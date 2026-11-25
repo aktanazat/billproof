@@ -1,0 +1,7 @@
+billproof.aktan.us {
+	encode zstd gzip
+	request_body {
+		max_size 13MB
+	}
+	reverse_proxy app:3000
+}
