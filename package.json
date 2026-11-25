@@ -2,11 +2,17 @@
   "name": "billproof",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "samples": "tsx scripts/make-samples.ts",
+    "eval": "tsx --conditions=react-server scripts/eval.ts",
+    "postinstall": "node scripts/copy-pdfjs.mjs"
   },
   "dependencies": {
     "next": "16.4.6",
