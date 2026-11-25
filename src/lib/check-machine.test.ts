@@ -41,6 +41,7 @@ describe("check machine", () => {
       attempts: 1,
       result: notABill,
       selection: { claims: { C1: "needs_confirmation" }, questions: {} },
+      thoughts: [],
     };
     expect(play([{ type: "toggle_claim", id: "C1" }], done)).toMatchObject({ selection: { claims: { C1: "needs_confirmation" } } });
     expect(play([{ type: "confirm_claim", id: "C1" }], done)).toMatchObject({ selection: { claims: { C1: "selected" } } });

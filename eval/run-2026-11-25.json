@@ -3,7 +3,7 @@
     {
       "id": "internet-guaranteed",
       "variant": "pdf",
-      "ms": 7340,
+      "ms": 9588,
       "claimsExpected": 2,
       "questionsExpected": 2,
       "explainedExpected": 0,
@@ -12,12 +12,12 @@
       "falseClaims": [],
       "questionsFound": 2,
       "explainedFound": 0,
-      "costMicros": 956
+      "costMicros": 2010
     },
     {
       "id": "internet-guaranteed",
       "variant": "photo",
-      "ms": 4385,
+      "ms": 6082,
       "claimsExpected": 2,
       "questionsExpected": 2,
       "explainedExpected": 0,
@@ -26,12 +26,12 @@
       "falseClaims": [],
       "questionsFound": 2,
       "explainedFound": 0,
-      "costMicros": 604
+      "costMicros": 1459
     },
     {
       "id": "internet-expired",
       "variant": "pdf",
-      "ms": 3422,
+      "ms": 4682,
       "claimsExpected": 0,
       "questionsExpected": 2,
       "explainedExpected": 2,
@@ -40,12 +40,12 @@
       "falseClaims": [],
       "questionsFound": 2,
       "explainedFound": 2,
-      "costMicros": 661
+      "costMicros": 1133
     },
     {
       "id": "internet-expired",
       "variant": "photo",
-      "ms": 466,
+      "ms": 433,
       "claimsExpected": 0,
       "questionsExpected": 2,
       "explainedExpected": 2,
@@ -59,7 +59,7 @@
     {
       "id": "mobile-autopay",
       "variant": "pdf",
-      "ms": 5633,
+      "ms": 8393,
       "claimsExpected": 1,
       "questionsExpected": 2,
       "explainedExpected": 0,
@@ -68,12 +68,12 @@
       "falseClaims": [],
       "questionsFound": 2,
       "explainedFound": 0,
-      "costMicros": 1070
+      "costMicros": 1920
     },
     {
       "id": "mobile-autopay",
       "variant": "photo",
-      "ms": 5566,
+      "ms": 8555,
       "claimsExpected": 1,
       "questionsExpected": 2,
       "explainedExpected": 0,
@@ -82,12 +82,12 @@
       "falseClaims": [],
       "questionsFound": 2,
       "explainedFound": 0,
-      "costMicros": 839
+      "costMicros": 1338
     },
     {
       "id": "internet-honored",
       "variant": "pdf",
-      "ms": 5040,
+      "ms": 9550,
       "claimsExpected": 0,
       "questionsExpected": 0,
       "explainedExpected": 0,
@@ -96,12 +96,12 @@
       "falseClaims": [],
       "questionsFound": 0,
       "explainedFound": 0,
-      "costMicros": 879
+      "costMicros": 1858
     },
     {
       "id": "internet-honored",
       "variant": "photo",
-      "ms": 3939,
+      "ms": 6849,
       "claimsExpected": 0,
       "questionsExpected": 0,
       "explainedExpected": 0,
@@ -110,12 +110,12 @@
       "falseClaims": [],
       "questionsFound": 0,
       "explainedFound": 0,
-      "costMicros": 568
+      "costMicros": 1203
     },
     {
       "id": "internet-gateway-credited",
       "variant": "pdf",
-      "ms": 5612,
+      "ms": 7573,
       "claimsExpected": 0,
       "questionsExpected": 0,
       "explainedExpected": 0,
@@ -124,12 +124,12 @@
       "falseClaims": [],
       "questionsFound": 0,
       "explainedFound": 0,
-      "costMicros": 901
+      "costMicros": 1395
     },
     {
       "id": "internet-gateway-credited",
       "variant": "photo",
-      "ms": 5187,
+      "ms": 5497,
       "claimsExpected": 0,
       "questionsExpected": 0,
       "explainedExpected": 0,
@@ -138,12 +138,12 @@
       "falseClaims": [],
       "questionsFound": 0,
       "explainedFound": 0,
-      "costMicros": 564
+      "costMicros": 954
     },
     {
       "id": "internet-autopay-unproven",
       "variant": "pdf",
-      "ms": 5801,
+      "ms": 7583,
       "claimsExpected": 0,
       "questionsExpected": 1,
       "explainedExpected": 0,
@@ -152,12 +152,12 @@
       "falseClaims": [],
       "questionsFound": 1,
       "explainedFound": 0,
-      "costMicros": 832
+      "costMicros": 1533
     },
     {
       "id": "internet-autopay-unproven",
       "variant": "photo",
-      "ms": 3582,
+      "ms": 6615,
       "claimsExpected": 0,
       "questionsExpected": 1,
       "explainedExpected": 0,
@@ -166,12 +166,12 @@
       "falseClaims": [],
       "questionsFound": 1,
       "explainedFound": 0,
-      "costMicros": 458
+      "costMicros": 1140
     },
     {
       "id": "mobile-credit-posted",
       "variant": "pdf",
-      "ms": 5210,
+      "ms": 8574,
       "claimsExpected": 0,
       "questionsExpected": 0,
       "explainedExpected": 0,
@@ -180,12 +180,12 @@
       "falseClaims": [],
       "questionsFound": 0,
       "explainedFound": 0,
-      "costMicros": 858
+      "costMicros": 1611
     },
     {
       "id": "mobile-credit-posted",
       "variant": "photo",
-      "ms": 4104,
+      "ms": 6617,
       "claimsExpected": 0,
       "questionsExpected": 0,
       "explainedExpected": 0,
@@ -194,12 +194,12 @@
       "falseClaims": [],
       "questionsFound": 0,
       "explainedFound": 0,
-      "costMicros": 554
+      "costMicros": 1520
     },
     {
       "id": "mobile-price-over",
       "variant": "pdf",
-      "ms": 5677,
+      "ms": 8051,
       "claimsExpected": 1,
       "questionsExpected": 0,
       "explainedExpected": 0,
@@ -208,12 +208,12 @@
       "falseClaims": [],
       "questionsFound": 0,
       "explainedFound": 0,
-      "costMicros": 777
+      "costMicros": 1712
     },
     {
       "id": "mobile-price-over",
       "variant": "photo",
-      "ms": 3758,
+      "ms": 7544,
       "claimsExpected": 1,
       "questionsExpected": 0,
       "explainedExpected": 0,
@@ -222,12 +222,12 @@
       "falseClaims": [],
       "questionsFound": 0,
       "explainedFound": 0,
-      "costMicros": 501
+      "costMicros": 1468
     },
     {
       "id": "tv-box-waived",
       "variant": "pdf",
-      "ms": 5914,
+      "ms": 11694,
       "claimsExpected": 1,
       "questionsExpected": 1,
       "explainedExpected": 0,
@@ -236,12 +236,12 @@
       "falseClaims": [],
       "questionsFound": 1,
       "explainedFound": 0,
-      "costMicros": 938
+      "costMicros": 2577
     },
     {
       "id": "tv-box-waived",
       "variant": "photo",
-      "ms": 5210,
+      "ms": 8025,
       "claimsExpected": 1,
       "questionsExpected": 1,
       "explainedExpected": 0,
@@ -250,12 +250,12 @@
       "falseClaims": [],
       "questionsFound": 1,
       "explainedFound": 0,
-      "costMicros": 510
+      "costMicros": 1736
     },
     {
       "id": "internet-promo-midcycle",
       "variant": "pdf",
-      "ms": 5723,
+      "ms": 8707,
       "claimsExpected": 0,
       "questionsExpected": 1,
       "explainedExpected": 0,
@@ -264,12 +264,12 @@
       "falseClaims": [],
       "questionsFound": 1,
       "explainedFound": 0,
-      "costMicros": 843
+      "costMicros": 1861
     },
     {
       "id": "internet-promo-midcycle",
       "variant": "photo",
-      "ms": 3632,
+      "ms": 7372,
       "claimsExpected": 0,
       "questionsExpected": 1,
       "explainedExpected": 0,
@@ -278,12 +278,12 @@
       "falseClaims": [],
       "questionsFound": 1,
       "explainedFound": 0,
-      "costMicros": 498
+      "costMicros": 1608
     },
     {
       "id": "electric-fixed-rate",
       "variant": "pdf",
-      "ms": 7845,
+      "ms": 11299,
       "claimsExpected": 0,
       "questionsExpected": 0,
       "explainedExpected": 0,
@@ -292,12 +292,12 @@
       "falseClaims": [],
       "questionsFound": 0,
       "explainedFound": 0,
-      "costMicros": 1414
+      "costMicros": 2377
     },
     {
       "id": "electric-fixed-rate",
       "variant": "photo",
-      "ms": 7567,
+      "ms": 7925,
       "claimsExpected": 0,
       "questionsExpected": 0,
       "explainedExpected": 0,
@@ -306,12 +306,12 @@
       "falseClaims": [],
       "questionsFound": 0,
       "explainedFound": 0,
-      "costMicros": 1039
+      "costMicros": 1394
     },
     {
       "id": "offer-other-company",
       "variant": "pdf",
-      "ms": 4683,
+      "ms": 15146,
       "claimsExpected": 0,
       "questionsExpected": 0,
       "explainedExpected": 0,
@@ -320,12 +320,12 @@
       "falseClaims": [],
       "questionsFound": 0,
       "explainedFound": 0,
-      "costMicros": 621
+      "costMicros": 2069
     },
     {
       "id": "offer-other-company",
       "variant": "photo",
-      "ms": 4286,
+      "ms": 4804,
       "claimsExpected": 0,
       "questionsExpected": 0,
       "explainedExpected": 0,
@@ -334,7 +334,7 @@
       "falseClaims": [],
       "questionsFound": 0,
       "explainedFound": 0,
-      "costMicros": 390
+      "costMicros": 795
     }
   ],
   "raw": [
@@ -347,16 +347,150 @@
           "stage": "reading_bill"
         },
         {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Extracting billing fields from printed text and mapping them to JSON schema with quoted exact values."
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Fiber 500 Internet",
+            "amount_cents": 7500,
+            "kind": "plan",
+            "page": 1,
+            "box": {
+              "x0": 100,
+              "y0": 428,
+              "x1": 913,
+              "y1": 448
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Wi-Fi Gateway Rental",
+            "amount_cents": 1500,
+            "kind": "equipment",
+            "page": 1,
+            "box": {
+              "x0": 102,
+              "y0": 474,
+              "x1": 912,
+              "y1": 494
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Network Enhancement Fee",
+            "amount_cents": 399,
+            "kind": "company_fee",
+            "page": 1,
+            "box": {
+              "x0": 103,
+              "y0": 525,
+              "x1": 912,
+              "y1": 543
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Autopay & Paperless Discount",
+            "amount_cents": -500,
+            "kind": "discount",
+            "page": 1,
+            "box": {
+              "x0": 103,
+              "y0": 574,
+              "x1": 912,
+              "y1": 593
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "CA Communications Users Tax",
+            "amount_cents": 251,
+            "kind": "government_tax",
+            "page": 1,
+            "box": {
+              "x0": 103,
+              "y0": 621,
+              "x1": 912,
+              "y1": 639
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Regulatory Recovery Fee",
+            "amount_cents": 99,
+            "kind": "company_fee",
+            "page": 1,
+            "box": {
+              "x0": 103,
+              "y0": 644,
+              "x1": 912,
+              "y1": 662
+            }
+          }
+        },
+        {
           "type": "spent",
-          "micros": 595
+          "micros": 1216
         },
         {
           "type": "stage",
           "stage": "reading_offer"
         },
         {
+          "type": "thinking",
+          "stage": "reading_offer",
+          "text": "Extracting pricing promises from the document into a JSON schema and mapping conditions and guarantee dates."
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_offer",
+          "text": "\n\n"
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_offer",
+          "text": "Assigning date bounds and line coverage to extracted pricing promises."
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "monthly_price",
+            "description": "Monthly price for Fiber 500 Internet is $55.00 with Autopay & Paperless.",
+            "amount_cents": 5500
+          }
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "included",
+            "description": "Wi-Fi Gateway is included at no extra cost.",
+            "amount_cents": null
+          }
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "included",
+            "description": "Installation is free.",
+            "amount_cents": null
+          }
+        },
+        {
           "type": "spent",
-          "micros": 956
+          "micros": 2010
         },
         {
           "type": "stage",
@@ -390,7 +524,7 @@
                 },
                 "total_due": {
                   "cents": 9249,
-                  "quote": "Total amount due\n$92.49"
+                  "quote": "$92.49"
                 }
               },
               "line_items": [
@@ -401,9 +535,9 @@
                   "page": 1,
                   "box": {
                     "x0": 100,
-                    "y0": 427,
-                    "x1": 912,
-                    "y1": 447
+                    "y0": 428,
+                    "x1": 913,
+                    "y1": 448
                   },
                   "quote": "Fiber 500 Internet Nov 12 - Dec 11 $75.00",
                   "prorated": false,
@@ -415,10 +549,10 @@
                   "kind": "equipment",
                   "page": 1,
                   "box": {
-                    "x0": 100,
-                    "y0": 478,
+                    "x0": 102,
+                    "y0": 474,
                     "x1": 912,
-                    "y1": 498
+                    "y1": 494
                   },
                   "quote": "Wi-Fi Gateway Rental Nov 12 - Dec 11 $15.00",
                   "prorated": false,
@@ -430,10 +564,10 @@
                   "kind": "company_fee",
                   "page": 1,
                   "box": {
-                    "x0": 100,
-                    "y0": 527,
+                    "x0": 103,
+                    "y0": 525,
                     "x1": 912,
-                    "y1": 547
+                    "y1": 543
                   },
                   "quote": "Network Enhancement Fee $3.99",
                   "prorated": false,
@@ -445,10 +579,10 @@
                   "kind": "discount",
                   "page": 1,
                   "box": {
-                    "x0": 100,
-                    "y0": 576,
+                    "x0": 103,
+                    "y0": 574,
                     "x1": 912,
-                    "y1": 596
+                    "y1": 593
                   },
                   "quote": "Autopay & Paperless Discount -$5.00",
                   "prorated": false,
@@ -460,10 +594,10 @@
                   "kind": "government_tax",
                   "page": 1,
                   "box": {
-                    "x0": 100,
-                    "y0": 625,
+                    "x0": 103,
+                    "y0": 621,
                     "x1": 912,
-                    "y1": 643
+                    "y1": 639
                   },
                   "quote": "CA Communications Users Tax $2.51",
                   "prorated": false,
@@ -475,7 +609,7 @@
                   "kind": "company_fee",
                   "page": 1,
                   "box": {
-                    "x0": 100,
+                    "x0": 103,
                     "y0": 644,
                     "x1": 912,
                     "y1": 662
@@ -499,7 +633,7 @@
             "promises": [
               {
                 "kind": "monthly_price",
-                "description": "The Fiber 500 Internet plan is promised at $55.00 per month with Autopay and Paperless billing through October 31, 2027.",
+                "description": "Monthly price for Fiber 500 Internet is $55.00 with Autopay & Paperless.",
                 "amount_cents": 5500,
                 "per_line": false,
                 "conditions": [
@@ -517,7 +651,7 @@
               },
               {
                 "kind": "included",
-                "description": "The Wi-Fi Gateway is promised as included at no extra cost.",
+                "description": "Wi-Fi Gateway is included at no extra cost.",
                 "amount_cents": null,
                 "per_line": false,
                 "conditions": [],
@@ -531,7 +665,7 @@
               },
               {
                 "kind": "included",
-                "description": "Installation is promised for free.",
+                "description": "Installation is free.",
                 "amount_cents": null,
                 "per_line": false,
                 "conditions": [],
@@ -601,24 +735,24 @@
             "providerMismatch": false,
             "billIsImage": false,
             "hadOffer": true,
-            "spentMicros": 956,
+            "spentMicros": 2010,
             "calls": [
               {
                 "name": "read_bill",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 4396,
-                "cachedTokens": 4340,
-                "outputTokens": 1143,
-                "costMicros": 595,
+                "cachedTokens": 0,
+                "outputTokens": 1552,
+                "costMicros": 1216,
                 "reused": false
               },
               {
                 "name": "read_terms",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 1106,
-                "cachedTokens": 1012,
-                "outputTokens": 695,
-                "costMicros": 361,
+                "cachedTokens": 756,
+                "outputTokens": 1511,
+                "costMicros": 794,
                 "reused": false
               }
             ]
@@ -635,12 +769,141 @@
           "stage": "reading_bill"
         },
         {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Extracting bill fields to JSON and mapping payments as a positive integer in cents per schema."
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "\n\n"
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Estimating bounding boxes and quoting printed lines for each extracted bill item"
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Fiber 500 Internet",
+            "amount_cents": 7500,
+            "kind": "plan",
+            "page": 1,
+            "box": {
+              "x0": 118,
+              "y0": 437,
+              "x1": 908,
+              "y1": 459
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Wi-Fi Gateway Rental",
+            "amount_cents": 1500,
+            "kind": "equipment",
+            "page": 1,
+            "box": {
+              "x0": 118,
+              "y0": 479,
+              "x1": 908,
+              "y1": 501
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Network Enhancement Fee",
+            "amount_cents": 399,
+            "kind": "company_fee",
+            "page": 1,
+            "box": {
+              "x0": 118,
+              "y0": 546,
+              "x1": 908,
+              "y1": 568
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Autopay & Paperless Discount",
+            "amount_cents": -500,
+            "kind": "discount",
+            "page": 1,
+            "box": {
+              "x0": 118,
+              "y0": 595,
+              "x1": 908,
+              "y1": 618
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "CA Communications Users Tax",
+            "amount_cents": 251,
+            "kind": "government_tax",
+            "page": 1,
+            "box": {
+              "x0": 118,
+              "y0": 645,
+              "x1": 908,
+              "y1": 667
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Regulatory Recovery Fee",
+            "amount_cents": 99,
+            "kind": "company_fee",
+            "page": 1,
+            "box": {
+              "x0": 118,
+              "y0": 668,
+              "x1": 908,
+              "y1": 690
+            }
+          }
+        },
+        {
           "type": "spent",
-          "micros": 604
+          "micros": 1459
         },
         {
           "type": "stage",
           "stage": "reading_offer"
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "monthly_price",
+            "description": "Monthly price for Fiber 500 Internet is $55.00 with Autopay & Paperless.",
+            "amount_cents": 5500
+          }
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "included",
+            "description": "Wi-Fi Gateway is included at no extra cost.",
+            "amount_cents": null
+          }
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "included",
+            "description": "Installation is free.",
+            "amount_cents": null
+          }
         },
         {
           "type": "stage",
@@ -684,10 +947,10 @@
                   "kind": "plan",
                   "page": 1,
                   "box": {
-                    "x0": 110,
-                    "y0": 425,
-                    "x1": 890,
-                    "y1": 455
+                    "x0": 118,
+                    "y0": 437,
+                    "x1": 908,
+                    "y1": 459
                   },
                   "quote": "Fiber 500 Internet Nov 12 - Dec 11 $75.00",
                   "prorated": false,
@@ -699,10 +962,10 @@
                   "kind": "equipment",
                   "page": 1,
                   "box": {
-                    "x0": 110,
-                    "y0": 470,
-                    "x1": 890,
-                    "y1": 495
+                    "x0": 118,
+                    "y0": 479,
+                    "x1": 908,
+                    "y1": 501
                   },
                   "quote": "Wi-Fi Gateway Rental Nov 12 - Dec 11 $15.00",
                   "prorated": false,
@@ -714,10 +977,10 @@
                   "kind": "company_fee",
                   "page": 1,
                   "box": {
-                    "x0": 110,
-                    "y0": 525,
-                    "x1": 890,
-                    "y1": 550
+                    "x0": 118,
+                    "y0": 546,
+                    "x1": 908,
+                    "y1": 568
                   },
                   "quote": "Network Enhancement Fee $3.99",
                   "prorated": false,
@@ -729,10 +992,10 @@
                   "kind": "discount",
                   "page": 1,
                   "box": {
-                    "x0": 110,
-                    "y0": 570,
-                    "x1": 890,
-                    "y1": 600
+                    "x0": 118,
+                    "y0": 595,
+                    "x1": 908,
+                    "y1": 618
                   },
                   "quote": "Autopay & Paperless Discount -$5.00",
                   "prorated": false,
@@ -744,10 +1007,10 @@
                   "kind": "government_tax",
                   "page": 1,
                   "box": {
-                    "x0": 110,
-                    "y0": 620,
-                    "x1": 890,
-                    "y1": 645
+                    "x0": 118,
+                    "y0": 645,
+                    "x1": 908,
+                    "y1": 667
                   },
                   "quote": "CA Communications Users Tax $2.51",
                   "prorated": false,
@@ -759,10 +1022,10 @@
                   "kind": "company_fee",
                   "page": 1,
                   "box": {
-                    "x0": 110,
-                    "y0": 645,
-                    "x1": 890,
-                    "y1": 670
+                    "x0": 118,
+                    "y0": 668,
+                    "x1": 908,
+                    "y1": 690
                   },
                   "quote": "Regulatory Recovery Fee $0.99",
                   "prorated": false,
@@ -783,7 +1046,7 @@
             "promises": [
               {
                 "kind": "monthly_price",
-                "description": "The Fiber 500 Internet plan is promised at $55.00 per month with Autopay and Paperless billing through October 31, 2027.",
+                "description": "Monthly price for Fiber 500 Internet is $55.00 with Autopay & Paperless.",
                 "amount_cents": 5500,
                 "per_line": false,
                 "conditions": [
@@ -801,7 +1064,7 @@
               },
               {
                 "kind": "included",
-                "description": "The Wi-Fi Gateway is promised as included at no extra cost.",
+                "description": "Wi-Fi Gateway is included at no extra cost.",
                 "amount_cents": null,
                 "per_line": false,
                 "conditions": [],
@@ -815,7 +1078,7 @@
               },
               {
                 "kind": "included",
-                "description": "Installation is promised for free.",
+                "description": "Installation is free.",
                 "amount_cents": null,
                 "per_line": false,
                 "conditions": [],
@@ -885,20 +1148,20 @@
             "providerMismatch": false,
             "billIsImage": true,
             "hadOffer": true,
-            "spentMicros": 604,
+            "spentMicros": 1459,
             "calls": [
               {
                 "name": "read_bill",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 4151,
-                "cachedTokens": 4084,
-                "outputTokens": 1160,
-                "costMicros": 604,
+                "cachedTokens": 0,
+                "outputTokens": 2086,
+                "costMicros": 1459,
                 "reused": false
               },
               {
                 "name": "read_terms",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 0,
                 "cachedTokens": 0,
                 "outputTokens": 0,
@@ -919,12 +1182,141 @@
           "stage": "reading_bill"
         },
         {
+          "type": "line",
+          "line": {
+            "label": "Fiber 500 Internet",
+            "amount_cents": 7500,
+            "kind": "plan",
+            "page": 1,
+            "box": {
+              "x0": 100,
+              "y0": 428,
+              "x1": 913,
+              "y1": 448
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Wi-Fi Gateway Rental",
+            "amount_cents": 1500,
+            "kind": "equipment",
+            "page": 1,
+            "box": {
+              "x0": 102,
+              "y0": 474,
+              "x1": 912,
+              "y1": 494
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Network Enhancement Fee",
+            "amount_cents": 399,
+            "kind": "company_fee",
+            "page": 1,
+            "box": {
+              "x0": 103,
+              "y0": 525,
+              "x1": 912,
+              "y1": 543
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Autopay & Paperless Discount",
+            "amount_cents": -500,
+            "kind": "discount",
+            "page": 1,
+            "box": {
+              "x0": 103,
+              "y0": 574,
+              "x1": 912,
+              "y1": 593
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "CA Communications Users Tax",
+            "amount_cents": 251,
+            "kind": "government_tax",
+            "page": 1,
+            "box": {
+              "x0": 103,
+              "y0": 621,
+              "x1": 912,
+              "y1": 639
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Regulatory Recovery Fee",
+            "amount_cents": 99,
+            "kind": "company_fee",
+            "page": 1,
+            "box": {
+              "x0": 103,
+              "y0": 644,
+              "x1": 912,
+              "y1": 662
+            }
+          }
+        },
+        {
           "type": "stage",
           "stage": "reading_offer"
         },
         {
+          "type": "thinking",
+          "stage": "reading_offer",
+          "text": "Extracting concrete pricing and service promises from the bill and order document to populate the required JSON schema fields."
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_offer",
+          "text": "\n\n"
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_offer",
+          "text": "Deriving applies_from and applies_until dates from the order date and the stated through date for the promotional period."
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "monthly_price",
+            "description": "The promotional price for Fiber 500 Internet is $55.00 per month with Autopay & Paperless.",
+            "amount_cents": 5500
+          }
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "included",
+            "description": "The Wi-Fi Gateway is included at no extra cost.",
+            "amount_cents": null
+          }
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "included",
+            "description": "Installation is free.",
+            "amount_cents": null
+          }
+        },
+        {
           "type": "spent",
-          "micros": 661
+          "micros": 1133
         },
         {
           "type": "stage",
@@ -958,7 +1350,7 @@
                 },
                 "total_due": {
                   "cents": 9249,
-                  "quote": "Total amount due\n$92.49"
+                  "quote": "$92.49"
                 }
               },
               "line_items": [
@@ -969,9 +1361,9 @@
                   "page": 1,
                   "box": {
                     "x0": 100,
-                    "y0": 427,
-                    "x1": 912,
-                    "y1": 447
+                    "y0": 428,
+                    "x1": 913,
+                    "y1": 448
                   },
                   "quote": "Fiber 500 Internet Nov 12 - Dec 11 $75.00",
                   "prorated": false,
@@ -983,10 +1375,10 @@
                   "kind": "equipment",
                   "page": 1,
                   "box": {
-                    "x0": 100,
-                    "y0": 478,
+                    "x0": 102,
+                    "y0": 474,
                     "x1": 912,
-                    "y1": 498
+                    "y1": 494
                   },
                   "quote": "Wi-Fi Gateway Rental Nov 12 - Dec 11 $15.00",
                   "prorated": false,
@@ -998,10 +1390,10 @@
                   "kind": "company_fee",
                   "page": 1,
                   "box": {
-                    "x0": 100,
-                    "y0": 527,
+                    "x0": 103,
+                    "y0": 525,
                     "x1": 912,
-                    "y1": 547
+                    "y1": 543
                   },
                   "quote": "Network Enhancement Fee $3.99",
                   "prorated": false,
@@ -1013,10 +1405,10 @@
                   "kind": "discount",
                   "page": 1,
                   "box": {
-                    "x0": 100,
-                    "y0": 576,
+                    "x0": 103,
+                    "y0": 574,
                     "x1": 912,
-                    "y1": 596
+                    "y1": 593
                   },
                   "quote": "Autopay & Paperless Discount -$5.00",
                   "prorated": false,
@@ -1028,10 +1420,10 @@
                   "kind": "government_tax",
                   "page": 1,
                   "box": {
-                    "x0": 100,
-                    "y0": 625,
+                    "x0": 103,
+                    "y0": 621,
                     "x1": 912,
-                    "y1": 643
+                    "y1": 639
                   },
                   "quote": "CA Communications Users Tax $2.51",
                   "prorated": false,
@@ -1043,7 +1435,7 @@
                   "kind": "company_fee",
                   "page": 1,
                   "box": {
-                    "x0": 100,
+                    "x0": 103,
                     "y0": 644,
                     "x1": 912,
                     "y1": 662
@@ -1067,14 +1459,14 @@
             "promises": [
               {
                 "kind": "monthly_price",
-                "description": "The Fiber 500 Internet plan is promised at $55.00 per month with Autopay and Paperless for 12 months through 10/31/2026.",
+                "description": "The promotional price for Fiber 500 Internet is $55.00 per month with Autopay & Paperless.",
                 "amount_cents": 5500,
                 "per_line": false,
                 "conditions": [
                   "autopay",
                   "paperless"
                 ],
-                "applies_from": "2025-10-28",
+                "applies_from": null,
                 "applies_until": "2026-10-31",
                 "quote": "Promotional price: $55.00/mo with Autopay & Paperless for 12 months (through 10/31/2026)",
                 "covers_line_ids": [
@@ -1085,11 +1477,11 @@
               },
               {
                 "kind": "included",
-                "description": "The Wi-Fi Gateway is included at no extra cost for 12 months through 10/31/2026.",
+                "description": "The Wi-Fi Gateway is included at no extra cost.",
                 "amount_cents": null,
                 "per_line": false,
                 "conditions": [],
-                "applies_from": "2025-10-28",
+                "applies_from": null,
                 "applies_until": "2026-10-31",
                 "quote": "Wi-Fi Gateway: included for 12 months (through 10/31/2026)",
                 "covers_line_ids": [
@@ -1099,7 +1491,7 @@
               },
               {
                 "kind": "included",
-                "description": "Installation is promised free of charge.",
+                "description": "Installation is free.",
                 "amount_cents": null,
                 "per_line": false,
                 "conditions": [],
@@ -1163,11 +1555,11 @@
             "providerMismatch": false,
             "billIsImage": false,
             "hadOffer": true,
-            "spentMicros": 661,
+            "spentMicros": 1133,
             "calls": [
               {
                 "name": "read_bill",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 0,
                 "cachedTokens": 0,
                 "outputTokens": 0,
@@ -1176,11 +1568,11 @@
               },
               {
                 "name": "read_terms",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 1112,
                 "cachedTokens": 1012,
-                "outputTokens": 1292,
-                "costMicros": 661,
+                "outputTokens": 2237,
+                "costMicros": 1133,
                 "reused": false
               }
             ]
@@ -1197,8 +1589,122 @@
           "stage": "reading_bill"
         },
         {
+          "type": "line",
+          "line": {
+            "label": "Fiber 500 Internet",
+            "amount_cents": 7500,
+            "kind": "plan",
+            "page": 1,
+            "box": {
+              "x0": 118,
+              "y0": 437,
+              "x1": 908,
+              "y1": 459
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Wi-Fi Gateway Rental",
+            "amount_cents": 1500,
+            "kind": "equipment",
+            "page": 1,
+            "box": {
+              "x0": 118,
+              "y0": 479,
+              "x1": 908,
+              "y1": 501
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Network Enhancement Fee",
+            "amount_cents": 399,
+            "kind": "company_fee",
+            "page": 1,
+            "box": {
+              "x0": 118,
+              "y0": 546,
+              "x1": 908,
+              "y1": 568
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Autopay & Paperless Discount",
+            "amount_cents": -500,
+            "kind": "discount",
+            "page": 1,
+            "box": {
+              "x0": 118,
+              "y0": 595,
+              "x1": 908,
+              "y1": 618
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "CA Communications Users Tax",
+            "amount_cents": 251,
+            "kind": "government_tax",
+            "page": 1,
+            "box": {
+              "x0": 118,
+              "y0": 645,
+              "x1": 908,
+              "y1": 667
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Regulatory Recovery Fee",
+            "amount_cents": 99,
+            "kind": "company_fee",
+            "page": 1,
+            "box": {
+              "x0": 118,
+              "y0": 668,
+              "x1": 908,
+              "y1": 690
+            }
+          }
+        },
+        {
           "type": "stage",
           "stage": "reading_offer"
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "monthly_price",
+            "description": "The promotional price for Fiber 500 Internet is $55.00 per month with Autopay & Paperless.",
+            "amount_cents": 5500
+          }
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "included",
+            "description": "The Wi-Fi Gateway is included at no extra cost.",
+            "amount_cents": null
+          }
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "included",
+            "description": "Installation is free.",
+            "amount_cents": null
+          }
         },
         {
           "type": "stage",
@@ -1242,10 +1748,10 @@
                   "kind": "plan",
                   "page": 1,
                   "box": {
-                    "x0": 110,
-                    "y0": 425,
-                    "x1": 890,
-                    "y1": 455
+                    "x0": 118,
+                    "y0": 437,
+                    "x1": 908,
+                    "y1": 459
                   },
                   "quote": "Fiber 500 Internet Nov 12 - Dec 11 $75.00",
                   "prorated": false,
@@ -1257,10 +1763,10 @@
                   "kind": "equipment",
                   "page": 1,
                   "box": {
-                    "x0": 110,
-                    "y0": 470,
-                    "x1": 890,
-                    "y1": 495
+                    "x0": 118,
+                    "y0": 479,
+                    "x1": 908,
+                    "y1": 501
                   },
                   "quote": "Wi-Fi Gateway Rental Nov 12 - Dec 11 $15.00",
                   "prorated": false,
@@ -1272,10 +1778,10 @@
                   "kind": "company_fee",
                   "page": 1,
                   "box": {
-                    "x0": 110,
-                    "y0": 525,
-                    "x1": 890,
-                    "y1": 550
+                    "x0": 118,
+                    "y0": 546,
+                    "x1": 908,
+                    "y1": 568
                   },
                   "quote": "Network Enhancement Fee $3.99",
                   "prorated": false,
@@ -1287,10 +1793,10 @@
                   "kind": "discount",
                   "page": 1,
                   "box": {
-                    "x0": 110,
-                    "y0": 570,
-                    "x1": 890,
-                    "y1": 600
+                    "x0": 118,
+                    "y0": 595,
+                    "x1": 908,
+                    "y1": 618
                   },
                   "quote": "Autopay & Paperless Discount -$5.00",
                   "prorated": false,
@@ -1302,10 +1808,10 @@
                   "kind": "government_tax",
                   "page": 1,
                   "box": {
-                    "x0": 110,
-                    "y0": 620,
-                    "x1": 890,
-                    "y1": 645
+                    "x0": 118,
+                    "y0": 645,
+                    "x1": 908,
+                    "y1": 667
                   },
                   "quote": "CA Communications Users Tax $2.51",
                   "prorated": false,
@@ -1317,10 +1823,10 @@
                   "kind": "company_fee",
                   "page": 1,
                   "box": {
-                    "x0": 110,
-                    "y0": 645,
-                    "x1": 890,
-                    "y1": 670
+                    "x0": 118,
+                    "y0": 668,
+                    "x1": 908,
+                    "y1": 690
                   },
                   "quote": "Regulatory Recovery Fee $0.99",
                   "prorated": false,
@@ -1341,14 +1847,14 @@
             "promises": [
               {
                 "kind": "monthly_price",
-                "description": "The Fiber 500 Internet plan is promised at $55.00 per month with Autopay and Paperless for 12 months through 10/31/2026.",
+                "description": "The promotional price for Fiber 500 Internet is $55.00 per month with Autopay & Paperless.",
                 "amount_cents": 5500,
                 "per_line": false,
                 "conditions": [
                   "autopay",
                   "paperless"
                 ],
-                "applies_from": "2025-10-28",
+                "applies_from": null,
                 "applies_until": "2026-10-31",
                 "quote": "Promotional price: $55.00/mo with Autopay & Paperless for 12 months (through 10/31/2026)",
                 "covers_line_ids": [
@@ -1359,11 +1865,11 @@
               },
               {
                 "kind": "included",
-                "description": "The Wi-Fi Gateway is included at no extra cost for 12 months through 10/31/2026.",
+                "description": "The Wi-Fi Gateway is included at no extra cost.",
                 "amount_cents": null,
                 "per_line": false,
                 "conditions": [],
-                "applies_from": "2025-10-28",
+                "applies_from": null,
                 "applies_until": "2026-10-31",
                 "quote": "Wi-Fi Gateway: included for 12 months (through 10/31/2026)",
                 "covers_line_ids": [
@@ -1373,7 +1879,7 @@
               },
               {
                 "kind": "included",
-                "description": "Installation is promised free of charge.",
+                "description": "Installation is free.",
                 "amount_cents": null,
                 "per_line": false,
                 "conditions": [],
@@ -1441,7 +1947,7 @@
             "calls": [
               {
                 "name": "read_bill",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 0,
                 "cachedTokens": 0,
                 "outputTokens": 0,
@@ -1450,7 +1956,7 @@
               },
               {
                 "name": "read_terms",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 0,
                 "cachedTokens": 0,
                 "outputTokens": 0,
@@ -1471,16 +1977,157 @@
           "stage": "reading_bill"
         },
         {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Extracting and formatting billing fields into JSON with date normalization and quoted text values."
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "\n\n"
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Joining split amount text into quoted values and classifying line items by plan, device, or other service."
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Unlimited Plus - Line 1 (510) 555-0132",
+            "amount_cents": 3500,
+            "kind": "plan",
+            "page": 1,
+            "box": {
+              "x0": 103,
+              "y0": 429,
+              "x1": 913,
+              "y1": 447
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Unlimited Plus - Line 2 (510) 555-0178",
+            "amount_cents": 3500,
+            "kind": "plan",
+            "page": 1,
+            "box": {
+              "x0": 103,
+              "y0": 450,
+              "x1": 913,
+              "y1": 468
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Device Protection - Line 1",
+            "amount_cents": 900,
+            "kind": "other",
+            "page": 1,
+            "box": {
+              "x0": 103,
+              "y0": 471,
+              "x1": 913,
+              "y1": 489
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Device Protection - Line 1",
+            "amount_cents": 900,
+            "kind": "other",
+            "page": 1,
+            "box": {
+              "x0": 103,
+              "y0": 493,
+              "x1": 913,
+              "y1": 511
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Administrative & Telco Recovery Charge",
+            "amount_cents": 698,
+            "kind": "company_fee",
+            "page": 1,
+            "box": {
+              "x0": 103,
+              "y0": 539,
+              "x1": 913,
+              "y1": 558
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Federal Universal Service Fund",
+            "amount_cents": 112,
+            "kind": "government_tax",
+            "page": 1,
+            "box": {
+              "x0": 104,
+              "y0": 584,
+              "x1": 913,
+              "y1": 603
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "State 911 Surcharge",
+            "amount_cents": 70,
+            "kind": "government_tax",
+            "page": 1,
+            "box": {
+              "x0": 104,
+              "y0": 606,
+              "x1": 913,
+              "y1": 624
+            }
+          }
+        },
+        {
           "type": "spent",
-          "micros": 766
+          "micros": 1417
         },
         {
           "type": "stage",
           "stage": "reading_offer"
         },
         {
+          "type": "thinking",
+          "stage": "reading_offer",
+          "text": "Extracting two per-line pricing promises from the document into JSON with monthly price and autopay credit fields."
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "monthly_price",
+            "description": "Unlimited Plus is priced at $35 per line per month.",
+            "amount_cents": 3500
+          }
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "recurring_credit",
+            "description": "A $5 per line Autopay discount is applied each month.",
+            "amount_cents": 500
+          }
+        },
+        {
           "type": "spent",
-          "micros": 1070
+          "micros": 1920
         },
         {
           "type": "stage",
@@ -1525,8 +2172,8 @@
                   "page": 1,
                   "box": {
                     "x0": 103,
-                    "y0": 433,
-                    "x1": 912,
+                    "y0": 429,
+                    "x1": 913,
                     "y1": 447
                   },
                   "quote": "Unlimited Plus - Line 1 (510) 555-0132 $35.00",
@@ -1540,9 +2187,9 @@
                   "page": 1,
                   "box": {
                     "x0": 103,
-                    "y0": 452,
-                    "x1": 912,
-                    "y1": 467
+                    "y0": 450,
+                    "x1": 913,
+                    "y1": 468
                   },
                   "quote": "Unlimited Plus - Line 2 (510) 555-0178 $35.00",
                   "prorated": false,
@@ -1556,8 +2203,8 @@
                   "box": {
                     "x0": 103,
                     "y0": 471,
-                    "x1": 912,
-                    "y1": 486
+                    "x1": 913,
+                    "y1": 489
                   },
                   "quote": "Device Protection - Line 1 $9.00",
                   "prorated": false,
@@ -1570,9 +2217,9 @@
                   "page": 1,
                   "box": {
                     "x0": 103,
-                    "y0": 490,
-                    "x1": 912,
-                    "y1": 505
+                    "y0": 493,
+                    "x1": 913,
+                    "y1": 511
                   },
                   "quote": "Device Protection - Line 1 $9.00",
                   "prorated": false,
@@ -1585,9 +2232,9 @@
                   "page": 1,
                   "box": {
                     "x0": 103,
-                    "y0": 537,
-                    "x1": 912,
-                    "y1": 555
+                    "y0": 539,
+                    "x1": 913,
+                    "y1": 558
                   },
                   "quote": "Administrative & Telco Recovery Charge $3.49 x 2 lines $6.98",
                   "prorated": false,
@@ -1599,10 +2246,10 @@
                   "kind": "government_tax",
                   "page": 1,
                   "box": {
-                    "x0": 103,
-                    "y0": 597,
-                    "x1": 912,
-                    "y1": 612
+                    "x0": 104,
+                    "y0": 584,
+                    "x1": 913,
+                    "y1": 603
                   },
                   "quote": "Federal Universal Service Fund $1.12",
                   "prorated": false,
@@ -1614,10 +2261,10 @@
                   "kind": "government_tax",
                   "page": 1,
                   "box": {
-                    "x0": 103,
-                    "y0": 615,
-                    "x1": 912,
-                    "y1": 630
+                    "x0": 104,
+                    "y0": 606,
+                    "x1": 913,
+                    "y1": 624
                   },
                   "quote": "State 911 Surcharge $0.70",
                   "prorated": false,
@@ -1638,7 +2285,7 @@
             "promises": [
               {
                 "kind": "monthly_price",
-                "description": "Unlimited Plus is promised at $35 per line per month.",
+                "description": "Unlimited Plus is priced at $35 per line per month.",
                 "amount_cents": 3500,
                 "per_line": true,
                 "conditions": [],
@@ -1653,7 +2300,7 @@
               },
               {
                 "kind": "recurring_credit",
-                "description": "A $5 per line monthly Autopay discount is promised.",
+                "description": "A $5 per line Autopay discount is applied each month.",
                 "amount_cents": 500,
                 "per_line": true,
                 "conditions": [
@@ -1712,24 +2359,24 @@
             "providerMismatch": false,
             "billIsImage": false,
             "hadOffer": true,
-            "spentMicros": 1070,
+            "spentMicros": 1920,
             "calls": [
               {
                 "name": "read_bill",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 4400,
-                "cachedTokens": 4340,
-                "outputTokens": 1485,
-                "costMicros": 766,
+                "cachedTokens": 1524,
+                "outputTokens": 2245,
+                "costMicros": 1417,
                 "reused": false
               },
               {
                 "name": "read_terms",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 1076,
                 "cachedTokens": 1012,
-                "outputTokens": 586,
-                "costMicros": 304,
+                "outputTokens": 984,
+                "costMicros": 503,
                 "reused": false
               }
             ]
@@ -1746,12 +2393,148 @@
           "stage": "reading_bill"
         },
         {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Extracting and normalizing billing fields from the image while quoting exact text and handling payment sign conversion."
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "\n\n"
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Classifying line items into plan, equipment, company fee, or other while preserving exact printed quotes and sign handling."
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Unlimited Plus - Line 1 (510) 555-0132",
+            "amount_cents": 3500,
+            "kind": "plan",
+            "page": 1,
+            "box": {
+              "x0": 120,
+              "y0": 442,
+              "x1": 905,
+              "y1": 462
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Unlimited Plus - Line 2 (510) 555-0178",
+            "amount_cents": 3500,
+            "kind": "plan",
+            "page": 1,
+            "box": {
+              "x0": 120,
+              "y0": 462,
+              "x1": 905,
+              "y1": 482
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Device Protection - Line 1",
+            "amount_cents": 900,
+            "kind": "other",
+            "page": 1,
+            "box": {
+              "x0": 120,
+              "y0": 482,
+              "x1": 905,
+              "y1": 502
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Device Protection - Line 1",
+            "amount_cents": 900,
+            "kind": "other",
+            "page": 1,
+            "box": {
+              "x0": 120,
+              "y0": 502,
+              "x1": 905,
+              "y1": 522
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Administrative & Telco Recovery Charge",
+            "amount_cents": 698,
+            "kind": "company_fee",
+            "page": 1,
+            "box": {
+              "x0": 120,
+              "y0": 538,
+              "x1": 910,
+              "y1": 560
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Federal Universal Service Fund",
+            "amount_cents": 112,
+            "kind": "government_tax",
+            "page": 1,
+            "box": {
+              "x0": 120,
+              "y0": 576,
+              "x1": 910,
+              "y1": 598
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "State 911 Surcharge",
+            "amount_cents": 70,
+            "kind": "government_tax",
+            "page": 1,
+            "box": {
+              "x0": 120,
+              "y0": 598,
+              "x1": 910,
+              "y1": 620
+            }
+          }
+        },
+        {
           "type": "spent",
-          "micros": 839
+          "micros": 1338
         },
         {
           "type": "stage",
           "stage": "reading_offer"
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "monthly_price",
+            "description": "Unlimited Plus is priced at $35 per line per month.",
+            "amount_cents": 3500
+          }
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "recurring_credit",
+            "description": "A $5 per line Autopay discount is applied each month.",
+            "amount_cents": 500
+          }
         },
         {
           "type": "stage",
@@ -1795,10 +2578,10 @@
                   "kind": "plan",
                   "page": 1,
                   "box": {
-                    "x0": 115,
-                    "y0": 438,
-                    "x1": 895,
-                    "y1": 458
+                    "x0": 120,
+                    "y0": 442,
+                    "x1": 905,
+                    "y1": 462
                   },
                   "quote": "Unlimited Plus - Line 1 (510) 555-0132 $35.00",
                   "prorated": false,
@@ -1810,10 +2593,10 @@
                   "kind": "plan",
                   "page": 1,
                   "box": {
-                    "x0": 115,
-                    "y0": 458,
-                    "x1": 895,
-                    "y1": 478
+                    "x0": 120,
+                    "y0": 462,
+                    "x1": 905,
+                    "y1": 482
                   },
                   "quote": "Unlimited Plus - Line 2 (510) 555-0178 $35.00",
                   "prorated": false,
@@ -1825,10 +2608,10 @@
                   "kind": "other",
                   "page": 1,
                   "box": {
-                    "x0": 115,
-                    "y0": 478,
-                    "x1": 895,
-                    "y1": 498
+                    "x0": 120,
+                    "y0": 482,
+                    "x1": 905,
+                    "y1": 502
                   },
                   "quote": "Device Protection - Line 1 $9.00",
                   "prorated": false,
@@ -1840,10 +2623,10 @@
                   "kind": "other",
                   "page": 1,
                   "box": {
-                    "x0": 115,
-                    "y0": 498,
-                    "x1": 895,
-                    "y1": 518
+                    "x0": 120,
+                    "y0": 502,
+                    "x1": 905,
+                    "y1": 522
                   },
                   "quote": "Device Protection - Line 1 $9.00",
                   "prorated": false,
@@ -1855,10 +2638,10 @@
                   "kind": "company_fee",
                   "page": 1,
                   "box": {
-                    "x0": 115,
+                    "x0": 120,
                     "y0": 538,
-                    "x1": 895,
-                    "y1": 558
+                    "x1": 910,
+                    "y1": 560
                   },
                   "quote": "Administrative & Telco Recovery Charge $3.49 x 2 lines $6.98",
                   "prorated": false,
@@ -1870,9 +2653,9 @@
                   "kind": "government_tax",
                   "page": 1,
                   "box": {
-                    "x0": 115,
-                    "y0": 578,
-                    "x1": 895,
+                    "x0": 120,
+                    "y0": 576,
+                    "x1": 910,
                     "y1": 598
                   },
                   "quote": "Federal Universal Service Fund $1.12",
@@ -1885,10 +2668,10 @@
                   "kind": "government_tax",
                   "page": 1,
                   "box": {
-                    "x0": 115,
+                    "x0": 120,
                     "y0": 598,
-                    "x1": 895,
-                    "y1": 618
+                    "x1": 910,
+                    "y1": 620
                   },
                   "quote": "State 911 Surcharge $0.70",
                   "prorated": false,
@@ -1909,7 +2692,7 @@
             "promises": [
               {
                 "kind": "monthly_price",
-                "description": "Unlimited Plus is promised at $35 per line per month.",
+                "description": "Unlimited Plus is priced at $35 per line per month.",
                 "amount_cents": 3500,
                 "per_line": true,
                 "conditions": [],
@@ -1924,7 +2707,7 @@
               },
               {
                 "kind": "recurring_credit",
-                "description": "A $5 per line monthly Autopay discount is promised.",
+                "description": "A $5 per line Autopay discount is applied each month.",
                 "amount_cents": 500,
                 "per_line": true,
                 "conditions": [
@@ -1983,20 +2766,20 @@
             "providerMismatch": false,
             "billIsImage": true,
             "hadOffer": true,
-            "spentMicros": 839,
+            "spentMicros": 1338,
             "calls": [
               {
                 "name": "read_bill",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 4151,
-                "cachedTokens": 4084,
-                "outputTokens": 1630,
-                "costMicros": 839,
+                "cachedTokens": 1524,
+                "outputTokens": 2137,
+                "costMicros": 1338,
                 "reused": false
               },
               {
                 "name": "read_terms",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 0,
                 "cachedTokens": 0,
                 "outputTokens": 0,
@@ -2017,16 +2800,99 @@
           "stage": "reading_bill"
         },
         {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Extracting structured billing fields and quoting exact document text for previous balance and payments."
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "\n\n"
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Validating line-item coordinates and ensuring quoted strings match the document verbatim."
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Fiber 300 Internet",
+            "amount_cents": 6000,
+            "kind": "plan",
+            "page": 1,
+            "box": {
+              "x0": 103,
+              "y0": 429,
+              "x1": 913,
+              "y1": 447
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Autopay Discount",
+            "amount_cents": -500,
+            "kind": "discount",
+            "page": 1,
+            "box": {
+              "x0": 103,
+              "y0": 476,
+              "x1": 913,
+              "y1": 494
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "CA Communications Users Tax",
+            "amount_cents": 189,
+            "kind": "government_tax",
+            "page": 1,
+            "box": {
+              "x0": 103,
+              "y0": 526,
+              "x1": 913,
+              "y1": 544
+            }
+          }
+        },
+        {
           "type": "spent",
-          "micros": 477
+          "micros": 1147
         },
         {
           "type": "stage",
           "stage": "reading_offer"
         },
         {
+          "type": "thinking",
+          "stage": "reading_offer",
+          "text": "Extracting concrete price and credit promises from the document and matching them to the JSON schema requirements."
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_offer",
+          "text": "\n\n"
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_offer",
+          "text": "Resolving the date range and quote extraction for the monthly price entry."
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "monthly_price",
+            "description": "Fiber 300 Internet is promised at $55 per month with autopay, with the price locked through 12/31/2027.",
+            "amount_cents": 5500
+          }
+        },
+        {
           "type": "spent",
-          "micros": 879
+          "micros": 1858
         },
         {
           "type": "stage",
@@ -2060,7 +2926,7 @@
                 },
                 "total_due": {
                   "cents": 5689,
-                  "quote": "$56.89"
+                  "quote": "Total amount due\n$56.89"
                 }
               },
               "line_items": [
@@ -2070,10 +2936,10 @@
                   "kind": "plan",
                   "page": 1,
                   "box": {
-                    "x0": 100,
+                    "x0": 103,
                     "y0": 429,
-                    "x1": 914,
-                    "y1": 445
+                    "x1": 913,
+                    "y1": 447
                   },
                   "quote": "Fiber 300 Internet $60.00",
                   "prorated": false,
@@ -2085,9 +2951,9 @@
                   "kind": "discount",
                   "page": 1,
                   "box": {
-                    "x0": 102,
-                    "y0": 477,
-                    "x1": 914,
+                    "x0": 103,
+                    "y0": 476,
+                    "x1": 913,
                     "y1": 494
                   },
                   "quote": "Autopay Discount -$5.00",
@@ -2100,10 +2966,10 @@
                   "kind": "government_tax",
                   "page": 1,
                   "box": {
-                    "x0": 102,
+                    "x0": 103,
                     "y0": 526,
                     "x1": 913,
-                    "y1": 543
+                    "y1": 544
                   },
                   "quote": "CA Communications Users Tax $1.89",
                   "prorated": false,
@@ -2124,7 +2990,7 @@
             "promises": [
               {
                 "kind": "monthly_price",
-                "description": "Fiber 300 Internet is promised at $55 per month with autopay, price locked through 12/31/2027.",
+                "description": "Fiber 300 Internet is promised at $55 per month with autopay, with the price locked through 12/31/2027.",
                 "amount_cents": 5500,
                 "per_line": false,
                 "conditions": [
@@ -2150,24 +3016,24 @@
             "providerMismatch": false,
             "billIsImage": false,
             "hadOffer": true,
-            "spentMicros": 879,
+            "spentMicros": 1858,
             "calls": [
               {
                 "name": "read_bill",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 4307,
-                "cachedTokens": 4212,
-                "outputTokens": 900,
-                "costMicros": 477,
+                "cachedTokens": 1524,
+                "outputTokens": 1724,
+                "costMicros": 1147,
                 "reused": false
               },
               {
                 "name": "read_terms",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 1003,
-                "cachedTokens": 884,
-                "outputTokens": 772,
-                "costMicros": 402,
+                "cachedTokens": 756,
+                "outputTokens": 1366,
+                "costMicros": 711,
                 "reused": false
               }
             ]
@@ -2184,12 +3050,80 @@
           "stage": "reading_bill"
         },
         {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Extracting bill fields into JSON and determining exact quote text format for schema compliance."
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "\n\n"
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Resolving quote substring ambiguity by choosing exact label-amount phrasing for schema fields."
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Fiber 300 Internet",
+            "amount_cents": 6000,
+            "kind": "plan",
+            "page": 1,
+            "box": {
+              "x0": 118,
+              "y0": 422,
+              "x1": 892,
+              "y1": 465
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Autopay Discount",
+            "amount_cents": -500,
+            "kind": "discount",
+            "page": 1,
+            "box": {
+              "x0": 118,
+              "y0": 476,
+              "x1": 892,
+              "y1": 515
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "CA Communications Users Tax",
+            "amount_cents": 189,
+            "kind": "government_tax",
+            "page": 1,
+            "box": {
+              "x0": 120,
+              "y0": 526,
+              "x1": 895,
+              "y1": 565
+            }
+          }
+        },
+        {
           "type": "spent",
-          "micros": 568
+          "micros": 1203
         },
         {
           "type": "stage",
           "stage": "reading_offer"
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "monthly_price",
+            "description": "Fiber 300 Internet is promised at $55 per month with autopay, with the price locked through 12/31/2027.",
+            "amount_cents": 5500
+          }
         },
         {
           "type": "stage",
@@ -2233,10 +3167,10 @@
                   "kind": "plan",
                   "page": 1,
                   "box": {
-                    "x0": 115,
-                    "y0": 440,
-                    "x1": 895,
-                    "y1": 460
+                    "x0": 118,
+                    "y0": 422,
+                    "x1": 892,
+                    "y1": 465
                   },
                   "quote": "Fiber 300 Internet $60.00",
                   "prorated": false,
@@ -2248,10 +3182,10 @@
                   "kind": "discount",
                   "page": 1,
                   "box": {
-                    "x0": 115,
-                    "y0": 475,
-                    "x1": 895,
-                    "y1": 495
+                    "x0": 118,
+                    "y0": 476,
+                    "x1": 892,
+                    "y1": 515
                   },
                   "quote": "Autopay Discount -$5.00",
                   "prorated": false,
@@ -2263,10 +3197,10 @@
                   "kind": "government_tax",
                   "page": 1,
                   "box": {
-                    "x0": 115,
-                    "y0": 530,
+                    "x0": 120,
+                    "y0": 526,
                     "x1": 895,
-                    "y1": 553
+                    "y1": 565
                   },
                   "quote": "CA Communications Users Tax $1.89",
                   "prorated": false,
@@ -2287,7 +3221,7 @@
             "promises": [
               {
                 "kind": "monthly_price",
-                "description": "Fiber 300 Internet is promised at $55 per month with autopay, price locked through 12/31/2027.",
+                "description": "Fiber 300 Internet is promised at $55 per month with autopay, with the price locked through 12/31/2027.",
                 "amount_cents": 5500,
                 "per_line": false,
                 "conditions": [
@@ -2313,20 +3247,20 @@
             "providerMismatch": false,
             "billIsImage": true,
             "hadOffer": true,
-            "spentMicros": 568,
+            "spentMicros": 1203,
             "calls": [
               {
                 "name": "read_bill",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 4151,
-                "cachedTokens": 4084,
-                "outputTokens": 1088,
-                "costMicros": 568,
+                "cachedTokens": 1524,
+                "outputTokens": 1868,
+                "costMicros": 1203,
                 "reused": false
               },
               {
                 "name": "read_terms",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 0,
                 "cachedTokens": 0,
                 "outputTokens": 0,
@@ -2347,16 +3281,102 @@
           "stage": "reading_bill"
         },
         {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Extracting structured fields from the bill text and quoting exact substrings for amounts and dates."
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Fiber 500 Internet",
+            "amount_cents": 6500,
+            "kind": "plan",
+            "page": 1,
+            "box": {
+              "x0": 104,
+              "y0": 428,
+              "x1": 914,
+              "y1": 448
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Wi-Fi Gateway Rental",
+            "amount_cents": 1500,
+            "kind": "equipment",
+            "page": 1,
+            "box": {
+              "x0": 104,
+              "y0": 476,
+              "x1": 914,
+              "y1": 496
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Gateway Promotional Credit",
+            "amount_cents": -1500,
+            "kind": "credit",
+            "page": 1,
+            "box": {
+              "x0": 104,
+              "y0": 526,
+              "x1": 914,
+              "y1": 546
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "CA Communications Users Tax",
+            "amount_cents": 210,
+            "kind": "government_tax",
+            "page": 1,
+            "box": {
+              "x0": 104,
+              "y0": 574,
+              "x1": 914,
+              "y1": 592
+            }
+          }
+        },
+        {
           "type": "spent",
-          "micros": 497
+          "micros": 908
         },
         {
           "type": "stage",
           "stage": "reading_offer"
         },
         {
+          "type": "thinking",
+          "stage": "reading_offer",
+          "text": "Extracting concrete billing promises by mapping plan price and credit lines to fields and line IDs."
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "monthly_price",
+            "description": "Fiber 500 Internet is promised at $65.00 per month.",
+            "amount_cents": 6500
+          }
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "included",
+            "description": "Wi-Fi Gateway is included with no monthly fee.",
+            "amount_cents": null
+          }
+        },
+        {
           "type": "spent",
-          "micros": 901
+          "micros": 1395
         },
         {
           "type": "stage",
@@ -2400,10 +3420,10 @@
                   "kind": "plan",
                   "page": 1,
                   "box": {
-                    "x0": 100,
-                    "y0": 429,
-                    "x1": 915,
-                    "y1": 447
+                    "x0": 104,
+                    "y0": 428,
+                    "x1": 914,
+                    "y1": 448
                   },
                   "quote": "Fiber 500 Internet $65.00",
                   "prorated": false,
@@ -2415,10 +3435,10 @@
                   "kind": "equipment",
                   "page": 1,
                   "box": {
-                    "x0": 100,
+                    "x0": 104,
                     "y0": 476,
-                    "x1": 915,
-                    "y1": 494
+                    "x1": 914,
+                    "y1": 496
                   },
                   "quote": "Wi-Fi Gateway Rental $15.00",
                   "prorated": false,
@@ -2430,10 +3450,10 @@
                   "kind": "credit",
                   "page": 1,
                   "box": {
-                    "x0": 100,
-                    "y0": 524,
-                    "x1": 915,
-                    "y1": 542
+                    "x0": 104,
+                    "y0": 526,
+                    "x1": 914,
+                    "y1": 546
                   },
                   "quote": "Gateway Promotional Credit -$15.00",
                   "prorated": false,
@@ -2445,10 +3465,10 @@
                   "kind": "government_tax",
                   "page": 1,
                   "box": {
-                    "x0": 100,
-                    "y0": 572,
-                    "x1": 915,
-                    "y1": 590
+                    "x0": 104,
+                    "y0": 574,
+                    "x1": 914,
+                    "y1": 592
                   },
                   "quote": "CA Communications Users Tax $2.10",
                   "prorated": false,
@@ -2508,24 +3528,24 @@
             "providerMismatch": false,
             "billIsImage": false,
             "hadOffer": true,
-            "spentMicros": 901,
+            "spentMicros": 1395,
             "calls": [
               {
                 "name": "read_bill",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 4307,
-                "cachedTokens": 4212,
-                "outputTokens": 941,
-                "costMicros": 497,
+                "cachedTokens": 1524,
+                "outputTokens": 1246,
+                "costMicros": 908,
                 "reused": false
               },
               {
                 "name": "read_terms",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 1016,
-                "cachedTokens": 1012,
-                "outputTokens": 799,
-                "costMicros": 404,
+                "cachedTokens": 884,
+                "outputTokens": 939,
+                "costMicros": 487,
                 "reused": false
               }
             ]
@@ -2542,12 +3562,103 @@
           "stage": "reading_bill"
         },
         {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Extracting structured fields from the statement and mapping printed values to quoted text under schema constraints."
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "\n\n"
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Estimating bounding boxes on a 0-1000 grid for each printed line."
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Fiber 500 Internet",
+            "amount_cents": 6500,
+            "kind": "plan",
+            "page": 1,
+            "box": {
+              "x0": 115,
+              "y0": 442,
+              "x1": 895,
+              "y1": 462
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Wi-Fi Gateway Rental",
+            "amount_cents": 1500,
+            "kind": "equipment",
+            "page": 1,
+            "box": {
+              "x0": 117,
+              "y0": 487,
+              "x1": 894,
+              "y1": 508
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Gateway Promotional Credit",
+            "amount_cents": -1500,
+            "kind": "credit",
+            "page": 1,
+            "box": {
+              "x0": 122,
+              "y0": 538,
+              "x1": 892,
+              "y1": 557
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "CA Communications Users Tax",
+            "amount_cents": 210,
+            "kind": "government_tax",
+            "page": 1,
+            "box": {
+              "x0": 123,
+              "y0": 582,
+              "x1": 898,
+              "y1": 602
+            }
+          }
+        },
+        {
           "type": "spent",
-          "micros": 564
+          "micros": 954
         },
         {
           "type": "stage",
           "stage": "reading_offer"
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "monthly_price",
+            "description": "Fiber 500 Internet is promised at $65.00 per month.",
+            "amount_cents": 6500
+          }
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "included",
+            "description": "Wi-Fi Gateway is included with no monthly fee.",
+            "amount_cents": null
+          }
         },
         {
           "type": "stage",
@@ -2581,7 +3692,7 @@
                 },
                 "total_due": {
                   "cents": 6710,
-                  "quote": "$67.10"
+                  "quote": "Total amount due $67.10"
                 }
               },
               "line_items": [
@@ -2591,10 +3702,10 @@
                   "kind": "plan",
                   "page": 1,
                   "box": {
-                    "x0": 110,
-                    "y0": 425,
-                    "x1": 890,
-                    "y1": 455
+                    "x0": 115,
+                    "y0": 442,
+                    "x1": 895,
+                    "y1": 462
                   },
                   "quote": "Fiber 500 Internet $65.00",
                   "prorated": false,
@@ -2606,10 +3717,10 @@
                   "kind": "equipment",
                   "page": 1,
                   "box": {
-                    "x0": 115,
-                    "y0": 465,
-                    "x1": 890,
-                    "y1": 495
+                    "x0": 117,
+                    "y0": 487,
+                    "x1": 894,
+                    "y1": 508
                   },
                   "quote": "Wi-Fi Gateway Rental $15.00",
                   "prorated": false,
@@ -2621,10 +3732,10 @@
                   "kind": "credit",
                   "page": 1,
                   "box": {
-                    "x0": 120,
-                    "y0": 525,
-                    "x1": 890,
-                    "y1": 555
+                    "x0": 122,
+                    "y0": 538,
+                    "x1": 892,
+                    "y1": 557
                   },
                   "quote": "Gateway Promotional Credit -$15.00",
                   "prorated": false,
@@ -2636,10 +3747,10 @@
                   "kind": "government_tax",
                   "page": 1,
                   "box": {
-                    "x0": 125,
-                    "y0": 570,
-                    "x1": 895,
-                    "y1": 600
+                    "x0": 123,
+                    "y0": 582,
+                    "x1": 898,
+                    "y1": 602
                   },
                   "quote": "CA Communications Users Tax $2.10",
                   "prorated": false,
@@ -2699,20 +3810,20 @@
             "providerMismatch": false,
             "billIsImage": true,
             "hadOffer": true,
-            "spentMicros": 564,
+            "spentMicros": 954,
             "calls": [
               {
                 "name": "read_bill",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 4151,
-                "cachedTokens": 4084,
-                "outputTokens": 1080,
-                "costMicros": 564,
+                "cachedTokens": 1524,
+                "outputTokens": 1369,
+                "costMicros": 954,
                 "reused": false
               },
               {
                 "name": "read_terms",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 0,
                 "cachedTokens": 0,
                 "outputTokens": 0,
@@ -2733,16 +3844,72 @@
           "stage": "reading_bill"
         },
         {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Mapping extracted billing fields to the required schema with exact quoted text and cent values."
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Fiber 300 Internet",
+            "amount_cents": 6000,
+            "kind": "plan",
+            "page": 1,
+            "box": {
+              "x0": 102,
+              "y0": 430,
+              "x1": 913,
+              "y1": 446
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "CA Communications Users Tax",
+            "amount_cents": 189,
+            "kind": "government_tax",
+            "page": 1,
+            "box": {
+              "x0": 102,
+              "y0": 478,
+              "x1": 913,
+              "y1": 493
+            }
+          }
+        },
+        {
           "type": "spent",
-          "micros": 393
+          "micros": 845
         },
         {
           "type": "stage",
           "stage": "reading_offer"
         },
         {
+          "type": "thinking",
+          "stage": "reading_offer",
+          "text": "Comparing the billed Fiber 300 plan and tax amounts against the confirmed promotional price and autopay discount, then structuring the result to the required JSON schema."
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "monthly_price",
+            "description": "Fiber 300 Internet is promised at $55 per month with autopay through 12/31/2027.",
+            "amount_cents": 5500
+          }
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "recurring_credit",
+            "description": "A $5 monthly autopay discount is promised on Fiber 300 Internet through 12/31/2027.",
+            "amount_cents": 500
+          }
+        },
+        {
           "type": "spent",
-          "micros": 832
+          "micros": 1533
         },
         {
           "type": "stage",
@@ -2776,7 +3943,7 @@
                 },
                 "total_due": {
                   "cents": 6189,
-                  "quote": "Total amount due $61.89"
+                  "quote": "$61.89"
                 }
               },
               "line_items": [
@@ -2786,10 +3953,10 @@
                   "kind": "plan",
                   "page": 1,
                   "box": {
-                    "x0": 100,
-                    "y0": 429,
-                    "x1": 915,
-                    "y1": 447
+                    "x0": 102,
+                    "y0": 430,
+                    "x1": 913,
+                    "y1": 446
                   },
                   "quote": "Fiber 300 Internet $60.00",
                   "prorated": false,
@@ -2801,10 +3968,10 @@
                   "kind": "government_tax",
                   "page": 1,
                   "box": {
-                    "x0": 100,
-                    "y0": 477,
-                    "x1": 915,
-                    "y1": 494
+                    "x0": 102,
+                    "y0": 478,
+                    "x1": 913,
+                    "y1": 493
                   },
                   "quote": "CA Communications Users Tax $1.89",
                   "prorated": false,
@@ -2841,7 +4008,7 @@
               },
               {
                 "kind": "recurring_credit",
-                "description": "A $5 monthly autopay discount is promised for Fiber 300 Internet through 12/31/2027.",
+                "description": "A $5 monthly autopay discount is promised on Fiber 300 Internet through 12/31/2027.",
                 "amount_cents": 500,
                 "per_line": false,
                 "conditions": [
@@ -2884,24 +4051,24 @@
             "providerMismatch": false,
             "billIsImage": false,
             "hadOffer": true,
-            "spentMicros": 832,
+            "spentMicros": 1533,
             "calls": [
               {
                 "name": "read_bill",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 4283,
-                "cachedTokens": 4212,
-                "outputTokens": 737,
-                "costMicros": 393,
+                "cachedTokens": 1524,
+                "outputTokens": 1126,
+                "costMicros": 845,
                 "reused": false
               },
               {
                 "name": "read_terms",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 992,
                 "cachedTokens": 884,
-                "outputTokens": 848,
-                "costMicros": 439,
+                "outputTokens": 1347,
+                "costMicros": 688,
                 "reused": false
               }
             ]
@@ -2918,12 +4085,73 @@
           "stage": "reading_bill"
         },
         {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Extracting bill fields to JSON while noting missing OCR text for the exact previous balance quote."
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "\n\n"
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Estimating bounding boxes on a 0-1000 grid for the line items."
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Fiber 300 Internet",
+            "amount_cents": 6000,
+            "kind": "plan",
+            "page": 1,
+            "box": {
+              "x0": 105,
+              "y0": 425,
+              "x1": 890,
+              "y1": 460
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "CA Communications Users Tax",
+            "amount_cents": 189,
+            "kind": "government_tax",
+            "page": 1,
+            "box": {
+              "x0": 115,
+              "y0": 470,
+              "x1": 890,
+              "y1": 505
+            }
+          }
+        },
+        {
           "type": "spent",
-          "micros": 458
+          "micros": 1140
         },
         {
           "type": "stage",
           "stage": "reading_offer"
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "monthly_price",
+            "description": "Fiber 300 Internet is promised at $55 per month with autopay through 12/31/2027.",
+            "amount_cents": 5500
+          }
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "recurring_credit",
+            "description": "A $5 monthly autopay discount is promised on Fiber 300 Internet through 12/31/2027.",
+            "amount_cents": 500
+          }
         },
         {
           "type": "stage",
@@ -2967,10 +4195,10 @@
                   "kind": "plan",
                   "page": 1,
                   "box": {
-                    "x0": 115,
-                    "y0": 438,
+                    "x0": 105,
+                    "y0": 425,
                     "x1": 890,
-                    "y1": 456
+                    "y1": 460
                   },
                   "quote": "Fiber 300 Internet $60.00",
                   "prorated": false,
@@ -2983,7 +4211,7 @@
                   "page": 1,
                   "box": {
                     "x0": 115,
-                    "y0": 488,
+                    "y0": 470,
                     "x1": 890,
                     "y1": 505
                   },
@@ -3022,7 +4250,7 @@
               },
               {
                 "kind": "recurring_credit",
-                "description": "A $5 monthly autopay discount is promised for Fiber 300 Internet through 12/31/2027.",
+                "description": "A $5 monthly autopay discount is promised on Fiber 300 Internet through 12/31/2027.",
                 "amount_cents": 500,
                 "per_line": false,
                 "conditions": [
@@ -3065,20 +4293,20 @@
             "providerMismatch": false,
             "billIsImage": true,
             "hadOffer": true,
-            "spentMicros": 458,
+            "spentMicros": 1140,
             "calls": [
               {
                 "name": "read_bill",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 4151,
-                "cachedTokens": 4084,
-                "outputTokens": 868,
-                "costMicros": 458,
+                "cachedTokens": 1524,
+                "outputTokens": 1742,
+                "costMicros": 1140,
                 "reused": false
               },
               {
                 "name": "read_terms",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 0,
                 "cachedTokens": 0,
                 "outputTokens": 0,
@@ -3099,16 +4327,112 @@
           "stage": "reading_bill"
         },
         {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Extracting billing fields from the statement text and mapping them to the required JSON schema with quoted values."
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Essentials - Line 1",
+            "amount_cents": 3000,
+            "kind": "plan",
+            "page": 1,
+            "box": {
+              "x0": 100,
+              "y0": 428,
+              "x1": 920,
+              "y1": 447
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Essentials - Line 2",
+            "amount_cents": 3000,
+            "kind": "plan",
+            "page": 1,
+            "box": {
+              "x0": 100,
+              "y0": 449,
+              "x1": 920,
+              "y1": 466
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Autopay Discount",
+            "amount_cents": -1000,
+            "kind": "discount",
+            "page": 1,
+            "box": {
+              "x0": 100,
+              "y0": 495,
+              "x1": 920,
+              "y1": 514
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Federal Universal Service Fund",
+            "amount_cents": 96,
+            "kind": "government_tax",
+            "page": 1,
+            "box": {
+              "x0": 100,
+              "y0": 544,
+              "x1": 920,
+              "y1": 562
+            }
+          }
+        },
+        {
           "type": "spent",
-          "micros": 541
+          "micros": 875
         },
         {
           "type": "stage",
           "stage": "reading_offer"
         },
         {
+          "type": "thinking",
+          "stage": "reading_offer",
+          "text": "Extracting Northstar Wireless monthly price promises into JSON with amount in cents and mapping applicable line IDs."
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_offer",
+          "text": "\n\n"
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_offer",
+          "text": "Resolving overlap between monthly_price and recurring_credit by assigning line IDs and conditions."
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "monthly_price",
+            "description": "Essentials is promised at $30 per line per month for 2 lines.",
+            "amount_cents": 3000
+          }
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "recurring_credit",
+            "description": "A $5 per line per month autopay discount is promised.",
+            "amount_cents": 500
+          }
+        },
+        {
           "type": "spent",
-          "micros": 858
+          "micros": 1611
         },
         {
           "type": "stage",
@@ -3152,10 +4476,10 @@
                   "kind": "plan",
                   "page": 1,
                   "box": {
-                    "x0": 103,
-                    "y0": 431,
-                    "x1": 912,
-                    "y1": 448
+                    "x0": 100,
+                    "y0": 428,
+                    "x1": 920,
+                    "y1": 447
                   },
                   "quote": "Essentials - Line 1 $30.00",
                   "prorated": false,
@@ -3167,10 +4491,10 @@
                   "kind": "plan",
                   "page": 1,
                   "box": {
-                    "x0": 103,
-                    "y0": 453,
-                    "x1": 912,
-                    "y1": 470
+                    "x0": 100,
+                    "y0": 449,
+                    "x1": 920,
+                    "y1": 466
                   },
                   "quote": "Essentials - Line 2 $30.00",
                   "prorated": false,
@@ -3182,10 +4506,10 @@
                   "kind": "discount",
                   "page": 1,
                   "box": {
-                    "x0": 103,
-                    "y0": 499,
-                    "x1": 912,
-                    "y1": 516
+                    "x0": 100,
+                    "y0": 495,
+                    "x1": 920,
+                    "y1": 514
                   },
                   "quote": "Autopay Discount $5 x 2 lines -$10.00",
                   "prorated": false,
@@ -3197,10 +4521,10 @@
                   "kind": "government_tax",
                   "page": 1,
                   "box": {
-                    "x0": 103,
-                    "y0": 546,
-                    "x1": 912,
-                    "y1": 563
+                    "x0": 100,
+                    "y0": 544,
+                    "x1": 920,
+                    "y1": 562
                   },
                   "quote": "Federal Universal Service Fund $0.96",
                   "prorated": false,
@@ -3230,13 +4554,14 @@
                 "quote": "Essentials, 2 lines: $30/line per month",
                 "covers_line_ids": [
                   "L1",
-                  "L2"
+                  "L2",
+                  "L3"
                 ],
                 "id": "P1"
               },
               {
                 "kind": "recurring_credit",
-                "description": "An autopay discount of $5 per line per month is promised.",
+                "description": "A $5 per line per month autopay discount is promised.",
                 "amount_cents": 500,
                 "per_line": true,
                 "conditions": [
@@ -3264,24 +4589,24 @@
             "providerMismatch": false,
             "billIsImage": false,
             "hadOffer": true,
-            "spentMicros": 858,
+            "spentMicros": 1611,
             "calls": [
               {
                 "name": "read_bill",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 4328,
-                "cachedTokens": 4212,
-                "outputTokens": 1024,
-                "costMicros": 541,
+                "cachedTokens": 1524,
+                "outputTokens": 1176,
+                "costMicros": 875,
                 "reused": false
               },
               {
                 "name": "read_terms",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 994,
-                "cachedTokens": 884,
-                "outputTokens": 604,
-                "costMicros": 317,
+                "cachedTokens": 756,
+                "outputTokens": 1418,
+                "costMicros": 736,
                 "reused": false
               }
             ]
@@ -3298,12 +4623,113 @@
           "stage": "reading_bill"
         },
         {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Extracting structured billing fields from the statement and defining the output schema for account, charges, and dates."
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "\n\n"
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Populating the schema with extracted amounts and exact quoted text for each billing field."
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "\n\n"
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Resolving amount alignment from image perspective to confirm four line items."
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Essentials - Line 1",
+            "amount_cents": 3000,
+            "kind": "plan",
+            "page": 1,
+            "box": {
+              "x0": 118,
+              "y0": 437,
+              "x1": 887,
+              "y1": 457
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Essentials - Line 2",
+            "amount_cents": 3000,
+            "kind": "plan",
+            "page": 1,
+            "box": {
+              "x0": 119,
+              "y0": 459,
+              "x1": 887,
+              "y1": 480
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Autopay Discount",
+            "amount_cents": -1000,
+            "kind": "discount",
+            "page": 1,
+            "box": {
+              "x0": 122,
+              "y0": 505,
+              "x1": 892,
+              "y1": 530
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Federal Universal Service Fund",
+            "amount_cents": 96,
+            "kind": "government_tax",
+            "page": 1,
+            "box": {
+              "x0": 125,
+              "y0": 548,
+              "x1": 887,
+              "y1": 570
+            }
+          }
+        },
+        {
           "type": "spent",
-          "micros": 554
+          "micros": 1520
         },
         {
           "type": "stage",
           "stage": "reading_offer"
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "monthly_price",
+            "description": "Essentials is promised at $30 per line per month for 2 lines.",
+            "amount_cents": 3000
+          }
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "recurring_credit",
+            "description": "A $5 per line per month autopay discount is promised.",
+            "amount_cents": 500
+          }
         },
         {
           "type": "stage",
@@ -3347,10 +4773,10 @@
                   "kind": "plan",
                   "page": 1,
                   "box": {
-                    "x0": 115,
-                    "y0": 443,
-                    "x1": 894,
-                    "y1": 459
+                    "x0": 118,
+                    "y0": 437,
+                    "x1": 887,
+                    "y1": 457
                   },
                   "quote": "Essentials - Line 1 $30.00",
                   "prorated": false,
@@ -3362,10 +4788,10 @@
                   "kind": "plan",
                   "page": 1,
                   "box": {
-                    "x0": 115,
-                    "y0": 462,
-                    "x1": 894,
-                    "y1": 477
+                    "x0": 119,
+                    "y0": 459,
+                    "x1": 887,
+                    "y1": 480
                   },
                   "quote": "Essentials - Line 2 $30.00",
                   "prorated": false,
@@ -3377,10 +4803,10 @@
                   "kind": "discount",
                   "page": 1,
                   "box": {
-                    "x0": 115,
-                    "y0": 497,
-                    "x1": 894,
-                    "y1": 520
+                    "x0": 122,
+                    "y0": 505,
+                    "x1": 892,
+                    "y1": 530
                   },
                   "quote": "Autopay Discount $5 x 2 lines -$10.00",
                   "prorated": false,
@@ -3392,10 +4818,10 @@
                   "kind": "government_tax",
                   "page": 1,
                   "box": {
-                    "x0": 120,
-                    "y0": 556,
-                    "x1": 893,
-                    "y1": 571
+                    "x0": 125,
+                    "y0": 548,
+                    "x1": 887,
+                    "y1": 570
                   },
                   "quote": "Federal Universal Service Fund $0.96",
                   "prorated": false,
@@ -3425,13 +4851,14 @@
                 "quote": "Essentials, 2 lines: $30/line per month",
                 "covers_line_ids": [
                   "L1",
-                  "L2"
+                  "L2",
+                  "L3"
                 ],
                 "id": "P1"
               },
               {
                 "kind": "recurring_credit",
-                "description": "An autopay discount of $5 per line per month is promised.",
+                "description": "A $5 per line per month autopay discount is promised.",
                 "amount_cents": 500,
                 "per_line": true,
                 "conditions": [
@@ -3459,20 +4886,20 @@
             "providerMismatch": false,
             "billIsImage": true,
             "hadOffer": true,
-            "spentMicros": 554,
+            "spentMicros": 1520,
             "calls": [
               {
                 "name": "read_bill",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 4151,
-                "cachedTokens": 4084,
-                "outputTokens": 1061,
-                "costMicros": 554,
+                "cachedTokens": 1524,
+                "outputTokens": 2501,
+                "costMicros": 1520,
                 "reused": false
               },
               {
                 "name": "read_terms",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 0,
                 "cachedTokens": 0,
                 "outputTokens": 0,
@@ -3493,208 +4920,114 @@
           "stage": "reading_bill"
         },
         {
-          "type": "spent",
-          "micros": 537
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Extracting billing fields to schema with sign normalization for payments and quoting exact text from source."
         },
         {
-          "type": "stage",
-          "stage": "reading_offer"
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "\n\n"
         },
         {
-          "type": "spent",
-          "micros": 777
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Resolving line-break ambiguity to select exact character-for-character quotes from the source."
         },
         {
-          "type": "stage",
-          "stage": "comparing"
-        },
-        {
-          "type": "result",
-          "result": {
-            "outcome": "checked",
-            "reading": {
-              "outcome": "bill",
-              "unreadable_reason": null,
-              "provider": "Northstar Wireless",
-              "account_last4": "1119",
-              "statement_date": "2026-11-06",
-              "period_start": "2026-11-08",
-              "period_end": "2026-12-07",
-              "due_date": "2026-11-27",
-              "printed": {
-                "previous_balance": {
-                  "cents": 7329,
-                  "quote": "Previous balance $73.29"
-                },
-                "payments": {
-                  "cents": 7329,
-                  "quote": "Payment received - thank you -$73.29"
-                },
-                "current_charges": {
-                  "cents": 9105,
-                  "quote": "Current charges $91.05"
-                },
-                "total_due": {
-                  "cents": 9105,
-                  "quote": "$91.05"
-                }
-              },
-              "line_items": [
-                {
-                  "label": "Unlimited Basic - Line 1",
-                  "amount_cents": 3000,
-                  "kind": "plan",
-                  "page": 1,
-                  "box": {
-                    "x0": 99,
-                    "y0": 427,
-                    "x1": 913,
-                    "y1": 448
-                  },
-                  "quote": "Unlimited Basic - Line 1 $30.00",
-                  "prorated": false,
-                  "id": "L1"
-                },
-                {
-                  "label": "Unlimited Basic - Line 2",
-                  "amount_cents": 3000,
-                  "kind": "plan",
-                  "page": 1,
-                  "box": {
-                    "x0": 99,
-                    "y0": 448,
-                    "x1": 913,
-                    "y1": 468
-                  },
-                  "quote": "Unlimited Basic - Line 2 $30.00",
-                  "prorated": false,
-                  "id": "L2"
-                },
-                {
-                  "label": "Unlimited Basic - Line 3",
-                  "amount_cents": 3000,
-                  "kind": "plan",
-                  "page": 1,
-                  "box": {
-                    "x0": 99,
-                    "y0": 468,
-                    "x1": 913,
-                    "y1": 488
-                  },
-                  "quote": "Unlimited Basic - Line 3 $30.00",
-                  "prorated": false,
-                  "id": "L3"
-                },
-                {
-                  "label": "State 911 Surcharge",
-                  "amount_cents": 105,
-                  "kind": "government_tax",
-                  "page": 1,
-                  "box": {
-                    "x0": 99,
-                    "y0": 513,
-                    "x1": 913,
-                    "y1": 534
-                  },
-                  "quote": "State 911 Surcharge $1.05",
-                  "prorated": false,
-                  "id": "L4"
-                }
-              ],
-              "autopay": {
-                "enrolled": null,
-                "quote": null
-              }
-            },
-            "totals": {
-              "lineSum": "ok",
-              "balance": "ok",
-              "lineSumCents": 9105
-            },
-            "offerProvider": "Northstar Wireless",
-            "promises": [
-              {
-                "kind": "monthly_price",
-                "description": "Unlimited Basic is promised at $25 per line per month for 3 lines.",
-                "amount_cents": 2500,
-                "per_line": true,
-                "conditions": [],
-                "applies_from": "2026-03-14",
-                "applies_until": "2029-03-13",
-                "quote": "Unlimited Basic for 3 lines at $25/line per month (price guaranteed for 3 years)",
-                "covers_line_ids": [
-                  "L1",
-                  "L2",
-                  "L3"
-                ],
-                "id": "P1"
-              }
-            ],
-            "claims": [
-              {
-                "kind": "price_above_promise",
-                "lineIds": [
-                  "L1",
-                  "L2",
-                  "L3"
-                ],
-                "promiseId": "P1",
-                "actualCents": 9000,
-                "expectedCents": 7500,
-                "amountCents": 1500,
-                "needsConfirmation": false,
-                "id": "C1"
-              }
-            ],
-            "questions": [],
-            "explained": [],
-            "unused": [],
-            "matchedPromiseIds": [
-              "P1"
-            ],
-            "providerMismatch": false,
-            "billIsImage": false,
-            "hadOffer": true,
-            "spentMicros": 777,
-            "calls": [
-              {
-                "name": "read_bill",
-                "effort": "low",
-                "inputTokens": 4314,
-                "cachedTokens": 4212,
-                "outputTokens": 1019,
-                "costMicros": 537,
-                "reused": false
-              },
-              {
-                "name": "read_terms",
-                "effort": "low",
-                "inputTokens": 1007,
-                "cachedTokens": 884,
-                "outputTokens": 447,
-                "costMicros": 240,
-                "reused": false
-              }
-            ]
+          "type": "line",
+          "line": {
+            "label": "Unlimited Basic - Line 1",
+            "amount_cents": 3000,
+            "kind": "plan",
+            "page": 1,
+            "box": {
+              "x0": 103,
+              "y0": 429,
+              "x1": 913,
+              "y1": 448
+            }
           }
-        }
-      ]
-    },
-    {
-      "id": "mobile-price-over",
-      "variant": "photo",
-      "events": [
+        },
         {
-          "type": "stage",
-          "stage": "reading_bill"
+          "type": "line",
+          "line": {
+            "label": "Unlimited Basic - Line 2",
+            "amount_cents": 3000,
+            "kind": "plan",
+            "page": 1,
+            "box": {
+              "x0": 103,
+              "y0": 450,
+              "x1": 913,
+              "y1": 469
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Unlimited Basic - Line 3",
+            "amount_cents": 3000,
+            "kind": "plan",
+            "page": 1,
+            "box": {
+              "x0": 103,
+              "y0": 470,
+              "x1": 913,
+              "y1": 489
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "State 911 Surcharge",
+            "amount_cents": 105,
+            "kind": "government_tax",
+            "page": 1,
+            "box": {
+              "x0": 103,
+              "y0": 514,
+              "x1": 913,
+              "y1": 535
+            }
+          }
         },
         {
           "type": "spent",
-          "micros": 501
+          "micros": 956
         },
         {
           "type": "stage",
           "stage": "reading_offer"
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_offer",
+          "text": "Extracting provider and promised plan details from bill and order summary into JSON schema."
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_offer",
+          "text": "\n\n"
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_offer",
+          "text": "Computing the 3-year end date from the order date and populating covers_line_ids and description fields."
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "monthly_price",
+            "description": "Unlimited Basic is promised at $25 per line per month for 3 lines.",
+            "amount_cents": 2500
+          }
+        },
+        {
+          "type": "spent",
+          "micros": 1712
         },
         {
           "type": "stage",
@@ -3738,10 +5071,10 @@
                   "kind": "plan",
                   "page": 1,
                   "box": {
-                    "x0": 115,
-                    "y0": 445,
-                    "x1": 890,
-                    "y1": 462
+                    "x0": 103,
+                    "y0": 429,
+                    "x1": 913,
+                    "y1": 448
                   },
                   "quote": "Unlimited Basic - Line 1 $30.00",
                   "prorated": false,
@@ -3753,10 +5086,10 @@
                   "kind": "plan",
                   "page": 1,
                   "box": {
-                    "x0": 115,
-                    "y0": 464,
-                    "x1": 890,
-                    "y1": 482
+                    "x0": 103,
+                    "y0": 450,
+                    "x1": 913,
+                    "y1": 469
                   },
                   "quote": "Unlimited Basic - Line 2 $30.00",
                   "prorated": false,
@@ -3768,10 +5101,10 @@
                   "kind": "plan",
                   "page": 1,
                   "box": {
-                    "x0": 115,
-                    "y0": 484,
-                    "x1": 890,
-                    "y1": 502
+                    "x0": 103,
+                    "y0": 470,
+                    "x1": 913,
+                    "y1": 489
                   },
                   "quote": "Unlimited Basic - Line 3 $30.00",
                   "prorated": false,
@@ -3783,10 +5116,295 @@
                   "kind": "government_tax",
                   "page": 1,
                   "box": {
-                    "x0": 120,
-                    "y0": 518,
+                    "x0": 103,
+                    "y0": 514,
+                    "x1": 913,
+                    "y1": 535
+                  },
+                  "quote": "State 911 Surcharge $1.05",
+                  "prorated": false,
+                  "id": "L4"
+                }
+              ],
+              "autopay": {
+                "enrolled": null,
+                "quote": null
+              }
+            },
+            "totals": {
+              "lineSum": "ok",
+              "balance": "ok",
+              "lineSumCents": 9105
+            },
+            "offerProvider": "Northstar Wireless",
+            "promises": [
+              {
+                "kind": "monthly_price",
+                "description": "Unlimited Basic is promised at $25 per line per month for 3 lines.",
+                "amount_cents": 2500,
+                "per_line": true,
+                "conditions": [],
+                "applies_from": "2026-03-14",
+                "applies_until": "2029-03-13",
+                "quote": "Unlimited Basic for 3 lines at $25/line per month (price guaranteed for 3 years)",
+                "covers_line_ids": [
+                  "L1",
+                  "L2",
+                  "L3"
+                ],
+                "id": "P1"
+              }
+            ],
+            "claims": [
+              {
+                "kind": "price_above_promise",
+                "lineIds": [
+                  "L1",
+                  "L2",
+                  "L3"
+                ],
+                "promiseId": "P1",
+                "actualCents": 9000,
+                "expectedCents": 7500,
+                "amountCents": 1500,
+                "needsConfirmation": false,
+                "id": "C1"
+              }
+            ],
+            "questions": [],
+            "explained": [],
+            "unused": [],
+            "matchedPromiseIds": [
+              "P1"
+            ],
+            "providerMismatch": false,
+            "billIsImage": false,
+            "hadOffer": true,
+            "spentMicros": 1712,
+            "calls": [
+              {
+                "name": "read_bill",
+                "effort": "high",
+                "inputTokens": 4314,
+                "cachedTokens": 1524,
+                "outputTokens": 1341,
+                "costMicros": 956,
+                "reused": false
+              },
+              {
+                "name": "read_terms",
+                "effort": "high",
+                "inputTokens": 1007,
+                "cachedTokens": 884,
+                "outputTokens": 1480,
+                "costMicros": 756,
+                "reused": false
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "mobile-price-over",
+      "variant": "photo",
+      "events": [
+        {
+          "type": "stage",
+          "stage": "reading_bill"
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Parsing the bill text to map fields like previous balance and due date into structured schema fields with quoted exact text."
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "\n\n"
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Extending field mapping to include line items with quoted exact text and cent conversion."
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "\n\n"
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Resolving a vertical alignment mismatch between headings and amounts to match the total."
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Unlimited Basic - Line 1",
+            "amount_cents": 3000,
+            "kind": "plan",
+            "page": 1,
+            "box": {
+              "x0": 118,
+              "y0": 440,
+              "x1": 894,
+              "y1": 460
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Unlimited Basic - Line 2",
+            "amount_cents": 3000,
+            "kind": "plan",
+            "page": 1,
+            "box": {
+              "x0": 118,
+              "y0": 460,
+              "x1": 894,
+              "y1": 480
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Unlimited Basic - Line 3",
+            "amount_cents": 3000,
+            "kind": "plan",
+            "page": 1,
+            "box": {
+              "x0": 118,
+              "y0": 478,
+              "x1": 894,
+              "y1": 500
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "State 911 Surcharge",
+            "amount_cents": 105,
+            "kind": "government_tax",
+            "page": 1,
+            "box": {
+              "x0": 122,
+              "y0": 520,
+              "x1": 895,
+              "y1": 545
+            }
+          }
+        },
+        {
+          "type": "spent",
+          "micros": 1468
+        },
+        {
+          "type": "stage",
+          "stage": "reading_offer"
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "monthly_price",
+            "description": "Unlimited Basic is promised at $25 per line per month for 3 lines.",
+            "amount_cents": 2500
+          }
+        },
+        {
+          "type": "stage",
+          "stage": "comparing"
+        },
+        {
+          "type": "result",
+          "result": {
+            "outcome": "checked",
+            "reading": {
+              "outcome": "bill",
+              "unreadable_reason": null,
+              "provider": "Northstar Wireless",
+              "account_last4": "1119",
+              "statement_date": "2026-11-06",
+              "period_start": "2026-11-08",
+              "period_end": "2026-12-07",
+              "due_date": "2026-11-27",
+              "printed": {
+                "previous_balance": {
+                  "cents": 7329,
+                  "quote": "Previous balance $73.29"
+                },
+                "payments": {
+                  "cents": 7329,
+                  "quote": "Payment received - thank you -$73.29"
+                },
+                "current_charges": {
+                  "cents": 9105,
+                  "quote": "Current charges $91.05"
+                },
+                "total_due": {
+                  "cents": 9105,
+                  "quote": "Total amount due $91.05"
+                }
+              },
+              "line_items": [
+                {
+                  "label": "Unlimited Basic - Line 1",
+                  "amount_cents": 3000,
+                  "kind": "plan",
+                  "page": 1,
+                  "box": {
+                    "x0": 118,
+                    "y0": 440,
+                    "x1": 894,
+                    "y1": 460
+                  },
+                  "quote": "Unlimited Basic - Line 1 $30.00",
+                  "prorated": false,
+                  "id": "L1"
+                },
+                {
+                  "label": "Unlimited Basic - Line 2",
+                  "amount_cents": 3000,
+                  "kind": "plan",
+                  "page": 1,
+                  "box": {
+                    "x0": 118,
+                    "y0": 460,
+                    "x1": 894,
+                    "y1": 480
+                  },
+                  "quote": "Unlimited Basic - Line 2 $30.00",
+                  "prorated": false,
+                  "id": "L2"
+                },
+                {
+                  "label": "Unlimited Basic - Line 3",
+                  "amount_cents": 3000,
+                  "kind": "plan",
+                  "page": 1,
+                  "box": {
+                    "x0": 118,
+                    "y0": 478,
+                    "x1": 894,
+                    "y1": 500
+                  },
+                  "quote": "Unlimited Basic - Line 3 $30.00",
+                  "prorated": false,
+                  "id": "L3"
+                },
+                {
+                  "label": "State 911 Surcharge",
+                  "amount_cents": 105,
+                  "kind": "government_tax",
+                  "page": 1,
+                  "box": {
+                    "x0": 122,
+                    "y0": 520,
                     "x1": 895,
-                    "y1": 536
+                    "y1": 545
                   },
                   "quote": "State 911 Surcharge $1.05",
                   "prorated": false,
@@ -3847,20 +5465,20 @@
             "providerMismatch": false,
             "billIsImage": true,
             "hadOffer": true,
-            "spentMicros": 501,
+            "spentMicros": 1468,
             "calls": [
               {
                 "name": "read_bill",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 4151,
-                "cachedTokens": 4084,
-                "outputTokens": 954,
-                "costMicros": 501,
+                "cachedTokens": 1524,
+                "outputTokens": 2398,
+                "costMicros": 1468,
                 "reused": false
               },
               {
                 "name": "read_terms",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 0,
                 "cachedTokens": 0,
                 "outputTokens": 0,
@@ -3881,16 +5499,132 @@
           "stage": "reading_bill"
         },
         {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Parsing a bill to build a JSON schema, normalizing dates and amounts to cents while deciding on exact quote formatting for printed fields."
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "TV Select Package",
+            "amount_cents": 5999,
+            "kind": "plan",
+            "page": 1,
+            "box": {
+              "x0": 102,
+              "y0": 427,
+              "x1": 911,
+              "y1": 447
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "HD Receiver Rental",
+            "amount_cents": 999,
+            "kind": "equipment",
+            "page": 1,
+            "box": {
+              "x0": 105,
+              "y0": 476,
+              "x1": 911,
+              "y1": 496
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Broadcast TV Fee",
+            "amount_cents": 2150,
+            "kind": "company_fee",
+            "page": 1,
+            "box": {
+              "x0": 105,
+              "y0": 526,
+              "x1": 911,
+              "y1": 546
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "NV Franchise Fee",
+            "amount_cents": 455,
+            "kind": "government_tax",
+            "page": 1,
+            "box": {
+              "x0": 105,
+              "y0": 576,
+              "x1": 911,
+              "y1": 596
+            }
+          }
+        },
+        {
           "type": "spent",
-          "micros": 503
+          "micros": 1015
         },
         {
           "type": "stage",
           "stage": "reading_offer"
         },
         {
+          "type": "thinking",
+          "stage": "reading_offer",
+          "text": "Extracting concrete customer promises from the bill and formatting them as JSON per the provided schema."
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_offer",
+          "text": "\n\n"
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_offer",
+          "text": "Deriving applies_from and applies_until dates from the stated 24-month term and explicit end date."
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_offer",
+          "text": "\n\n"
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_offer",
+          "text": "Resolving the one-day end-date discrepancy between the explicit through date and the 24-month duration from the order date."
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_offer",
+          "text": "\n\n"
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_offer",
+          "text": "Evaluating whether to align the second end date with the first or compute it from the duration and order date."
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "monthly_price",
+            "description": "The TV Select Package is promised at $59.99 per month for 24 months.",
+            "amount_cents": 5999
+          }
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "included",
+            "description": "The HD Receiver rental fee is waived for 24 months.",
+            "amount_cents": null
+          }
+        },
+        {
           "type": "spent",
-          "micros": 938
+          "micros": 2577
         },
         {
           "type": "stage",
@@ -3924,7 +5658,7 @@
                 },
                 "total_due": {
                   "cents": 9603,
-                  "quote": "Total amount due $96.03"
+                  "quote": "$96.03"
                 }
               },
               "line_items": [
@@ -3934,10 +5668,10 @@
                   "kind": "plan",
                   "page": 1,
                   "box": {
-                    "x0": 99,
-                    "y0": 428,
-                    "x1": 916,
-                    "y1": 449
+                    "x0": 102,
+                    "y0": 427,
+                    "x1": 911,
+                    "y1": 447
                   },
                   "quote": "TV Select Package $59.99",
                   "prorated": false,
@@ -3949,9 +5683,9 @@
                   "kind": "equipment",
                   "page": 1,
                   "box": {
-                    "x0": 99,
-                    "y0": 475,
-                    "x1": 916,
+                    "x0": 105,
+                    "y0": 476,
+                    "x1": 911,
                     "y1": 496
                   },
                   "quote": "HD Receiver Rental $9.99",
@@ -3964,10 +5698,10 @@
                   "kind": "company_fee",
                   "page": 1,
                   "box": {
-                    "x0": 99,
-                    "y0": 523,
-                    "x1": 916,
-                    "y1": 543
+                    "x0": 105,
+                    "y0": 526,
+                    "x1": 911,
+                    "y1": 546
                   },
                   "quote": "Broadcast TV Fee $21.50",
                   "prorated": false,
@@ -3979,10 +5713,10 @@
                   "kind": "government_tax",
                   "page": 1,
                   "box": {
-                    "x0": 99,
-                    "y0": 569,
-                    "x1": 916,
-                    "y1": 590
+                    "x0": 105,
+                    "y0": 576,
+                    "x1": 911,
+                    "y1": 596
                   },
                   "quote": "NV Franchise Fee $4.55",
                   "prorated": false,
@@ -4003,7 +5737,7 @@
             "promises": [
               {
                 "kind": "monthly_price",
-                "description": "TV Select Package is promised at $59.99 per month for 24 months through 11/30/2027.",
+                "description": "The TV Select Package is promised at $59.99 per month for 24 months.",
                 "amount_cents": 5999,
                 "per_line": false,
                 "conditions": [],
@@ -4063,24 +5797,24 @@
             "providerMismatch": false,
             "billIsImage": false,
             "hadOffer": true,
-            "spentMicros": 938,
+            "spentMicros": 2577,
             "calls": [
               {
                 "name": "read_bill",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 4303,
-                "cachedTokens": 4212,
-                "outputTokens": 953,
-                "costMicros": 503,
+                "cachedTokens": 1524,
+                "outputTokens": 1461,
+                "costMicros": 1015,
                 "reused": false
               },
               {
                 "name": "read_terms",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 1028,
-                "cachedTokens": 1012,
-                "outputTokens": 858,
-                "costMicros": 435,
+                "cachedTokens": 756,
+                "outputTokens": 3062,
+                "costMicros": 1562,
                 "reused": false
               }
             ]
@@ -4097,12 +5831,113 @@
           "stage": "reading_bill"
         },
         {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Extracting bill fields into JSON per schema while handling unreadable outcome."
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "\n\n"
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Assigning amounts and kinds to line items with bounding boxes and quoted text."
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "\n\n"
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Resolving quote text and bounding box alignment for multi-line line items."
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "TV Select Package",
+            "amount_cents": 5999,
+            "kind": "plan",
+            "page": 1,
+            "box": {
+              "x0": 105,
+              "y0": 420,
+              "x1": 898,
+              "y1": 465
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "HD Receiver Rental",
+            "amount_cents": 999,
+            "kind": "equipment",
+            "page": 1,
+            "box": {
+              "x0": 105,
+              "y0": 465,
+              "x1": 898,
+              "y1": 515
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Broadcast TV Fee",
+            "amount_cents": 2150,
+            "kind": "company_fee",
+            "page": 1,
+            "box": {
+              "x0": 105,
+              "y0": 515,
+              "x1": 898,
+              "y1": 560
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "NV Franchise Fee",
+            "amount_cents": 455,
+            "kind": "government_tax",
+            "page": 1,
+            "box": {
+              "x0": 105,
+              "y0": 560,
+              "x1": 898,
+              "y1": 605
+            }
+          }
+        },
+        {
           "type": "spent",
-          "micros": 510
+          "micros": 1736
         },
         {
           "type": "stage",
           "stage": "reading_offer"
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "monthly_price",
+            "description": "The TV Select Package is promised at $59.99 per month for 24 months.",
+            "amount_cents": 5999
+          }
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "included",
+            "description": "The HD Receiver rental fee is waived for 24 months.",
+            "amount_cents": null
+          }
         },
         {
           "type": "stage",
@@ -4146,10 +5981,10 @@
                   "kind": "plan",
                   "page": 1,
                   "box": {
-                    "x0": 110,
-                    "y0": 440,
-                    "x1": 890,
-                    "y1": 460
+                    "x0": 105,
+                    "y0": 420,
+                    "x1": 898,
+                    "y1": 465
                   },
                   "quote": "TV Select Package $59.99",
                   "prorated": false,
@@ -4161,10 +5996,10 @@
                   "kind": "equipment",
                   "page": 1,
                   "box": {
-                    "x0": 110,
-                    "y0": 485,
-                    "x1": 890,
-                    "y1": 505
+                    "x0": 105,
+                    "y0": 465,
+                    "x1": 898,
+                    "y1": 515
                   },
                   "quote": "HD Receiver Rental $9.99",
                   "prorated": false,
@@ -4176,10 +6011,10 @@
                   "kind": "company_fee",
                   "page": 1,
                   "box": {
-                    "x0": 110,
-                    "y0": 537,
-                    "x1": 890,
-                    "y1": 556
+                    "x0": 105,
+                    "y0": 515,
+                    "x1": 898,
+                    "y1": 560
                   },
                   "quote": "Broadcast TV Fee $21.50",
                   "prorated": false,
@@ -4191,10 +6026,10 @@
                   "kind": "government_tax",
                   "page": 1,
                   "box": {
-                    "x0": 110,
-                    "y0": 581,
-                    "x1": 890,
-                    "y1": 599
+                    "x0": 105,
+                    "y0": 560,
+                    "x1": 898,
+                    "y1": 605
                   },
                   "quote": "NV Franchise Fee $4.55",
                   "prorated": false,
@@ -4215,7 +6050,7 @@
             "promises": [
               {
                 "kind": "monthly_price",
-                "description": "TV Select Package is promised at $59.99 per month for 24 months through 11/30/2027.",
+                "description": "The TV Select Package is promised at $59.99 per month for 24 months.",
                 "amount_cents": 5999,
                 "per_line": false,
                 "conditions": [],
@@ -4275,20 +6110,20 @@
             "providerMismatch": false,
             "billIsImage": true,
             "hadOffer": true,
-            "spentMicros": 510,
+            "spentMicros": 1736,
             "calls": [
               {
                 "name": "read_bill",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 4151,
-                "cachedTokens": 4084,
-                "outputTokens": 972,
-                "costMicros": 510,
+                "cachedTokens": 1524,
+                "outputTokens": 2934,
+                "costMicros": 1736,
                 "reused": false
               },
               {
                 "name": "read_terms",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 0,
                 "cachedTokens": 0,
                 "outputTokens": 0,
@@ -4309,16 +6144,84 @@
           "stage": "reading_bill"
         },
         {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Extracting bill fields to JSON and mapping amounts to positive integer cents per schema."
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "\n\n"
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Estimating bounding boxes on a 0-1000 grid for extracted line items."
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Fiber 300 Internet",
+            "amount_cents": 7000,
+            "kind": "plan",
+            "page": 1,
+            "box": {
+              "x0": 103,
+              "y0": 430,
+              "x1": 912,
+              "y1": 447
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "CA Communications Users Tax",
+            "amount_cents": 221,
+            "kind": "government_tax",
+            "page": 1,
+            "box": {
+              "x0": 103,
+              "y0": 478,
+              "x1": 912,
+              "y1": 493
+            }
+          }
+        },
+        {
           "type": "spent",
-          "micros": 355
+          "micros": 984
         },
         {
           "type": "stage",
           "stage": "reading_offer"
         },
         {
+          "type": "thinking",
+          "stage": "reading_offer",
+          "text": "Extracting a monthly price from text into JSON fields with amount in cents and conditions."
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_offer",
+          "text": "\n\n"
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_offer",
+          "text": "Resolving applies_from from the 12-month duration versus the explicit through date."
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "monthly_price",
+            "description": "Fiber 300 Internet is promised at $50 per month for 12 months through November 20, 2026.",
+            "amount_cents": 5000
+          }
+        },
+        {
           "type": "spent",
-          "micros": 843
+          "micros": 1861
         },
         {
           "type": "stage",
@@ -4352,7 +6255,7 @@
                 },
                 "total_due": {
                   "cents": 7221,
-                  "quote": "Total amount due $72.21"
+                  "quote": "Total amount due\n$72.21"
                 }
               },
               "line_items": [
@@ -4362,9 +6265,9 @@
                   "kind": "plan",
                   "page": 1,
                   "box": {
-                    "x0": 100,
-                    "y0": 427,
-                    "x1": 914,
+                    "x0": 103,
+                    "y0": 430,
+                    "x1": 912,
                     "y1": 447
                   },
                   "quote": "Fiber 300 Internet $70.00",
@@ -4377,10 +6280,10 @@
                   "kind": "government_tax",
                   "page": 1,
                   "box": {
-                    "x0": 100,
-                    "y0": 476,
-                    "x1": 914,
-                    "y1": 495
+                    "x0": 103,
+                    "y0": 478,
+                    "x1": 912,
+                    "y1": 493
                   },
                   "quote": "CA Communications Users Tax $2.21",
                   "prorated": false,
@@ -4405,7 +6308,7 @@
                 "amount_cents": 5000,
                 "per_line": false,
                 "conditions": [],
-                "applies_from": "2025-12-02",
+                "applies_from": null,
                 "applies_until": "2026-11-20",
                 "quote": "Fiber 300 Internet: $50/mo for 12 months (through 11/20/2026)",
                 "covers_line_ids": [
@@ -4433,24 +6336,24 @@
             "providerMismatch": false,
             "billIsImage": false,
             "hadOffer": true,
-            "spentMicros": 843,
+            "spentMicros": 1861,
             "calls": [
               {
                 "name": "read_bill",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 4283,
-                "cachedTokens": 4212,
-                "outputTokens": 661,
-                "costMicros": 355,
+                "cachedTokens": 1524,
+                "outputTokens": 1404,
+                "costMicros": 984,
                 "reused": false
               },
               {
                 "name": "read_terms",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 987,
                 "cachedTokens": 884,
-                "outputTokens": 947,
-                "costMicros": 488,
+                "outputTokens": 1726,
+                "costMicros": 877,
                 "reused": false
               }
             ]
@@ -4467,12 +6370,75 @@
           "stage": "reading_bill"
         },
         {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Extracting bill fields to JSON and handling exact text quoting for printed account summary values."
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "\n\n"
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Resolving the quote field definition by mapping printed line fragments to the JSON schema."
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "\n\n"
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Mapping inferred line-item amounts to labels and estimating merged bounding boxes for the quote."
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Fiber 300 Internet",
+            "amount_cents": 7000,
+            "kind": "plan",
+            "page": 1,
+            "box": {
+              "x0": 104,
+              "y0": 425,
+              "x1": 891,
+              "y1": 465
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "CA Communications Users Tax",
+            "amount_cents": 221,
+            "kind": "government_tax",
+            "page": 1,
+            "box": {
+              "x0": 104,
+              "y0": 472,
+              "x1": 891,
+              "y1": 505
+            }
+          }
+        },
+        {
           "type": "spent",
-          "micros": 498
+          "micros": 1608
         },
         {
           "type": "stage",
           "stage": "reading_offer"
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "monthly_price",
+            "description": "Fiber 300 Internet is promised at $50 per month for 12 months through November 20, 2026.",
+            "amount_cents": 5000
+          }
         },
         {
           "type": "stage",
@@ -4516,10 +6482,10 @@
                   "kind": "plan",
                   "page": 1,
                   "box": {
-                    "x0": 110,
-                    "y0": 435,
-                    "x1": 905,
-                    "y1": 460
+                    "x0": 104,
+                    "y0": 425,
+                    "x1": 891,
+                    "y1": 465
                   },
                   "quote": "Fiber 300 Internet $70.00",
                   "prorated": false,
@@ -4531,9 +6497,9 @@
                   "kind": "government_tax",
                   "page": 1,
                   "box": {
-                    "x0": 110,
-                    "y0": 480,
-                    "x1": 905,
+                    "x0": 104,
+                    "y0": 472,
+                    "x1": 891,
                     "y1": 505
                   },
                   "quote": "CA Communications Users Tax $2.21",
@@ -4559,7 +6525,7 @@
                 "amount_cents": 5000,
                 "per_line": false,
                 "conditions": [],
-                "applies_from": "2025-12-02",
+                "applies_from": null,
                 "applies_until": "2026-11-20",
                 "quote": "Fiber 300 Internet: $50/mo for 12 months (through 11/20/2026)",
                 "covers_line_ids": [
@@ -4587,20 +6553,20 @@
             "providerMismatch": false,
             "billIsImage": true,
             "hadOffer": true,
-            "spentMicros": 498,
+            "spentMicros": 1608,
             "calls": [
               {
                 "name": "read_bill",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 4151,
-                "cachedTokens": 4084,
-                "outputTokens": 949,
-                "costMicros": 498,
+                "cachedTokens": 1524,
+                "outputTokens": 2678,
+                "costMicros": 1608,
                 "reused": false
               },
               {
                 "name": "read_terms",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 0,
                 "cachedTokens": 0,
                 "outputTokens": 0,
@@ -4621,16 +6587,340 @@
           "stage": "reading_bill"
         },
         {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Extracting fields from the statement text and mapping them to the JSON schema with exact quoted substrings and cent conversions."
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Basic Service Charge",
+            "amount_cents": 1200,
+            "kind": "plan",
+            "page": 1,
+            "box": {
+              "x0": 102,
+              "y0": 430,
+              "x1": 912,
+              "y1": 447
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Electric Usage (412 kWh @ $0.2210)",
+            "amount_cents": 9105,
+            "kind": "usage",
+            "page": 1,
+            "box": {
+              "x0": 102,
+              "y0": 450,
+              "x1": 912,
+              "y1": 467
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Utility Users Tax (7.5%)",
+            "amount_cents": 773,
+            "kind": "government_tax",
+            "page": 1,
+            "box": {
+              "x0": 102,
+              "y0": 497,
+              "x1": 912,
+              "y1": 514
+            }
+          }
+        },
+        {
           "type": "spent",
-          "micros": 475
+          "micros": 1060
         },
         {
           "type": "stage",
           "stage": "reading_offer"
         },
         {
+          "type": "thinking",
+          "stage": "reading_offer",
+          "text": "Analyzing a billing document to classify and extract concrete promises on price, included items, and recurring credits."
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_offer",
+          "text": "\n\n"
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_offer",
+          "text": "Resolving a unit mismatch for a per-kWh rate against an integer-cent schema and choosing the appropriate promise kind."
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_offer",
+          "text": "\n\n"
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_offer",
+          "text": "Resolving the integer-cent constraint by classifying the per-kWh rate as other with a null amount."
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "other",
+            "description": "Your energy rate is $0.199 per kWh, fixed for 12 months starting 2026-06-01.",
+            "amount_cents": null
+          }
+        },
+        {
           "type": "spent",
-          "micros": 1414
+          "micros": 2377
+        },
+        {
+          "type": "stage",
+          "stage": "comparing"
+        },
+        {
+          "type": "result",
+          "result": {
+            "outcome": "checked",
+            "reading": {
+              "outcome": "bill",
+              "unreadable_reason": null,
+              "provider": "Pacific Valley Power",
+              "account_last4": "1133",
+              "statement_date": "2026-11-06",
+              "period_start": "2026-11-08",
+              "period_end": "2026-12-07",
+              "due_date": "2026-11-27",
+              "printed": {
+                "previous_balance": {
+                  "cents": 7603,
+                  "quote": "Previous balance $76.03"
+                },
+                "payments": {
+                  "cents": 7603,
+                  "quote": "Payment received - thank you -$76.03"
+                },
+                "current_charges": {
+                  "cents": 11078,
+                  "quote": "Current charges $110.78"
+                },
+                "total_due": {
+                  "cents": 11078,
+                  "quote": "$110.78"
+                }
+              },
+              "line_items": [
+                {
+                  "label": "Basic Service Charge",
+                  "amount_cents": 1200,
+                  "kind": "plan",
+                  "page": 1,
+                  "box": {
+                    "x0": 102,
+                    "y0": 430,
+                    "x1": 912,
+                    "y1": 447
+                  },
+                  "quote": "Basic Service Charge $12.00",
+                  "prorated": false,
+                  "id": "L1"
+                },
+                {
+                  "label": "Electric Usage (412 kWh @ $0.2210)",
+                  "amount_cents": 9105,
+                  "kind": "usage",
+                  "page": 1,
+                  "box": {
+                    "x0": 102,
+                    "y0": 450,
+                    "x1": 912,
+                    "y1": 467
+                  },
+                  "quote": "Electric Usage (412 kWh @ $0.2210) $91.05",
+                  "prorated": false,
+                  "id": "L2"
+                },
+                {
+                  "label": "Utility Users Tax (7.5%)",
+                  "amount_cents": 773,
+                  "kind": "government_tax",
+                  "page": 1,
+                  "box": {
+                    "x0": 102,
+                    "y0": 497,
+                    "x1": 912,
+                    "y1": 514
+                  },
+                  "quote": "Utility Users Tax (7.5%) $7.73",
+                  "prorated": false,
+                  "id": "L3"
+                }
+              ],
+              "autopay": {
+                "enrolled": null,
+                "quote": null
+              }
+            },
+            "totals": {
+              "lineSum": "ok",
+              "balance": "ok",
+              "lineSumCents": 11078
+            },
+            "offerProvider": "Pacific Valley Power",
+            "promises": [
+              {
+                "kind": "other",
+                "description": "Your energy rate is $0.199 per kWh, fixed for 12 months starting 2026-06-01.",
+                "amount_cents": null,
+                "per_line": true,
+                "conditions": [],
+                "applies_from": "2026-06-01",
+                "applies_until": "2027-05-31",
+                "quote": "Your energy rate: $0.199 per kWh, fixed for 12 months starting 2026-06-01.",
+                "covers_line_ids": [
+                  "L2"
+                ],
+                "id": "P1"
+              }
+            ],
+            "claims": [],
+            "questions": [],
+            "explained": [],
+            "unused": [
+              {
+                "promiseId": "P1",
+                "reason": "kind_not_checked"
+              }
+            ],
+            "matchedPromiseIds": [],
+            "providerMismatch": false,
+            "billIsImage": false,
+            "hadOffer": true,
+            "spentMicros": 2377,
+            "calls": [
+              {
+                "name": "read_bill",
+                "effort": "high",
+                "inputTokens": 4303,
+                "cachedTokens": 1524,
+                "outputTokens": 1552,
+                "costMicros": 1060,
+                "reused": false
+              },
+              {
+                "name": "read_terms",
+                "effort": "high",
+                "inputTokens": 993,
+                "cachedTokens": 756,
+                "outputTokens": 2580,
+                "costMicros": 1317,
+                "reused": false
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "electric-fixed-rate",
+      "variant": "photo",
+      "events": [
+        {
+          "type": "stage",
+          "stage": "reading_bill"
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Parsing bill fields and normalizing dates while handling ambiguous printed text extraction for JSON output."
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "\n\n"
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Resolving amount sign and unit conventions and mapping printed line items to schema categories."
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "\n\n"
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Estimating bounding boxes for each line item from the rotated image layout."
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Basic Service Charge",
+            "amount_cents": 1200,
+            "kind": "plan",
+            "page": 1,
+            "box": {
+              "x0": 118,
+              "y0": 430,
+              "x1": 889,
+              "y1": 457
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Electric Usage (412 kWh @ $0.2210)",
+            "amount_cents": 9105,
+            "kind": "usage",
+            "page": 1,
+            "box": {
+              "x0": 120,
+              "y0": 450,
+              "x1": 889,
+              "y1": 476
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Utility Users Tax (7.5%)",
+            "amount_cents": 773,
+            "kind": "government_tax",
+            "page": 1,
+            "box": {
+              "x0": 120,
+              "y0": 500,
+              "x1": 889,
+              "y1": 526
+            }
+          }
+        },
+        {
+          "type": "spent",
+          "micros": 1394
+        },
+        {
+          "type": "stage",
+          "stage": "reading_offer"
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "other",
+            "description": "Your energy rate is $0.199 per kWh, fixed for 12 months starting 2026-06-01.",
+            "amount_cents": null
+          }
         },
         {
           "type": "stage",
@@ -4674,10 +6964,10 @@
                   "kind": "plan",
                   "page": 1,
                   "box": {
-                    "x0": 103,
-                    "y0": 431,
-                    "x1": 911,
-                    "y1": 446
+                    "x0": 118,
+                    "y0": 430,
+                    "x1": 889,
+                    "y1": 457
                   },
                   "quote": "Basic Service Charge $12.00",
                   "prorated": false,
@@ -4689,10 +6979,10 @@
                   "kind": "usage",
                   "page": 1,
                   "box": {
-                    "x0": 103,
-                    "y0": 449,
-                    "x1": 911,
-                    "y1": 466
+                    "x0": 120,
+                    "y0": 450,
+                    "x1": 889,
+                    "y1": 476
                   },
                   "quote": "Electric Usage (412 kWh @ $0.2210) $91.05",
                   "prorated": false,
@@ -4704,10 +6994,10 @@
                   "kind": "government_tax",
                   "page": 1,
                   "box": {
-                    "x0": 103,
-                    "y0": 495,
-                    "x1": 911,
-                    "y1": 513
+                    "x0": 120,
+                    "y0": 500,
+                    "x1": 889,
+                    "y1": 526
                   },
                   "quote": "Utility Users Tax (7.5%) $7.73",
                   "prorated": false,
@@ -4728,7 +7018,7 @@
             "promises": [
               {
                 "kind": "other",
-                "description": "Pacific Valley Power promised a fixed energy rate of $0.199 per kWh for 12 months starting 2026-06-01.",
+                "description": "Your energy rate is $0.199 per kWh, fixed for 12 months starting 2026-06-01.",
                 "amount_cents": null,
                 "per_line": true,
                 "conditions": [],
@@ -4752,203 +7042,27 @@
             ],
             "matchedPromiseIds": [],
             "providerMismatch": false,
-            "billIsImage": false,
-            "hadOffer": true,
-            "spentMicros": 1414,
-            "calls": [
-              {
-                "name": "read_bill",
-                "effort": "low",
-                "inputTokens": 4303,
-                "cachedTokens": 4212,
-                "outputTokens": 897,
-                "costMicros": 475,
-                "reused": false
-              },
-              {
-                "name": "read_terms",
-                "effort": "low",
-                "inputTokens": 993,
-                "cachedTokens": 884,
-                "outputTokens": 1848,
-                "costMicros": 939,
-                "reused": false
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "electric-fixed-rate",
-      "variant": "photo",
-      "events": [
-        {
-          "type": "stage",
-          "stage": "reading_bill"
-        },
-        {
-          "type": "spent",
-          "micros": 621
-        },
-        {
-          "type": "stage",
-          "stage": "reading_offer"
-        },
-        {
-          "type": "spent",
-          "micros": 1039
-        },
-        {
-          "type": "stage",
-          "stage": "comparing"
-        },
-        {
-          "type": "result",
-          "result": {
-            "outcome": "checked",
-            "reading": {
-              "outcome": "bill",
-              "unreadable_reason": null,
-              "provider": "Pacific Valley Power",
-              "account_last4": "1133",
-              "statement_date": "2026-11-06",
-              "period_start": "2026-11-08",
-              "period_end": "2026-12-07",
-              "due_date": "2026-11-27",
-              "printed": {
-                "previous_balance": {
-                  "cents": 7603,
-                  "quote": "Previous balance $76.03"
-                },
-                "payments": {
-                  "cents": 7603,
-                  "quote": "Payment received - thank you -$76.03"
-                },
-                "current_charges": {
-                  "cents": 11078,
-                  "quote": "Current charges $110.78"
-                },
-                "total_due": {
-                  "cents": 11078,
-                  "quote": "Total amount due $110.78"
-                }
-              },
-              "line_items": [
-                {
-                  "label": "Basic Service Charge",
-                  "amount_cents": 1200,
-                  "kind": "company_fee",
-                  "page": 1,
-                  "box": {
-                    "x0": 118,
-                    "y0": 440,
-                    "x1": 892,
-                    "y1": 459
-                  },
-                  "quote": "Basic Service Charge $12.00",
-                  "prorated": false,
-                  "id": "L1"
-                },
-                {
-                  "label": "Electric Usage (412 kWh @ $0.2210)",
-                  "amount_cents": 9105,
-                  "kind": "usage",
-                  "page": 1,
-                  "box": {
-                    "x0": 118,
-                    "y0": 460,
-                    "x1": 892,
-                    "y1": 480
-                  },
-                  "quote": "Electric Usage (412 kWh @ $0.2210) $91.05",
-                  "prorated": false,
-                  "id": "L2"
-                },
-                {
-                  "label": "Utility Users Tax (7.5%)",
-                  "amount_cents": 773,
-                  "kind": "government_tax",
-                  "page": 1,
-                  "box": {
-                    "x0": 120,
-                    "y0": 508,
-                    "x1": 892,
-                    "y1": 528
-                  },
-                  "quote": "Utility Users Tax (7.5%) $7.73",
-                  "prorated": false,
-                  "id": "L3"
-                }
-              ],
-              "autopay": {
-                "enrolled": null,
-                "quote": null
-              }
-            },
-            "totals": {
-              "lineSum": "ok",
-              "balance": "ok",
-              "lineSumCents": 11078
-            },
-            "offerProvider": "Pacific Valley Power",
-            "promises": [
-              {
-                "kind": "other",
-                "description": "The energy rate is $0.199 per kWh, fixed for 12 months starting 2026-06-01.",
-                "amount_cents": null,
-                "per_line": false,
-                "conditions": [],
-                "applies_from": "2026-06-01",
-                "applies_until": "2027-05-31",
-                "quote": "Your energy rate: $0.199 per kWh, fixed for 12 months starting 2026-06-01.",
-                "covers_line_ids": [
-                  "L2"
-                ],
-                "id": "P1"
-              }
-            ],
-            "claims": [],
-            "questions": [
-              {
-                "kind": "unagreed_fee",
-                "lineIds": [
-                  "L1"
-                ],
-                "promiseId": null,
-                "id": "Q1"
-              }
-            ],
-            "explained": [],
-            "unused": [
-              {
-                "promiseId": "P1",
-                "reason": "kind_not_checked"
-              }
-            ],
-            "matchedPromiseIds": [],
-            "providerMismatch": false,
             "billIsImage": true,
             "hadOffer": true,
-            "spentMicros": 1039,
+            "spentMicros": 1394,
             "calls": [
               {
                 "name": "read_bill",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 4151,
-                "cachedTokens": 4084,
-                "outputTokens": 1195,
-                "costMicros": 621,
+                "cachedTokens": 1524,
+                "outputTokens": 2249,
+                "costMicros": 1394,
                 "reused": false
               },
               {
                 "name": "read_terms",
-                "effort": "low",
-                "inputTokens": 994,
-                "cachedTokens": 884,
-                "outputTokens": 806,
-                "costMicros": 418,
-                "reused": false
+                "effort": "high",
+                "inputTokens": 0,
+                "cachedTokens": 0,
+                "outputTokens": 0,
+                "costMicros": 0,
+                "reused": true
               }
             ]
           }
@@ -4964,16 +7078,84 @@
           "stage": "reading_bill"
         },
         {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Extracting bill fields from document text and quoting exact strings for JSON output under schema constraints."
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Fiber 500 Internet",
+            "amount_cents": 7500,
+            "kind": "plan",
+            "page": 1,
+            "box": {
+              "x0": 100,
+              "y0": 429,
+              "x1": 914,
+              "y1": 447
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "CA Communications Users Tax",
+            "amount_cents": 251,
+            "kind": "government_tax",
+            "page": 1,
+            "box": {
+              "x0": 103,
+              "y0": 477,
+              "x1": 913,
+              "y1": 493
+            }
+          }
+        },
+        {
           "type": "spent",
-          "micros": 388
+          "micros": 913
         },
         {
           "type": "stage",
           "stage": "reading_offer"
         },
         {
+          "type": "thinking",
+          "stage": "reading_offer",
+          "text": "Extracting concrete pricing promises and mapping bill lines while excluding taxes."
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_offer",
+          "text": "\n\n"
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_offer",
+          "text": "Resolving an ambiguous end date for the price guarantee into a concrete YYYY-MM-DD value."
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_offer",
+          "text": "\n\n"
+        },
+        {
+          "type": "thinking",
+          "stage": "reading_offer",
+          "text": "Resolving the missing start date and converting the year-only end date to a full YYYY-MM-DD value."
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "monthly_price",
+            "description": "Internet 500 is promised for $45 per month guaranteed through 2028.",
+            "amount_cents": 4500
+          }
+        },
+        {
           "type": "spent",
-          "micros": 621
+          "micros": 2069
         },
         {
           "type": "stage",
@@ -5007,7 +7189,7 @@
                 },
                 "total_due": {
                   "cents": 7751,
-                  "quote": "Total amount due\n$77.51"
+                  "quote": "$77.51"
                 }
               },
               "line_items": [
@@ -5018,8 +7200,8 @@
                   "page": 1,
                   "box": {
                     "x0": 100,
-                    "y0": 427,
-                    "x1": 912,
+                    "y0": 429,
+                    "x1": 914,
                     "y1": 447
                   },
                   "quote": "Fiber 500 Internet $75.00",
@@ -5032,10 +7214,10 @@
                   "kind": "government_tax",
                   "page": 1,
                   "box": {
-                    "x0": 100,
+                    "x0": 103,
                     "y0": 477,
-                    "x1": 912,
-                    "y1": 497
+                    "x1": 913,
+                    "y1": 493
                   },
                   "quote": "CA Communications Users Tax $2.51",
                   "prorated": false,
@@ -5056,7 +7238,7 @@
             "promises": [
               {
                 "kind": "monthly_price",
-                "description": "Internet 500 is promised for $45 per month through the end of 2028.",
+                "description": "Internet 500 is promised for $45 per month guaranteed through 2028.",
                 "amount_cents": 4500,
                 "per_line": false,
                 "conditions": [],
@@ -5088,24 +7270,24 @@
             "providerMismatch": true,
             "billIsImage": false,
             "hadOffer": true,
-            "spentMicros": 621,
+            "spentMicros": 2069,
             "calls": [
               {
                 "name": "read_bill",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 4283,
-                "cachedTokens": 4212,
-                "outputTokens": 728,
-                "costMicros": 388,
+                "cachedTokens": 1524,
+                "outputTokens": 1261,
+                "costMicros": 913,
                 "reused": false
               },
               {
                 "name": "read_terms",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 983,
                 "cachedTokens": 884,
-                "outputTokens": 438,
-                "costMicros": 233,
+                "outputTokens": 2284,
+                "costMicros": 1156,
                 "reused": false
               }
             ]
@@ -5122,12 +7304,55 @@
           "stage": "reading_bill"
         },
         {
+          "type": "thinking",
+          "stage": "reading_bill",
+          "text": "Extracting bill fields and checking the exact quoted text requirement for previous balance."
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "Fiber 500 Internet",
+            "amount_cents": 7500,
+            "kind": "plan",
+            "page": 1,
+            "box": {
+              "x0": 110,
+              "y0": 440,
+              "x1": 895,
+              "y1": 460
+            }
+          }
+        },
+        {
+          "type": "line",
+          "line": {
+            "label": "CA Communications Users Tax",
+            "amount_cents": 251,
+            "kind": "government_tax",
+            "page": 1,
+            "box": {
+              "x0": 110,
+              "y0": 485,
+              "x1": 895,
+              "y1": 505
+            }
+          }
+        },
+        {
           "type": "spent",
-          "micros": 390
+          "micros": 795
         },
         {
           "type": "stage",
           "stage": "reading_offer"
+        },
+        {
+          "type": "promise",
+          "promise": {
+            "kind": "monthly_price",
+            "description": "Internet 500 is promised for $45 per month guaranteed through 2028.",
+            "amount_cents": 4500
+          }
         },
         {
           "type": "stage",
@@ -5171,9 +7396,9 @@
                   "kind": "plan",
                   "page": 1,
                   "box": {
-                    "x0": 115,
+                    "x0": 110,
                     "y0": 440,
-                    "x1": 890,
+                    "x1": 895,
                     "y1": 460
                   },
                   "quote": "Fiber 500 Internet $75.00",
@@ -5186,10 +7411,10 @@
                   "kind": "government_tax",
                   "page": 1,
                   "box": {
-                    "x0": 115,
-                    "y0": 490,
-                    "x1": 890,
-                    "y1": 510
+                    "x0": 110,
+                    "y0": 485,
+                    "x1": 895,
+                    "y1": 505
                   },
                   "quote": "CA Communications Users Tax $2.51",
                   "prorated": false,
@@ -5210,7 +7435,7 @@
             "promises": [
               {
                 "kind": "monthly_price",
-                "description": "Internet 500 is promised for $45 per month through the end of 2028.",
+                "description": "Internet 500 is promised for $45 per month guaranteed through 2028.",
                 "amount_cents": 4500,
                 "per_line": false,
                 "conditions": [],
@@ -5242,20 +7467,20 @@
             "providerMismatch": true,
             "billIsImage": true,
             "hadOffer": true,
-            "spentMicros": 390,
+            "spentMicros": 795,
             "calls": [
               {
                 "name": "read_bill",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 4151,
-                "cachedTokens": 4084,
-                "outputTokens": 733,
-                "costMicros": 390,
+                "cachedTokens": 1524,
+                "outputTokens": 1052,
+                "costMicros": 795,
                 "reused": false
               },
               {
                 "name": "read_terms",
-                "effort": "low",
+                "effort": "high",
                 "inputTokens": 0,
                 "cachedTokens": 0,
                 "outputTokens": 0,

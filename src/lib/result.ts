@@ -25,6 +25,10 @@ export const MAX_UPLOAD_BYTES = 12_000_000;
 
 export type Stage = "reading_bill" | "rereading_bill" | "reading_offer" | "comparing";
 
+// What the person sees while a check runs: Muse Ember's reasoning summary and each item as soon as it is read.
+export type SeenLine = { label: string; amount_cents: number; kind: string; page: number; box: { x0: number; y0: number; x1: number; y1: number } | null };
+export type SeenPromise = { kind: string; description: string; amount_cents: number | null };
+
 export type CallRecord = {
   name: string;
   effort: string;
@@ -71,5 +75,8 @@ export type CheckResult =
 export type CheckEvent =
   | { type: "stage"; stage: Stage }
   | { type: "spent"; micros: number }
+  | { type: "thinking"; stage: Stage; text: string }
+  | { type: "line"; line: SeenLine }
+  | { type: "promise"; promise: SeenPromise }
   | { type: "result"; result: CheckResult }
   | { type: "error"; failure: CheckFailure; message: string; spentMicros: number; retryable: boolean };

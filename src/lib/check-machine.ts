@@ -1,4 +1,4 @@
-import type { CheckFailure, CheckInput, CheckResult, PreparedPage, Stage } from "./result";
+import type { CheckFailure, CheckInput, CheckResult, PreparedPage, SeenLine, SeenPromise, Stage } from "./result";
 
 export type Doc =
   | { id: string; name: string; status: "preparing" }
@@ -10,10 +10,13 @@ export type Inputs = { bill: Doc | null; offerFile: Doc | null; offerText: strin
 export type ClaimMark = "selected" | "unselected" | "needs_confirmation";
 export type Selection = { claims: Record<string, ClaimMark>; questions: Record<string, boolean> };
 
+export type Thought = { stage: Stage; text: string };
+export type Live = { thoughts: Thought[]; lines: SeenLine[]; promises: SeenPromise[] };
+
 export type CheckState =
   | { s: "composing"; inputs: Inputs; attempts: number }
-  | { s: "running"; inputs: Inputs; attempts: number; attempt: number; stage: Stage | null; spentMicros: number }
-  | { s: "done"; inputs: Inputs; attempts: number; result: CheckResult; selection: Selection }
+  | { s: "running"; inputs: Inputs; attempts: number; attempt: number; stage: Stage | null; spentMicros: number; live: Live }
+  | { s: "done"; inputs: Inputs; attempts: number; result: CheckResult; selection: Selection; thoughts: Thought[] }
   | { s: "failed"; inputs: Inputs; attempts: number; stage: Stage | null; failure: CheckFailure; message: string; spentMicros: number; retryable: boolean }
   | { s: "cancelled"; inputs: Inputs; attempts: number; stage: Stage | null; spentMicros: number };
 
@@ -28,6 +31,9 @@ export type CheckAction =
   | { type: "sample_ready"; bill: Extract<Doc, { status: "ready" }>; offerText: string }
   | { type: "stage"; attempt: number; stage: Stage }
   | { type: "spent"; attempt: number; micros: number }
+  | { type: "thought"; attempt: number; stage: Stage; text: string }
+  | { type: "line_read"; attempt: number; line: SeenLine }
+  | { type: "promise_read"; attempt: number; promise: SeenPromise }
   | { type: "finished"; attempt: number; result: CheckResult }
   | { type: "errored"; attempt: number; failure: CheckFailure; message: string; spentMicros: number; retryable: boolean }
   | { type: "cancel" }
@@ -66,7 +72,7 @@ export function checkInput(inputs: Inputs): CheckInput | null {
 
 function run(state: CheckState): CheckState {
   const attempt = state.attempts + 1;
-  return { s: "running", inputs: state.inputs, attempts: attempt, attempt, stage: null, spentMicros: 0 };
+  return { s: "running", inputs: state.inputs, attempts: attempt, attempt, stage: null, spentMicros: 0, live: { thoughts: [], lines: [], promises: [] } };
 }
 
 export function reduce(state: CheckState, action: CheckAction): CheckState {
@@ -100,11 +106,21 @@ export function reduce(state: CheckState, action: CheckAction): CheckState {
       if ("attempt" in action && action.attempt !== state.attempt) return state;
       switch (action.type) {
         case "stage":
-          return { ...state, stage: action.stage };
+          // A second reading of the bill replaces the first one's lines.
+          return { ...state, stage: action.stage, live: action.stage === "rereading_bill" ? { ...state.live, lines: [] } : state.live };
         case "spent":
           return { ...state, spentMicros: action.micros };
+        case "thought": {
+          const last = state.live.thoughts.at(-1);
+          const thoughts = last?.stage === action.stage ? [...state.live.thoughts.slice(0, -1), { stage: last.stage, text: last.text + action.text }] : [...state.live.thoughts, { stage: action.stage, text: action.text }];
+          return { ...state, live: { ...state.live, thoughts } };
+        }
+        case "line_read":
+          return { ...state, live: { ...state.live, lines: [...state.live.lines, action.line] } };
+        case "promise_read":
+          return { ...state, live: { ...state.live, promises: [...state.live.promises, action.promise] } };
         case "finished":
-          return { s: "done", inputs: state.inputs, attempts: state.attempts, result: action.result, selection: initialSelection(action.result) };
+          return { s: "done", inputs: state.inputs, attempts: state.attempts, result: action.result, selection: initialSelection(action.result), thoughts: state.live.thoughts };
         case "errored":
           return { s: "failed", inputs: state.inputs, attempts: state.attempts, stage: state.stage, failure: action.failure, message: action.message, spentMicros: action.spentMicros, retryable: action.retryable };
         case "cancel":

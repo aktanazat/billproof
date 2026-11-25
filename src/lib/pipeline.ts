@@ -5,7 +5,7 @@ import { checkTotals, decide, type Source } from "./decide";
 import { buildRequest, countInputTokens, EmberError, send, type EmberCall, type Part } from "./ember";
 import { usd } from "./letter";
 import { LedgerRefusal, type Ledger } from "./ledger";
-import type { CallRecord, CheckEvent, CheckFailure, CheckInput, CheckResult, PreparedPage } from "./result";
+import type { CallRecord, CheckEvent, CheckFailure, CheckInput, CheckResult, PreparedPage, Stage } from "./result";
 import { billReadingSchema, termsSchema, type BillReading, type PromiseTerm, type Reading } from "./schemas";
 
 const READ_BILL_INSTRUCTIONS = `You read one household service bill (internet, phone, TV, electric, gas, water or similar) and return its contents as JSON.
@@ -89,14 +89,16 @@ function withIds(reading: BillReading): Reading {
   return { ...reading, line_items: reading.line_items.map((line, i) => ({ ...line, id: `L${i + 1}` })) };
 }
 
-function readBillCall(pages: PreparedPage[], effort: "low" | "high"): EmberCall<BillReading> {
+// First pass at high effort, which is also what gives a readable reasoning summary; a second pass, only when the
+// lines don't add up, at xhigh.
+function readBillCall(pages: PreparedPage[], pass: "first" | "second"): EmberCall<BillReading> {
   return {
-    name: effort === "low" ? "read_bill" : "reread_bill",
+    name: pass === "first" ? "read_bill" : "reread_bill",
     instructions: READ_BILL_INSTRUCTIONS,
     parts: pageParts(pages, "Bill"),
     schema: billReadingSchema,
-    effort,
-    maxOutputTokens: effort === "low" ? OUTPUT_TOKENS.read_bill : OUTPUT_TOKENS.reread_bill,
+    effort: pass === "first" ? "high" : "xhigh",
+    maxOutputTokens: pass === "first" ? OUTPUT_TOKENS.read_bill : OUTPUT_TOKENS.reread_bill,
   };
 }
 
@@ -113,12 +115,62 @@ function readTermsCall(offer: NonNullable<CheckInput["offer"]>, reading: Reading
     instructions: READ_TERMS_INSTRUCTIONS,
     parts: [context, ...offerParts],
     schema: termsSchema,
-    effort: "low",
+    effort: "high",
     maxOutputTokens: OUTPUT_TOKENS.read_terms,
   } satisfies EmberCall<unknown>;
 }
 
-async function paid<T>(call: EmberCall<T>, checkId: string, deps: CheckDeps, calls: CallRecord[]): Promise<T> {
+// Complete objects so far inside `"key": [ ... ]` of a JSON document still being written.
+export function completedObjects(text: string, key: string): unknown[] {
+  const keyAt = text.indexOf(`"${key}"`);
+  if (keyAt < 0) return [];
+  const open = text.indexOf("[", keyAt);
+  if (open < 0) return [];
+  const found: unknown[] = [];
+  let depth = 0;
+  let start = -1;
+  let inString = false;
+  let escaped = false;
+  for (let i = open + 1; i < text.length; i++) {
+    const c = text[i];
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (c === "\\") escaped = true;
+      else if (c === '"') inString = false;
+    } else if (c === '"') inString = true;
+    else if (c === "{") {
+      if (depth === 0) start = i;
+      depth += 1;
+    } else if (c === "}") {
+      depth -= 1;
+      if (depth === 0) {
+        try {
+          found.push(JSON.parse(text.slice(start, i + 1)));
+        } catch {
+          return found;
+        }
+      }
+    } else if (c === "]" && depth === 0) break;
+  }
+  return found;
+}
+
+type Live = { stage: Stage; items: "line_items" | "promises" };
+
+const lineShape = billReadingSchema.shape.line_items.element;
+const promiseShape = termsSchema.shape.promises.element;
+
+function emitItem(live: Live, item: unknown, deps: CheckDeps) {
+  if (live.items === "line_items") {
+    const line = lineShape.safeParse(item);
+    if (line.success) deps.emit({ type: "line", line: { label: line.data.label, amount_cents: line.data.amount_cents, kind: line.data.kind, page: line.data.page, box: line.data.box } });
+  } else {
+    const promise = promiseShape.safeParse(item);
+    if (promise.success) deps.emit({ type: "promise", promise: { kind: promise.data.kind, description: promise.data.description, amount_cents: promise.data.amount_cents } });
+  }
+}
+
+async function paid<T>(call: EmberCall<T>, checkId: string, deps: CheckDeps, calls: CallRecord[], live: Live): Promise<T> {
   const request = buildRequest(call);
   const key = createHash("sha256").update(JSON.stringify(request.body)).digest("hex");
   const hit = outputCache.get(key);
@@ -126,6 +178,7 @@ async function paid<T>(call: EmberCall<T>, checkId: string, deps: CheckDeps, cal
     const parsed = call.schema.safeParse(hit.output);
     if (parsed.success) {
       calls.push({ name: call.name, effort: call.effort, inputTokens: 0, cachedTokens: 0, outputTokens: 0, costMicros: 0, reused: true });
+      for (const item of completedObjects(JSON.stringify(hit.output), live.items)) emitItem(live, item, deps);
       return parsed.data;
     }
   }
@@ -133,8 +186,19 @@ async function paid<T>(call: EmberCall<T>, checkId: string, deps: CheckDeps, cal
   const inputTokens = await countInputTokens(request, deps.signal);
   if (inputTokens > LONG_CONTEXT_THRESHOLD) throw new CheckStop("bad_input", "These files are too large to read in one check", false);
   const attempt = deps.ledger.reserve(checkId, ceilingMicros(inputTokens, call.maxOutputTokens));
+  let written = "";
+  let shown = 0;
   try {
-    const result = await send(request, deps.signal);
+    const result = await send(request, deps.signal, (delta) => {
+      if (delta.kind === "thinking") {
+        deps.emit({ type: "thinking", stage: live.stage, text: delta.text });
+        return;
+      }
+      written += delta.text;
+      const items = completedObjects(written, live.items);
+      for (const item of items.slice(shown)) emitItem(live, item, deps);
+      shown = items.length;
+    });
     deps.ledger.settle(attempt, result.costMicros);
     if (outputCache.size >= CACHE_MAX) outputCache.delete(outputCache.keys().next().value ?? "");
     outputCache.set(key, { output: result.output, at: Date.now() });
@@ -155,7 +219,7 @@ async function check(input: CheckInput, checkId: string, deps: CheckDeps): Promi
   const bill = sourceOf(input.bill.pages);
 
   deps.emit({ type: "stage", stage: "reading_bill" });
-  let raw = await paid(readBillCall(input.bill.pages, "low"), checkId, deps, calls);
+  let raw = await paid(readBillCall(input.bill.pages, "first"), checkId, deps, calls, { stage: "reading_bill", items: "line_items" });
   if (raw.outcome === "not_a_bill") return { outcome: "not_a_bill", spentMicros: spent() };
   if (raw.outcome === "unreadable") {
     return { outcome: "could_not_check", reason: raw.unreadable_reason ?? "The amounts on this bill could not be read.", spentMicros: spent() };
@@ -165,7 +229,7 @@ async function check(input: CheckInput, checkId: string, deps: CheckDeps): Promi
 
   if (totals.lineSum === "mismatch") {
     deps.emit({ type: "stage", stage: "rereading_bill" });
-    const second = await paid(readBillCall(input.bill.pages, "high"), checkId, deps, calls);
+    const second = await paid(readBillCall(input.bill.pages, "second"), checkId, deps, calls, { stage: "rereading_bill", items: "line_items" });
     const secondReading = withIds(second);
     const secondTotals = checkTotals(secondReading, bill);
     if (second.outcome !== "bill" || (secondTotals.lineSum === "mismatch" && !sameAmounts(raw, second))) {
@@ -181,7 +245,7 @@ async function check(input: CheckInput, checkId: string, deps: CheckDeps): Promi
   let proof: Source = { kind: "image" };
   if (input.offer) {
     deps.emit({ type: "stage", stage: "reading_offer" });
-    const terms = await paid(readTermsCall(input.offer, reading), checkId, deps, calls);
+    const terms = await paid(readTermsCall(input.offer, reading), checkId, deps, calls, { stage: "reading_offer", items: "promises" });
     promises = terms.promises.map((promise, i) => ({ ...promise, id: `P${i + 1}` }));
     offerProvider = terms.provider;
     proof = input.offer.kind === "text" ? { kind: "text", text: input.offer.text } : sourceOf(input.offer.pages);

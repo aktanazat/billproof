@@ -7,6 +7,7 @@ import type { Claim, Question, UnusedReason } from "@/lib/decide";
 import { buildMessage, shortDate, usd } from "@/lib/letter";
 import type { CheckResult } from "@/lib/result";
 import type { LineItem, PromiseTerm } from "@/lib/schemas";
+import { BillPage, type Mark } from "./bill-page";
 
 type Done = Extract<CheckState, { s: "done" }>;
 type Checked = Extract<CheckResult, { outcome: "checked" }>;
@@ -66,51 +67,51 @@ function questionTitle(question: Question, lines: LineItem[], result: Checked): 
   }
 }
 
-function Quote({ source, text }: { source: string; text: string }) {
-  return (
-    <p className="text-[13px] leading-5 text-ink-2">
-      <span className="text-ink-3">{source} </span>
-      <q className="text-ink">{text}</q>
-    </p>
-  );
-}
-
 function BillPages({ result, pages, focus }: { result: Checked; pages: { image: string }[]; focus: ReadonlySet<string> }) {
-  const claimNumber = new Map<string, number>();
-  result.claims.forEach((claim, i) => claim.lineIds.forEach((id) => claimNumber.set(id, i + 1)));
   const asked = new Set(result.questions.filter((q) => SHOWN_QUESTIONS.has(q.kind)).flatMap((q) => q.lineIds));
+  const lines = new Map(result.reading.line_items.map((line) => [line.id, line]));
+  const marks: (Mark & { page: number })[] = [];
+  result.claims.forEach((claim, i) => {
+    // The number tab sits on the claim's charged line; its discounts are marked without a tab.
+    const tabbed = claim.lineIds.find((id) => (lines.get(id)?.amount_cents ?? 0) > 0) ?? claim.lineIds[0];
+    for (const id of claim.lineIds) {
+      const line = lines.get(id);
+      if (line?.box) marks.push({ id, box: line.box, tone: "claim", n: id === tabbed ? i + 1 : undefined, page: line.page });
+    }
+  });
+  for (const id of asked) {
+    const line = lines.get(id);
+    if (line?.box && !marks.some((m) => m.id === id)) marks.push({ id, box: line.box, tone: "ask", page: line.page });
+  }
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {pages.map((page, index) => (
-        <div key={index} className="relative overflow-hidden rounded-[10px] bg-white shadow-[0_1px_3px_rgb(0_0_0/0.12)]">
-          <img src={page.image} alt={`Bill page ${index + 1}`} className="block w-full" />
-          {result.reading.line_items
-            .filter((line) => line.page === index + 1 && line.box && (claimNumber.has(line.id) || asked.has(line.id)))
-            .map((line) => {
-              const box = line.box!;
-              const isClaim = claimNumber.has(line.id);
-              return (
-                <div
-                  key={line.id}
-                  aria-hidden
-                  className={`absolute rounded-[3px] transition-opacity ${isClaim ? "mark" : "ask-mark"} ${focus.size > 0 && !focus.has(line.id) ? "opacity-30" : ""}`}
-                  style={{
-                    left: `${Math.max(0, box.x0 - 6) / 10}%`,
-                    top: `${Math.max(0, box.y0 - 4) / 10}%`,
-                    width: `${(Math.min(1000, box.x1 + 6) - Math.max(0, box.x0 - 6)) / 10}%`,
-                    height: `${(Math.min(1000, box.y1 + 4) - Math.max(0, box.y0 - 4)) / 10}%`,
-                  }}
-                />
-              );
-            })}
-        </div>
+        <BillPage key={index} image={page.image} alt={`Bill page ${index + 1}`} marks={marks.filter((m) => m.page === index + 1)} focus={focus} />
       ))}
     </div>
   );
 }
 
-function Checkbox({ checked, onChange, label }: { checked: boolean; onChange: () => void; label: string }) {
-  return <input type="checkbox" checked={checked} onChange={onChange} aria-label={label} className="mt-1 size-[18px] shrink-0 accent-[var(--accent)]" />;
+function Toggle({ checked, onChange, label }: { checked: boolean; onChange: () => void; label: string }) {
+  return (
+    <label className="inline-flex cursor-pointer items-center gap-2 text-[13px] text-ink-2 select-none">
+      <input type="checkbox" checked={checked} onChange={onChange} className="size-4 accent-[var(--accent)]" />
+      {label}
+    </label>
+  );
+}
+
+function Evidence({ rows }: { rows: { source: string; text: string }[] }) {
+  return (
+    <dl className="grid grid-cols-[3.25rem_1fr] gap-x-3 gap-y-1.5 rounded-[12px] bg-fill px-3.5 py-3 text-[13px] leading-5">
+      {rows.map((row, i) => (
+        <div key={i} className="contents">
+          <dt className="text-ink-3">{row.source}</dt>
+          <dd className="text-ink">{row.text}</dd>
+        </div>
+      ))}
+    </dl>
+  );
 }
 
 function MessageBox({ result, done }: { result: Checked; done: Done }) {
@@ -118,45 +119,47 @@ function MessageBox({ result, done }: { result: Checked; done: Done }) {
   const [copied, setCopied] = useState(false);
   const selected = new Set(Object.entries(done.selection.claims).filter(([, mark]) => mark === "selected").map(([id]) => id));
   const included = new Set(Object.entries(done.selection.questions).filter(([, on]) => on).map(([id]) => id));
-  const message = buildMessage(result, selected, included);
   if (selected.size === 0 && included.size === 0) return null;
-  const text = message[format];
+  const text = buildMessage(result, selected, included)[format];
   const formats = [
     ["chat", "Chat"],
     ["email", "Email"],
     ["call", "Call"],
   ] as const;
   return (
-    <div className="rounded-[14px] bg-surface p-4 shadow-[0_0_0_1px_var(--hairline)]">
-      <div className="flex items-center justify-between gap-3">
-        <div role="tablist" aria-label="Message format" className="inline-flex rounded-[9px] bg-fill p-0.5">
-          {formats.map(([value, label]) => (
-            <button
-              key={value}
-              role="tab"
-              type="button"
-              aria-selected={format === value}
-              onClick={() => setFormat(value)}
-              className={`rounded-[7px] px-3 py-1 text-[13px] ${format === value ? "bg-surface font-medium shadow-[0_1px_2px_rgb(0_0_0/0.1)]" : "text-ink-2"}`}
-            >
-              {label}
-            </button>
-          ))}
+    <div className="rounded-[20px] bg-surface p-5 shadow-[0_0_0_1px_var(--hairline)]">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="text-[17px] font-semibold tracking-[-0.01em]">Message to send</h2>
+        <div className="flex items-center gap-2">
+          <div role="tablist" aria-label="Message format" className="inline-flex rounded-[10px] bg-fill p-0.5">
+            {formats.map(([value, label]) => (
+              <button
+                key={value}
+                role="tab"
+                type="button"
+                aria-selected={format === value}
+                onClick={() => setFormat(value)}
+                className={`rounded-[8px] px-3 py-1 text-[13px] transition-colors ${format === value ? "bg-surface font-medium shadow-[0_1px_2px_rgb(0_0_0/0.12)]" : "text-ink-2 hover:text-ink"}`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              void navigator.clipboard.writeText(text).then(() => {
+                setCopied(true);
+                setTimeout(() => setCopied(false), 1600);
+              });
+            }}
+            className="h-8 min-w-[72px] rounded-[10px] bg-accent px-3.5 text-[13px] font-semibold text-accent-ink active:scale-[0.98]"
+          >
+            {copied ? "Copied" : "Copy"}
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={() => {
-            void navigator.clipboard.writeText(text).then(() => {
-              setCopied(true);
-              setTimeout(() => setCopied(false), 1600);
-            });
-          }}
-          className="rounded-[9px] bg-accent px-3.5 py-1.5 text-[13px] font-medium text-accent-ink"
-        >
-          {copied ? "Copied" : "Copy"}
-        </button>
       </div>
-      <textarea readOnly value={text} aria-label="Message to send" className="mt-3 h-[260px] w-full resize-none bg-transparent text-[14px] leading-6 focus:outline-none" />
+      <textarea readOnly value={text} aria-label="Message to send" className="mt-4 h-[300px] w-full resize-none bg-transparent text-[15px] leading-[1.6] focus:outline-none" />
     </div>
   );
 }
@@ -165,18 +168,19 @@ export function ResultView({ state, dispatch }: { state: Done; dispatch: Dispatc
   const [focus, setFocus] = useState<ReadonlySet<string>>(new Set());
   const { result } = state;
   const pages = state.inputs.bill?.status === "ready" ? state.inputs.bill.pages : [];
-  const changeFiles = (
-    <button type="button" onClick={() => dispatch({ type: "edit" })} className="rounded-[10px] bg-fill px-4 py-2 text-[15px] hover:bg-hairline">
+  const again = (
+    <button type="button" onClick={() => dispatch({ type: "edit" })} className="h-9 shrink-0 rounded-[10px] bg-fill px-3.5 text-[14px] hover:bg-hairline">
       Check another bill
     </button>
   );
 
   if (result.outcome !== "checked") {
     return (
-      <section className="mx-auto w-full max-w-[880px] space-y-4 px-6 py-10">
-        <p className="text-[22px] font-medium">{result.outcome === "not_a_bill" ? "This doesn't look like a bill" : result.reason}</p>
+      <section className="mx-auto flex w-full max-w-[720px] flex-col items-start gap-4 px-6 pt-16">
+        <h1 className="text-[34px] font-semibold tracking-[-0.025em]">{result.outcome === "not_a_bill" ? "This doesn't look like a bill" : "Couldn't check this bill"}</h1>
+        {result.outcome === "could_not_check" && <p className="text-[17px] text-ink-2">{result.reason}</p>}
         <p className="text-[13px] text-ink-2 tabular-nums">Checked for {formatMicros(result.spentMicros)}</p>
-        {changeFiles}
+        {again}
       </section>
     );
   }
@@ -189,6 +193,7 @@ export function ResultView({ state, dispatch }: { state: Done; dispatch: Dispatc
   const provider = result.reading.provider;
   const { totals } = result;
   const printed = result.reading.printed.current_charges;
+  const focusOn = (ids: string[]) => ({ onMouseEnter: () => setFocus(new Set(ids)), onMouseLeave: () => setFocus(new Set()), onFocus: () => setFocus(new Set(ids)), onBlur: () => setFocus(new Set()) });
 
   const heading =
     result.claims.length > 0
@@ -204,79 +209,67 @@ export function ResultView({ state, dispatch }: { state: Done; dispatch: Dispatc
             : "Nothing is billed above your offer";
 
   return (
-    <section className="mx-auto grid w-full max-w-[1180px] gap-8 px-6 py-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+    <section className="mx-auto grid w-full max-w-[1180px] gap-10 px-6 pb-20 pt-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1fr)] lg:gap-14">
       <div className="lg:sticky lg:top-8 lg:self-start">
         <BillPages result={result} pages={pages} focus={focus} />
       </div>
 
-      <div className="space-y-8">
-        <header>
+      <div className="flex flex-col gap-10">
+        <header className="flex items-start justify-between gap-6">
           {heading ? (
-            <h1 className="text-[28px] font-semibold tracking-[-0.01em]">{heading}</h1>
+            <h1 className="text-[34px] font-semibold leading-[1.1] tracking-[-0.025em] text-balance">{heading}</h1>
           ) : (
-            <>
-              <p className="text-[40px] font-semibold tracking-[-0.02em] tabular-nums">{usd(selectedTotal)}</p>
-              <h1 className="text-[17px] text-ink-2">to ask back{provider ? ` from ${provider}` : ""}</h1>
-            </>
+            <div>
+              <p className="text-[64px] font-semibold leading-none tracking-[-0.04em] tabular-nums">{usd(selectedTotal)}</p>
+              <h1 className="mt-2 text-[17px] text-ink-2">to ask back{provider ? ` from ${provider}` : ""}</h1>
+            </div>
           )}
+          {again}
         </header>
 
         {result.claims.length > 0 && (
-          <ul className="space-y-3">
+          <ol className="flex flex-col gap-4">
             {result.claims.map((claim, i) => {
               const claimLines = linesOf(claim.lineIds);
               const promise = promises.get(claim.promiseId);
               const mark = state.selection.claims[claim.id];
               return (
-                <li
-                  key={claim.id}
-                  onMouseEnter={() => setFocus(new Set(claim.lineIds))}
-                  onMouseLeave={() => setFocus(new Set())}
-                  className="flex gap-3 rounded-[14px] bg-surface p-4 shadow-[0_0_0_1px_var(--hairline)]"
-                >
-                  {mark !== "needs_confirmation" && <Checkbox checked={mark === "selected"} onChange={() => dispatch({ type: "toggle_claim", id: claim.id })} label={`Include claim ${i + 1}`} />}
-                  <div className="min-w-0 flex-1 space-y-2">
-                    <div className="flex items-baseline justify-between gap-3">
-                      <p className="text-[15px] font-medium">{claimTitle(claim, claimLines)}</p>
-                      <p className="text-[15px] font-medium tabular-nums">{usd(claim.amountCents)}</p>
-                    </div>
-                    {claimLines.map((line) => (
-                      <Quote key={line.id} source="Bill" text={line.quote} />
-                    ))}
-                    {promise && <Quote source="Offer" text={promise.quote} />}
-                    {mark === "needs_confirmation" && (
-                      <button type="button" onClick={() => dispatch({ type: "confirm_claim", id: claim.id })} className="rounded-[9px] bg-fill px-3 py-1.5 text-[13px] hover:bg-hairline">
+                <li key={claim.id} tabIndex={0} {...focusOn(claim.lineIds)} className="flex flex-col gap-3.5 rounded-[20px] bg-surface p-5 shadow-[0_0_0_1px_var(--hairline)] outline-none focus-visible:shadow-[0_0_0_2px_var(--accent)]">
+                  <div className="flex items-start gap-3">
+                    <span className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full bg-ink text-[12px] font-semibold text-ground">{i + 1}</span>
+                    <p className="flex-1 text-[17px] font-medium leading-snug">{claimTitle(claim, claimLines)}</p>
+                    <p className="text-[17px] font-semibold tabular-nums">{usd(claim.amountCents)}</p>
+                  </div>
+                  <Evidence rows={[...claimLines.map((line) => ({ source: "Bill", text: line.quote })), ...(promise ? [{ source: "Offer", text: promise.quote }] : [])]} />
+                  <div className="pl-9">
+                    {mark === "needs_confirmation" ? (
+                      <button type="button" onClick={() => dispatch({ type: "confirm_claim", id: claim.id })} className="rounded-[10px] bg-fill px-3 py-1.5 text-[13px] hover:bg-hairline">
                         The highlighted line matches my bill
                       </button>
+                    ) : (
+                      <Toggle checked={mark === "selected"} onChange={() => dispatch({ type: "toggle_claim", id: claim.id })} label="Include in message" />
                     )}
                   </div>
                 </li>
               );
             })}
-          </ul>
+          </ol>
         )}
 
         {questions.length > 0 && (
           <div>
-            <h2 className="text-[15px] font-medium">Worth asking about</h2>
-            <ul className="mt-3 space-y-2">
+            <h2 className="text-[17px] font-semibold tracking-[-0.01em]">Worth asking about</h2>
+            <ul className="mt-3 divide-y divide-hairline rounded-[20px] bg-surface px-5 shadow-[0_0_0_1px_var(--hairline)]">
               {questions.map((question) => {
                 const questionLines = linesOf(question.lineIds);
                 const canInclude = question.kind === "unagreed_fee" || question.kind === "repeated_charge";
                 return (
-                  <li
-                    key={question.id}
-                    onMouseEnter={() => setFocus(new Set(question.lineIds))}
-                    onMouseLeave={() => setFocus(new Set())}
-                    className="flex gap-3 rounded-[12px] px-1 py-1.5"
-                  >
-                    {canInclude && <Checkbox checked={state.selection.questions[question.id] === true} onChange={() => dispatch({ type: "toggle_question", id: question.id })} label="Include in message" />}
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-baseline justify-between gap-3">
-                        <p className="text-[15px]">{questionTitle(question, questionLines, result)}</p>
-                        {questionLines[0] && <p className="text-[15px] text-ink-2 tabular-nums">{usd(questionLines.reduce((t, l) => t + l.amount_cents, 0))}</p>}
-                      </div>
+                  <li key={question.id} tabIndex={0} {...focusOn(question.lineIds)} className="flex flex-col gap-2 py-4 outline-none">
+                    <div className="flex items-baseline justify-between gap-4">
+                      <p className="text-[15px] leading-snug">{questionTitle(question, questionLines, result)}</p>
+                      {questionLines[0] && <p className="text-[15px] text-ink-2 tabular-nums">{usd(questionLines.reduce((t, l) => t + l.amount_cents, 0))}</p>}
                     </div>
+                    {canInclude && <Toggle checked={state.selection.questions[question.id] === true} onChange={() => dispatch({ type: "toggle_question", id: question.id })} label="Ask in message" />}
                   </li>
                 );
               })}
@@ -286,16 +279,16 @@ export function ResultView({ state, dispatch }: { state: Done; dispatch: Dispatc
 
         {result.explained.length > 0 && (
           <div>
-            <h2 className="text-[15px] font-medium">Explained by your offer</h2>
-            <ul className="mt-3 space-y-2">
+            <h2 className="text-[17px] font-semibold tracking-[-0.01em]">Explained by your offer</h2>
+            <ul className="mt-3 flex flex-col gap-3">
               {result.explained.map((item) => {
                 const promise = promises.get(item.promiseId);
                 return (
-                  <li key={item.id} className="space-y-1 px-1">
-                    <p className="text-[15px]">
+                  <li key={item.id} className="flex flex-col gap-2.5 rounded-[20px] bg-surface p-5 shadow-[0_0_0_1px_var(--hairline)]">
+                    <p className="text-[15px] leading-snug">
                       {listNames(linesOf(item.lineIds).filter((line) => line.amount_cents > 0))}: the offer ended {shortDate(item.endedOn)}, before this bill
                     </p>
-                    {promise && <Quote source="Offer" text={promise.quote} />}
+                    {promise && <Evidence rows={[{ source: "Offer", text: promise.quote }]} />}
                   </li>
                 );
               })}
@@ -305,51 +298,59 @@ export function ResultView({ state, dispatch }: { state: Done; dispatch: Dispatc
 
         <MessageBox result={result} done={state} />
 
-        <div className="space-y-1 text-[13px] text-ink-2">
-          {printed && totals.lineSum === "ok" && <p className="tabular-nums">The charges add up to the {usd(printed.cents)} printed on the bill.</p>}
-          {printed && totals.lineSum === "mismatch" && (
-            <p className="tabular-nums text-ink">
-              The charges add up to {usd(totals.lineSumCents)}, but the bill prints {usd(printed.cents)}.
-            </p>
-          )}
-          {totals.balance === "mismatch" && <p className="text-ink">The previous balance, payments and new charges don&apos;t add up to the amount due.</p>}
-          {result.hadOffer && (
-            <p>
-              Compared {result.reading.line_items.length} charges with {result.matchedPromiseIds.length} {result.matchedPromiseIds.length === 1 ? "promise" : "promises"} from your offer.
-            </p>
-          )}
-          {result.unused.flatMap((item) => {
-            const why = UNUSED_TEXT[item.reason];
-            return why ? [<p key={item.promiseId}>{`Not used: ${promises.get(item.promiseId)?.description ?? "a promise"} (${why}).`}</p>] : [];
-          })}
-          <details className="group">
-            <summary className="cursor-pointer list-none tabular-nums hover:text-ink">Checked for {formatMicros(result.spentMicros)} with Muse Ember</summary>
-            <table className="mt-2 w-full text-left tabular-nums">
+        <details className="group rounded-[20px] bg-surface p-5 shadow-[0_0_0_1px_var(--hairline)]">
+          <summary className="flex cursor-pointer list-none items-center justify-between text-[15px] font-medium">
+            How Muse Ember checked it
+            <span className="text-[13px] font-normal text-ink-2 tabular-nums">{formatMicros(result.spentMicros)}</span>
+          </summary>
+          <div className="mt-4 flex flex-col gap-4 text-[14px] leading-6 text-ink-2">
+            {state.thoughts.map((thought, i) => (
+              <p key={i} className="whitespace-pre-line">
+                {thought.text}
+              </p>
+            ))}
+            <ul className="flex flex-col gap-1 text-[13px]">
+              {printed && totals.lineSum === "ok" && <li className="tabular-nums">The charges add up to the {usd(printed.cents)} printed on the bill.</li>}
+              {printed && totals.lineSum === "mismatch" && (
+                <li className="tabular-nums text-ink">
+                  The charges add up to {usd(totals.lineSumCents)}, but the bill prints {usd(printed.cents)}.
+                </li>
+              )}
+              {totals.balance === "mismatch" && <li className="text-ink">The previous balance, payments and new charges don&apos;t add up to the amount due.</li>}
+              {result.hadOffer && (
+                <li>
+                  Compared {result.reading.line_items.length} charges with {result.matchedPromiseIds.length} {result.matchedPromiseIds.length === 1 ? "promise" : "promises"} from your offer.
+                </li>
+              )}
+              {result.unused.flatMap((item) => {
+                const why = UNUSED_TEXT[item.reason];
+                return why ? [<li key={item.promiseId}>{`Not used: ${promises.get(item.promiseId)?.description ?? "a promise"} (${why}).`}</li>] : [];
+              })}
+            </ul>
+            <table className="w-full text-left text-[13px] tabular-nums">
               <thead className="text-ink-3">
                 <tr>
-                  <th className="py-1 font-normal">Step</th>
-                  <th className="py-1 font-normal">Effort</th>
-                  <th className="py-1 text-right font-normal">Tokens in</th>
-                  <th className="py-1 text-right font-normal">Tokens out</th>
-                  <th className="py-1 text-right font-normal">Cost</th>
+                  <th className="py-1.5 font-normal">Step</th>
+                  <th className="py-1.5 font-normal">Effort</th>
+                  <th className="py-1.5 text-right font-normal">Tokens in</th>
+                  <th className="py-1.5 text-right font-normal">Tokens out</th>
+                  <th className="py-1.5 text-right font-normal">Cost</th>
                 </tr>
               </thead>
               <tbody>
                 {result.calls.map((call, i) => (
                   <tr key={i} className="border-t border-hairline">
-                    <td className="py-1">{CALL_NAMES[call.name] ?? call.name}</td>
-                    <td className="py-1">{call.effort}</td>
-                    <td className="py-1 text-right">{call.reused ? "reused" : call.inputTokens.toLocaleString("en-US")}</td>
-                    <td className="py-1 text-right">{call.reused ? "" : call.outputTokens.toLocaleString("en-US")}</td>
-                    <td className="py-1 text-right">{formatMicros(call.costMicros)}</td>
+                    <td className="py-1.5 text-ink">{CALL_NAMES[call.name] ?? call.name}</td>
+                    <td className="py-1.5">{call.effort}</td>
+                    <td className="py-1.5 text-right">{call.reused ? "reused" : call.inputTokens.toLocaleString("en-US")}</td>
+                    <td className="py-1.5 text-right">{call.reused ? "" : call.outputTokens.toLocaleString("en-US")}</td>
+                    <td className="py-1.5 text-right">{formatMicros(call.costMicros)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </details>
-        </div>
-
-        {changeFiles}
+          </div>
+        </details>
       </div>
     </section>
   );

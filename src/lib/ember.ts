@@ -43,9 +43,11 @@ export function buildRequest<T>(call: EmberCall<T>): EmberRequest<T> {
     body: {
       model: MODEL,
       store: false,
+      stream: true,
       instructions: call.instructions,
       input: [{ type: "message", role: "user", content }],
-      reasoning: { effort: call.effort },
+      // The summary is what the person watches while Muse Ember works; the raw reasoning stays private.
+      reasoning: { effort: call.effort, summary: "detailed" },
       max_output_tokens: call.maxOutputTokens,
       prompt_cache_key: `billproof-${call.name}`,
       text: { format: { type: "json_schema", name: call.name, schema: z.toJSONSchema(call.schema), strict: false } },
@@ -104,9 +106,51 @@ const responseShape = z.object({
 
 export type EmberResult<T> = { output: T; usage: Usage; costMicros: number };
 
-export async function send<T>(request: EmberRequest<T>, signal: AbortSignal): Promise<EmberResult<T>> {
+export type EmberDelta = { kind: "thinking"; text: string } | { kind: "output"; text: string };
+
+const streamEvent = z.object({
+  type: z.string(),
+  delta: z.string().optional(),
+  response: z.unknown().optional(),
+});
+
+// Reads the server-sent events of a streamed response, forwarding summary and output deltas, and returns the final
+// response object carried by the terminal event.
+async function readStream(res: Response, onDelta: (delta: EmberDelta) => void): Promise<unknown> {
+  if (!res.body) throw new EmberError("upstream", "Meta Model API sent an empty stream");
+  const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
+  let buffer = "";
+  let final: unknown = null;
+  let summaryParts = 0;
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buffer += value;
+    const events = buffer.split("\n\n");
+    buffer = events.pop() ?? "";
+    for (const block of events) {
+      const data = block
+        .split("\n")
+        .filter((line) => line.startsWith("data:"))
+        .map((line) => line.slice(5).trimStart())
+        .join("\n");
+      if (!data || data === "[DONE]") continue;
+      const event = streamEvent.safeParse(JSON.parse(data));
+      if (!event.success) continue;
+      const { type, delta, response } = event.data;
+      if (type === "response.reasoning_summary_part.added" && summaryParts++ > 0) onDelta({ kind: "thinking", text: "\n\n" });
+      else if (type === "response.reasoning_summary_text.delta" && delta) onDelta({ kind: "thinking", text: delta });
+      else if (type === "response.output_text.delta" && delta) onDelta({ kind: "output", text: delta });
+      else if (type === "response.completed" || type === "response.incomplete" || type === "response.failed") final = response;
+    }
+  }
+  if (final === null) throw new EmberError("upstream", "The stream from Meta Model API ended without a result");
+  return final;
+}
+
+export async function send<T>(request: EmberRequest<T>, signal: AbortSignal, onDelta: (delta: EmberDelta) => void): Promise<EmberResult<T>> {
   const res = await post("/responses", request.body, signal);
-  const parsed = responseShape.safeParse(await res.json());
+  const parsed = responseShape.safeParse(await readStream(res, onDelta));
   if (!parsed.success) throw new EmberError("upstream", "Meta Model API returned a response in an unexpected shape");
   const usage: Usage = {
     inputTokens: parsed.data.usage.input_tokens,
@@ -116,6 +160,7 @@ export async function send<T>(request: EmberRequest<T>, signal: AbortSignal): Pr
   const billed = costMicros(usage);
   const name = request.call.name;
 
+  if (parsed.data.status === "failed") throw new EmberError("upstream", `${name} failed on Meta's side`, billed);
   if (parsed.data.status !== "completed") {
     throw new EmberError("truncated", `${name} stopped early (${parsed.data.incomplete_details?.reason ?? parsed.data.status})`, billed);
   }

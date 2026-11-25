@@ -2,19 +2,25 @@
   {
     "id": "internet-guaranteed",
     "title": "Internet, price guaranteed",
+    "outcome": "$30.00 to ask back",
     "bill": "/samples/internet-guaranteed.pdf",
+    "image": "/samples/internet-guaranteed.png",
     "proof": "From: Bayline Fiber <orders@bayline.example>\nSubject: Your Bayline order is confirmed\nDate: October 28, 2025\n\nHi Jordan, thanks for choosing Bayline Fiber.\n\nYour plan: Fiber 500 Internet\nMonthly price: $55.00/mo with Autopay & Paperless (2-year price guarantee through 10/31/2027)\nWi-Fi Gateway: included at no extra cost\nInstallation: free\n\nPrice excludes taxes and government fees. The 2-year price guarantee applies to your internet plan rate."
   },
   {
     "id": "internet-expired",
     "title": "Internet, promo ended",
+    "outcome": "No claim: the promo ended Oct 31",
     "bill": "/samples/internet-expired.pdf",
+    "image": "/samples/internet-expired.png",
     "proof": "From: Bayline Fiber <orders@bayline.example>\nSubject: Your Bayline order is confirmed\nDate: October 28, 2025\n\nHi Jordan, thanks for choosing Bayline Fiber.\n\nYour plan: Fiber 500 Internet\nPromotional price: $55.00/mo with Autopay & Paperless for 12 months (through 10/31/2026)\nWi-Fi Gateway: included for 12 months (through 10/31/2026)\nInstallation: free\n\nAfter the promotional period, regular rates apply. Price excludes taxes and government fees."
   },
   {
     "id": "mobile-autopay",
     "title": "Phone, autopay credit",
+    "outcome": "$10.00 credit missing",
     "bill": "/samples/mobile-autopay.pdf",
+    "image": "/samples/mobile-autopay.png",
     "proof": "Northstar Wireless - Plan summary\nUnlimited Plus, 2 lines\n$35/line per month, minus a $5/line Autopay discount each month\nTaxes & fees extra."
   }
 ]

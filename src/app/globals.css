@@ -60,18 +60,82 @@ html {
   outline-offset: 2px;
 }
 
-.mark {
+/* Highlighter: slightly irregular edges so it reads as a pen stroke, not a selection box. The blend lives on a
+   pseudo-element so the number tab inside keeps its own colors. */
+.mark::before {
+  content: "";
+  position: absolute;
+  inset: 0;
   background: var(--mark);
-  box-shadow: inset 0 -2px 0 var(--mark-edge);
+  border-radius: 3px 6px 4px 7px / 6px 3px 7px 4px;
   mix-blend-mode: multiply;
 }
 
 .ask-mark {
+  border-radius: 4px;
   box-shadow: inset 0 0 0 1.5px var(--ask);
 }
 
+.mark-tab {
+  position: absolute;
+  top: 50%;
+  right: calc(100% + 6px);
+  translate: 0 -50%;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--ground);
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.paper {
+  box-shadow:
+    0 0 0 1px oklch(0 0 0 / 0.06),
+    0 1px 2px oklch(0 0 0 / 0.06),
+    0 12px 32px -12px oklch(0 0 0 / 0.18);
+}
+
+/* While Muse Ember reads, a highlighter band passes down the page. */
+.sweep {
+  position: absolute;
+  inset-inline: 6%;
+  height: 2.2%;
+  top: 0;
+  background: var(--mark);
+  border-radius: 4px;
+  mix-blend-mode: multiply;
+  animation: sweep 2.4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+@keyframes sweep {
+  from {
+    top: 14%;
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  88% {
+    opacity: 1;
+  }
+  to {
+    top: 70%;
+    opacity: 0;
+  }
+}
+
+.wordmark-mark {
+  background: linear-gradient(transparent 58%, var(--mark) 58%, var(--mark) 92%, transparent 92%);
+}
+
 @media (prefers-color-scheme: dark) {
-  .mark {
+  .mark::before,
+  .sweep {
     mix-blend-mode: normal;
   }
 }
@@ -80,5 +144,28 @@ html {
   * {
     transition: none !important;
     animation: none !important;
+  }
+}
+
+/* A line Muse Ember has just read: a light wash that settles, so the page fills in as the reading streams. */
+.read-mark {
+  border-radius: 4px;
+  background: oklch(0.6 0.12 252 / 0.1);
+  box-shadow: inset 2px 0 0 oklch(0.52 0.16 252 / 0.55);
+  animation: settle 600ms ease-out both;
+}
+
+.appear {
+  animation: settle 400ms ease-out both;
+}
+
+@keyframes settle {
+  from {
+    opacity: 0;
+    translate: 0 4px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
   }
 }

@@ -9,8 +9,8 @@ Live: https://billproof.aktan.us (three sample bills run from the start screen).
 ## How a check works
 
 1. The browser renders each PDF page to an image and keeps its text layer; photos are scaled to 1600 px. Nothing is uploaded until you press Check.
-2. Muse Ember reads the bill into structured line items (amount, kind, quote, position on the page) at low reasoning effort.
-3. If the line items don't add up to the printed current charges, Muse Ember reads the bill once more at high effort. Two readings that still disagree end the check with "could not check" rather than a guess.
+2. Muse Ember reads the bill into structured line items (amount, kind, quote, position on the page) at high reasoning effort. Its reasoning summary and each line stream to the screen as they are read, and the lines light up on the bill.
+3. If the line items don't add up to the printed current charges, Muse Ember reads the bill once more at xhigh effort. Two readings that still disagree end the check with "could not check" rather than a guess.
 4. Muse Ember reads the offer and links each promise to the bill lines it governs.
 5. Code, not the model, decides every dollar:
    - a promise counts only if its quote is in the offer and its amount is in the quote;
@@ -53,7 +53,7 @@ Run on 2026-11-25 (`eval/run-2026-11-25.json` holds every event, reading and mod
 | PDF | 12/12 | 5/5 | 0 | 9/9 | 2/2 |
 | Phone photo | 12/12 | 5/5 | 0 | 9/9 | 2/2 |
 
-Median cost per check: 0.078¢. All 24 checks together: 35 paid Muse Ember calls (13 more steps reused an identical earlier reading), 106,459 input tokens (103,644 served from Meta's prompt cache, because earlier runs had read the same bills), 33,118 output tokens, $0.017. The first run, with a cold cache, cost $0.023 (median 0.099¢). Three full runs and three more runs of the phone bills gave the same results. The bills are synthetic, so these numbers show the pipeline holds its rules; real bills are messier.
+Median cost per check: 0.15¢, at high reasoning effort so the reasoning summary can stream to the screen. All 24 checks together: 34 paid Muse Ember calls (14 more steps reused an identical earlier reading), 105,465 input tokens (40,704 served from Meta's prompt cache), 60,036 output tokens including reasoning, $0.037. Earlier runs at low effort gave the same results for less (median 0.078–0.099¢), so effort is a dial between watchable reasoning and cost. The bills are synthetic, so these numbers show the pipeline holds its rules; real bills are messier.
 
 `pnpm samples` regenerates the three sample bills on the start screen.
 
