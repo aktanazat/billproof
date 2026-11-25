@@ -1,10 +1,10 @@
-import type { PreparedCall } from "./prepare";
+import type { PreparedCall, ShownPage } from "./prepare";
 import type { TranscriptTurn } from "./schemas";
 import type { CheckFailure, CheckInput, CheckResult, PreparedPage, SeenChallenge, SeenLine, SeenPromise, SingleResult, Stage } from "./result";
 
 export type Doc =
   | { id: string; name: string; status: "preparing" }
-  | { id: string; name: string; status: "ready"; pages: PreparedPage[] }
+  | { id: string; name: string; status: "ready"; pages: ShownPage[] }
   | { id: string; name: string; status: "failed"; message: string };
 
 // A recorded call: the WAV Muse Ember hears, and a playable URL of the original file for the person.
@@ -33,7 +33,7 @@ export type Live = {
 export type CheckState =
   | { s: "composing"; inputs: Inputs; attempts: number }
   | { s: "running"; inputs: Inputs; attempts: number; attempt: number; stage: Stage | null; spentMicros: number; live: Live }
-  | { s: "done"; inputs: Inputs; attempts: number; result: CheckResult; selections: Selection[]; thoughts: Thought[] }
+  | { s: "done"; inputs: Inputs; attempts: number; result: CheckResult; selections: Selection[] }
   | { s: "failed"; inputs: Inputs; attempts: number; stage: Stage | null; failure: CheckFailure; message: string; spentMicros: number; retryable: boolean }
   | { s: "cancelled"; inputs: Inputs; attempts: number; stage: Stage | null; spentMicros: number };
 
@@ -41,7 +41,7 @@ export type CheckAction =
   | { type: "bills_added"; docs: { id: string; name: string }[] }
   | { type: "offer_file_added"; id: string; name: string }
   | { type: "call_added"; id: string; name: string }
-  | { type: "doc_prepared"; id: string; pages: PreparedPage[] }
+  | { type: "doc_prepared"; id: string; pages: ShownPage[] }
   | { type: "call_prepared"; id: string; call: PreparedCall }
   | { type: "prep_failed"; id: string; message: string }
   | { type: "removed"; id: string }
@@ -93,7 +93,9 @@ function prepared<T extends { id: string; name: string; status: string }>(item: 
 // The request body for a check, or null when the inputs cannot start one.
 export function checkInput(inputs: Inputs): CheckInput | null {
   if (inputs.bills.length === 0 || inputs.bills.some((doc) => doc.status !== "ready")) return null;
-  const bills = inputs.bills.flatMap((doc) => (doc.status === "ready" ? [{ pages: doc.pages }] : []));
+  // Printed rows only place marks on screen; the check gets the image and text.
+  const sent = (pages: ShownPage[]): PreparedPage[] => pages.map(({ image, text }) => ({ image, text }));
+  const bills = inputs.bills.flatMap((doc) => (doc.status === "ready" ? [{ pages: sent(doc.pages) }] : []));
   const { offer } = inputs;
   switch (offer.kind) {
     case "none":
@@ -101,7 +103,7 @@ export function checkInput(inputs: Inputs): CheckInput | null {
     case "text":
       return { bills, offer: offer.text.trim() ? { kind: "text", text: offer.text.trim() } : null };
     case "file":
-      return offer.doc.status === "ready" ? { bills, offer: { kind: "pages", pages: offer.doc.pages } } : null;
+      return offer.doc.status === "ready" ? { bills, offer: { kind: "pages", pages: sent(offer.doc.pages) } } : null;
     case "call":
       return offer.call.status === "ready" ? { bills, offer: { kind: "audio", wav: offer.call.wav } } : null;
   }
@@ -175,7 +177,7 @@ function running(state: Extract<CheckState, { s: "running" }>, action: CheckActi
     case "month_done":
       return { ...state, live: { ...live, months: { ...live.months, [action.bill]: action.result } } };
     case "finished":
-      return { s: "done", inputs: state.inputs, attempts: state.attempts, result: action.result, selections: initialSelections(action.result), thoughts: live.thoughts };
+      return { s: "done", inputs: state.inputs, attempts: state.attempts, result: action.result, selections: initialSelections(action.result) };
     case "errored":
       return { s: "failed", inputs: state.inputs, attempts: state.attempts, stage: state.stage, failure: action.failure, message: action.message, spentMicros: action.spentMicros, retryable: action.retryable };
     case "cancel":

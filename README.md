@@ -9,7 +9,7 @@ Live: https://billproof.aktan.us (six samples run from the start screen, includi
 ## How a check works
 
 1. The browser renders each PDF page to an image and keeps its text layer; photos are scaled to 1600 px; a recorded call is decoded to 16 kHz mono WAV. Nothing is uploaded until you press Check. The server measures the recording from its bytes and refuses anything over four minutes.
-2. Muse Ember reads the bill into structured line items (amount, kind, quote, position on the page) at high reasoning effort. Its reasoning summary and each line stream to the screen as they are read, and the lines light up on the bill.
+2. Muse Ember reads the bill into structured line items (amount, kind, quote, position on the page) at high reasoning effort. Its reasoning summary and each line stream to the screen as they are read, and the lines light up on the bill. On a PDF, each mark sits on the printed row that carries the line's label, taken from the text layer, so a box the model places a row off still lands on the right line.
 3. If the line items don't add up to the printed current charges, Muse Ember reads the bill once more at xhigh effort. Two readings that still disagree end the check with "could not check" rather than a guess.
 4. Muse Ember reads the offer and links each promise to the bill lines it governs. A recording is sent as audio: Muse Ember writes the transcript (speaker, start time, words) and quotes each promise from it with the second it was said.
 5. Code, not the model, decides every dollar:
@@ -19,6 +19,7 @@ Live: https://billproof.aktan.us (six samples run from the start screen, includi
    - conditions like autopay need proof on the bill; paperless or bundle conditions can't be proven from a bill, so they become questions;
    - an offer from a different company, a promise that starts or ends mid-period, or an amount that looks misread becomes a question;
    - each bill line backs at most one claim;
+   - a promise that something is included covers only a charge whose label it names, so a gateway promise linked to the internet plan by mistake claims nothing;
    - a claim resting on a photo or on a recording waits until the person confirms the marked line, or plays the clip and confirms what was said.
 6. Muse Ember then argues the company's side of each claim: it searches the bill and the offer for a credit, an end date or a condition that would defeat it. A claim is dropped only when the rebuttal quotes the bill or offer word for word; a rebuttal that can't be verified leaves the claim standing for the person to confirm.
 7. The message is assembled from fixed sentences filled with verified fields, so every number in it traces to a claim you selected. Promises from a call are cited with their time in the recording.

@@ -1,20 +1,17 @@
 import type { Metadata, Viewport } from "next";
-import { Instrument_Serif } from "next/font/google";
 import "./globals.css";
 
-const serif = Instrument_Serif({ weight: "400", style: ["normal", "italic"], subsets: ["latin"], variable: "--font-instrument" });
-
 export const metadata: Metadata = {
-  title: "Billproof — put your bill on the stand",
+  title: "Billproof — check a bill against the offer",
   description:
-    "Set a phone, internet or utility bill against what you were promised, even a recording of the sales call. Muse Ember marks every charge that breaks it and writes the message that gets the money back.",
+    "Check a phone, internet or utility bill against the offer email, a screenshot or a recording of the sales call. Billproof finds charges above the promise and writes the message.",
 };
 
-export const viewport: Viewport = { themeColor: "#ecebe6", colorScheme: "light" };
+export const viewport: Viewport = { themeColor: "#ffffff", colorScheme: "light" };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`h-full ${serif.variable}`}>
+    <html lang="en" className="h-full">
       <body className="min-h-full">{children}</body>
     </html>
   );

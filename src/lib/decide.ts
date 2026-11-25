@@ -38,7 +38,8 @@ export type UnusedReason =
   | "line_not_on_bill"
   | "starts_later"
   | "no_price"
-  | "no_credit_amount";
+  | "no_credit_amount"
+  | "item_not_named";
 export type Unused = { promiseId: string; reason: UnusedReason };
 
 export type Decision = {
@@ -52,6 +53,17 @@ export type Decision = {
 
 type KindSet = Partial<Record<LineKind, true>>;
 const CREDIT_KINDS: KindSet = { credit: true, discount: true };
+
+// Words in a bill label that say nothing about which item it is.
+const GENERIC_WORDS = new Set(["fee", "fees", "rental", "rent", "charge", "charges", "monthly", "service", "services", "plan", "line", "the", "and", "for", "with"]);
+
+// An "included" promise names its item ("Wi-Fi Gateway: included"); a charge whose label shares no specific word
+// with the quote is some other item the model linked by mistake.
+function quoteNamesLine(quote: string, label: string): boolean {
+  const said = new Set(tokens(quote));
+  return tokens(label).some((word) => word.length >= 3 && !GENERIC_WORDS.has(word) && said.has(word));
+}
+
 const COVERABLE: Record<Exclude<PromiseTerm["kind"], "other">, KindSet> = {
   monthly_price: { plan: true, discount: true, credit: true },
   included: { equipment: true, company_fee: true, one_time: true, plan: true, other: true, credit: true, discount: true },
@@ -224,9 +236,12 @@ export function decide(reading: Reading, promises: PromiseTerm[], bill: Source, 
     }
 
     if (promise.kind === "included") {
-      const actual = sum(covered);
-      if (actual > 0) {
-        drafts.push({ kind: "included_charged", lineIds, promiseId: promise.id, actualCents: actual, expectedCents: 0, amountCents: actual, needsConfirmation: photoEvidence });
+      const named = covered.filter((line) => line.amount_cents > 0 && quoteNamesLine(promise.quote, line.label));
+      const credits = covered.filter((line) => line.amount_cents < 0);
+      const actual = sum([...named, ...credits]);
+      if (named.length === 0 && covered.some((line) => line.amount_cents > 0)) unused.push({ promiseId: promise.id, reason: "item_not_named" });
+      else if (actual > 0) {
+        drafts.push({ kind: "included_charged", lineIds: [...named, ...credits].map((line) => line.id), promiseId: promise.id, actualCents: actual, expectedCents: 0, amountCents: actual, needsConfirmation: photoEvidence });
       }
       continue;
     }

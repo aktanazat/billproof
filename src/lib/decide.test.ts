@@ -144,6 +144,13 @@ describe("decide on the internet bill with an active price guarantee", () => {
     expect(decision.claims).toEqual([]);
   });
 
+  test("makes no included claim on a charge the promise doesn't name", () => {
+    const misLinked = [{ ...promises[1], covers_line_ids: idOf(reading, "Fiber 500 Internet") }];
+    const decision = decide(reading, misLinked, billText.get(internetGuaranteed.id)!, offer(internetGuaranteed));
+    expect(decision.claims).toEqual([]);
+    expect(decision.unused).toEqual([{ promiseId: "P2", reason: "item_not_named" }]);
+  });
+
   test("never counts a linked tax toward the promised price", () => {
     const withTax = [{ ...promises[0], covers_line_ids: [...idOf(reading, "Fiber 500 Internet"), ...idOf(reading, "CA Communications Users Tax")] }];
     const decision = decide(reading, withTax, billText.get(internetGuaranteed.id)!, offer(internetGuaranteed));

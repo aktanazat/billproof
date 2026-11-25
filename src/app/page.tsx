@@ -18,11 +18,9 @@ const samples = z
 export default function Home() {
   return (
     <main className="flex min-h-full flex-col">
-      <header className="mx-auto flex w-full max-w-[1240px] items-baseline justify-between px-6 pt-6">
-        <p className="display text-[26px] leading-none">
-          Billproof<span className="text-vermilion">.</span>
-        </p>
-        <a href="https://github.com/aktanazat/billproof" className="text-[13px] text-ink-2 underline-offset-4 hover:text-ink hover:underline">
+      <header className="mx-auto flex h-14 w-full max-w-[1120px] items-center justify-between px-6">
+        <p className="text-[17px] font-semibold tracking-[-0.01em]">Billproof</p>
+        <a href="https://github.com/aktanazat/billproof" className="text-[15px] text-text-2 hover:text-text">
           Source
         </a>
       </header>

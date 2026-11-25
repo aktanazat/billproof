@@ -6,7 +6,7 @@ import { formatMicros } from "@/lib/cost";
 import { usd } from "@/lib/letter";
 import { isAudio, MAX_BILL_PAGES, MAX_OFFER_PAGES, prepareCall, prepareFile, PrepareError } from "@/lib/prepare";
 import { MAX_BILLS, MAX_CALL_SECONDS, type CheckEvent, type CheckInput, type Stage } from "@/lib/result";
-import { BillPage, type Mark } from "./bill-page";
+import { BillPage, snapBox, type Mark } from "./bill-page";
 import { formatClock, Waveform } from "./evidence";
 import { ResultView } from "./result-view";
 import { YearView } from "./year-view";
@@ -125,59 +125,71 @@ function FileTarget({ label, accept, multiple, onFiles, children, className }: {
           if (files.length) onFiles(files);
         }}
       />
-      <button type="button" onClick={() => input.current?.click()} className={`${className ?? ""} ${over ? "outline-2 outline-vermilion" : ""}`}>
+      <button type="button" onClick={() => input.current?.click()} className={`${className ?? ""} ${over ? "bg-fill-2" : ""}`}>
         {children}
       </button>
     </div>
   );
 }
 
-function DocChip({ doc, onRemove }: { doc: Doc; onRemove: () => void }) {
-  const detail = doc.status === "preparing" ? "Opening…" : doc.status === "failed" ? doc.message : doc.pages.length === 1 ? "1 page" : `${doc.pages.length} pages`;
+function RemoveButton({ onRemove }: { onRemove: () => void }) {
   return (
-    <div className="flex items-center gap-3 py-2">
-      <div className="paper h-[52px] w-[40px] shrink-0 overflow-hidden">{doc.status === "ready" && <img src={doc.pages[0].image} alt="" className="h-full w-full object-cover object-top" />}</div>
+    <button type="button" onClick={onRemove} className="h-8 rounded-lg px-2 text-[13px] text-text-2 hover:bg-fill-2 hover:text-text">
+      Remove
+    </button>
+  );
+}
+
+function DocRow({ doc, onRemove }: { doc: Doc; onRemove: () => void }) {
+  const detail = doc.status === "preparing" ? "Opening" : doc.status === "failed" ? doc.message : doc.pages.length === 1 ? "1 page" : `${doc.pages.length} pages`;
+  return (
+    <div className="flex items-center gap-3 py-1.5">
+      <div className="h-10 w-8 shrink-0 overflow-hidden rounded-[4px] bg-white shadow-[inset_0_0_0_1px_var(--line)]">{doc.status === "ready" && <img src={doc.pages[0].image} alt="" className="h-full w-full object-cover object-top" />}</div>
       <div className="min-w-0 flex-1">
-        <div className="truncate text-[14px] font-medium">{doc.name}</div>
-        <div className={`text-[12px] ${doc.status === "failed" ? "text-vermilion-ink" : "text-ink-2"}`} role={doc.status === "failed" ? "alert" : undefined}>
+        <div className="truncate text-[15px]">{doc.name}</div>
+        <div className={`text-[13px] ${doc.status === "failed" ? "text-red" : "text-text-2"}`} role={doc.status === "failed" ? "alert" : undefined}>
           {detail}
         </div>
       </div>
-      <button type="button" onClick={onRemove} className="px-2 py-1 text-[12px] text-ink-2 underline-offset-4 hover:text-ink hover:underline">
-        Remove
-      </button>
+      <RemoveButton onRemove={onRemove} />
     </div>
   );
 }
 
-function CallChip({ call, onRemove }: { call: Call; onRemove: () => void }) {
+function CallRow({ call, onRemove }: { call: Call; onRemove: () => void }) {
   return (
-    <div className="flex items-center gap-4 py-2">
+    <div className="flex items-center gap-3 py-1.5">
       <div className="min-w-0 flex-1">
-        <div className="truncate text-[14px] font-medium">{call.name}</div>
+        <div className="truncate text-[15px]">{call.name}</div>
         {call.status === "ready" ? (
-          <div className="mt-2 flex items-center gap-3">
-            <Waveform peaks={call.peaks} className="h-8 flex-1" />
-            <span className="text-[12px] text-ink-2 tabular-nums">{formatClock(call.seconds)}</span>
+          <div className="mt-1 flex items-center gap-3">
+            <Waveform peaks={call.peaks} className="h-6 flex-1" />
+            <span className="text-[13px] text-text-2 tabular-nums">{formatClock(call.seconds)}</span>
           </div>
         ) : (
-          <div className={`text-[12px] ${call.status === "failed" ? "text-vermilion-ink" : "text-ink-2"}`} role={call.status === "failed" ? "alert" : undefined}>
-            {call.status === "failed" ? call.message : "Listening to the file…"}
+          <div className={`text-[13px] ${call.status === "failed" ? "text-red" : "text-text-2"}`} role={call.status === "failed" ? "alert" : undefined}>
+            {call.status === "failed" ? call.message : "Opening"}
           </div>
         )}
       </div>
-      <button type="button" onClick={onRemove} className="px-2 py-1 text-[12px] text-ink-2 underline-offset-4 hover:text-ink hover:underline">
-        Remove
-      </button>
+      <RemoveButton onRemove={onRemove} />
     </div>
   );
 }
 
 function Spinner() {
-  return <span aria-hidden className="inline-block size-[14px] animate-spin rounded-full border-[1.5px] border-rule border-t-vermilion" />;
+  return <span aria-hidden className="inline-block size-4 animate-spin rounded-full border-2 border-fill-2 border-t-text" />;
 }
 
-type Step = { key: "bill" | "offer" | "compare" | "challenge"; stages: Stage[] };
+function Check() {
+  return (
+    <svg aria-hidden width="16" height="16" viewBox="0 0 16 16" className="text-text">
+      <path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+type Step = { key: "bill" | "offer" | "compare" | "challenge"; stages: Stage[]; label: string };
 const STAGE_ORDER: Stage[] = ["reading_bill", "rereading_bill", "reading_offer", "comparing", "challenging"];
 
 function stepStatus(step: Step, stage: Stage | null, active: boolean): "done" | "now" | "later" {
@@ -190,20 +202,30 @@ function stepStatus(step: Step, stage: Stage | null, active: boolean): "done" | 
   return "later";
 }
 
-function Failure({ state, dispatch }: { state: Extract<CheckState, { s: "failed" } | { s: "cancelled" }>; dispatch: (action: CheckAction) => void }) {
+const secondary = "h-9 rounded-lg bg-fill px-4 text-[15px] hover:bg-fill-2";
+const primary = "h-9 rounded-lg bg-text px-4 text-[15px] font-medium text-white hover:bg-black";
+
+function Footer({ state, onCancel, dispatch }: { state: Exclude<CheckState, { s: "composing" } | { s: "done" }>; onCancel: () => void; dispatch: (action: CheckAction) => void }) {
+  if (state.s === "running") {
+    return (
+      <button type="button" onClick={onCancel} className={`${secondary} self-start`}>
+        Cancel
+      </button>
+    );
+  }
   return (
-    <div className="flex flex-col gap-3 border-t border-rule pt-5">
-      <p className="display text-[28px] leading-tight" role={state.s === "failed" ? "alert" : undefined}>
+    <div className="flex flex-col gap-3">
+      <p className="text-[15px]" role={state.s === "failed" ? "alert" : undefined}>
         {state.s === "failed" ? state.message : "Check stopped."}
       </p>
-      <p className="text-[13px] text-ink-2 tabular-nums">{state.s === "cancelled" ? `At least ${formatMicros(state.spentMicros)} spent` : state.spentMicros > 0 ? `${formatMicros(state.spentMicros)} spent` : ""}</p>
+      {(state.s === "cancelled" || state.spentMicros > 0) && <p className="text-[13px] text-text-2 tabular-nums">{state.s === "cancelled" ? `At least ${formatMicros(state.spentMicros)} spent` : `${formatMicros(state.spentMicros)} spent`}</p>}
       <div className="flex gap-2">
         {(state.s === "cancelled" || state.retryable) && (
-          <button type="button" onClick={() => dispatch({ type: "retry" })} className="h-10 rounded-full bg-ink px-5 text-[14px] font-medium text-paper">
+          <button type="button" onClick={() => dispatch({ type: "retry" })} className={primary}>
             Check again
           </button>
         )}
-        <button type="button" onClick={() => dispatch({ type: "edit" })} className="h-10 rounded-full px-5 text-[14px] shadow-[inset_0_0_0_1px_var(--rule)] hover:bg-fill">
+        <button type="button" onClick={() => dispatch({ type: "edit" })} className={secondary}>
           Change files
         </button>
       </div>
@@ -216,41 +238,38 @@ function WorkingYear({ state, onCancel, dispatch }: { state: Exclude<CheckState,
   const bills = state.inputs.bills;
   const done = live ? Object.keys(live.months).length : 0;
   return (
-    <section className="mx-auto w-full max-w-[1240px] px-6 pb-20 pt-4">
-      <div className="flex items-end justify-between gap-6 border-b border-rule pb-5">
-        <h1 className="display text-[44px] leading-none sm:text-[56px]">
-          Reading {bills.length} bills at once<span className="text-vermilion">.</span>
-        </h1>
-        <p className="text-[13px] text-ink-2 tabular-nums">
-          {done} of {bills.length} read{state.spentMicros > 0 ? `, ${formatMicros(state.spentMicros)}` : ""}
+    <section className="mx-auto w-full max-w-[1120px] px-6 pb-20 pt-6">
+      <div className="flex items-baseline justify-between gap-6 pb-6">
+        <h1 className="text-[28px] font-semibold tracking-[-0.02em]">Reading {bills.length} bills</h1>
+        <p className="text-[13px] text-text-2 tabular-nums">
+          {done} of {bills.length} done{state.spentMicros > 0 ? `, ${formatMicros(state.spentMicros)}` : ""}
         </p>
       </div>
-      <ol className="mt-8 grid grid-cols-3 gap-5 sm:grid-cols-4 lg:grid-cols-6">
+      <ol className="grid grid-cols-3 gap-4 sm:grid-cols-4 lg:grid-cols-6">
         {bills.map((doc, i) => {
           const month = live?.months[i];
           const lines = live?.lines[i] ?? [];
-          const marks: Mark[] = lines.flatMap((line, j) => (line.box && line.page === 1 ? [{ id: `R${j}`, box: line.box, tone: "read" as const }] : []));
-          const claimed = month?.outcome === "checked" ? month.claims.reduce((t, c) => t + c.amountCents, 0) : 0;
+          const rows = doc.status === "ready" ? doc.pages[0].rows : null;
+          const marks: Mark[] = lines.flatMap((line, j) => {
+            const box = line.page === 1 ? snapBox(line.box, line.label, rows) : null;
+            return box ? [{ id: `R${j}`, box, tone: "read" as const }] : [];
+          });
+          const over = month?.outcome === "checked" ? month.claims.reduce((t, c) => t + c.amountCents, 0) : 0;
           return (
             <li key={doc.id} className="flex flex-col gap-2">
-              {doc.status === "ready" && <BillPage image={doc.pages[0].image} alt={`Bill ${i + 1}`} marks={marks} sweeping={!month && state.s === "running"} visibleAspect="1200 / 1000" />}
-              <p className={`text-[13px] tabular-nums ${claimed > 0 ? "font-medium text-vermilion-ink" : "text-ink-2"}`}>
-                {month ? (month.outcome === "checked" ? (claimed > 0 ? `+${usd(claimed)}` : "Matches the offer") : "Couldn't read") : lines.length > 0 ? `${lines.length} lines read` : "Waiting"}
+              {doc.status === "ready" && <BillPage image={doc.pages[0].image} alt={`Bill ${i + 1}`} marks={marks} visibleAspect="1000 / 900" />}
+              <p className={`flex items-center gap-2 text-[13px] tabular-nums ${over > 0 ? "font-semibold text-red" : "text-text-2"}`}>
+                {!month && state.s === "running" && lines.length > 0 && <Spinner />}
+                {month ? (month.outcome === "checked" ? (over > 0 ? `${usd(over)} over` : "Matches") : "Couldn't read") : lines.length > 0 ? `${lines.length} lines` : "Waiting"}
               </p>
             </li>
           );
         })}
       </ol>
-      <div className="mt-10">{state.s === "running" ? <CancelButton onCancel={onCancel} /> : <Failure state={state} dispatch={dispatch} />}</div>
+      <div className="mt-8">
+        <Footer state={state} onCancel={onCancel} dispatch={dispatch} />
+      </div>
     </section>
-  );
-}
-
-function CancelButton({ onCancel }: { onCancel: () => void }) {
-  return (
-    <button type="button" onClick={onCancel} className="h-10 self-start rounded-full px-5 text-[14px] shadow-[inset_0_0_0_1px_var(--rule)] hover:bg-fill">
-      Cancel
-    </button>
   );
 }
 
@@ -261,72 +280,72 @@ function Working({ state, onCancel, dispatch }: { state: Exclude<CheckState, { s
   const running = state.s === "running";
   const live = running ? state.live : null;
   const stage = state.stage;
-  const reading = running && (stage === null || stage === "reading_bill" || stage === "rereading_bill");
   const lines = live?.lines[0] ?? [];
-  const marks: Mark[] = lines.flatMap((line, i) => (line.box && line.page === 1 ? [{ id: `R${i}`, box: line.box, tone: "read" as const }] : []));
+  const marks: Mark[] = lines.flatMap((line, i) => {
+    const box = line.page === 1 ? snapBox(line.box, line.label, page?.rows ?? null) : null;
+    return box ? [{ id: `R${i}`, box, tone: "read" as const }] : [];
+  });
   const offer = state.inputs.offer;
   const isCall = offer.kind === "call";
-  const steps: (Step & { label: string })[] = [
-    { key: "bill", stages: ["reading_bill", "rereading_bill"], label: stage === "rereading_bill" ? "Reading the bill again, more carefully" : "Reading the bill" },
-    ...(offer.kind === "none" ? [] : [{ key: "offer" as const, stages: ["reading_offer"] as Stage[], label: isCall ? "Listening to the call" : "Reading what you were promised" }]),
-    { key: "compare", stages: ["comparing"], label: "Checking every dollar in code" },
-    ...(offer.kind === "none" ? [] : [{ key: "challenge" as const, stages: ["challenging"] as Stage[], label: "Arguing the company's side" }]),
+  const steps: Step[] = [
+    { key: "bill", stages: ["reading_bill", "rereading_bill"], label: stage === "rereading_bill" ? "Reading the bill again" : "Reading the bill" },
+    ...(offer.kind === "none" ? [] : [{ key: "offer" as const, stages: ["reading_offer"] as Stage[], label: isCall ? "Listening to the call" : "Reading the offer" }]),
+    { key: "compare", stages: ["comparing"], label: "Comparing charges with the promise" },
+    ...(offer.kind === "none" ? [] : [{ key: "challenge" as const, stages: ["challenging"] as Stage[], label: "Checking the company's side" }]),
   ];
-  const thought = (step: Step) => (live?.thoughts ?? []).filter((t) => step.stages.includes(t.stage)).map((t) => t.text).join("\n\n");
   const current = steps.find((step) => stepStatus(step, stage, running) === "now");
+  const latestThought = current ? (live?.thoughts ?? []).filter((t) => current.stages.includes(t.stage)).at(-1)?.text.split("\n\n").at(-1) : undefined;
 
   return (
-    <section className="mx-auto grid w-full max-w-[1240px] gap-10 px-6 pb-20 pt-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1fr)] lg:gap-16">
-      <div className="lg:sticky lg:top-6 lg:self-start">{page && <BillPage image={page.image} alt="Your bill, first page" marks={marks} sweeping={reading} />}</div>
+    <section className="mx-auto grid w-full max-w-[1120px] gap-10 px-6 pb-20 pt-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
+      <div className="lg:sticky lg:top-6 lg:self-start">{page && <BillPage image={page.image} alt="Your bill, first page" marks={marks} />}</div>
 
-      <div className="flex flex-col gap-8" aria-live="polite">
-        <div className="flex items-baseline justify-between border-b border-rule pb-4">
-          <p className="text-[13px] text-ink-2">Muse Ember</p>
-          <p className="text-[13px] text-ink-2 tabular-nums">{state.spentMicros > 0 ? `${formatMicros(state.spentMicros)} spent` : "Starting"}</p>
+      <div className="flex flex-col gap-6" aria-live="polite">
+        <div className="flex items-baseline justify-between gap-4">
+          <h1 className="text-[28px] font-semibold tracking-[-0.02em]">{current?.label ?? (running ? "Starting" : "Stopped")}</h1>
+          {state.spentMicros > 0 && <p className="text-[13px] text-text-2 tabular-nums">{formatMicros(state.spentMicros)}</p>}
         </div>
+        <p className="min-h-[44px] text-[15px] leading-[22px] text-text-2">{latestThought ?? (running ? "Muse Ember is starting on the bill." : "")}</p>
 
-        {current && thought(current) && <p className="display caret text-[30px] leading-[1.2] text-ink sm:text-[34px]">{thought(current).split("\n\n").at(-1)}</p>}
-
-        <ol className="flex flex-col">
-          {steps.map((step, index) => {
+        <ol className="flex flex-col border-t border-line">
+          {steps.map((step) => {
             const status = stepStatus(step, stage, running);
             return (
-              <li key={step.key} className={`border-t border-rule py-4 transition-opacity duration-300 ${status === "later" ? "opacity-35" : ""}`}>
-                <div className="flex items-center gap-3">
-                  <span className="w-5 text-[12px] text-ink-3 tabular-nums">{String(index + 1).padStart(2, "0")}</span>
-                  <span className="flex-1 text-[16px] font-medium">{step.label}</span>
-                  {status === "now" ? <Spinner /> : status === "done" ? <span className="text-[12px] text-ink-2">Done</span> : null}
+              <li key={step.key} className="border-b border-line py-3">
+                <div className={`flex items-center gap-3 ${status === "later" ? "text-text-2" : ""}`}>
+                  <span className="grid size-4 place-items-center">{status === "now" ? <Spinner /> : status === "done" ? <Check /> : <span className="size-2 rounded-full bg-fill-2" />}</span>
+                  <span className="text-[15px]">{step.label}</span>
                 </div>
 
                 {step.key === "bill" && lines.length > 0 && (
-                  <ul className="ml-8 mt-3">
+                  <ul className="ml-7 mt-2">
                     {lines.map((line, i) => (
-                      <li key={i} className="appear flex items-baseline justify-between gap-4 border-b border-dotted border-rule py-1.5 text-[14px]">
+                      <li key={i} className="appear flex items-baseline justify-between gap-4 py-0.5 text-[13px]">
                         <span className="truncate">{line.label}</span>
-                        <span className="tabular-nums text-ink-2">{usd(line.amount_cents)}</span>
+                        <span className="text-text-2 tabular-nums">{usd(line.amount_cents)}</span>
                       </li>
                     ))}
                   </ul>
                 )}
 
                 {step.key === "offer" && live && live.heard.length > 0 && (
-                  <ul className="ml-8 mt-3 flex flex-col gap-2">
+                  <ul className="ml-7 mt-2 flex flex-col gap-1">
                     {live.heard.map((turn, i) => (
-                      <li key={i} className="appear grid grid-cols-[4.5rem_1fr] gap-3 text-[14px] leading-snug">
-                        <span className="text-ink-3 tabular-nums">
-                          {turn.speaker === "company" ? "Company" : turn.speaker === "customer" ? "You" : "Other"} {formatClock(turn.start_seconds)}
+                      <li key={i} className="appear grid grid-cols-[2.5rem_1fr] gap-2 text-[13px] leading-[18px]">
+                        <span className="text-text-2 tabular-nums">{formatClock(turn.start_seconds)}</span>
+                        <span>
+                          <span className="text-text-2">{turn.speaker === "company" ? "Company" : turn.speaker === "customer" ? "You" : "Other"}: </span>
+                          {turn.text}
                         </span>
-                        <span className={turn.speaker === "company" ? "text-ink" : "text-ink-2"}>{turn.text}</span>
                       </li>
                     ))}
                   </ul>
                 )}
 
                 {step.key === "offer" && live && live.promises.length > 0 && (
-                  <ul className="ml-8 mt-3 flex flex-col gap-1.5">
+                  <ul className="ml-7 mt-2 flex flex-col gap-0.5">
                     {live.promises.map((promise, i) => (
-                      <li key={i} className="appear text-[14px] text-ink">
-                        <span className="text-vermilion">→ </span>
+                      <li key={i} className="appear text-[13px] leading-[18px]">
                         {promise.description}
                       </li>
                     ))}
@@ -334,13 +353,11 @@ function Working({ state, onCancel, dispatch }: { state: Exclude<CheckState, { s
                 )}
 
                 {step.key === "challenge" && live && live.challenges.length > 0 && (
-                  <ul className="ml-8 mt-3 flex flex-col gap-3">
+                  <ul className="ml-7 mt-2 flex flex-col gap-1">
                     {live.challenges.map((challenge, i) => (
-                      <li key={i} className="appear flex items-start justify-between gap-4 text-[14px] leading-snug">
-                        <span className="text-ink-2">{challenge.looked_for}</span>
-                        <span className={`stamp shrink-0 rounded-[3px] px-2 py-0.5 text-[11px] font-semibold tracking-wide ${challenge.verdict === "stands" ? "text-ink shadow-[inset_0_0_0_1.5px_var(--ink)]" : "text-vermilion-ink shadow-[inset_0_0_0_1.5px_var(--vermilion)]"}`}>
-                          {challenge.verdict === "stands" ? "STANDS" : "DROPPED"}
-                        </span>
+                      <li key={i} className="appear flex items-baseline justify-between gap-4 text-[13px] leading-[18px]">
+                        <span className="text-text-2">{challenge.looked_for}</span>
+                        <span className={`shrink-0 ${challenge.verdict === "stands" ? "" : "text-red"}`}>{challenge.verdict === "stands" ? "Holds" : "Dropped"}</span>
                       </li>
                     ))}
                   </ul>
@@ -350,29 +367,21 @@ function Working({ state, onCancel, dispatch }: { state: Exclude<CheckState, { s
           })}
         </ol>
 
-        {state.s === "running" ? <CancelButton onCancel={onCancel} /> : <Failure state={state} dispatch={dispatch} />}
+        <Footer state={state} onCancel={onCancel} dispatch={dispatch} />
       </div>
     </section>
   );
 }
 
-function SampleCard({ sample, busy, loading, onRun }: { sample: Sample; busy: boolean; loading: boolean; onRun: () => void }) {
+function SampleButton({ sample, busy, loading, onRun }: { sample: Sample; busy: boolean; loading: boolean; onRun: () => void }) {
   return (
-    <button type="button" disabled={busy} onClick={onRun} className="group flex flex-col gap-3 text-left disabled:cursor-wait">
-      <div className="relative transition-transform duration-500 group-hover:-translate-y-1 group-hover:rotate-[-0.6deg]">
-        {sample.bills.length > 1 && <div aria-hidden className="paper absolute inset-0 translate-x-2 translate-y-2 rotate-[1.2deg]" />}
-        {sample.bills.length > 1 && <div aria-hidden className="paper absolute inset-0 translate-x-1 translate-y-1 rotate-[0.6deg]" />}
-        <BillPage image={sample.image} alt="" visibleAspect="1200 / 640" />
-        {sample.offer.kind === "call" && (
-          <div className="paper absolute -bottom-3 right-3 flex items-center gap-2 px-3 py-2">
-            <span className="size-2 rounded-full bg-vermilion" />
-            <span className="text-[12px] font-medium">Recorded call</span>
-          </div>
-        )}
+    <button type="button" disabled={busy} onClick={onRun} className="flex items-center gap-4 rounded-xl p-3 text-left hover:bg-fill disabled:cursor-wait">
+      <div className="h-[72px] w-14 shrink-0 overflow-hidden rounded-[4px] bg-white shadow-[inset_0_0_0_1px_var(--line)]">
+        <img src={sample.image} alt="" className="w-[230%] max-w-none -translate-x-[9%] -translate-y-[4%]" />
       </div>
-      <span className="mt-1">
-        <span className="block text-[15px] font-medium">{loading ? "Opening…" : sample.title}</span>
-        <span className="block text-[13px] text-ink-2">{sample.outcome}</span>
+      <span className="min-w-0">
+        <span className="block text-[15px] font-medium">{loading ? "Opening" : sample.title}</span>
+        <span className="block text-[13px] text-text-2">{sample.outcome}</span>
       </span>
     </button>
   );
@@ -464,12 +473,10 @@ export function Checker({ samples }: { samples: Sample[] }) {
     return (
       <ResultView
         result={state.result}
-        pages={bill?.status === "ready" ? bill.pages : []}
-        offerText={offer.kind === "text" ? offer.text : null}
-        callUrl={offer.kind === "call" && offer.call.status === "ready" ? offer.call.url : null}
         bill={0}
+        pages={bill?.status === "ready" ? bill.pages : []}
+        callUrl={offer.kind === "call" && offer.call.status === "ready" ? offer.call.url : null}
         selection={state.selections[0]}
-        thoughts={state.thoughts}
         dispatch={dispatch}
         backLabel="Check another bill"
         onBack={() => dispatch({ type: "edit" })}
@@ -482,44 +489,46 @@ export function Checker({ samples }: { samples: Sample[] }) {
   const ready = checkInput(state.inputs) !== null;
 
   return (
-    <section className="mx-auto w-full max-w-[1240px] px-6 pb-24">
-      <div className="pt-10 lg:pt-16">
-        <h1 className="display max-w-[14ch] text-[64px] leading-[0.92] tracking-[-0.025em] sm:text-[104px]">
-          Put your bill on the stand<span className="text-vermilion">.</span>
-        </h1>
-        <p className="mt-7 max-w-[40rem] text-[19px] leading-[1.5] text-ink-2 text-pretty">
-          Billproof sets a phone, internet or utility bill against what you were promised: the offer email, a screenshot, even a recording of the sales call. Muse Ember marks every charge that breaks it, then argues the company&apos;s side before anything is claimed.
+    <section className="mx-auto w-full max-w-[1120px] px-6 pb-24">
+      <div className="max-w-[44rem] pt-12">
+        <h1 className="text-[40px] font-semibold leading-[1.1] tracking-[-0.025em]">Check a bill against what you were promised</h1>
+        <p className="mt-4 text-[17px] leading-[26px] text-text-2 text-pretty">
+          Add a phone, internet or utility bill and the offer: the confirmation email, a screenshot, or a recording of the sales call. Muse Ember finds every charge above the promise and writes the message to get it back.
         </p>
       </div>
 
-      <div className="mt-12 grid gap-px overflow-hidden rounded-[4px] bg-rule shadow-[0_0_0_1px_var(--rule)] lg:grid-cols-[1fr_1.15fr_auto]">
-        <div className="bg-paper p-5">
-          <p className="text-[12px] text-ink-3">The bill</p>
+      <div className="mt-10 grid gap-3 lg:grid-cols-2">
+        <div className="flex min-h-[180px] flex-col rounded-xl bg-fill p-4">
+          <p className="text-[15px] font-semibold">Bill</p>
           {bills.length > 0 ? (
-            <div className="mt-2 max-h-[220px] overflow-y-auto">
+            <div className="mt-2 max-h-[200px] overflow-y-auto">
               {bills.map((doc) => (
-                <DocChip key={doc.id} doc={doc} onRemove={() => dispatch({ type: "removed", id: doc.id })} />
+                <DocRow key={doc.id} doc={doc} onRemove={() => dispatch({ type: "removed", id: doc.id })} />
               ))}
               {bills.length < MAX_BILLS && (
-                <FileTarget label="Add more bills" accept={BILL_ACCEPT} multiple onFiles={addBills} className="mt-1 text-[13px] text-ink-2 underline underline-offset-4 hover:text-ink">
+                <FileTarget label="Add more bills" accept={BILL_ACCEPT} multiple onFiles={addBills} className="mt-1 h-8 rounded-lg px-2 text-[13px] text-text-2 hover:bg-fill-2 hover:text-text">
                   Add another month
                 </FileTarget>
               )}
             </div>
           ) : (
-            <FileTarget label="Choose the bill" accept={BILL_ACCEPT} multiple onFiles={addBills} className="mt-3 flex h-[132px] w-full flex-col items-start justify-end text-left">
-              <span className="display text-[30px] leading-none">Drop the bill</span>
-              <span className="mt-2 text-[13px] text-ink-2">PDF or photo. Drop up to 12 months to read a whole year.</span>
+            <FileTarget label="Choose the bill" accept={BILL_ACCEPT} multiple onFiles={addBills} className="mt-3 flex h-[112px] w-full flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-text-2/40 text-center hover:bg-fill-2">
+              <span className="text-[15px]">Drop a PDF or photo, or choose a file</span>
+              <span className="text-[13px] text-text-2">Up to 12 months at once</span>
             </FileTarget>
           )}
         </div>
 
-        <div className="bg-paper p-5">
-          <p className="text-[12px] text-ink-3">What you were promised</p>
+        <div className="flex min-h-[180px] flex-col rounded-xl bg-fill p-4">
+          <p className="text-[15px] font-semibold">What you were promised</p>
           {offer.kind === "file" ? (
-            <DocChip doc={offer.doc} onRemove={() => dispatch({ type: "removed", id: offer.doc.id })} />
+            <div className="mt-2">
+              <DocRow doc={offer.doc} onRemove={() => dispatch({ type: "removed", id: offer.doc.id })} />
+            </div>
           ) : offer.kind === "call" ? (
-            <CallChip call={offer.call} onRemove={() => dispatch({ type: "removed", id: offer.call.id })} />
+            <div className="mt-2">
+              <CallRow call={offer.call} onRemove={() => dispatch({ type: "removed", id: offer.call.id })} />
+            </div>
           ) : (
             <>
               <textarea
@@ -527,39 +536,32 @@ export function Checker({ samples }: { samples: Sample[] }) {
                 onChange={(event) => dispatch({ type: "offer_text", text: event.target.value })}
                 placeholder="Paste the order confirmation or plan details"
                 aria-label="What you were promised"
-                className="mt-2 block h-[96px] w-full resize-none bg-transparent text-[15px] leading-6 placeholder:text-ink-3 focus:outline-none"
+                className="mt-2 block min-h-[88px] w-full flex-1 resize-none rounded-lg bg-white p-3 text-[15px] leading-[22px] shadow-[inset_0_0_0_1px_var(--line)] placeholder:text-text-2 focus:outline-none focus-visible:shadow-[inset_0_0_0_2px_var(--text)]"
               />
-              <FileTarget label="Add the offer as a file or recording" accept={OFFER_ACCEPT} onFiles={(files) => void addOffer(files[0])} className="text-[13px] text-ink-2 underline underline-offset-4 hover:text-ink">
-                Or add a screenshot, PDF, or a recording of the call
+              <FileTarget label="Add the offer as a file or recording" accept={OFFER_ACCEPT} onFiles={(files) => void addOffer(files[0])} className="mt-2 h-8 rounded-lg px-2 text-[13px] text-text-2 hover:bg-fill-2 hover:text-text">
+                Add a screenshot, PDF or call recording instead
               </FileTarget>
             </>
           )}
         </div>
-
-        <div className="flex items-end bg-paper p-5">
-          <button
-            type="button"
-            disabled={!ready}
-            onClick={() => dispatch({ type: "start" })}
-            className="h-14 w-full rounded-full bg-vermilion px-8 text-[16px] font-semibold text-white transition-[opacity,transform] active:scale-[0.98] disabled:bg-ink disabled:opacity-25 lg:w-auto"
-          >
-            {bills.length > 1 ? `Check ${bills.length} bills` : "Check bill"}
-          </button>
-        </div>
       </div>
-      <p className="mt-3 text-[12px] text-ink-3">Read by Meta&apos;s Muse Ember. Billproof doesn&apos;t keep your files.</p>
 
-      <div className="mt-24">
-        <div className="flex items-baseline justify-between border-b border-rule pb-3">
-          <h2 className="display text-[34px] leading-none">Try a sample</h2>
-          <p className="text-[13px] text-ink-2">Each runs live on Muse Ember</p>
-        </div>
-        <div className="mt-8 grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <p className="text-[13px] text-text-2">Read by Meta&apos;s Muse Ember. Files aren&apos;t stored.</p>
+        <button type="button" disabled={!ready} onClick={() => dispatch({ type: "start" })} className="h-11 rounded-lg bg-text px-6 text-[15px] font-medium text-white hover:bg-black disabled:bg-fill-2 disabled:text-text-2">
+          {bills.length > 1 ? `Check ${bills.length} bills` : "Check bill"}
+        </button>
+      </div>
+
+      <section className="mt-16">
+        <h2 className="text-[17px] font-semibold">Samples</h2>
+        <p className="mt-1 text-[13px] text-text-2">Each one runs live on Muse Ember.</p>
+        <div className="-mx-3 mt-3 grid sm:grid-cols-2 lg:grid-cols-3">
           {samples.map((sample) => (
-            <SampleCard key={sample.id} sample={sample} busy={loadingSample !== null} loading={loadingSample === sample.id} onRun={() => void runSample(sample)} />
+            <SampleButton key={sample.id} sample={sample} busy={loadingSample !== null} loading={loadingSample === sample.id} onRun={() => void runSample(sample)} />
           ))}
         </div>
-      </div>
+      </section>
     </section>
   );
 }

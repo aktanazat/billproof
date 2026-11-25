@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 import { initialState, reduce, type CheckAction, type CheckState } from "./check-machine";
 import type { CheckResult } from "./result";
 
-const page = { image: "data:image/jpeg;base64,AAAA", text: null };
+const page = { image: "data:image/jpeg;base64,AAAA", text: null, rows: null };
 const notABill: CheckResult = { outcome: "not_a_bill", spentMicros: 120 };
 
 const play = (actions: CheckAction[], from: CheckState = initialState) => actions.reduce(reduce, from);
@@ -53,7 +53,6 @@ describe("check machine", () => {
       attempts: 1,
       result: notABill,
       selections: [{ claims: { C1: "needs_confirmation" }, questions: {} }],
-      thoughts: [],
     };
     expect(play([{ type: "toggle_claim", bill: 0, id: "C1" }], done)).toMatchObject({ selections: [{ claims: { C1: "needs_confirmation" } }] });
     expect(play([{ type: "confirm_claim", bill: 0, id: "C1" }], done)).toMatchObject({ selections: [{ claims: { C1: "selected" } }] });

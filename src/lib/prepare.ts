@@ -1,5 +1,8 @@
-import { pageText } from "./pdf-text";
+import { pageRows, pageText, type TextRow } from "./pdf-text";
 import type { PreparedPage } from "./result";
+
+// A page as the browser keeps it: what is sent to the check, plus the printed rows used to place marks exactly.
+export type ShownPage = PreparedPage & { rows: TextRow[] | null };
 
 const LONG_SIDE = 1600;
 const JPEG_QUALITY = 0.85;
@@ -13,7 +16,7 @@ function canvasToJpeg(canvas: HTMLCanvasElement): string {
   return canvas.toDataURL("image/jpeg", JPEG_QUALITY);
 }
 
-async function preparePdf(file: File, maxPages: number): Promise<PreparedPage[]> {
+async function preparePdf(file: File, maxPages: number): Promise<ShownPage[]> {
   // pdf.js is browser-only and large; it loads when the first PDF is opened, never during server rendering.
   const { getDocument, GlobalWorkerOptions } = await import("pdfjs-dist");
   GlobalWorkerOptions.workerSrc = "/pdfjs/pdf.worker.min.mjs";
@@ -21,7 +24,7 @@ async function preparePdf(file: File, maxPages: number): Promise<PreparedPage[]>
   try {
     const doc = await task.promise;
     if (doc.numPages > maxPages) throw new PrepareError(`This PDF has ${doc.numPages} pages. Use the pages with the charges, up to ${maxPages}.`);
-    const pages: PreparedPage[] = [];
+    const pages: ShownPage[] = [];
     for (let n = 1; n <= doc.numPages; n++) {
       const page = await doc.getPage(n);
       const base = page.getViewport({ scale: 1 });
@@ -34,8 +37,9 @@ async function preparePdf(file: File, maxPages: number): Promise<PreparedPage[]>
       context.fillStyle = "#ffffff";
       context.fillRect(0, 0, canvas.width, canvas.height);
       await page.render({ canvas, canvasContext: context, viewport }).promise;
-      const text = pageText(await page.getTextContent());
-      pages.push({ image: canvasToJpeg(canvas), text: text.length > 0 ? text : null });
+      const content = await page.getTextContent();
+      const text = pageText(content);
+      pages.push({ image: canvasToJpeg(canvas), text: text.length > 0 ? text : null, rows: text.length > 0 ? pageRows(content, base) : null });
     }
     return pages;
   } catch (error) {
@@ -46,7 +50,7 @@ async function preparePdf(file: File, maxPages: number): Promise<PreparedPage[]>
   }
 }
 
-async function prepareImage(file: File): Promise<PreparedPage[]> {
+async function prepareImage(file: File): Promise<ShownPage[]> {
   let bitmap: ImageBitmap;
   try {
     bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
@@ -61,10 +65,10 @@ async function prepareImage(file: File): Promise<PreparedPage[]> {
   if (!context) throw new PrepareError("This browser could not draw the image.");
   context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
   bitmap.close();
-  return [{ image: canvasToJpeg(canvas), text: null }];
+  return [{ image: canvasToJpeg(canvas), text: null, rows: null }];
 }
 
-export async function prepareFile(file: File, maxPages: number): Promise<PreparedPage[]> {
+export async function prepareFile(file: File, maxPages: number): Promise<ShownPage[]> {
   const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
   if (!isPdf && /\.(heic|heif)$/i.test(file.name)) throw new PrepareError("HEIC photos can't be read here. Export the photo as JPEG and try again.");
   if (!isPdf && !file.type.startsWith("image/")) throw new PrepareError("Add a PDF or a photo of the bill.");

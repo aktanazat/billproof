@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, type CSSProperties } from "react";
+import { useState } from "react";
 import type { CheckAction, CheckState } from "@/lib/check-machine";
-import { buildYearMessage, usd, type Message } from "@/lib/letter";
+import { buildYearMessage, usd } from "@/lib/letter";
 import type { CallRecord, Checked, YearResult } from "@/lib/result";
-import { BillPage } from "./bill-page";
-import { ResultView, Trace } from "./result-view";
+import { MessageBox, ResultView, Trace } from "./result-view";
 
 type Done = Extract<CheckState, { s: "done" }>;
 
@@ -17,11 +16,6 @@ function monthOf(result: Checked, long = false): string {
   if (!iso) return "Unknown";
   const [y, m] = iso.split("-").map(Number);
   return long ? `${LONG_MONTHS[m - 1]} ${y}` : `${MONTHS[m - 1]} ${String(y).slice(2)}`;
-}
-
-// The plan's net monthly price: plan lines with the discounts and credits that come off them.
-function netPlan(result: Checked): number {
-  return result.reading.line_items.filter((line) => line.kind === "plan" || line.kind === "discount" || line.kind === "credit").reduce((t, line) => t + line.amount_cents, 0);
 }
 
 const claimed = (result: Checked) => result.claims.reduce((t, claim) => t + claim.amountCents, 0);
@@ -38,23 +32,6 @@ function summarize(calls: CallRecord[]): CallRecord[] {
     );
   }
   return [...byName.values()];
-}
-
-function PriceLine({ values, firstBad }: { values: (number | null)[]; firstBad: number }) {
-  const known = values.filter((v): v is number => v !== null);
-  if (known.length < 2) return null;
-  const max = Math.max(...known);
-  const min = Math.min(...known);
-  const span = Math.max(1, max - min);
-  const w = 100 / values.length;
-  const y = (v: number) => 34 - ((v - min) / span) * 26;
-  const points = values.map((v, i) => (v === null ? null : { x: i * w + w / 2, y: y(v) }));
-  const segments = points.slice(1).map((p, i) => ({ a: points[i], b: p, bad: i + 1 >= firstBad && firstBad >= 0 }));
-  return (
-    <svg aria-hidden viewBox="0 0 100 40" preserveAspectRatio="none" className="hidden h-16 w-full lg:block">
-      {segments.map((s, i) => (s.a && s.b ? <path key={i} d={`M${s.a.x},${s.a.y} H${s.b.x} V${s.b.y}`} fill="none" stroke={s.bad ? "var(--vermilion)" : "var(--ink)"} strokeWidth={s.bad ? 1.4 : 0.8} vectorEffect="non-scaling-stroke" /> : null))}
-    </svg>
-  );
 }
 
 export function YearView({ state, result, dispatch }: { state: Done; result: YearResult; dispatch: (action: CheckAction) => void }) {
@@ -88,7 +65,6 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
   const firstBad = checked.findIndex((month) => claimed(month.result) > 0);
   const total = checked.reduce((t, month) => t + asked(month), 0);
   const provider = checked[0]?.result.reading.provider ?? null;
-  const offerText = state.inputs.offer.kind === "text" ? state.inputs.offer.text : null;
   const callUrl = state.inputs.offer.kind === "call" && state.inputs.offer.call.status === "ready" ? state.inputs.offer.call.url : null;
 
   if (open !== null) {
@@ -96,7 +72,7 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
     const doc = state.inputs.bills[open];
     const selection = state.selections[open];
     if (month && doc?.status === "ready" && selection) {
-      return <ResultView result={month.result} bill={open} pages={doc.pages} offerText={offerText} callUrl={callUrl} selection={selection} thoughts={[]} dispatch={dispatch} backLabel="Back to the year" onBack={() => setOpen(null)} />;
+      return <ResultView result={month.result} bill={open} pages={doc.pages} callUrl={callUrl} selection={selection} dispatch={dispatch} backLabel="Back to the year" onBack={() => setOpen(null)} />;
     }
   }
 
@@ -107,88 +83,50 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
     duplicates > 0 ? `${duplicates} duplicate ${duplicates === 1 ? "statement" : "statements"}` : null,
     otherAccount > 0 ? `${otherAccount} from another account` : null,
   ].filter(Boolean);
+  const largest = Math.max(1, ...checked.map((month) => claimed(month.result)));
 
   return (
-    <section className="mx-auto w-full max-w-[1240px] px-6 pb-24 pt-10">
-      <header className="flex flex-wrap items-end justify-between gap-6 border-b border-rule pb-6">
+    <section className="mx-auto w-full max-w-[1120px] px-6 pb-24 pt-6">
+      <header className="flex flex-wrap items-end justify-between gap-4 pb-8">
         <div>
-          <p className="display text-[96px] leading-[0.85] tracking-[-0.03em] tabular-nums sm:text-[136px]">{usd(total)}</p>
-          <h1 className="mt-3 max-w-[48rem] text-[17px] text-ink-2">
+          <p className="text-[40px] font-semibold leading-none tracking-[-0.02em] tabular-nums">{usd(total)}</p>
+          <h1 className="mt-2 max-w-[44rem] text-[17px] text-text-2">
             {firstBad >= 0
-              ? `to ask back${provider ? ` from ${provider}` : ""} across ${checked.length} statements${waiting ? ", once you confirm the marked lines" : ""}. It started in ${monthOf(checked[firstBad].result, true)}.`
-              : `Every one of ${checked.length} statements matches the offer.`}
-            {skipped.length > 0 ? ` Not counted: ${skipped.join(", ")}.` : ""}
+              ? `to ask back${provider ? ` from ${provider}` : ""} across ${checked.length} statements${waiting ? ", once you confirm the marked lines" : ""}`
+              : `All ${checked.length} statements match the offer`}
           </h1>
+          {skipped.length > 0 && <p className="mt-1 text-[13px] text-text-2">Not counted: {skipped.join(", ")}</p>}
         </div>
-        <button type="button" onClick={() => dispatch({ type: "edit" })} className="h-10 shrink-0 rounded-full px-5 text-[14px] shadow-[inset_0_0_0_1px_var(--rule)] hover:bg-fill">
+        <button type="button" onClick={() => dispatch({ type: "edit" })} className="h-9 shrink-0 rounded-lg bg-fill px-4 text-[15px] hover:bg-fill-2">
           Check other bills
         </button>
       </header>
 
-      <div className="mt-12">
-        <PriceLine values={checked.map((m) => netPlan(m.result))} firstBad={firstBad} />
-        <ol className="grid grid-cols-4 gap-3 sm:grid-cols-6 lg:[grid-template-columns:repeat(var(--months),minmax(0,1fr))]" style={{ "--months": checked.length } as CSSProperties}>
-          {checked.map((month, i) => {
-            const doc = state.inputs.bills[month.bill];
+      <section className="flex flex-col gap-4">
+        <h2 className="text-[17px] font-semibold">{firstBad > 0 ? `Overcharged from ${monthOf(checked[firstBad].result, true)}` : "Overcharge by month"}</h2>
+        <ol className="grid grid-cols-6 gap-x-2 gap-y-6 lg:grid-cols-12" aria-label="Overcharge by month">
+          {checked.map((month) => {
             const amount = claimed(month.result);
             return (
               <li key={month.bill}>
-                <button type="button" onClick={() => setOpen(month.bill)} className={`group flex w-full flex-col gap-2 text-left ${i === firstBad ? "relative" : ""}`}>
-                  <div className={`transition-transform duration-300 group-hover:-translate-y-1 ${amount > 0 ? "outline outline-2 outline-offset-2 outline-vermilion" : ""}`}>{doc?.status === "ready" && <BillPage image={doc.pages[0].image} alt="" visibleAspect="1200 / 1100" />}</div>
-                  <span className="text-[12px] text-ink-2">{monthOf(month.result)}</span>
-                  <span className="text-[13px] tabular-nums">{usd(netPlan(month.result))}</span>
-                  <span className={`text-[12px] font-medium tabular-nums ${amount > 0 ? "text-vermilion-ink" : "text-ink-3"}`}>{amount > 0 ? `+${usd(amount)}` : "OK"}</span>
+                <button type="button" onClick={() => setOpen(month.bill)} className="group flex w-full flex-col gap-2 rounded-lg text-left" aria-label={`${monthOf(month.result, true)}: ${amount > 0 ? `${usd(amount)} overcharged` : "matches the offer"}`}>
+                  <div className="flex h-28 items-end rounded-t-md border-b border-line px-1.5 group-hover:bg-fill">
+                    {amount > 0 && <div className="w-full rounded-t-[3px] bg-red" style={{ height: `${Math.max(8, (amount / largest) * 100)}%` }} />}
+                  </div>
+                  <span className="text-[13px] text-text-2">{monthOf(month.result)}</span>
+                  <span className={`text-[13px] tabular-nums ${amount > 0 ? "font-semibold text-red" : "text-text-2"}`}>{amount > 0 ? usd(amount) : "—"}</span>
                 </button>
               </li>
             );
           })}
         </ol>
-        {firstBad > 0 && (
-          <p className="display mt-6 text-[24px] leading-snug">
-            The promise held for {firstBad} {firstBad === 1 ? "month" : "months"}, then broke in {monthOf(checked[firstBad].result, true)}. Open any month to see its evidence.
-          </p>
-        )}
-      </div>
+        <p className="text-[13px] text-text-2">Select a month to see its bill and evidence.</p>
+      </section>
 
-      {message && <YearMessage text={message} />}
-
-      <div className="mt-12">
-        <Trace thoughts={[]} calls={summarize(result.calls)} spentMicros={result.spentMicros} notes={[`${result.months.length} bills read in parallel, ${checked.length} checked against the offer.`]} />
+      <div className="mt-12 flex max-w-[720px] flex-col gap-10">
+        {message && <MessageBox message={message} />}
+        <Trace calls={summarize(result.calls)} spentMicros={result.spentMicros} notes={[`${result.months.length} bills read in parallel, ${checked.length} checked against the offer.`]} />
       </div>
-    </section>
-  );
-}
-
-function YearMessage({ text }: { text: Message }) {
-  const [format, setFormat] = useState<"chat" | "email" | "call">("email");
-  const [copied, setCopied] = useState(false);
-  return (
-    <section className="paper mt-16 px-6 py-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="display text-[30px] leading-none">The message for the whole year</h2>
-        <div className="flex items-center gap-2">
-          <div role="tablist" aria-label="Message format" className="inline-flex rounded-full p-0.5 shadow-[inset_0_0_0_1px_var(--rule)]">
-            {(["chat", "email", "call"] as const).map((value) => (
-              <button key={value} role="tab" type="button" aria-selected={format === value} onClick={() => setFormat(value)} className={`rounded-full px-3 py-1 text-[13px] ${format === value ? "bg-ink text-paper" : "text-ink-2 hover:text-ink"}`}>
-                {value === "call" ? "Call script" : value[0].toUpperCase() + value.slice(1)}
-              </button>
-            ))}
-          </div>
-          <button
-            type="button"
-            onClick={() => {
-              void navigator.clipboard.writeText(text[format]).then(() => {
-                setCopied(true);
-                setTimeout(() => setCopied(false), 1600);
-              });
-            }}
-            className="h-8 min-w-[76px] rounded-full bg-vermilion px-4 text-[13px] font-semibold text-white"
-          >
-            {copied ? "Copied" : "Copy"}
-          </button>
-        </div>
-      </div>
-      <textarea readOnly value={text[format]} aria-label="Message to send" className="mt-5 h-[300px] w-full resize-none bg-transparent text-[15px] leading-[1.65] focus:outline-none" />
     </section>
   );
 }
