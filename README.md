@@ -4,6 +4,8 @@ Billproof checks a phone, internet or utility bill against what the company prom
 
 Drop in the bill (PDF or a phone photo) and paste the offer email or plan summary. Billproof highlights each charge that breaks the promise on the bill itself, shows the line from the bill and the line from the offer side by side, and writes the dispute as a chat message, an email or a call script. Built for the Meta Muse Ember hackathon: every check runs on `muse-ember-1.0` and costs a fraction of a cent.
 
+Live: https://billproof.aktan.us (three sample bills run from the start screen).
+
 ## How a check works
 
 1. The browser renders each PDF page to an image and keeps its text layer; photos are scaled to 1600 px. Nothing is uploaded until you press Check.
@@ -44,7 +46,20 @@ Checks: `pnpm typecheck`, `pnpm lint`, `pnpm test`.
 
 `pnpm eval` renders every synthetic bill in `scripts/samples/eval-specs.ts` as a PDF and as a phone photo, runs each through the real pipeline and Muse Ember, and scores claims, false claims, questions and explanations against the planted ground truth. The set includes clean lookalikes (promises honored, credits posted), an expired promotion, a promotion ending mid-cycle, an unproven autopay condition, an offer from another company, and an unsupported electricity rate plan.
 
+Run on 2026-11-25 (`eval/run-2026-11-25.json` holds every event, reading and model call):
+
+| Input | Checks completed | Claims found | False claims | Questions found | Explained |
+| --- | --- | --- | --- | --- | --- |
+| PDF | 12/12 | 5/5 | 0 | 9/9 | 2/2 |
+| Phone photo | 12/12 | 5/5 | 0 | 9/9 | 2/2 |
+
+Median cost per check: 0.099¢. All 24 checks together: 35 paid Muse Ember calls (13 more steps reused an identical earlier reading), 105,770 input tokens (49,116 served from the prompt cache), 34,359 output tokens, $0.023. The bills are synthetic, so these numbers show the pipeline holds its rules; real bills are messier.
+
 `pnpm samples` regenerates the three sample bills on the start screen.
+
+## Proof of usage
+
+Every check returns its own trace: each Muse Ember step with its reasoning effort, input, cached and output tokens, and cost, shown under "Checked for … with Muse Ember" on the result screen. The prompts are `READ_BILL_INSTRUCTIONS` and `READ_TERMS_INSTRUCTIONS` in `src/lib/pipeline.ts`; the evaluation trace is `eval/run-2026-11-25.json`. The server ledger (`data/ledger.db`) records every reservation and settled cost.
 
 ## Privacy
 

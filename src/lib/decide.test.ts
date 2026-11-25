@@ -120,7 +120,7 @@ describe("decide on the internet bill with an active price guarantee", () => {
     const misread = [{ ...promises[0], amount_cents: 4500 }];
     const decision = decide(reading, misread, billText.get(internetGuaranteed.id)!, offer(internetGuaranteed));
     expect(decision.claims).toEqual([]);
-    expect(decision.unused).toEqual([{ promiseId: "P1", reason: "its amount is not in the quoted text" }]);
+    expect(decision.unused).toEqual([{ promiseId: "P1", reason: "amount_not_in_quote" }]);
   });
 
   test("makes no claim when the promise quote is not in the offer", () => {

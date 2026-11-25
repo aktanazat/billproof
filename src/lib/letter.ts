@@ -30,10 +30,12 @@ function names(lines: LineItem[]): string {
 function claimSentence(claim: Claim, lines: LineItem[], promise: PromiseTerm, period: string): string {
   const quoted = `"${promise.quote.trim()}"`;
   switch (claim.kind) {
-    case "price_above_promise":
-      return `For ${period}, ${names(lines)} comes to ${usd(claim.actualCents)}, but my plan was confirmed at ${usd(claim.expectedCents)} a month (${quoted}). Please credit the ${usd(claim.amountCents)} difference and correct the rate.`;
+    case "price_above_promise": {
+      const discounted = lines.some((line) => line.amount_cents < 0) ? " after discounts" : "";
+      return `For ${period}, ${names(lines.filter((line) => line.amount_cents > 0))} comes to ${usd(claim.actualCents)}${discounted}, but my plan was confirmed at ${usd(claim.expectedCents)} a month (${quoted}). Please credit the ${usd(claim.amountCents)} difference and correct the rate.`;
+    }
     case "included_charged":
-      return `I was charged ${usd(claim.amountCents)} for ${names(lines)}, which was included at no extra cost (${quoted}). Please remove it and credit ${usd(claim.amountCents)}.`;
+      return `I was charged ${usd(claim.amountCents)} for ${names(lines.filter((line) => line.amount_cents > 0))}, which was included at no extra cost (${quoted}). Please remove it and credit ${usd(claim.amountCents)}.`;
     case "credit_missing":
       return `My account is on autopay, but this bill has ${claim.actualCents === 0 ? "no" : `only ${usd(claim.actualCents)} of the`} ${usd(claim.expectedCents)} monthly credit I was promised (${quoted}). Please apply the missing ${usd(claim.amountCents)}.`;
   }

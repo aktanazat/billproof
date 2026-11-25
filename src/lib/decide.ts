@@ -27,7 +27,16 @@ export type Question = { id: string; kind: QuestionKind; lineIds: string[]; prom
 
 export type Explained = { id: string; kind: "promise_ended"; lineIds: string[]; promiseId: string; endedOn: string };
 
-export type Unused = { promiseId: string; reason: string };
+export type UnusedReason =
+  | "kind_not_checked"
+  | "quote_not_in_offer"
+  | "amount_not_in_quote"
+  | "no_matching_charge"
+  | "line_not_on_bill"
+  | "starts_later"
+  | "no_price"
+  | "no_credit_amount";
+export type Unused = { promiseId: string; reason: UnusedReason };
 
 export type Decision = {
   claims: Claim[];
@@ -51,11 +60,9 @@ export function lineIsEvidenced(line: LineItem, bill: Source): boolean {
   return bill.kind === "text" ? quoteFoundIn(line.quote, bill.text) : line.box !== null;
 }
 
-function promiseEvidenceProblem(promise: PromiseTerm, proof: Source): string | null {
-  if (proof.kind === "text" && !quoteFoundIn(promise.quote, proof.text)) return "its quote is not in the offer";
-  if (promise.amount_cents !== null && !quoteHasAmount(promise.quote, promise.amount_cents)) {
-    return "its amount is not in the quoted text";
-  }
+function promiseEvidenceProblem(promise: PromiseTerm, proof: Source): UnusedReason | null {
+  if (proof.kind === "text" && !quoteFoundIn(promise.quote, proof.text)) return "quote_not_in_offer";
+  if (promise.amount_cents !== null && !quoteHasAmount(promise.quote, promise.amount_cents)) return "amount_not_in_quote";
   return null;
 }
 
@@ -132,7 +139,7 @@ export function decide(reading: Reading, promises: PromiseTerm[], bill: Source, 
 
   for (const promise of promises) {
     if (promise.kind === "other") {
-      unused.push({ promiseId: promise.id, reason: "this kind of promise is not checked yet" });
+      unused.push({ promiseId: promise.id, reason: "kind_not_checked" });
       continue;
     }
     const problem = promiseEvidenceProblem(promise, proof);
@@ -151,12 +158,12 @@ export function decide(reading: Reading, promises: PromiseTerm[], bill: Source, 
         : [];
     const covered = [...linked, ...conditionCredits];
     if (covered.length === 0) {
-      unused.push({ promiseId: promise.id, reason: "no charge on this bill matches it" });
+      unused.push({ promiseId: promise.id, reason: "no_matching_charge" });
       continue;
     }
     const unevidenced = covered.filter((line) => !lineIsEvidenced(line, bill));
     if (unevidenced.length > 0) {
-      unused.push({ promiseId: promise.id, reason: "a matching line could not be found on the bill as quoted" });
+      unused.push({ promiseId: promise.id, reason: "line_not_on_bill" });
       continue;
     }
     matchedPromiseIds.push(promise.id);
@@ -169,7 +176,7 @@ export function decide(reading: Reading, promises: PromiseTerm[], bill: Source, 
       continue;
     }
     if (when.state === "not_started") {
-      unused.push({ promiseId: promise.id, reason: "it starts after this bill's period" });
+      unused.push({ promiseId: promise.id, reason: "starts_later" });
       continue;
     }
     if (when.state !== "active" || covered.some((line) => line.prorated)) {
@@ -185,7 +192,7 @@ export function decide(reading: Reading, promises: PromiseTerm[], bill: Source, 
 
     if (promise.kind === "monthly_price") {
       if (promise.amount_cents === null || planLines.length === 0) {
-        unused.push({ promiseId: promise.id, reason: "it names no price for a plan on this bill" });
+        unused.push({ promiseId: promise.id, reason: "no_price" });
         continue;
       }
       // A posted discount on the covered lines shows the company already counts the conditions as met.
@@ -214,7 +221,7 @@ export function decide(reading: Reading, promises: PromiseTerm[], bill: Source, 
     }
 
     if (promise.amount_cents === null) {
-      unused.push({ promiseId: promise.id, reason: "it names no credit amount" });
+      unused.push({ promiseId: promise.id, reason: "no_credit_amount" });
       continue;
     }
     if (unproven.length > 0) {

@@ -3,7 +3,7 @@
 import { useState, type Dispatch } from "react";
 import type { CheckAction, CheckState } from "@/lib/check-machine";
 import { formatMicros } from "@/lib/cost";
-import type { Claim, Question } from "@/lib/decide";
+import type { Claim, Question, UnusedReason } from "@/lib/decide";
 import { buildMessage, shortDate, usd } from "@/lib/letter";
 import type { CheckResult } from "@/lib/result";
 import type { LineItem, PromiseTerm } from "@/lib/schemas";
@@ -13,6 +13,17 @@ type Checked = Extract<CheckResult, { outcome: "checked" }>;
 
 const SHOWN_QUESTIONS = new Set<Question["kind"]>(["unagreed_fee", "repeated_charge", "partial_period", "conditions_unproven", "price_gap", "provider_mismatch"]);
 const CALL_NAMES: Record<string, string> = { read_bill: "Read bill", reread_bill: "Reread bill", read_terms: "Read offer" };
+// Promises that simply have nothing on this bill are not worth a line.
+const UNUSED_TEXT: Record<UnusedReason, string | null> = {
+  kind_not_checked: "this kind of promise isn't checked yet",
+  quote_not_in_offer: "its wording isn't in the offer",
+  amount_not_in_quote: "its amount isn't in the quoted text",
+  no_matching_charge: null,
+  line_not_on_bill: "a matching line couldn't be found on the bill as quoted",
+  starts_later: null,
+  no_price: "it names no price for a plan on this bill",
+  no_credit_amount: "it names no credit amount",
+};
 
 function listNames(lines: LineItem[]): string {
   const labels = [...new Set(lines.map((line) => line.label))];
@@ -22,9 +33,9 @@ function listNames(lines: LineItem[]): string {
 function claimTitle(claim: Claim, lines: LineItem[]): string {
   switch (claim.kind) {
     case "price_above_promise":
-      return `${listNames(lines)} is billed above your promised price`;
+      return `${listNames(lines.filter((line) => line.amount_cents > 0))} is billed above your promised price`;
     case "included_charged":
-      return `${listNames(lines)} was supposed to be included`;
+      return `${listNames(lines.filter((line) => line.amount_cents > 0))} was supposed to be included`;
     case "credit_missing":
       return claim.actualCents === 0 ? "Your promised credit is missing" : "Your promised credit is short";
   }
@@ -294,11 +305,10 @@ export function ResultView({ state, dispatch }: { state: Done; dispatch: Dispatc
               Compared {result.reading.line_items.length} charges with {result.matchedPromiseIds.length} {result.matchedPromiseIds.length === 1 ? "promise" : "promises"} from your offer.
             </p>
           )}
-          {result.unused.map((item) => (
-            <p key={item.promiseId}>
-              Not used: {promises.get(item.promiseId)?.description ?? "a promise"} ({item.reason}).
-            </p>
-          ))}
+          {result.unused.flatMap((item) => {
+            const why = UNUSED_TEXT[item.reason];
+            return why ? [<p key={item.promiseId}>{`Not used: ${promises.get(item.promiseId)?.description ?? "a promise"} (${why}).`}</p>] : [];
+          })}
           <details className="group">
             <summary className="cursor-pointer list-none tabular-nums hover:text-ink">Checked for {formatMicros(result.spentMicros)} with Muse Ember</summary>
             <table className="mt-2 w-full text-left tabular-nums">
