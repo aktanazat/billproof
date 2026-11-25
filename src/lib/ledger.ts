@@ -4,9 +4,6 @@ import { mkdirSync } from "node:fs";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 
-// One Node process owns this file. node:sqlite is synchronous, so each function below runs to completion
-// before any other request's JavaScript can observe the ledger: reservation checks and inserts are atomic.
-
 export const CHECK_CAP_MICROS = 30_000;
 const CHECKS_PER_CLIENT_PER_HOUR = 12;
 const HOUR_MS = 3_600_000;
@@ -39,6 +36,7 @@ export function openLedger(file: string, eventCapMicros: number): Ledger {
   const db = new DatabaseSync(file);
   db.exec(`
     PRAGMA journal_mode = WAL;
+    PRAGMA busy_timeout = 5000;
     CREATE TABLE IF NOT EXISTS checks (id TEXT PRIMARY KEY, client TEXT NOT NULL, created_at INTEGER NOT NULL);
     CREATE TABLE IF NOT EXISTS attempts (
       id TEXT PRIMARY KEY,
@@ -64,27 +62,45 @@ export function openLedger(file: string, eventCapMicros: number): Ledger {
 
   const micros = (row: unknown) => numberColumn(row, "micros");
 
+  // BEGIN IMMEDIATE takes the write lock before the reads, so another process sharing the file (the app and
+  // `pnpm eval`) cannot pass the same cap check in between.
+  function writeTransaction<T>(body: () => T): T {
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      const value = body();
+      db.exec("COMMIT");
+      return value;
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
+  }
+
   return {
     admitCheck(client: string, now = Date.now()): string {
-      const n = numberColumn(recentChecks.get(client, now - HOUR_MS), "n");
-      if (n >= CHECKS_PER_CLIENT_PER_HOUR) {
-        throw new LedgerRefusal("too_many_checks", `This address has run ${n} checks in the last hour`);
-      }
-      const id = randomUUID();
-      insertCheck.run(id, client, now);
-      return id;
+      return writeTransaction(() => {
+        const n = numberColumn(recentChecks.get(client, now - HOUR_MS), "n");
+        if (n >= CHECKS_PER_CLIENT_PER_HOUR) {
+          throw new LedgerRefusal("too_many_checks", `This address has run ${n} checks in the last hour`);
+        }
+        const id = randomUUID();
+        insertCheck.run(id, client, now);
+        return id;
+      });
     },
     reserve(checkId: string, amount: number): string {
-      const forCheck = micros(checkSpent.get(checkId));
-      if (forCheck + amount > CHECK_CAP_MICROS) {
-        throw new LedgerRefusal("over_budget", `This step could cost up to ${amount} µ$, past this check's ${CHECK_CAP_MICROS} µ$ limit`);
-      }
-      if (micros(eventSpent.get()) + amount > eventCapMicros) {
-        throw new LedgerRefusal("over_budget", "The demo's model budget is used up");
-      }
-      const id = randomUUID();
-      insertAttempt.run(id, checkId, amount, Date.now());
-      return id;
+      return writeTransaction(() => {
+        const forCheck = micros(checkSpent.get(checkId));
+        if (forCheck + amount > CHECK_CAP_MICROS) {
+          throw new LedgerRefusal("over_budget", `This step could cost up to ${amount} µ$, past this check's ${CHECK_CAP_MICROS} µ$ limit`);
+        }
+        if (micros(eventSpent.get()) + amount > eventCapMicros) {
+          throw new LedgerRefusal("over_budget", "The demo's model budget is used up");
+        }
+        const id = randomUUID();
+        insertAttempt.run(id, checkId, amount, Date.now());
+        return id;
+      });
     },
     settle(attemptId: string, actualMicros: number) {
       settleAttempt.run(actualMicros, attemptId);

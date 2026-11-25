@@ -48,7 +48,7 @@ export async function POST(request: Request) {
           if (!request.signal.aborted) controller.enqueue(encoder.encode(JSON.stringify(event) + "\n"));
         },
       });
-      controller.close();
+      if (!request.signal.aborted) controller.close();
     },
   });
   return new Response(stream, { headers: { "Content-Type": "application/x-ndjson", "Cache-Control": "no-store" } });

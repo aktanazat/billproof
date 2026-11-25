@@ -2,11 +2,10 @@ import "server-only";
 import { createHash } from "node:crypto";
 import { ceilingMicros, LONG_CONTEXT_THRESHOLD } from "./cost";
 import { checkTotals, decide, type Source } from "./decide";
-import { tokens } from "./evidence";
 import { buildRequest, countInputTokens, EmberError, send, type EmberCall, type Part } from "./ember";
 import { usd } from "./letter";
 import { LedgerRefusal, type Ledger } from "./ledger";
-import type { CheckEvent, CheckFailure, CheckInput, CheckResult, PreparedPage } from "./result";
+import type { CallRecord, CheckEvent, CheckFailure, CheckInput, CheckResult, PreparedPage } from "./result";
 import { billReadingSchema, termsSchema, type BillReading, type PromiseTerm, type Reading } from "./schemas";
 
 const READ_BILL_INSTRUCTIONS = `You read one household service bill (internet, phone, TV, electric, gas, water or similar) and return its contents as JSON.
@@ -119,13 +118,16 @@ function readTermsCall(offer: NonNullable<CheckInput["offer"]>, reading: Reading
   } satisfies EmberCall<unknown>;
 }
 
-async function paid<T>(call: EmberCall<T>, checkId: string, deps: CheckDeps): Promise<T> {
+async function paid<T>(call: EmberCall<T>, checkId: string, deps: CheckDeps, calls: CallRecord[]): Promise<T> {
   const request = buildRequest(call);
   const key = createHash("sha256").update(JSON.stringify(request.body)).digest("hex");
   const hit = outputCache.get(key);
   if (hit && Date.now() - hit.at < CACHE_TTL_MS) {
     const parsed = call.schema.safeParse(hit.output);
-    if (parsed.success) return parsed.data;
+    if (parsed.success) {
+      calls.push({ name: call.name, effort: call.effort, inputTokens: 0, cachedTokens: 0, outputTokens: 0, costMicros: 0, reused: true });
+      return parsed.data;
+    }
   }
 
   const inputTokens = await countInputTokens(request, deps.signal);
@@ -136,6 +138,7 @@ async function paid<T>(call: EmberCall<T>, checkId: string, deps: CheckDeps): Pr
     deps.ledger.settle(attempt, result.costMicros);
     if (outputCache.size >= CACHE_MAX) outputCache.delete(outputCache.keys().next().value ?? "");
     outputCache.set(key, { output: result.output, at: Date.now() });
+    calls.push({ name: call.name, effort: call.effort, ...result.usage, costMicros: result.costMicros, reused: false });
     deps.emit({ type: "spent", micros: deps.ledger.spentForCheck(checkId) });
     return result.output;
   } catch (error) {
@@ -148,22 +151,23 @@ async function paid<T>(call: EmberCall<T>, checkId: string, deps: CheckDeps): Pr
 
 async function check(input: CheckInput, checkId: string, deps: CheckDeps): Promise<CheckResult> {
   const spent = () => deps.ledger.spentForCheck(checkId);
+  const calls: CallRecord[] = [];
   const bill = sourceOf(input.bill.pages);
 
   deps.emit({ type: "stage", stage: "reading_bill" });
-  let raw = await paid(readBillCall(input.bill.pages, "low"), checkId, deps);
+  let raw = await paid(readBillCall(input.bill.pages, "low"), checkId, deps, calls);
   if (raw.outcome === "not_a_bill") return { outcome: "not_a_bill", spentMicros: spent() };
   if (raw.outcome === "unreadable") {
     return { outcome: "could_not_check", reason: raw.unreadable_reason ?? "The amounts on this bill could not be read.", spentMicros: spent() };
   }
   let reading = withIds(raw);
-  let totals = checkTotals(reading);
+  let totals = checkTotals(reading, bill);
 
   if (totals.lineSum === "mismatch") {
     deps.emit({ type: "stage", stage: "rereading_bill" });
-    const second = await paid(readBillCall(input.bill.pages, "high"), checkId, deps);
+    const second = await paid(readBillCall(input.bill.pages, "high"), checkId, deps, calls);
     const secondReading = withIds(second);
-    const secondTotals = checkTotals(secondReading);
+    const secondTotals = checkTotals(secondReading, bill);
     if (second.outcome !== "bill" || (secondTotals.lineSum === "mismatch" && !sameAmounts(raw, second))) {
       return { outcome: "could_not_check", reason: "The charges on this bill could not be read the same way twice.", spentMicros: spent() };
     }
@@ -177,29 +181,24 @@ async function check(input: CheckInput, checkId: string, deps: CheckDeps): Promi
   let proof: Source = { kind: "image" };
   if (input.offer) {
     deps.emit({ type: "stage", stage: "reading_offer" });
-    const terms = await paid(readTermsCall(input.offer, reading), checkId, deps);
+    const terms = await paid(readTermsCall(input.offer, reading), checkId, deps, calls);
     promises = terms.promises.map((promise, i) => ({ ...promise, id: `P${i + 1}` }));
     offerProvider = terms.provider;
     proof = input.offer.kind === "text" ? { kind: "text", text: input.offer.text } : sourceOf(input.offer.pages);
   }
 
   deps.emit({ type: "stage", stage: "comparing" });
-  const decision = decide(reading, promises, bill, proof);
-  // An offer from a different company proves nothing about this bill: its claims wait for the person to confirm.
-  const billWords = new Set(tokens(reading.provider ?? "").filter((word) => word.length > 2));
-  const providerMismatch = offerProvider !== null && billWords.size > 0 && !tokens(offerProvider).some((word) => billWords.has(word));
   return {
     outcome: "checked",
     reading,
     totals,
     offerProvider,
-    providerMismatch,
     promises,
-    ...decision,
-    claims: providerMismatch ? decision.claims.map((claim) => ({ ...claim, needsConfirmation: true })) : decision.claims,
+    ...decide(reading, promises, bill, proof, offerProvider),
     billIsImage: bill.kind === "image",
     hadOffer: input.offer !== null,
     spentMicros: spent(),
+    calls,
   };
 }
 
@@ -209,11 +208,22 @@ const RETRYABLE: Record<CheckFailure, boolean> = {
   network: true,
   invalid_output: true,
   truncated: false,
+  refused: false,
   over_budget: false,
   config: false,
   too_many_checks: false,
   bad_input: false,
 };
+
+function failureOf(error: unknown): [CheckFailure, string] {
+  if (error instanceof CheckStop) return [error.failure, error.message];
+  if (error instanceof LedgerRefusal) return [error.kind, error.message];
+  if (error instanceof EmberError) {
+    const wait = error.kind === "rate_limited" && error.retryAfterSeconds ? ` Try again in ${Math.ceil(error.retryAfterSeconds)} seconds.` : "";
+    return [error.kind, error.message + wait];
+  }
+  return ["network", error instanceof Error ? error.message : "The connection to the model failed"];
+}
 
 // Emits exactly one terminal event: a result or an error.
 export async function runCheck(input: CheckInput, deps: CheckDeps): Promise<void> {
@@ -223,12 +233,7 @@ export async function runCheck(input: CheckInput, deps: CheckDeps): Promise<void
     deps.emit({ type: "result", result: await check(input, checkId, deps) });
   } catch (error) {
     const spentMicros = checkId ? deps.ledger.spentForCheck(checkId) : 0;
-    const [failure, message] =
-      error instanceof CheckStop || error instanceof LedgerRefusal
-        ? [error instanceof CheckStop ? error.failure : error.kind, error.message]
-        : error instanceof EmberError
-          ? [error.kind === "refused" ? "upstream" : error.kind, error.message]
-          : (["network", error instanceof Error ? error.message : "The connection to the model failed"] as const);
+    const [failure, message] = failureOf(error);
     deps.emit({ type: "error", failure, message, spentMicros, retryable: RETRYABLE[failure] });
   }
 }

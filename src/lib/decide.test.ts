@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, test } from "vitest";
 import { rasterize } from "../../scripts/samples/raster";
 import { renderBillPdf } from "../../scripts/samples/render";
 import { internetExpired, internetGuaranteed, mobile, type BillSpec } from "../../scripts/samples/specs";
-import { decide, type Source } from "./decide";
+import { checkTotals, decide, type Source } from "./decide";
 import type { LineItem, LineKind, PromiseTerm, Reading } from "./schemas";
 
 const KIND_BY_LABEL: Record<string, LineKind> = {
@@ -235,5 +235,74 @@ describe("decide on the mobile bill with autopay on", () => {
     const decision = decide(reading, [netPrice, sameCredit], billText.get(mobile.id)!, { kind: "text", text });
     expect(decision.claims.map((c) => c.amountCents)).toEqual([1000]);
     expect(decision.questions.map((q) => q.kind)).toContain("overlapping_claim");
+  });
+});
+
+describe("decide refuses claims the evidence does not carry", () => {
+  const mobileReading = readingOf(mobile);
+  const mobilePlans = [...idOf(mobileReading, "Unlimited Plus - Line 1 (510) 555-0132"), ...idOf(mobileReading, "Unlimited Plus - Line 2 (510) 555-0178")];
+
+  test("a discount amount read as the monthly price becomes a question, not a $60 claim", () => {
+    const misread = promise({ kind: "monthly_price", amount_cents: 500, per_line: true, quote: "$35/line per month, minus a $5/line Autopay discount each month", covers_line_ids: mobilePlans });
+    const decision = decide(mobileReading, [misread], billText.get(mobile.id)!, offer(mobile));
+    expect(decision.claims).toEqual([]);
+    expect(decision.questions.map((q) => q.kind)).toContain("price_gap");
+  });
+
+  test("an offer from another company yields a question, even when the names share a word", () => {
+    const reading = readingOf(internetGuaranteed);
+    const text = "Westline Fiber: Internet 500 for $45/mo, guaranteed through 2028";
+    const other = promise({ kind: "monthly_price", amount_cents: 4500, quote: text, covers_line_ids: idOf(reading, "Fiber 500 Internet") });
+    const decision = decide(reading, [other], billText.get(internetGuaranteed.id)!, { kind: "text", text }, "Westline Fiber");
+    expect(decision.claims).toEqual([]);
+    expect(decision.questions.map((q) => q.kind)).toContain("provider_mismatch");
+  });
+
+  test("the same company written differently still yields the claim", () => {
+    const reading = readingOf(internetGuaranteed);
+    const guaranteed = promise({
+      kind: "monthly_price",
+      amount_cents: 5500,
+      conditions: ["autopay", "paperless"],
+      quote: "Monthly price: $55.00/mo with Autopay & Paperless (2-year price guarantee through 10/31/2027)",
+      covers_line_ids: idOf(reading, "Fiber 500 Internet"),
+    });
+    const decision = decide(reading, [guaranteed], billText.get(internetGuaranteed.id)!, offer(internetGuaranteed), "Bayline");
+    expect(decision.claims.map((c) => c.amountCents)).toEqual([1500]);
+  });
+
+  test("a paperless condition is not proven by autopay", () => {
+    const text = "Fiber 500 Internet $80.00\nAutopay is on.";
+    const reading: Reading = {
+      ...readingOf(internetGuaranteed),
+      line_items: [{ id: "L1", label: "Fiber 500 Internet", amount_cents: 8000, kind: "plan", page: 1, box: null, quote: "Fiber 500 Internet $80.00", prorated: false }],
+      autopay: { enrolled: true, quote: "Autopay is on." },
+    };
+    const offerText = "Fiber 500 Internet: $60/month with paperless billing";
+    const paperless = promise({ kind: "monthly_price", amount_cents: 6000, conditions: ["paperless"], quote: offerText, covers_line_ids: ["L1"] });
+    const decision = decide(reading, [paperless], { kind: "text", text }, { kind: "text", text: offerText });
+    expect(decision.claims).toEqual([]);
+    expect(decision.questions.map((q) => q.kind)).toEqual(["conditions_unproven"]);
+  });
+
+  test("a credit posted for an included item cancels its charge", () => {
+    const text = "Wi-Fi Gateway Rental $15.00\nGateway Promotional Credit -$15.00";
+    const reading: Reading = {
+      ...readingOf(internetGuaranteed),
+      line_items: [
+        { id: "L1", label: "Wi-Fi Gateway Rental", amount_cents: 1500, kind: "equipment", page: 1, box: null, quote: "Wi-Fi Gateway Rental $15.00", prorated: false },
+        { id: "L2", label: "Gateway Promotional Credit", amount_cents: -1500, kind: "credit", page: 1, box: null, quote: "Gateway Promotional Credit -$15.00", prorated: false },
+      ],
+    };
+    const offerText = "Wi-Fi Gateway: included, no monthly fee";
+    const included = promise({ kind: "included", quote: offerText, covers_line_ids: ["L1", "L2"] });
+    expect(decide(reading, [included], { kind: "text", text }, { kind: "text", text: offerText }).claims).toEqual([]);
+  });
+
+  test("a printed total whose quote is not on the bill does not count as printed", () => {
+    const reading = readingOf(internetGuaranteed);
+    const invented: Reading = { ...reading, printed: { ...reading.printed, current_charges: { cents: 9999, quote: "Current charges $99.99" } } };
+    expect(checkTotals(invented, billText.get(internetGuaranteed.id)!).lineSum).toBe("not_printed");
+    expect(checkTotals(reading, billText.get(internetGuaranteed.id)!).lineSum).toBe("ok");
   });
 });

@@ -15,7 +15,14 @@ export type Claim = {
   needsConfirmation: boolean;
 };
 
-export type QuestionKind = "unagreed_fee" | "repeated_charge" | "partial_period" | "conditions_unproven" | "overlapping_claim";
+export type QuestionKind =
+  | "unagreed_fee"
+  | "repeated_charge"
+  | "partial_period"
+  | "conditions_unproven"
+  | "overlapping_claim"
+  | "price_gap"
+  | "provider_mismatch";
 export type Question = { id: string; kind: QuestionKind; lineIds: string[]; promiseId: string | null };
 
 export type Explained = { id: string; kind: "promise_ended"; lineIds: string[]; promiseId: string; endedOn: string };
@@ -28,13 +35,14 @@ export type Decision = {
   explained: Explained[];
   unused: Unused[];
   matchedPromiseIds: string[];
+  providerMismatch: boolean;
 };
 
 type KindSet = Partial<Record<LineKind, true>>;
 const CREDIT_KINDS: KindSet = { credit: true, discount: true };
 const COVERABLE: Record<Exclude<PromiseTerm["kind"], "other">, KindSet> = {
   monthly_price: { plan: true, discount: true, credit: true },
-  included: { equipment: true, company_fee: true, one_time: true, plan: true, other: true },
+  included: { equipment: true, company_fee: true, one_time: true, plan: true, other: true, credit: true, discount: true },
   recurring_credit: { plan: true, credit: true, discount: true },
 };
 
@@ -68,24 +76,51 @@ function activity(promise: PromiseTerm, reading: Reading): Activity {
 export type Equation = "ok" | "mismatch" | "not_printed";
 export type Totals = { lineSum: Equation; balance: Equation; lineSumCents: number };
 
+// A printed summary value counts only when its quote carries the amount and, on a PDF, appears on the bill.
+function printedValue(value: Reading["printed"]["total_due"], bill: Source): number | null {
+  if (!value || !quoteHasAmount(value.quote, value.cents)) return null;
+  return bill.kind === "image" || quoteFoundIn(value.quote, bill.text) ? value.cents : null;
+}
+
 // E1: the lines add up to the printed current charges. E2: previous balance − payments + current charges = total due.
-export function checkTotals(reading: Reading): Totals {
-  const { previous_balance, payments, current_charges, total_due } = reading.printed;
+export function checkTotals(reading: Reading, bill: Source): Totals {
+  const previous = printedValue(reading.printed.previous_balance, bill);
+  const payments = printedValue(reading.printed.payments, bill);
+  const current = printedValue(reading.printed.current_charges, bill);
+  const due = printedValue(reading.printed.total_due, bill);
   const lineSumCents = sum(reading.line_items);
-  const lineSum: Equation = current_charges === null ? "not_printed" : Math.abs(current_charges.cents - lineSumCents) <= 1 ? "ok" : "mismatch";
+  const lineSum: Equation = current === null ? "not_printed" : Math.abs(current - lineSumCents) <= 1 ? "ok" : "mismatch";
   let balance: Equation = "not_printed";
-  if (previous_balance && payments && current_charges && total_due) {
-    const computed = previous_balance.cents - Math.abs(payments.cents) + current_charges.cents;
-    balance = Math.abs(computed - total_due.cents) <= 1 ? "ok" : "mismatch";
+  if (previous !== null && payments !== null && current !== null && due !== null) {
+    balance = Math.abs(previous - Math.abs(payments) + current - due) <= 1 ? "ok" : "mismatch";
   }
   return { lineSum, balance, lineSumCents };
 }
 
 const sum = (lines: LineItem[]) => lines.reduce((total, line) => total + line.amount_cents, 0);
 
+const GENERIC_PROVIDER_WORDS = new Set(["fiber", "cable", "internet", "wireless", "mobile", "power", "energy", "electric", "gas", "water", "tv", "communications", "telecom", "broadband", "inc", "llc", "co", "corp", "company", "the", "and", "of"]);
+
+function distinctiveWords(name: string): Set<string> {
+  return new Set(tokens(name).filter((word) => word.length > 1 && !GENERIC_PROVIDER_WORDS.has(word)));
+}
+
+// True only when both names are known and share no distinctive word ("Bayline Fiber" vs "Westline Fiber").
+export function providersDiffer(billProvider: string | null, offerProvider: string | null): boolean {
+  if (!billProvider || !offerProvider) return false;
+  const bill = distinctiveWords(billProvider);
+  const offer = distinctiveWords(offerProvider);
+  if (bill.size === 0 || offer.size === 0) return false;
+  return ![...offer].some((word) => bill.has(word));
+}
+
+// A promised price under half of what the covered lines cost, or a promised credit over half the plan price, is
+// more likely a misread amount than a real overcharge; it becomes a question.
+const MAX_PLAUSIBLE_SHARE = 0.5;
+
 type Draft = Omit<Claim, "id">;
 
-export function decide(reading: Reading, promises: PromiseTerm[], bill: Source, proof: Source): Decision {
+export function decide(reading: Reading, promises: PromiseTerm[], bill: Source, proof: Source, offerProvider: string | null = null): Decision {
   const lines = new Map(reading.line_items.map((line) => [line.id, line]));
   const drafts: Draft[] = [];
   const questions: Omit<Question, "id">[] = [];
@@ -145,23 +180,28 @@ export function decide(reading: Reading, promises: PromiseTerm[], bill: Source, 
     const planLines = covered.filter((line) => line.kind === "plan");
     const units = promise.per_line ? Math.max(planLines.length, 1) : 1;
     const autopayProven = reading.autopay.enrolled === true && reading.autopay.quote !== null && (bill.kind === "image" || quoteFoundIn(reading.autopay.quote, bill.text));
-    const needsAutopay = promise.conditions.includes("autopay") || promise.conditions.includes("paperless");
+    // Only autopay can be proven from a bill; paperless, bundle and contract terms cannot.
+    const unproven = promise.conditions.filter((condition) => !(condition === "autopay" && autopayProven));
 
     if (promise.kind === "monthly_price") {
       if (promise.amount_cents === null || planLines.length === 0) {
         unused.push({ promiseId: promise.id, reason: "it names no price for a plan on this bill" });
         continue;
       }
+      // A posted discount on the covered lines shows the company already counts the conditions as met.
       const discountPosted = covered.some((line) => CREDIT_KINDS[line.kind]);
-      if (needsAutopay && !discountPosted && !autopayProven) {
+      if (unproven.length > 0 && !discountPosted) {
         questions.push({ kind: "conditions_unproven", lineIds, promiseId: promise.id });
         continue;
       }
       const expected = promise.amount_cents * units;
       const actual = sum(covered);
-      if (actual > expected) {
-        drafts.push({ kind: "price_above_promise", lineIds, promiseId: promise.id, actualCents: actual, expectedCents: expected, amountCents: actual - expected, needsConfirmation: photoEvidence });
+      if (actual <= expected) continue;
+      if (expected < actual * MAX_PLAUSIBLE_SHARE) {
+        questions.push({ kind: "price_gap", lineIds, promiseId: promise.id });
+        continue;
       }
+      drafts.push({ kind: "price_above_promise", lineIds, promiseId: promise.id, actualCents: actual, expectedCents: expected, amountCents: actual - expected, needsConfirmation: photoEvidence });
       continue;
     }
 
@@ -177,15 +217,24 @@ export function decide(reading: Reading, promises: PromiseTerm[], bill: Source, 
       unused.push({ promiseId: promise.id, reason: "it names no credit amount" });
       continue;
     }
-    if (needsAutopay && !autopayProven) {
+    if (unproven.length > 0) {
       questions.push({ kind: "conditions_unproven", lineIds, promiseId: promise.id });
       continue;
     }
     const expected = Math.abs(promise.amount_cents) * units;
     const posted = -sum(covered.filter((line) => CREDIT_KINDS[line.kind]));
-    if (posted < expected) {
-      drafts.push({ kind: "credit_missing", lineIds, promiseId: promise.id, actualCents: posted, expectedCents: expected, amountCents: expected - posted, needsConfirmation: photoEvidence });
+    if (posted >= expected) continue;
+    if (expected > sum(planLines) * MAX_PLAUSIBLE_SHARE) {
+      questions.push({ kind: "price_gap", lineIds, promiseId: promise.id });
+      continue;
     }
+    drafts.push({ kind: "credit_missing", lineIds, promiseId: promise.id, actualCents: posted, expectedCents: expected, amountCents: expected - posted, needsConfirmation: photoEvidence });
+  }
+
+  // An offer from another company proves nothing about this bill.
+  const providerMismatch = providersDiffer(reading.provider, offerProvider);
+  if (providerMismatch) {
+    for (const draft of drafts.splice(0)) questions.push({ kind: "provider_mismatch", lineIds: draft.lineIds, promiseId: draft.promiseId });
   }
 
   // Each line can back one dollar claim; the larger claim keeps it.
@@ -224,5 +273,6 @@ export function decide(reading: Reading, promises: PromiseTerm[], bill: Source, 
     explained: explained.map((e, i) => ({ ...e, id: `E${i + 1}` })),
     unused,
     matchedPromiseIds,
+    providerMismatch,
   };
 }

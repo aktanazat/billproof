@@ -25,6 +25,16 @@ export const MAX_UPLOAD_BYTES = 12_000_000;
 
 export type Stage = "reading_bill" | "rereading_bill" | "reading_offer" | "comparing";
 
+export type CallRecord = {
+  name: string;
+  effort: string;
+  inputTokens: number;
+  cachedTokens: number;
+  outputTokens: number;
+  costMicros: number;
+  reused: boolean;
+};
+
 export type CheckFailure =
   | "over_budget"
   | "rate_limited"
@@ -34,6 +44,7 @@ export type CheckFailure =
   | "config"
   | "too_many_checks"
   | "bad_input"
+  | "refused"
   | "network";
 
 export type CheckResult =
@@ -54,6 +65,7 @@ export type CheckResult =
       billIsImage: boolean;
       hadOffer: boolean;
       spentMicros: number;
+      calls: CallRecord[];
     };
 
 export type CheckEvent =

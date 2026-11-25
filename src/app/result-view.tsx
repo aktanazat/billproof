@@ -11,7 +11,8 @@ import type { LineItem, PromiseTerm } from "@/lib/schemas";
 type Done = Extract<CheckState, { s: "done" }>;
 type Checked = Extract<CheckResult, { outcome: "checked" }>;
 
-const SHOWN_QUESTIONS = new Set<Question["kind"]>(["unagreed_fee", "repeated_charge", "partial_period", "conditions_unproven"]);
+const SHOWN_QUESTIONS = new Set<Question["kind"]>(["unagreed_fee", "repeated_charge", "partial_period", "conditions_unproven", "price_gap", "provider_mismatch"]);
+const CALL_NAMES: Record<string, string> = { read_bill: "Read bill", reread_bill: "Reread bill", read_terms: "Read offer" };
 
 function listNames(lines: LineItem[]): string {
   const labels = [...new Set(lines.map((line) => line.label))];
@@ -29,7 +30,10 @@ function claimTitle(claim: Claim, lines: LineItem[]): string {
   }
 }
 
-function questionTitle(question: Question, lines: LineItem[]): string {
+const CONDITION_NAMES: Record<string, string> = { autopay: "autopay", paperless: "paperless billing", bundle: "a bundle", contract: "a contract", other: "a condition" };
+
+function questionTitle(question: Question, lines: LineItem[], result: Checked): string {
+  const promise = result.promises.find((p) => p.id === question.promiseId);
   switch (question.kind) {
     case "unagreed_fee":
       return `${listNames(lines)} isn't in your offer`;
@@ -38,7 +42,11 @@ function questionTitle(question: Question, lines: LineItem[]): string {
     case "partial_period":
       return "Your offer starts or ends during this bill";
     case "conditions_unproven":
-      return "This bill doesn't show the autopay your price depends on";
+      return `The bill doesn't show ${(promise?.conditions ?? ["other"]).map((c) => CONDITION_NAMES[c]).join(" or ")}, which your price depends on`;
+    case "price_gap":
+      return `${listNames(lines)} is too far from the promised amount to claim; check the offer`;
+    case "provider_mismatch":
+      return `The offer is from ${result.offerProvider ?? "another company"}, not ${result.reading.provider ?? "this company"}`;
     case "overlapping_claim":
       return "";
   }
@@ -241,7 +249,7 @@ export function ResultView({ state, dispatch }: { state: Done; dispatch: Dispatc
                     {canInclude && <Checkbox checked={state.selection.questions[question.id] === true} onChange={() => dispatch({ type: "toggle_question", id: question.id })} label="Include in message" />}
                     <div className="min-w-0 flex-1">
                       <div className="flex items-baseline justify-between gap-3">
-                        <p className="text-[15px]">{questionTitle(question, questionLines)}</p>
+                        <p className="text-[15px]">{questionTitle(question, questionLines, result)}</p>
                         {questionLines[0] && <p className="text-[15px] text-ink-2 tabular-nums">{usd(questionLines.reduce((t, l) => t + l.amount_cents, 0))}</p>}
                       </div>
                     </div>
@@ -281,11 +289,6 @@ export function ResultView({ state, dispatch }: { state: Done; dispatch: Dispatc
             </p>
           )}
           {totals.balance === "mismatch" && <p className="text-ink">The previous balance, payments and new charges don&apos;t add up to the amount due.</p>}
-          {result.providerMismatch && (
-            <p className="text-ink">
-              The offer is from {result.offerProvider}, but this bill is from {provider}.
-            </p>
-          )}
           {result.hadOffer && (
             <p>
               Compared {result.reading.line_items.length} charges with {result.matchedPromiseIds.length} {result.matchedPromiseIds.length === 1 ? "promise" : "promises"} from your offer.
@@ -296,7 +299,31 @@ export function ResultView({ state, dispatch }: { state: Done; dispatch: Dispatc
               Not used: {promises.get(item.promiseId)?.description ?? "a promise"} ({item.reason}).
             </p>
           ))}
-          <p className="tabular-nums">Checked for {formatMicros(result.spentMicros)} with Muse Ember.</p>
+          <details className="group">
+            <summary className="cursor-pointer list-none tabular-nums hover:text-ink">Checked for {formatMicros(result.spentMicros)} with Muse Ember</summary>
+            <table className="mt-2 w-full text-left tabular-nums">
+              <thead className="text-ink-3">
+                <tr>
+                  <th className="py-1 font-normal">Step</th>
+                  <th className="py-1 font-normal">Effort</th>
+                  <th className="py-1 text-right font-normal">Tokens in</th>
+                  <th className="py-1 text-right font-normal">Tokens out</th>
+                  <th className="py-1 text-right font-normal">Cost</th>
+                </tr>
+              </thead>
+              <tbody>
+                {result.calls.map((call, i) => (
+                  <tr key={i} className="border-t border-hairline">
+                    <td className="py-1">{CALL_NAMES[call.name] ?? call.name}</td>
+                    <td className="py-1">{call.effort}</td>
+                    <td className="py-1 text-right">{call.reused ? "reused" : call.inputTokens.toLocaleString("en-US")}</td>
+                    <td className="py-1 text-right">{call.reused ? "" : call.outputTokens.toLocaleString("en-US")}</td>
+                    <td className="py-1 text-right">{formatMicros(call.costMicros)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </details>
         </div>
 
         {changeFiles}
