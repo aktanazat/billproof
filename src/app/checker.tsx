@@ -1,17 +1,27 @@
 "use client";
 
 import { useEffect, useReducer, useRef, useState, type ChangeEvent, type DragEvent, type ReactNode } from "react";
-import { checkInput, initialState, reduce, type CheckAction, type CheckState, type Doc } from "@/lib/check-machine";
+import { checkInput, initialState, reduce, type Call, type CheckAction, type CheckState, type Doc, type Inputs } from "@/lib/check-machine";
 import { formatMicros } from "@/lib/cost";
 import { usd } from "@/lib/letter";
-import { MAX_BILL_PAGES, MAX_OFFER_PAGES, prepareFile, PrepareError } from "@/lib/prepare";
-import type { CheckEvent, CheckInput, Stage } from "@/lib/result";
+import { isAudio, MAX_BILL_PAGES, MAX_OFFER_PAGES, prepareCall, prepareFile, PrepareError } from "@/lib/prepare";
+import { MAX_BILLS, MAX_CALL_SECONDS, type CheckEvent, type CheckInput, type Stage } from "@/lib/result";
 import { BillPage, type Mark } from "./bill-page";
+import { formatClock, Waveform } from "./evidence";
 import { ResultView } from "./result-view";
+import { YearView } from "./year-view";
 
-export type Sample = { id: string; title: string; outcome: string; bill: string; image: string; proof: string };
+export type Sample = {
+  id: string;
+  title: string;
+  outcome: string;
+  image: string;
+  bills: string[];
+  offer: { kind: "text"; text: string } | { kind: "call"; url: string };
+};
 
-const ACCEPT = "application/pdf,image/jpeg,image/png,image/webp";
+const BILL_ACCEPT = "application/pdf,image/jpeg,image/png,image/webp";
+const OFFER_ACCEPT = "application/pdf,image/jpeg,image/png,image/webp,audio/*,.m4a,.mp3,.wav";
 
 function isCheckEvent(value: unknown): value is CheckEvent {
   return typeof value === "object" && value !== null && "type" in value && typeof value.type === "string";
@@ -52,10 +62,19 @@ async function streamCheck(input: CheckInput, attempt: number, signal: AbortSign
             dispatch({ type: "thought", attempt, stage: event.stage, text: event.text });
             break;
           case "line":
-            dispatch({ type: "line_read", attempt, line: event.line });
+            dispatch({ type: "line_read", attempt, bill: event.bill, line: event.line });
             break;
           case "promise":
             dispatch({ type: "promise_read", attempt, promise: event.promise });
+            break;
+          case "heard":
+            dispatch({ type: "turn_heard", attempt, turn: event.turn });
+            break;
+          case "challenge":
+            dispatch({ type: "challenged", attempt, challenge: event.challenge });
+            break;
+          case "month":
+            dispatch({ type: "month_done", attempt, bill: event.bill, result: event.result });
             break;
           case "result":
             terminal = true;
@@ -74,14 +93,14 @@ async function streamCheck(input: CheckInput, attempt: number, signal: AbortSign
   if (!terminal && !signal.aborted) fail("The connection dropped before the check finished.");
 }
 
-function FileTarget({ label, onFile, children, className }: { label: string; onFile: (file: File) => void; children: ReactNode; className?: string }) {
+function FileTarget({ label, accept, multiple, onFiles, children, className }: { label: string; accept: string; multiple?: boolean; onFiles: (files: File[]) => void; children: ReactNode; className?: string }) {
   const input = useRef<HTMLInputElement>(null);
   const [over, setOver] = useState(false);
   const onDrop = (event: DragEvent) => {
     event.preventDefault();
     setOver(false);
-    const file = event.dataTransfer.files[0];
-    if (file) onFile(file);
+    const files = [...event.dataTransfer.files];
+    if (files.length) onFiles(multiple ? files : files.slice(0, 1));
   };
   return (
     <div
@@ -95,163 +114,233 @@ function FileTarget({ label, onFile, children, className }: { label: string; onF
       <input
         ref={input}
         type="file"
-        accept={ACCEPT}
+        accept={accept}
+        multiple={multiple}
         aria-label={label}
         tabIndex={-1}
         className="sr-only"
         onChange={(event: ChangeEvent<HTMLInputElement>) => {
-          const file = event.target.files?.[0];
+          const files = [...(event.target.files ?? [])];
           event.target.value = "";
-          if (file) onFile(file);
+          if (files.length) onFiles(files);
         }}
       />
-      <button type="button" onClick={() => input.current?.click()} className={`${className ?? ""} ${over ? "shadow-[0_0_0_2px_var(--accent)]" : ""}`}>
+      <button type="button" onClick={() => input.current?.click()} className={`${className ?? ""} ${over ? "outline-2 outline-vermilion" : ""}`}>
         {children}
       </button>
     </div>
   );
 }
 
-function DocIcon() {
-  return (
-    <svg aria-hidden width="28" height="34" viewBox="0 0 28 34" fill="none" className="text-ink-3">
-      <path d="M4 1.5h13.5L26.5 10.5V30a2.5 2.5 0 0 1-2.5 2.5H4A2.5 2.5 0 0 1 1.5 30V4A2.5 2.5 0 0 1 4 1.5Z" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M17.5 1.5V8a2.5 2.5 0 0 0 2.5 2.5h6.5" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M7 17h14M7 21.5h14M7 26h9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-}
-
 function DocChip({ doc, onRemove }: { doc: Doc; onRemove: () => void }) {
   const detail = doc.status === "preparing" ? "Opening…" : doc.status === "failed" ? doc.message : doc.pages.length === 1 ? "1 page" : `${doc.pages.length} pages`;
-  const thumb = doc.status === "ready" ? doc.pages[0].image : null;
   return (
-    <div className="flex items-center gap-4 rounded-[14px] bg-fill p-3">
-      <div className="grid h-[64px] w-[50px] shrink-0 place-items-center overflow-hidden rounded-[6px] bg-surface shadow-[0_0_0_1px_var(--hairline)]">
-        {thumb ? <img src={thumb} alt="" className="h-full w-full object-cover object-top" /> : <DocIcon />}
-      </div>
+    <div className="flex items-center gap-3 py-2">
+      <div className="paper h-[52px] w-[40px] shrink-0 overflow-hidden">{doc.status === "ready" && <img src={doc.pages[0].image} alt="" className="h-full w-full object-cover object-top" />}</div>
       <div className="min-w-0 flex-1">
-        <div className="truncate text-[15px] font-medium">{doc.name}</div>
-        <div className={`text-[13px] ${doc.status === "failed" ? "text-danger" : "text-ink-2"}`} role={doc.status === "failed" ? "alert" : undefined}>
+        <div className="truncate text-[14px] font-medium">{doc.name}</div>
+        <div className={`text-[12px] ${doc.status === "failed" ? "text-vermilion-ink" : "text-ink-2"}`} role={doc.status === "failed" ? "alert" : undefined}>
           {detail}
         </div>
       </div>
-      <button type="button" onClick={onRemove} className="rounded-[8px] px-2.5 py-1.5 text-[13px] text-ink-2 hover:bg-hairline hover:text-ink">
+      <button type="button" onClick={onRemove} className="px-2 py-1 text-[12px] text-ink-2 underline-offset-4 hover:text-ink hover:underline">
         Remove
       </button>
     </div>
   );
 }
 
-// The sample bill as Muse Ember marked it on a live run (eval/run-2026-11-25.json): what a result looks like.
-const HERO_MARKS: Mark[] = [
-  { id: "L1", box: { x0: 100, y0: 427, x1: 912, y1: 447 }, tone: "claim", n: 1 },
-  { id: "L4", box: { x0: 100, y0: 576, x1: 912, y1: 596 }, tone: "claim" },
-  { id: "L2", box: { x0: 100, y0: 478, x1: 912, y1: 498 }, tone: "claim", n: 2 },
-  { id: "L3", box: { x0: 100, y0: 527, x1: 912, y1: 547 }, tone: "ask" },
-  { id: "L6", box: { x0: 100, y0: 644, x1: 912, y1: 662 }, tone: "ask" },
-];
-
-function Hero({ sample, onRun, busy }: { sample: Sample; onRun: () => void; busy: boolean }) {
+function CallChip({ call, onRemove }: { call: Call; onRemove: () => void }) {
   return (
-    <button type="button" onClick={onRun} disabled={busy} className="group block w-full text-left disabled:cursor-wait">
-      <div className="rounded-[24px] bg-surface p-5 shadow-[0_0_0_1px_var(--hairline),0_24px_48px_-28px_rgb(0_0_0/0.25)] transition-transform duration-300 group-hover:-translate-y-0.5 sm:p-7">
-        <BillPage image={sample.image} alt="A sample internet bill with two overcharges marked" marks={HERO_MARKS} visibleAspect="1200 / 1090" />
-        <dl className="mt-5 grid gap-2.5 text-[14px]">
-          <div className="flex items-baseline gap-3">
-            <dt className="grid size-5 shrink-0 place-items-center rounded-full bg-ink text-[11px] font-semibold text-ground">1</dt>
-            <dd className="flex-1">Internet billed above the promised $55</dd>
-            <dd className="font-medium tabular-nums">$15.00</dd>
+    <div className="flex items-center gap-4 py-2">
+      <div className="min-w-0 flex-1">
+        <div className="truncate text-[14px] font-medium">{call.name}</div>
+        {call.status === "ready" ? (
+          <div className="mt-2 flex items-center gap-3">
+            <Waveform peaks={call.peaks} className="h-8 flex-1" />
+            <span className="text-[12px] text-ink-2 tabular-nums">{formatClock(call.seconds)}</span>
           </div>
-          <div className="flex items-baseline gap-3">
-            <dt className="grid size-5 shrink-0 place-items-center rounded-full bg-ink text-[11px] font-semibold text-ground">2</dt>
-            <dd className="flex-1">Gateway charged, promised included</dd>
-            <dd className="font-medium tabular-nums">$15.00</dd>
+        ) : (
+          <div className={`text-[12px] ${call.status === "failed" ? "text-vermilion-ink" : "text-ink-2"}`} role={call.status === "failed" ? "alert" : undefined}>
+            {call.status === "failed" ? call.message : "Listening to the file…"}
           </div>
-        </dl>
-        <p className="mt-4 text-[13px] text-ink-2">{busy ? "Opening the sample…" : "Run this sample live"}</p>
+        )}
       </div>
-    </button>
+      <button type="button" onClick={onRemove} className="px-2 py-1 text-[12px] text-ink-2 underline-offset-4 hover:text-ink hover:underline">
+        Remove
+      </button>
+    </div>
   );
 }
 
 function Spinner() {
-  return <span aria-hidden className="inline-block size-[14px] animate-spin rounded-full border-[1.5px] border-hairline border-t-ink" />;
+  return <span aria-hidden className="inline-block size-[14px] animate-spin rounded-full border-[1.5px] border-rule border-t-vermilion" />;
 }
 
-function Check() {
-  return (
-    <svg aria-hidden width="14" height="14" viewBox="0 0 14 14" fill="none">
-      <path d="M2.5 7.5 5.5 10.5 11.5 3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
+type Step = { key: "bill" | "offer" | "compare" | "challenge"; stages: Stage[] };
+const STAGE_ORDER: Stage[] = ["reading_bill", "rereading_bill", "reading_offer", "comparing", "challenging"];
 
-type Step = { key: "bill" | "offer" | "compare"; label: string; stages: Stage[] };
-const STEPS: Step[] = [
-  { key: "bill", label: "Reading the bill", stages: ["reading_bill", "rereading_bill"] },
-  { key: "offer", label: "Reading what you were promised", stages: ["reading_offer"] },
-  { key: "compare", label: "Comparing each charge", stages: ["comparing"] },
-];
-const STAGE_ORDER: Stage[] = ["reading_bill", "rereading_bill", "reading_offer", "comparing"];
-
-function stepState(step: Step, stage: Stage | null, active: boolean): "done" | "now" | "later" {
+function stepStatus(step: Step, stage: Stage | null, active: boolean): "done" | "now" | "later" {
   if (!stage) return step.key === "bill" && active ? "now" : "later";
   const at = STAGE_ORDER.indexOf(stage);
-  const last = Math.max(...step.stages.map((s) => STAGE_ORDER.indexOf(s)));
   const first = Math.min(...step.stages.map((s) => STAGE_ORDER.indexOf(s)));
+  const last = Math.max(...step.stages.map((s) => STAGE_ORDER.indexOf(s)));
   if (at > last) return "done";
-  if (at >= first) return active ? "now" : "later";
+  if (at >= first) return active ? "now" : "done";
   return "later";
 }
 
+function Failure({ state, dispatch }: { state: Extract<CheckState, { s: "failed" } | { s: "cancelled" }>; dispatch: (action: CheckAction) => void }) {
+  return (
+    <div className="flex flex-col gap-3 border-t border-rule pt-5">
+      <p className="display text-[28px] leading-tight" role={state.s === "failed" ? "alert" : undefined}>
+        {state.s === "failed" ? state.message : "Check stopped."}
+      </p>
+      <p className="text-[13px] text-ink-2 tabular-nums">{state.s === "cancelled" ? `At least ${formatMicros(state.spentMicros)} spent` : state.spentMicros > 0 ? `${formatMicros(state.spentMicros)} spent` : ""}</p>
+      <div className="flex gap-2">
+        {(state.s === "cancelled" || state.retryable) && (
+          <button type="button" onClick={() => dispatch({ type: "retry" })} className="h-10 rounded-full bg-ink px-5 text-[14px] font-medium text-paper">
+            Check again
+          </button>
+        )}
+        <button type="button" onClick={() => dispatch({ type: "edit" })} className="h-10 rounded-full px-5 text-[14px] shadow-[inset_0_0_0_1px_var(--rule)] hover:bg-fill">
+          Change files
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function WorkingYear({ state, onCancel, dispatch }: { state: Exclude<CheckState, { s: "composing" } | { s: "done" }>; onCancel: () => void; dispatch: (action: CheckAction) => void }) {
+  const live = state.s === "running" ? state.live : null;
+  const bills = state.inputs.bills;
+  const done = live ? Object.keys(live.months).length : 0;
+  return (
+    <section className="mx-auto w-full max-w-[1240px] px-6 pb-20 pt-4">
+      <div className="flex items-end justify-between gap-6 border-b border-rule pb-5">
+        <h1 className="display text-[44px] leading-none sm:text-[56px]">
+          Reading {bills.length} bills at once<span className="text-vermilion">.</span>
+        </h1>
+        <p className="text-[13px] text-ink-2 tabular-nums">
+          {done} of {bills.length} read{state.spentMicros > 0 ? `, ${formatMicros(state.spentMicros)}` : ""}
+        </p>
+      </div>
+      <ol className="mt-8 grid grid-cols-3 gap-5 sm:grid-cols-4 lg:grid-cols-6">
+        {bills.map((doc, i) => {
+          const month = live?.months[i];
+          const lines = live?.lines[i] ?? [];
+          const marks: Mark[] = lines.flatMap((line, j) => (line.box && line.page === 1 ? [{ id: `R${j}`, box: line.box, tone: "read" as const }] : []));
+          const claimed = month?.outcome === "checked" ? month.claims.reduce((t, c) => t + c.amountCents, 0) : 0;
+          return (
+            <li key={doc.id} className="flex flex-col gap-2">
+              {doc.status === "ready" && <BillPage image={doc.pages[0].image} alt={`Bill ${i + 1}`} marks={marks} sweeping={!month && state.s === "running"} visibleAspect="1200 / 1000" />}
+              <p className={`text-[13px] tabular-nums ${claimed > 0 ? "font-medium text-vermilion-ink" : "text-ink-2"}`}>
+                {month ? (month.outcome === "checked" ? (claimed > 0 ? `+${usd(claimed)}` : "Matches the offer") : "Couldn't read") : lines.length > 0 ? `${lines.length} lines read` : "Waiting"}
+              </p>
+            </li>
+          );
+        })}
+      </ol>
+      <div className="mt-10">{state.s === "running" ? <CancelButton onCancel={onCancel} /> : <Failure state={state} dispatch={dispatch} />}</div>
+    </section>
+  );
+}
+
+function CancelButton({ onCancel }: { onCancel: () => void }) {
+  return (
+    <button type="button" onClick={onCancel} className="h-10 self-start rounded-full px-5 text-[14px] shadow-[inset_0_0_0_1px_var(--rule)] hover:bg-fill">
+      Cancel
+    </button>
+  );
+}
+
 function Working({ state, onCancel, dispatch }: { state: Exclude<CheckState, { s: "composing" } | { s: "done" }>; onCancel: () => void; dispatch: (action: CheckAction) => void }) {
-  const page = state.inputs.bill?.status === "ready" ? state.inputs.bill.pages[0] : null;
+  if (state.inputs.bills.length > 1) return <WorkingYear state={state} onCancel={onCancel} dispatch={dispatch} />;
+  const bill = state.inputs.bills[0];
+  const page = bill?.status === "ready" ? bill.pages[0] : null;
   const running = state.s === "running";
   const live = running ? state.live : null;
   const stage = state.stage;
   const reading = running && (stage === null || stage === "reading_bill" || stage === "rereading_bill");
-  const marks: Mark[] = (live?.lines ?? []).flatMap((line, i) => (line.box && line.page === 1 ? [{ id: `R${i}`, box: line.box, tone: "read" as const }] : []));
-  const hasOffer = state.inputs.offerFile !== null || state.inputs.offerText.trim().length > 0;
-  const steps = STEPS.filter((step) => step.key !== "offer" || hasOffer);
-  const thoughtsByStep = (step: Step) => (live?.thoughts ?? []).filter((t) => step.stages.includes(t.stage)).map((t) => t.text).join("\n\n");
+  const lines = live?.lines[0] ?? [];
+  const marks: Mark[] = lines.flatMap((line, i) => (line.box && line.page === 1 ? [{ id: `R${i}`, box: line.box, tone: "read" as const }] : []));
+  const offer = state.inputs.offer;
+  const isCall = offer.kind === "call";
+  const steps: (Step & { label: string })[] = [
+    { key: "bill", stages: ["reading_bill", "rereading_bill"], label: stage === "rereading_bill" ? "Reading the bill again, more carefully" : "Reading the bill" },
+    ...(offer.kind === "none" ? [] : [{ key: "offer" as const, stages: ["reading_offer"] as Stage[], label: isCall ? "Listening to the call" : "Reading what you were promised" }]),
+    { key: "compare", stages: ["comparing"], label: "Checking every dollar in code" },
+    ...(offer.kind === "none" ? [] : [{ key: "challenge" as const, stages: ["challenging"] as Stage[], label: "Arguing the company's side" }]),
+  ];
+  const thought = (step: Step) => (live?.thoughts ?? []).filter((t) => step.stages.includes(t.stage)).map((t) => t.text).join("\n\n");
+  const current = steps.find((step) => stepStatus(step, stage, running) === "now");
 
   return (
-    <section className="mx-auto grid w-full max-w-[1180px] gap-10 px-6 pb-16 pt-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1fr)] lg:gap-14">
-      <div className="lg:sticky lg:top-8 lg:self-start">{page && <BillPage image={page.image} alt="Your bill, first page" marks={marks} sweeping={reading} />}</div>
+    <section className="mx-auto grid w-full max-w-[1240px] gap-10 px-6 pb-20 pt-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1fr)] lg:gap-16">
+      <div className="lg:sticky lg:top-6 lg:self-start">{page && <BillPage image={page.image} alt="Your bill, first page" marks={marks} sweeping={reading} />}</div>
 
-      <div className="flex flex-col gap-6" aria-live="polite">
-        <div className="flex items-center justify-between">
-          <p className="text-[13px] font-medium text-ink-2">Muse Ember</p>
+      <div className="flex flex-col gap-8" aria-live="polite">
+        <div className="flex items-baseline justify-between border-b border-rule pb-4">
+          <p className="text-[13px] text-ink-2">Muse Ember</p>
           <p className="text-[13px] text-ink-2 tabular-nums">{state.spentMicros > 0 ? `${formatMicros(state.spentMicros)} spent` : "Starting"}</p>
         </div>
 
-        <ol className="flex flex-col gap-5">
-          {steps.map((step) => {
-            const status = stepState(step, stage, running);
-            const thought = thoughtsByStep(step);
+        {current && thought(current) && <p className="display caret text-[30px] leading-[1.2] text-ink sm:text-[34px]">{thought(current).split("\n\n").at(-1)}</p>}
+
+        <ol className="flex flex-col">
+          {steps.map((step, index) => {
+            const status = stepStatus(step, stage, running);
             return (
-              <li key={step.key} className={`transition-opacity duration-300 ${status === "later" ? "opacity-40" : ""}`}>
+              <li key={step.key} className={`border-t border-rule py-4 transition-opacity duration-300 ${status === "later" ? "opacity-35" : ""}`}>
                 <div className="flex items-center gap-3">
-                  <span className={`grid size-6 place-items-center rounded-full ${status === "done" ? "bg-ink text-ground" : "bg-fill text-ink"}`}>{status === "now" ? <Spinner /> : status === "done" ? <Check /> : null}</span>
-                  <span className="text-[17px] font-medium">{step.key === "bill" && stage === "rereading_bill" ? "Reading the bill again, more carefully" : step.label}</span>
+                  <span className="w-5 text-[12px] text-ink-3 tabular-nums">{String(index + 1).padStart(2, "0")}</span>
+                  <span className="flex-1 text-[16px] font-medium">{step.label}</span>
+                  {status === "now" ? <Spinner /> : status === "done" ? <span className="text-[12px] text-ink-2">Done</span> : null}
                 </div>
-                {thought && <p className="ml-9 mt-2 whitespace-pre-line text-[14px] leading-6 text-ink-2">{thought}</p>}
-                {step.key === "bill" && live && live.lines.length > 0 && (
-                  <ul className="ml-9 mt-3 divide-y divide-hairline rounded-[12px] bg-surface px-3 shadow-[0_0_0_1px_var(--hairline)]">
-                    {live.lines.map((line, i) => (
-                      <li key={i} className="appear flex items-baseline justify-between gap-4 py-2 text-[14px]">
+
+                {step.key === "bill" && lines.length > 0 && (
+                  <ul className="ml-8 mt-3">
+                    {lines.map((line, i) => (
+                      <li key={i} className="appear flex items-baseline justify-between gap-4 border-b border-dotted border-rule py-1.5 text-[14px]">
                         <span className="truncate">{line.label}</span>
                         <span className="tabular-nums text-ink-2">{usd(line.amount_cents)}</span>
                       </li>
                     ))}
                   </ul>
                 )}
+
+                {step.key === "offer" && live && live.heard.length > 0 && (
+                  <ul className="ml-8 mt-3 flex flex-col gap-2">
+                    {live.heard.map((turn, i) => (
+                      <li key={i} className="appear grid grid-cols-[4.5rem_1fr] gap-3 text-[14px] leading-snug">
+                        <span className="text-ink-3 tabular-nums">
+                          {turn.speaker === "company" ? "Company" : turn.speaker === "customer" ? "You" : "Other"} {formatClock(turn.start_seconds)}
+                        </span>
+                        <span className={turn.speaker === "company" ? "text-ink" : "text-ink-2"}>{turn.text}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
                 {step.key === "offer" && live && live.promises.length > 0 && (
-                  <ul className="ml-9 mt-3 flex flex-col gap-2">
+                  <ul className="ml-8 mt-3 flex flex-col gap-1.5">
                     {live.promises.map((promise, i) => (
-                      <li key={i} className="appear rounded-[12px] bg-surface px-3 py-2 text-[14px] shadow-[0_0_0_1px_var(--hairline)]">
+                      <li key={i} className="appear text-[14px] text-ink">
+                        <span className="text-vermilion">→ </span>
                         {promise.description}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                {step.key === "challenge" && live && live.challenges.length > 0 && (
+                  <ul className="ml-8 mt-3 flex flex-col gap-3">
+                    {live.challenges.map((challenge, i) => (
+                      <li key={i} className="appear flex items-start justify-between gap-4 text-[14px] leading-snug">
+                        <span className="text-ink-2">{challenge.looked_for}</span>
+                        <span className={`stamp shrink-0 rounded-[3px] px-2 py-0.5 text-[11px] font-semibold tracking-wide ${challenge.verdict === "stands" ? "text-ink shadow-[inset_0_0_0_1.5px_var(--ink)]" : "text-vermilion-ink shadow-[inset_0_0_0_1.5px_var(--vermilion)]"}`}>
+                          {challenge.verdict === "stands" ? "STANDS" : "DROPPED"}
+                        </span>
                       </li>
                     ))}
                   </ul>
@@ -261,54 +350,43 @@ function Working({ state, onCancel, dispatch }: { state: Exclude<CheckState, { s
           })}
         </ol>
 
-        {state.s === "running" && (
-          <div>
-            <button type="button" onClick={onCancel} className="rounded-[10px] bg-fill px-4 py-2 text-[15px] hover:bg-hairline">
-              Cancel
-            </button>
-          </div>
-        )}
-        {state.s === "failed" && (
-          <div className="flex flex-col gap-3 rounded-[16px] bg-surface p-5 shadow-[0_0_0_1px_var(--hairline)]">
-            <p className="text-[17px] font-medium" role="alert">
-              {state.message}
-            </p>
-            {state.spentMicros > 0 && <p className="text-[13px] text-ink-2 tabular-nums">{formatMicros(state.spentMicros)} spent</p>}
-            <div className="flex gap-2">
-              {state.retryable && (
-                <button type="button" onClick={() => dispatch({ type: "retry" })} className="rounded-[10px] bg-accent px-4 py-2 text-[15px] font-medium text-accent-ink">
-                  Try again
-                </button>
-              )}
-              <button type="button" onClick={() => dispatch({ type: "edit" })} className="rounded-[10px] bg-fill px-4 py-2 text-[15px] hover:bg-hairline">
-                Change files
-              </button>
-            </div>
-          </div>
-        )}
-        {state.s === "cancelled" && (
-          <div className="flex flex-col gap-3 rounded-[16px] bg-surface p-5 shadow-[0_0_0_1px_var(--hairline)]">
-            <p className="text-[17px] font-medium">Check stopped</p>
-            <p className="text-[13px] text-ink-2 tabular-nums">At least {formatMicros(state.spentMicros)} spent</p>
-            <div className="flex gap-2">
-              <button type="button" onClick={() => dispatch({ type: "retry" })} className="rounded-[10px] bg-accent px-4 py-2 text-[15px] font-medium text-accent-ink">
-                Check again
-              </button>
-              <button type="button" onClick={() => dispatch({ type: "edit" })} className="rounded-[10px] bg-fill px-4 py-2 text-[15px] hover:bg-hairline">
-                Change files
-              </button>
-            </div>
-          </div>
-        )}
+        {state.s === "running" ? <CancelButton onCancel={onCancel} /> : <Failure state={state} dispatch={dispatch} />}
       </div>
     </section>
   );
+}
+
+function SampleCard({ sample, busy, loading, onRun }: { sample: Sample; busy: boolean; loading: boolean; onRun: () => void }) {
+  return (
+    <button type="button" disabled={busy} onClick={onRun} className="group flex flex-col gap-3 text-left disabled:cursor-wait">
+      <div className="relative transition-transform duration-500 group-hover:-translate-y-1 group-hover:rotate-[-0.6deg]">
+        {sample.bills.length > 1 && <div aria-hidden className="paper absolute inset-0 translate-x-2 translate-y-2 rotate-[1.2deg]" />}
+        {sample.bills.length > 1 && <div aria-hidden className="paper absolute inset-0 translate-x-1 translate-y-1 rotate-[0.6deg]" />}
+        <BillPage image={sample.image} alt="" visibleAspect="1200 / 640" />
+        {sample.offer.kind === "call" && (
+          <div className="paper absolute -bottom-3 right-3 flex items-center gap-2 px-3 py-2">
+            <span className="size-2 rounded-full bg-vermilion" />
+            <span className="text-[12px] font-medium">Recorded call</span>
+          </div>
+        )}
+      </div>
+      <span className="mt-1">
+        <span className="block text-[15px] font-medium">{loading ? "Opening…" : sample.title}</span>
+        <span className="block text-[13px] text-ink-2">{sample.outcome}</span>
+      </span>
+    </button>
+  );
+}
+
+async function fetchFile(url: string, name: string, type: string): Promise<File> {
+  return new File([await (await fetch(url)).blob()], name, { type });
 }
 
 export function Checker({ samples }: { samples: Sample[] }) {
   const [state, dispatch] = useReducer(reduce, initialState);
   const controllers = useRef(new Map<number, AbortController>());
   const nextId = useRef(0);
+  const id = () => `doc-${++nextId.current}`;
 
   const runningAttempt = state.s === "running" ? state.attempt : null;
   useEffect(() => {
@@ -326,121 +404,159 @@ export function Checker({ samples }: { samples: Sample[] }) {
     dispatch({ type: "cancel" });
   };
 
-  const addFile = async (role: "bill" | "offer", file: File) => {
-    const id = `doc-${++nextId.current}`;
-    dispatch({ type: role === "bill" ? "bill_added" : "offer_added", id, name: file.name });
+  const prepareDoc = async (docId: string, file: File, maxPages: number) => {
     try {
-      const pages = await prepareFile(file, role === "bill" ? MAX_BILL_PAGES : MAX_OFFER_PAGES);
-      dispatch({ type: "doc_prepared", id, pages });
+      dispatch({ type: "doc_prepared", id: docId, pages: await prepareFile(file, maxPages) });
     } catch (error) {
-      dispatch({ type: "doc_failed", id, message: error instanceof PrepareError ? error.message : "This file could not be opened." });
+      dispatch({ type: "prep_failed", id: docId, message: error instanceof PrepareError ? error.message : "This file could not be opened." });
     }
   };
 
-  // A sample's bill and offer enter the check together; a later sample click wins over one still loading.
+  const addBills = (files: File[]) => {
+    const room = MAX_BILLS - (state.s === "composing" ? state.inputs.bills.length : 0);
+    const docs = files.slice(0, room).map((file) => ({ id: id(), name: file.name, file }));
+    dispatch({ type: "bills_added", docs: docs.map(({ id: docId, name }) => ({ id: docId, name })) });
+    for (const doc of docs) void prepareDoc(doc.id, doc.file, MAX_BILL_PAGES);
+  };
+
+  const addOffer = async (file: File) => {
+    const docId = id();
+    if (!isAudio(file)) {
+      dispatch({ type: "offer_file_added", id: docId, name: file.name });
+      return prepareDoc(docId, file, MAX_OFFER_PAGES);
+    }
+    dispatch({ type: "call_added", id: docId, name: file.name });
+    try {
+      dispatch({ type: "call_prepared", id: docId, call: await prepareCall(file, MAX_CALL_SECONDS) });
+    } catch (error) {
+      dispatch({ type: "prep_failed", id: docId, message: error instanceof PrepareError ? error.message : "This recording could not be opened." });
+    }
+  };
+
+  // A sample's bills and offer enter the check together; a later sample click wins over one still loading.
   const sampleToken = useRef(0);
   const [loadingSample, setLoadingSample] = useState<string | null>(null);
   const runSample = async (sample: Sample) => {
     const token = ++sampleToken.current;
     setLoadingSample(sample.id);
     try {
-      const blob = await (await fetch(sample.bill)).blob();
-      const pages = await prepareFile(new File([blob], `${sample.title}.pdf`, { type: "application/pdf" }), MAX_BILL_PAGES);
+      const bills = await Promise.all(
+        sample.bills.map(async (url, i): Promise<Doc> => {
+          const name = sample.bills.length > 1 ? `${sample.title} ${i + 1}.pdf` : `${sample.title}.pdf`;
+          return { id: `sample-${token}-${i}`, name, status: "ready", pages: await prepareFile(await fetchFile(url, name, "application/pdf"), MAX_BILL_PAGES) };
+        }),
+      );
+      const offer: Inputs["offer"] =
+        sample.offer.kind === "text"
+          ? { kind: "text", text: sample.offer.text }
+          : { kind: "call", call: { id: `sample-${token}-call`, name: "Sales call.m4a", status: "ready", ...(await prepareCall(await fetchFile(sample.offer.url, "Sales call.m4a", "audio/mp4"), MAX_CALL_SECONDS)) } };
       if (token !== sampleToken.current) return;
-      dispatch({ type: "sample_ready", bill: { id: `sample-${token}`, name: `${sample.title}.pdf`, status: "ready", pages }, offerText: sample.proof });
+      dispatch({ type: "sample_ready", inputs: { bills, offer } });
     } finally {
       if (token === sampleToken.current) setLoadingSample(null);
     }
   };
 
-  if (state.s === "done") return <ResultView state={state} dispatch={dispatch} />;
+  if (state.s === "done") {
+    if (state.result.outcome === "year") return <YearView state={state} result={state.result} dispatch={dispatch} />;
+    const bill = state.inputs.bills[0];
+    const { offer } = state.inputs;
+    return (
+      <ResultView
+        result={state.result}
+        pages={bill?.status === "ready" ? bill.pages : []}
+        offerText={offer.kind === "text" ? offer.text : null}
+        callUrl={offer.kind === "call" && offer.call.status === "ready" ? offer.call.url : null}
+        bill={0}
+        selection={state.selections[0]}
+        thoughts={state.thoughts}
+        dispatch={dispatch}
+        backLabel="Check another bill"
+        onBack={() => dispatch({ type: "edit" })}
+      />
+    );
+  }
   if (state.s !== "composing") return <Working state={state} onCancel={cancel} dispatch={dispatch} />;
 
-  const { bill, offerFile, offerText } = state.inputs;
+  const { bills, offer } = state.inputs;
   const ready = checkInput(state.inputs) !== null;
-  const hero = samples[0];
 
   return (
-    <section className="mx-auto w-full max-w-[1180px] px-6 pb-20">
-      <div className="grid items-start gap-12 pt-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.92fr)] lg:gap-16 lg:pt-16">
-        <div>
-          <h1 className="text-[40px] font-semibold leading-[1.04] tracking-[-0.03em] text-balance sm:text-[56px]">Find what your bill owes you</h1>
-          <p className="mt-5 max-w-[34rem] text-[19px] leading-[1.5] text-ink-2 text-pretty">
-            Add a phone, internet or utility bill and the offer you signed up for. Billproof marks each charge that breaks it and writes the message that gets the money back.
-          </p>
+    <section className="mx-auto w-full max-w-[1240px] px-6 pb-24">
+      <div className="pt-10 lg:pt-16">
+        <h1 className="display max-w-[14ch] text-[64px] leading-[0.92] tracking-[-0.025em] sm:text-[104px]">
+          Put your bill on the stand<span className="text-vermilion">.</span>
+        </h1>
+        <p className="mt-7 max-w-[40rem] text-[19px] leading-[1.5] text-ink-2 text-pretty">
+          Billproof sets a phone, internet or utility bill against what you were promised: the offer email, a screenshot, even a recording of the sales call. Muse Ember marks every charge that breaks it, then argues the company&apos;s side before anything is claimed.
+        </p>
+      </div>
 
-          <div className="mt-10 rounded-[24px] bg-surface p-3 shadow-[0_0_0_1px_var(--hairline),0_24px_48px_-28px_rgb(0_0_0/0.25)]">
-            <div className="p-3">
-              <p className="mb-2 text-[13px] font-medium text-ink-2">Bill</p>
-              {bill ? (
-                <DocChip doc={bill} onRemove={() => dispatch({ type: "doc_removed", id: bill.id })} />
-              ) : (
-                <FileTarget label="Choose the bill" onFile={(file) => void addFile("bill", file)} className="flex w-full items-center gap-4 rounded-[14px] bg-fill p-4 text-left transition-colors hover:bg-hairline">
-                  <DocIcon />
-                  <span>
-                    <span className="block text-[15px] font-medium">Drop the bill here, or choose a file</span>
-                    <span className="block text-[13px] text-ink-2">PDF or photo, up to 6 pages</span>
-                  </span>
+      <div className="mt-12 grid gap-px overflow-hidden rounded-[4px] bg-rule shadow-[0_0_0_1px_var(--rule)] lg:grid-cols-[1fr_1.15fr_auto]">
+        <div className="bg-paper p-5">
+          <p className="text-[12px] text-ink-3">The bill</p>
+          {bills.length > 0 ? (
+            <div className="mt-2 max-h-[220px] overflow-y-auto">
+              {bills.map((doc) => (
+                <DocChip key={doc.id} doc={doc} onRemove={() => dispatch({ type: "removed", id: doc.id })} />
+              ))}
+              {bills.length < MAX_BILLS && (
+                <FileTarget label="Add more bills" accept={BILL_ACCEPT} multiple onFiles={addBills} className="mt-1 text-[13px] text-ink-2 underline underline-offset-4 hover:text-ink">
+                  Add another month
                 </FileTarget>
               )}
             </div>
-
-            <div className="p-3 pt-1">
-              <p className="mb-2 text-[13px] font-medium text-ink-2">What you were promised</p>
-              {offerFile ? (
-                <DocChip doc={offerFile} onRemove={() => dispatch({ type: "doc_removed", id: offerFile.id })} />
-              ) : (
-                <div className="rounded-[14px] bg-fill focus-within:shadow-[0_0_0_2px_var(--accent)]">
-                  <textarea
-                    value={offerText}
-                    onChange={(event) => dispatch({ type: "offer_text", text: event.target.value })}
-                    placeholder="Paste the order confirmation or plan details"
-                    aria-label="What you were promised"
-                    className="block h-[120px] w-full resize-none bg-transparent px-4 pt-3.5 text-[15px] leading-6 placeholder:text-ink-3 focus:outline-none"
-                  />
-                  <div className="flex justify-end px-3 pb-2.5">
-                    <FileTarget label="Add the offer as a file" onFile={(file) => void addFile("offer", file)} className="rounded-[8px] px-2 py-1 text-[13px] text-ink-2 hover:bg-hairline hover:text-ink">
-                      Add a screenshot or PDF
-                    </FileTarget>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="flex flex-wrap items-center justify-between gap-3 p-3 pt-2">
-              <p className="text-[13px] text-ink-2">Read by Meta&apos;s Muse Ember. Billproof doesn&apos;t keep your files.</p>
-              <button
-                type="button"
-                disabled={!ready}
-                onClick={() => dispatch({ type: "start" })}
-                className="h-11 rounded-[12px] bg-accent px-6 text-[15px] font-semibold text-accent-ink transition-[opacity,transform] active:scale-[0.98] disabled:opacity-35"
-              >
-                Check bill
-              </button>
-            </div>
-          </div>
+          ) : (
+            <FileTarget label="Choose the bill" accept={BILL_ACCEPT} multiple onFiles={addBills} className="mt-3 flex h-[132px] w-full flex-col items-start justify-end text-left">
+              <span className="display text-[30px] leading-none">Drop the bill</span>
+              <span className="mt-2 text-[13px] text-ink-2">PDF or photo. Drop up to 12 months to read a whole year.</span>
+            </FileTarget>
+          )}
         </div>
 
-        {hero && <Hero sample={hero} onRun={() => void runSample(hero)} busy={loadingSample !== null} />}
-      </div>
+        <div className="bg-paper p-5">
+          <p className="text-[12px] text-ink-3">What you were promised</p>
+          {offer.kind === "file" ? (
+            <DocChip doc={offer.doc} onRemove={() => dispatch({ type: "removed", id: offer.doc.id })} />
+          ) : offer.kind === "call" ? (
+            <CallChip call={offer.call} onRemove={() => dispatch({ type: "removed", id: offer.call.id })} />
+          ) : (
+            <>
+              <textarea
+                value={offer.kind === "text" ? offer.text : ""}
+                onChange={(event) => dispatch({ type: "offer_text", text: event.target.value })}
+                placeholder="Paste the order confirmation or plan details"
+                aria-label="What you were promised"
+                className="mt-2 block h-[96px] w-full resize-none bg-transparent text-[15px] leading-6 placeholder:text-ink-3 focus:outline-none"
+              />
+              <FileTarget label="Add the offer as a file or recording" accept={OFFER_ACCEPT} onFiles={(files) => void addOffer(files[0])} className="text-[13px] text-ink-2 underline underline-offset-4 hover:text-ink">
+                Or add a screenshot, PDF, or a recording of the call
+              </FileTarget>
+            </>
+          )}
+        </div>
 
-      <div className="mt-20">
-        <h2 className="text-[22px] font-semibold tracking-[-0.015em]">Try a sample bill</h2>
-        <div className="mt-5 grid gap-4 sm:grid-cols-3">
+        <div className="flex items-end bg-paper p-5">
+          <button
+            type="button"
+            disabled={!ready}
+            onClick={() => dispatch({ type: "start" })}
+            className="h-14 w-full rounded-full bg-vermilion px-8 text-[16px] font-semibold text-white transition-[opacity,transform] active:scale-[0.98] disabled:bg-ink disabled:opacity-25 lg:w-auto"
+          >
+            {bills.length > 1 ? `Check ${bills.length} bills` : "Check bill"}
+          </button>
+        </div>
+      </div>
+      <p className="mt-3 text-[12px] text-ink-3">Read by Meta&apos;s Muse Ember. Billproof doesn&apos;t keep your files.</p>
+
+      <div className="mt-24">
+        <div className="flex items-baseline justify-between border-b border-rule pb-3">
+          <h2 className="display text-[34px] leading-none">Try a sample</h2>
+          <p className="text-[13px] text-ink-2">Each runs live on Muse Ember</p>
+        </div>
+        <div className="mt-8 grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
           {samples.map((sample) => (
-            <button
-              key={sample.id}
-              type="button"
-              disabled={loadingSample !== null}
-              onClick={() => void runSample(sample)}
-              className="group flex flex-col gap-4 rounded-[20px] bg-surface p-4 text-left shadow-[0_0_0_1px_var(--hairline)] transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_0_1px_var(--hairline),0_18px_36px_-24px_rgb(0_0_0/0.3)] disabled:cursor-wait"
-            >
-              <BillPage image={sample.image} alt="" visibleAspect="1200 / 560" />
-              <span>
-                <span className="block text-[15px] font-medium">{loadingSample === sample.id ? "Opening…" : sample.title}</span>
-                <span className="block text-[13px] text-ink-2">{sample.outcome}</span>
-              </span>
-            </button>
+            <SampleCard key={sample.id} sample={sample} busy={loadingSample !== null} loading={loadingSample === sample.id} onRun={() => void runSample(sample)} />
           ))}
         </div>
       </div>

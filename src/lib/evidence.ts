@@ -53,3 +53,9 @@ export function quoteFoundIn(quote: string, source: string, minShare = 0.9): boo
   }
   return false;
 }
+
+// True when the source contains the quote's words in the same order with nothing left out.
+export function quoteExactIn(quote: string, source: string): boolean {
+  const want = tokens(quote).join(" ");
+  return want.length > 0 && ` ${tokens(source).join(" ")} `.includes(` ${want} `);
+}

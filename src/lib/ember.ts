@@ -7,7 +7,7 @@ export const MODEL = "muse-ember-1.0";
 
 export type Effort = "minimal" | "low" | "medium" | "high" | "xhigh" | "max";
 
-export type Part = { type: "text"; text: string } | { type: "image"; dataUrl: string };
+export type Part = { type: "text"; text: string } | { type: "image"; dataUrl: string } | { type: "audio"; wav: string };
 
 export type EmberCall<T> = {
   name: string;
@@ -36,7 +36,11 @@ export class EmberError extends Error {
 
 export function buildRequest<T>(call: EmberCall<T>): EmberRequest<T> {
   const content = call.parts.map((part) =>
-    part.type === "text" ? { type: "input_text", text: part.text } : { type: "input_image", image_url: part.dataUrl },
+    part.type === "text"
+      ? { type: "input_text", text: part.text }
+      : part.type === "image"
+        ? { type: "input_image", image_url: part.dataUrl }
+        : { type: "input_audio", input_audio: { data: part.wav, format: "wav" } },
   );
   return {
     call,

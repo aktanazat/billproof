@@ -61,6 +61,16 @@ export const PROMISE_KINDS = ["monthly_price", "included", "recurring_credit", "
 export type PromiseKind = (typeof PROMISE_KINDS)[number];
 
 export const termsSchema = z.object({
+  transcript: z
+    .array(
+      z.object({
+        start_seconds: z.number().describe("When this turn starts in the recording"),
+        speaker: z.enum(["company", "customer", "other"]),
+        text: z.string().describe("The exact words spoken"),
+      }),
+    )
+    .nullable()
+    .describe("Only for a recording: every spoken turn in order. Null for written offers"),
   provider: z.string().nullable().describe("Company named in the offer, or null"),
   promises: z.array(
     z.object({
@@ -72,11 +82,26 @@ export const termsSchema = z.object({
       applies_from: isoDate.nullable(),
       applies_until: isoDate.nullable().describe("Last day the promise applies, or null when no end is stated"),
       quote,
+      said_at_seconds: z.number().nullable().describe("Only for a recording: when the company starts saying the quote"),
       covers_line_ids: z.array(z.string()).describe("IDs of the bill lines this promise governs"),
     }),
   ),
 });
 export type Terms = z.infer<typeof termsSchema>;
+export type TranscriptTurn = NonNullable<Terms["transcript"]>[number];
+
+export const challengeSchema = z.object({
+  challenges: z.array(
+    z.object({
+      claim_id: z.string(),
+      looked_for: z.string().describe("One plain sentence: what you searched for that would make the claim wrong"),
+      verdict: z.enum(["stands", "refuted"]),
+      counter_quote: quote.nullable().describe("When refuted: the exact text on the bill or offer that defeats the claim"),
+      counter_source: z.enum(["bill", "offer"]).nullable(),
+    }),
+  ),
+});
+export type Challenge = z.infer<typeof challengeSchema>["challenges"][number];
 
 export type LineItem = BillReading["line_items"][number] & { id: string };
 export type Reading = Omit<BillReading, "line_items"> & { line_items: LineItem[] };

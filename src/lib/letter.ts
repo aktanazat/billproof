@@ -1,8 +1,6 @@
 import type { Claim, Question } from "./decide";
-import type { CheckResult } from "./result";
+import type { Checked } from "./result";
 import type { LineItem, PromiseTerm } from "./schemas";
-
-type Checked = Extract<CheckResult, { outcome: "checked" }>;
 
 export function usd(cents: number): string {
   const sign = cents < 0 ? "-" : "";
@@ -27,8 +25,9 @@ function names(lines: LineItem[]): string {
   return labels.length <= 1 ? (labels[0] ?? "this charge") : `${labels.slice(0, -1).join(", ")} and ${labels.at(-1)}`;
 }
 
-function claimSentence(claim: Claim, lines: LineItem[], promise: PromiseTerm, period: string): string {
-  const quoted = `"${promise.quote.trim()}"`;
+function claimSentence(claim: Claim, lines: LineItem[], promise: PromiseTerm, period: string, onCall: boolean): string {
+  // A promise heard on a recorded call is cited as what the representative said, with the moment it was said.
+  const quoted = onCall && promise.said_at_seconds !== null ? `your representative told me on the call, at ${Math.floor(promise.said_at_seconds / 60)}:${String(Math.floor(promise.said_at_seconds % 60)).padStart(2, "0")} in my recording: "${promise.quote.trim()}"` : `"${promise.quote.trim()}"`;
   switch (claim.kind) {
     case "price_above_promise": {
       const discounted = lines.some((line) => line.amount_cents < 0) ? " after discounts" : "";
@@ -64,7 +63,7 @@ export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<stri
   const totalCents = claims.reduce((total, claim) => total + claim.amountCents, 0);
   const claimText = claims.flatMap((claim) => {
     const promise = promises.get(claim.promiseId);
-    return promise ? [claimSentence(claim, linesOf(claim.lineIds), promise, period)] : [];
+    return promise ? [claimSentence(claim, linesOf(claim.lineIds), promise, period, result.transcript !== null)] : [];
   });
   const questionText = result.questions
     .filter((question) => includedQuestionIds.has(question.id))
@@ -99,5 +98,27 @@ export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<stri
     .filter(Boolean)
     .join("\n\n");
 
+  return { totalCents, chat, email, call };
+}
+
+// One message for a year of statements: each month's claims under its statement, then the total.
+export function buildYearMessage(months: Checked[]): Message {
+  const withClaims = months.filter((month) => month.claims.length > 0);
+  const totalCents = withClaims.reduce((sum, month) => sum + month.claims.reduce((t, claim) => t + claim.amountCents, 0), 0);
+  const first = withClaims[0]?.reading;
+  const account = first?.account_last4 ? `account ending ${first.account_last4}` : "my account";
+  const sections = withClaims.map((month) => {
+    const lines = new Map(month.reading.line_items.map((line) => [line.id, line]));
+    const promises = new Map(month.promises.map((promise) => [promise.id, promise]));
+    const sentences = month.claims.flatMap((claim) => {
+      const promise = promises.get(claim.promiseId);
+      return promise ? [claimSentence(claim, claim.lineIds.flatMap((id) => lines.get(id) ?? []), promise, periodText(month), month.transcript !== null)] : [];
+    });
+    return sentences.join(" ");
+  });
+  const ask = totalCents > 0 ? `In total, please credit ${usd(totalCents)} to ${account}.` : "";
+  const chat = [`Hi, I'm writing about ${account}. I checked my statements against the plan I signed up for.`, ...sections, ask].filter(Boolean).join("\n\n");
+  const email = [`Subject: Billing correction for ${account}`, "", `Hello ${first?.provider ?? "billing"} team,`, "", ...sections.flatMap((s) => [s, ""]), ...(ask ? [ask, ""] : []), "Please reply with the corrected amount and the date the credit will post.", "", "Thank you,", "[Your name]"].join("\n");
+  const call = [`I'm calling about ${account}.`, ...sections.map((s, i) => `${i + 1}. ${s}`), ask, "Before ending the call, ask for a reference number and the date the credit will post."].filter(Boolean).join("\n\n");
   return { totalCents, chat, email, call };
 }

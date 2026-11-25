@@ -10,7 +10,7 @@ billproof.aktan.us {
 		}
 	}
 	request_body {
-		max_size 13MB
+		max_size 41MB
 	}
 	reverse_proxy app:3000 {
 		# The check streams Muse Ember's reading line by line; pass each line through as it arrives.

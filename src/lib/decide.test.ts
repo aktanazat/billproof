@@ -67,6 +67,7 @@ function promise(overrides: Partial<PromiseTerm> & Pick<PromiseTerm, "kind" | "q
     conditions: [],
     applies_from: null,
     applies_until: null,
+    said_at_seconds: null,
     ...overrides,
   };
 }
@@ -126,6 +127,20 @@ describe("decide on the internet bill with an active price guarantee", () => {
   test("makes no claim when the promise quote is not in the offer", () => {
     const invented = [{ ...promises[0], quote: "Monthly price: $55.00/mo forever, guaranteed" }];
     const decision = decide(reading, invented, billText.get(internetGuaranteed.id)!, offer(internetGuaranteed));
+    expect(decision.claims).toEqual([]);
+  });
+
+  test("a price heard on a call becomes a claim the person must confirm", () => {
+    const call: Source = { kind: "heard", text: "Absolutely. With autopay and paperless, Fiber 500 is $55 a month, and that price is locked for two years." };
+    const heard = [{ ...promises[0], quote: "Fiber 500 is $55 a month, and that price is locked for two years", said_at_seconds: 15 }];
+    const decision = decide(reading, heard, billText.get(internetGuaranteed.id)!, call);
+    expect(decision.claims.map((c) => [c.kind, c.amountCents, c.needsConfirmation])).toEqual([["price_above_promise", 1500, true]]);
+  });
+
+  test("makes no claim from words the call never contained", () => {
+    const call: Source = { kind: "heard", text: "Fiber 500 is $55 a month with autopay." };
+    const heard = [{ ...promises[0], quote: "Fiber 500 is $55 a month, and that price is locked for two years", said_at_seconds: 15 }];
+    const decision = decide(reading, heard, billText.get(internetGuaranteed.id)!, call);
     expect(decision.claims).toEqual([]);
   });
 

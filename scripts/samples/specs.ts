@@ -164,3 +164,57 @@ export const mobile: BillSpec = {
 };
 
 export const demoBills = [internetGuaranteed, internetExpired, mobile] as const;
+
+// Twelve monthly Bayline statements under the 2-year guarantee: the price creeps up in August and the gateway
+// fee appears in October. Claims: $5 in Aug and Sep, $15 + $15 in Oct and Nov; nothing before.
+const MONTH_STARTS = ["2025-12-12", "2026-01-12", "2026-02-12", "2026-03-12", "2026-04-12", "2026-05-12", "2026-06-12", "2026-07-12", "2026-08-12", "2026-09-12", "2026-10-12", "2026-11-12"];
+
+function addDays(iso: string, days: number): string {
+  const date = new Date(`${iso}T12:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
+export const yearBills: BillSpec[] = MONTH_STARTS.map((start, i) => {
+  const internet = i >= 10 ? 7500 : i >= 8 ? 6500 : 6000;
+  const lines: Line[] = [
+    { label: "Fiber 500 Internet", cents: internet, section: "service" },
+    ...(i >= 10 ? [{ label: "Wi-Fi Gateway Rental", cents: 1500, section: "equipment" as const }] : []),
+    { label: "Autopay & Paperless Discount", cents: -500, section: "credits" },
+    { label: "CA Communications Users Tax", cents: Math.round(internet * 0.0335), section: "taxes" },
+  ];
+  const claims: Expected["claims"] = [];
+  if (i >= 8) claims.push({ kind: "price_above_promise", labels: ["Fiber 500 Internet", "Autopay & Paperless Discount"], amountCents: internet - 500 - 5500 });
+  if (i >= 10) claims.push({ kind: "included_charged", labels: ["Wi-Fi Gateway Rental"], amountCents: 1500 });
+  const previous = i === 0 ? 5701 : 0;
+  return {
+    ...internetGuaranteed,
+    id: `year-${String(i + 1).padStart(2, "0")}`,
+    statementDate: addDays(start, -2),
+    period: { start, end: addDays(MONTH_STARTS[i + 1] ?? "2026-12-12", -1) },
+    dueDate: addDays(start, 19),
+    previousBalanceCents: previous,
+    paymentCents: previous,
+    lines,
+    notices: ["Questions about your bill? Visit bayline.example/help or call 1-866-555-0144."],
+    expected: { claims, questions: [], explained: [] },
+  };
+});
+
+// Staged sales calls, spoken by two system voices. The first keeps the $55 price for two years; the second only for
+// the first year, so the same bill has no claim.
+export type CallTurn = { speaker: "company" | "customer"; text: string };
+export const callTwoYears: CallTurn[] = [
+  { speaker: "company", text: "Thanks for calling Bayline Fiber, this is Maria. Today is October twenty-eighth, twenty twenty-five. How can I help?" },
+  { speaker: "customer", text: "Hi, I want to sign up for the Fiber 500 plan, but only if the price stays put." },
+  { speaker: "company", text: "Absolutely. With autopay and paperless, Fiber 500 is fifty-five dollars a month, and that price is locked for two years." },
+  { speaker: "customer", text: "And the Wi-Fi gateway?" },
+  { speaker: "company", text: "The Wi-Fi gateway is included at no extra cost. You're all set." },
+];
+export const callFirstYear: CallTurn[] = [
+  { speaker: "company", text: "Thanks for calling Bayline Fiber, this is Maria. Today is October twenty-eighth, twenty twenty-five. How can I help?" },
+  { speaker: "customer", text: "Hi, I want to sign up for the Fiber 500 plan, but only if the price stays put." },
+  { speaker: "company", text: "Sure. With autopay and paperless, Fiber 500 is fifty-five dollars a month for your first twelve months, then the regular rate applies." },
+  { speaker: "customer", text: "And the Wi-Fi gateway?" },
+  { speaker: "company", text: "The gateway is included for the first twelve months too. You're all set." },
+];

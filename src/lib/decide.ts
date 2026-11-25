@@ -1,7 +1,9 @@
 import { quoteFoundIn, quoteHasAmount, tokens } from "./evidence";
 import type { LineItem, LineKind, PromiseTerm, Reading } from "./schemas";
 
-export type Source = { kind: "text"; text: string } | { kind: "image" };
+// "heard" is a transcript Muse Ember made from a recording: quotes are checked against it, but a person confirms
+// what was said before a claim built on it is used.
+export type Source = { kind: "text"; text: string } | { kind: "image" } | { kind: "heard"; text: string };
 
 export type ClaimKind = "price_above_promise" | "included_charged" | "credit_missing";
 export type Claim = {
@@ -58,11 +60,11 @@ const COVERABLE: Record<Exclude<PromiseTerm["kind"], "other">, KindSet> = {
 
 export function lineIsEvidenced(line: LineItem, bill: Source): boolean {
   if (!quoteHasAmount(line.quote, line.amount_cents)) return false;
-  return bill.kind === "text" ? quoteFoundIn(line.quote, bill.text) : line.box !== null;
+  return bill.kind === "image" ? line.box !== null : quoteFoundIn(line.quote, bill.text);
 }
 
 function promiseEvidenceProblem(promise: PromiseTerm, proof: Source): UnusedReason | null {
-  if (proof.kind === "text" && !quoteFoundIn(promise.quote, proof.text)) return "quote_not_in_offer";
+  if (proof.kind !== "image" && !quoteFoundIn(promise.quote, proof.text)) return "quote_not_in_offer";
   if (promise.amount_cents !== null && !quoteHasAmount(promise.quote, promise.amount_cents)) return "amount_not_in_quote";
   return null;
 }
@@ -140,7 +142,7 @@ export function decide(reading: Reading, promises: PromiseTerm[], bill: Source, 
   const unused: Unused[] = [];
   const governed = new Set<string>();
   const matchedPromiseIds: string[] = [];
-  const photoEvidence = bill.kind === "image" || proof.kind === "image";
+  const photoEvidence = bill.kind === "image" || proof.kind !== "text";
 
   for (const promise of promises) {
     if (promise.kind === "other") {

@@ -16,7 +16,7 @@ export class LedgerRefusal extends Error {
 
 export type Ledger = {
   admitCheck(client: string, now?: number): string;
-  reserve(checkId: string, amount: number): string;
+  reserve(checkId: string, amount: number, capMicros: number): string;
   settle(attemptId: string, actualMicros: number): void;
   lose(attemptId: string): void;
   spentForCheck(checkId: string): number;
@@ -88,11 +88,11 @@ export function openLedger(file: string, eventCapMicros: number): Ledger {
         return id;
       });
     },
-    reserve(checkId: string, amount: number): string {
+    reserve(checkId: string, amount: number, capMicros: number): string {
       return writeTransaction(() => {
         const forCheck = micros(checkSpent.get(checkId));
-        if (forCheck + amount > CHECK_CAP_MICROS) {
-          throw new LedgerRefusal("over_budget", `This step could cost up to ${amount} µ$, past this check's ${CHECK_CAP_MICROS} µ$ limit`);
+        if (forCheck + amount > capMicros) {
+          throw new LedgerRefusal("over_budget", `This step could cost up to ${amount} µ$, past this check's ${capMicros} µ$ limit`);
         }
         if (micros(eventSpent.get()) + amount > eventCapMicros) {
           throw new LedgerRefusal("over_budget", "The demo's model budget is used up");
