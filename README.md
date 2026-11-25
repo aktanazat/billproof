@@ -21,7 +21,7 @@ Live: https://billproof.aktan.us (six samples run from the start screen, includi
    - each bill line backs at most one claim;
    - a promise that something is included covers only a charge whose label it names, so a gateway promise linked to the internet plan by mistake claims nothing;
    - a claim resting on a photo or on a recording waits until the person confirms the marked line, or plays the clip and confirms what was said.
-6. Muse Ember then argues the company's side of each claim: it searches the bill and the offer for a credit, an end date or a condition that would defeat it. A claim is dropped only when the rebuttal quotes the bill or offer word for word; a rebuttal that can't be verified leaves the claim standing for the person to confirm.
+6. Muse Ember then argues the company's side of each claim: it searches the bill and the offer for a credit, an end date or a condition that would defeat it. A claim is dropped only when the rebuttal quotes the offer word for word, or quotes a credit on the bill that pays the claim back. The bill's own notices ("your promotional pricing ended") are the company's position, not proof, so they never drop a claim; an offer rebuttal that can't be found word for word leaves the claim standing for the person to confirm.
 7. The message is assembled from fixed sentences filled with verified fields, so every number in it traces to a claim you selected. Promises from a call are cited with their time in the recording.
 
 Only three kinds of claim produce dollars: a price above a promised monthly price, a charge for something promised as included, and a promised recurring credit that is missing. Company fees nobody agreed to and charges listed twice are offered as questions to ask, never as overcharges.
