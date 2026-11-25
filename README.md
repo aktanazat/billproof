@@ -53,7 +53,7 @@ Run on 2026-11-25 (`eval/run-2026-11-25.json` holds every event, reading and mod
 | PDF | 12/12 | 5/5 | 0 | 9/9 | 2/2 |
 | Phone photo | 12/12 | 5/5 | 0 | 9/9 | 2/2 |
 
-Median cost per check: 0.074¢. All 24 checks together: 34 paid Muse Ember calls (14 more steps reused an identical earlier reading), 105,465 input tokens (101,864 served from Meta's prompt cache, because an earlier run had read the same bills), 34,670 output tokens, $0.018. A first run with a cold cache cost $0.023 (median 0.099¢). The same results held on a second full run and on three more runs of the phone bills. The bills are synthetic, so these numbers show the pipeline holds its rules; real bills are messier.
+Median cost per check: 0.078¢. All 24 checks together: 35 paid Muse Ember calls (13 more steps reused an identical earlier reading), 106,459 input tokens (103,644 served from Meta's prompt cache, because earlier runs had read the same bills), 33,118 output tokens, $0.017. The first run, with a cold cache, cost $0.023 (median 0.099¢). Three full runs and three more runs of the phone bills gave the same results. The bills are synthetic, so these numbers show the pipeline holds its rules; real bills are messier.
 
 `pnpm samples` regenerates the three sample bills on the start screen.
 

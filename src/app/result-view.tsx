@@ -293,7 +293,7 @@ export function ResultView({ state, dispatch }: { state: Done; dispatch: Dispatc
                 return (
                   <li key={item.id} className="space-y-1 px-1">
                     <p className="text-[15px]">
-                      {listNames(linesOf(item.lineIds))}: the offer ended {shortDate(item.endedOn)}, before this bill
+                      {listNames(linesOf(item.lineIds).filter((line) => line.amount_cents > 0))}: the offer ended {shortDate(item.endedOn)}, before this bill
                     </p>
                     {promise && <Quote source="Offer" text={promise.quote} />}
                   </li>
