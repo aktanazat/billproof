@@ -3,10 +3,10 @@
 import { useState, type ReactNode } from "react";
 import type { CheckAction, Selection } from "@/lib/check-machine";
 import { formatMicros } from "@/lib/cost";
-import type { Claim, Question, UnusedReason } from "@/lib/decide";
+import type { Claim, Question, TestedClaim, UnusedReason } from "@/lib/decide";
 import { buildMessage, shortDate, usd, type Message } from "@/lib/letter";
 import type { ShownPage } from "@/lib/prepare";
-import type { CallRecord, Checked, SingleResult, TestedClaim } from "@/lib/result";
+import type { CallRecord, Checked, SingleResult } from "@/lib/result";
 import type { LineItem, PromiseTerm, TranscriptTurn } from "@/lib/schemas";
 import { BillPage, snapBox, type Mark } from "./bill-page";
 import { formatClock, PlayButton } from "./evidence";
@@ -138,7 +138,7 @@ function ClaimRow({ claim, index, result, callUrl, mark, onToggle, onConfirm, on
       </dl>
 
       <div className="ml-[30px] flex flex-wrap items-center justify-between gap-3">
-        <p className="max-w-[34rem] text-[13px] leading-[18px] text-text-2">{claim.lookedFor ? `Checked the bill and offer for anything that would explain it. Nothing did.` : ""}</p>
+        <p className="max-w-[34rem] text-[13px] leading-[18px] text-text-2">{claim.lookedFor ? "Checked against the company's side before claiming." : ""}</p>
         {mark === "needs_confirmation" ? (
           <button type="button" onClick={onConfirm} className="h-8 rounded-lg bg-text px-3 text-[13px] font-medium text-white hover:bg-black">
             {result.transcript ? "I heard it, use this" : "The marked line matches my bill"}

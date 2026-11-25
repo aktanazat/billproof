@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, test } from "vitest";
 import { rasterize } from "../../scripts/samples/raster";
 import { renderBillPdf } from "../../scripts/samples/render";
 import { internetExpired, internetGuaranteed, mobile, type BillSpec } from "../../scripts/samples/specs";
-import { checkTotals, decide, type Source } from "./decide";
+import { checkTotals, decide, settleChallenges, type Source } from "./decide";
 import type { LineItem, LineKind, PromiseTerm, Reading } from "./schemas";
 
 const KIND_BY_LABEL: Record<string, LineKind> = {
@@ -109,6 +109,32 @@ describe("decide on the internet bill with an active price guarantee", () => {
       ["price_above_promise", 1500],
       ["included_charged", 1500],
     ]);
+  });
+
+  test("the bill's own notice that the promotion ended does not drop a claim", () => {
+    const bill = billText.get(internetGuaranteed.id)!;
+    const { claims } = decide(reading, promises, bill, offer(internetGuaranteed));
+    const notice = { claim_id: claims[0].id, looked_for: "an end date", verdict: "refuted" as const, counter_quote: "Your promotional pricing ended on 10/31/2026.", counter_source: "bill" as const };
+    const settled = settleChallenges(claims, [notice], reading, bill, offer(internetGuaranteed));
+    expect(settled.dropped).toEqual([]);
+    expect(settled.claims.map((c) => c.amountCents)).toEqual([1500, 1500]);
+  });
+
+  test("a bill credit that pays the claim back drops it", () => {
+    const bill: Source = { kind: "text", text: `${(billText.get(internetGuaranteed.id) as { text: string }).text}\nGateway Credit -$15.00` };
+    const withCredit: Reading = { ...reading, line_items: [...reading.line_items, { id: "L99", label: "Gateway Credit", amount_cents: -1500, kind: "credit", page: 1, box: null, quote: "Gateway Credit -$15.00", prorated: false }] };
+    const { claims } = decide(reading, promises, billText.get(internetGuaranteed.id)!, offer(internetGuaranteed));
+    const credit = { claim_id: claims[1].id, looked_for: "a credit", verdict: "refuted" as const, counter_quote: "Gateway Credit -$15.00", counter_source: "bill" as const };
+    const settled = settleChallenges(claims, [credit], withCredit, bill, offer(internetGuaranteed));
+    expect(settled.dropped.map((d) => d.claim.id)).toEqual([claims[1].id]);
+  });
+
+  test("an offer rebuttal not in the offer's exact words keeps the claim for the person to confirm", () => {
+    const { claims } = decide(reading, promises, billText.get(internetGuaranteed.id)!, offer(internetGuaranteed));
+    const loose = { claim_id: claims[0].id, looked_for: "an exclusion", verdict: "refuted" as const, counter_quote: "The price guarantee applies to your internet plan rate.", counter_source: "offer" as const };
+    const settled = settleChallenges(claims, [loose], reading, billText.get(internetGuaranteed.id)!, offer(internetGuaranteed));
+    expect(settled.dropped).toEqual([]);
+    expect(settled.claims[0].needsConfirmation).toBe(true);
   });
 
   test("asks about company fees no promise covers, never about taxes", () => {

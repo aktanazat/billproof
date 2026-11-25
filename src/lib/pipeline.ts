@@ -1,13 +1,12 @@
 import "server-only";
 import { createHash } from "node:crypto";
 import { ceilingMicros, LONG_CONTEXT_THRESHOLD } from "./cost";
-import { checkTotals, decide, type Claim, type Source } from "./decide";
+import { checkTotals, decide, settleChallenges, type Claim, type Source } from "./decide";
 import { buildRequest, countInputTokens, EmberError, send, type EmberCall, type Part } from "./ember";
-import { quoteExactIn } from "./evidence";
 import { usd } from "./letter";
 import { CHECK_CAP_MICROS, LedgerRefusal, type Ledger } from "./ledger";
-import { wavSeconds, type CallRecord, type CheckEvent, type CheckFailure, type CheckInput, type CheckResult, type DroppedClaim, type OfferInput, type PreparedPage, type SingleResult, type Stage, type TestedClaim } from "./result";
-import { billReadingSchema, challengeSchema, termsSchema, type BillReading, type Challenge, type PromiseTerm, type Reading, type TranscriptTurn } from "./schemas";
+import { wavSeconds, type CallRecord, type CheckEvent, type CheckFailure, type CheckInput, type CheckResult, type OfferInput, type PreparedPage, type SingleResult, type Stage } from "./result";
+import { billReadingSchema, challengeSchema, termsSchema, type BillReading, type PromiseTerm, type Reading, type TranscriptTurn } from "./schemas";
 
 const READ_BILL_INSTRUCTIONS = `You read one household service bill (internet, phone, TV, electric, gas, water or similar) and return its contents as JSON.
 
@@ -227,7 +226,7 @@ function emitItem(key: StreamKey, item: unknown, live: Live, deps: CheckDeps) {
     if (promise.success) deps.emit({ type: "promise", promise: { kind: promise.data.kind, description: promise.data.description, amount_cents: promise.data.amount_cents } });
   } else {
     const challenge = challengeShape.safeParse(item);
-    if (challenge.success) deps.emit({ type: "challenge", challenge: { claim_id: challenge.data.claim_id, looked_for: challenge.data.looked_for, verdict: challenge.data.verdict } });
+    if (challenge.success) deps.emit({ type: "challenge", challenge: { claim_id: challenge.data.claim_id, looked_for: challenge.data.looked_for } });
   }
 }
 
@@ -292,33 +291,6 @@ function offerSource(offer: OfferInput, transcriptText: string): Source {
   }
 }
 
-// A claim survives unless Muse Ember, arguing for the company, quotes text that is really on the bill or in the offer
-// and defeats it. A refutation whose quote can't be found keeps the claim but sends it to the person to confirm.
-function settleChallenges(claims: Claim[], challenges: Challenge[], bill: Source, proof: Source): { claims: TestedClaim[]; dropped: DroppedClaim[] } {
-  const kept: TestedClaim[] = [];
-  const dropped: DroppedClaim[] = [];
-  for (const claim of claims) {
-    const challenge = challenges.find((c) => c.claim_id === claim.id);
-    if (!challenge) {
-      kept.push({ ...claim, lookedFor: null });
-      continue;
-    }
-    if (challenge.verdict === "refuted" && challenge.counter_quote && challenge.counter_source) {
-      const where = challenge.counter_source === "bill" ? bill : proof;
-      // A rebuttal drops a claim only on the source's exact words: a fuzzy match would accept a quote missing a "not".
-      const verified = where.kind !== "image" && quoteExactIn(challenge.counter_quote, where.text);
-      if (verified) {
-        dropped.push({ claim, lookedFor: challenge.looked_for, counterQuote: challenge.counter_quote, source: challenge.counter_source });
-        continue;
-      }
-      kept.push({ ...claim, lookedFor: challenge.looked_for, needsConfirmation: true });
-      continue;
-    }
-    kept.push({ ...claim, lookedFor: challenge.looked_for });
-  }
-  return { claims: kept, dropped };
-}
-
 async function checkOne(pages: PreparedPage[], offer: OfferInput | null, run: Run, bill: number): Promise<SingleResult> {
   const { deps } = run;
   const stage = (s: Stage) => {
@@ -363,11 +335,11 @@ async function checkOne(pages: PreparedPage[], offer: OfferInput | null, run: Ru
   stage("comparing");
   const decision = decide(reading, promises, source, proof, offerProvider);
 
-  let tested: { claims: TestedClaim[]; dropped: DroppedClaim[] } = { claims: decision.claims.map((claim) => ({ ...claim, lookedFor: null })), dropped: [] };
+  let tested: ReturnType<typeof settleChallenges> = { claims: decision.claims.map((claim) => ({ ...claim, lookedFor: null })), dropped: [] };
   if (offer && decision.claims.length > 0 && !run.year) {
     stage("challenging");
     const { challenges } = await paid(challengeCall(pages, offer, reading, promises, decision.claims), run, { stage: "challenging", streams: ["challenges"], bill });
-    tested = settleChallenges(decision.claims, challenges, source, proof);
+    tested = settleChallenges(decision.claims, challenges, reading, source, proof);
   }
 
   return {

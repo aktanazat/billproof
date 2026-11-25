@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { Claim, Explained, Question, Totals, Unused } from "./decide";
+import type { DroppedClaim, Explained, Question, TestedClaim, Totals, Unused } from "./decide";
 import type { PromiseTerm, Reading, TranscriptTurn } from "./schemas";
 
 const page = z.object({
@@ -59,7 +59,7 @@ export type Stage = "reading_bill" | "rereading_bill" | "reading_offer" | "compa
 // What the person sees while a check runs: Muse Ember's reasoning summary and each item as soon as it is read.
 export type SeenLine = { label: string; amount_cents: number; kind: string; page: number; box: { x0: number; y0: number; x1: number; y1: number } | null };
 export type SeenPromise = { kind: string; description: string; amount_cents: number | null };
-export type SeenChallenge = { claim_id: string; looked_for: string; verdict: "stands" | "refuted" };
+export type SeenChallenge = { claim_id: string; looked_for: string };
 
 export type CallRecord = {
   name: string;
@@ -82,10 +82,6 @@ export type CheckFailure =
   | "bad_input"
   | "refused"
   | "network";
-
-// A claim after Muse Ember tried to disprove it: what it searched for, or null when no challenge ran.
-export type TestedClaim = Claim & { lookedFor: string | null };
-export type DroppedClaim = { claim: Claim; lookedFor: string; counterQuote: string; source: "bill" | "offer" };
 
 export type Checked = {
   outcome: "checked";

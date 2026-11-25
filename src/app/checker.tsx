@@ -355,9 +355,8 @@ function Working({ state, onCancel, dispatch }: { state: Exclude<CheckState, { s
                 {step.key === "challenge" && live && live.challenges.length > 0 && (
                   <ul className="ml-7 mt-2 flex flex-col gap-1">
                     {live.challenges.map((challenge, i) => (
-                      <li key={i} className="appear flex items-baseline justify-between gap-4 text-[13px] leading-[18px]">
-                        <span className="text-text-2">{challenge.looked_for}</span>
-                        <span className={`shrink-0 ${challenge.verdict === "stands" ? "" : "text-red"}`}>{challenge.verdict === "stands" ? "Holds" : "Dropped"}</span>
+                      <li key={i} className="appear text-[13px] leading-[18px] text-text-2">
+                        {challenge.looked_for}
                       </li>
                     ))}
                   </ul>

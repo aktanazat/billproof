@@ -1,5 +1,5 @@
-import { quoteFoundIn, quoteHasAmount, tokens } from "./evidence";
-import type { LineItem, LineKind, PromiseTerm, Reading } from "./schemas";
+import { moneyIn, quoteExactIn, quoteFoundIn, quoteHasAmount, tokens } from "./evidence";
+import type { Challenge, LineItem, LineKind, PromiseTerm, Reading } from "./schemas";
 
 // "heard" is a transcript Muse Ember made from a recording: quotes are checked against it, but a person confirms
 // what was said before a claim built on it is used.
@@ -16,6 +16,10 @@ export type Claim = {
   amountCents: number;
   needsConfirmation: boolean;
 };
+
+// A claim after Muse Ember tried to disprove it: what it searched for, or null when no challenge ran.
+export type TestedClaim = Claim & { lookedFor: string | null };
+export type DroppedClaim = { claim: Claim; lookedFor: string; counterQuote: string; source: "bill" | "offer" };
 
 export type QuestionKind =
   | "unagreed_fee"
@@ -308,4 +312,44 @@ export function decide(reading: Reading, promises: PromiseTerm[], bill: Source, 
     matchedPromiseIds,
     providerMismatch,
   };
+}
+
+// The bill is the company's own account, so its notices ("your promotional pricing ended") restate the dispute rather
+// than settle it. From the bill, only a credit line that pays the claim back can defeat it.
+function billPaysBack(claim: Claim, quote: string, reading: Reading): boolean {
+  const quoted = moneyIn(quote).map(Math.abs);
+  return reading.line_items.some(
+    (line) => line.amount_cents < 0 && !claim.lineIds.includes(line.id) && -line.amount_cents >= claim.amountCents && quoted.includes(-line.amount_cents) && quoteFoundIn(line.label, quote),
+  );
+}
+
+// A claim survives unless Muse Ember, arguing for the company, quotes the offer word for word against it, or quotes a
+// bill credit that pays it back. A rebuttal from the offer whose words can't be found keeps the claim but sends it to
+// the person to confirm.
+export function settleChallenges(claims: Claim[], challenges: Challenge[], reading: Reading, bill: Source, proof: Source): { claims: TestedClaim[]; dropped: DroppedClaim[] } {
+  const kept: TestedClaim[] = [];
+  const dropped: DroppedClaim[] = [];
+  for (const claim of claims) {
+    const challenge = challenges.find((c) => c.claim_id === claim.id);
+    if (!challenge) {
+      kept.push({ ...claim, lookedFor: null });
+      continue;
+    }
+    const quote = challenge.counter_quote;
+    if (challenge.verdict !== "refuted" || !quote || !challenge.counter_source) {
+      kept.push({ ...claim, lookedFor: challenge.looked_for });
+      continue;
+    }
+    const where = challenge.counter_source === "bill" ? bill : proof;
+    // Exact words only: a fuzzy match would accept a quote missing a "not".
+    const onSource = where.kind !== "image" && quoteExactIn(quote, where.text);
+    if (challenge.counter_source === "bill") {
+      if (onSource && billPaysBack(claim, quote, reading)) dropped.push({ claim, lookedFor: challenge.looked_for, counterQuote: quote, source: "bill" });
+      else kept.push({ ...claim, lookedFor: challenge.looked_for });
+      continue;
+    }
+    if (onSource) dropped.push({ claim, lookedFor: challenge.looked_for, counterQuote: quote, source: "offer" });
+    else kept.push({ ...claim, lookedFor: challenge.looked_for, needsConfirmation: true });
+  }
+  return { claims: kept, dropped };
 }
