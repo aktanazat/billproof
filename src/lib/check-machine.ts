@@ -25,6 +25,7 @@ export type CheckAction =
   | { type: "doc_removed"; id: string }
   | { type: "offer_text"; text: string }
   | { type: "start" }
+  | { type: "sample_ready"; bill: Extract<Doc, { status: "ready" }>; offerText: string }
   | { type: "stage"; attempt: number; stage: Stage }
   | { type: "spent"; attempt: number; micros: number }
   | { type: "finished"; attempt: number; result: CheckResult }
@@ -87,6 +88,8 @@ export function reduce(state: CheckState, action: CheckAction): CheckState {
           return state;
         case "offer_text":
           return inputs.offerFile ? state : { ...state, inputs: { ...inputs, offerText: action.text } };
+        case "sample_ready":
+          return run({ ...state, inputs: { bill: action.bill, offerFile: null, offerText: action.offerText } });
         case "start":
           return checkInput(inputs) ? run(state) : state;
         default:

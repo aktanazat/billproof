@@ -5,7 +5,7 @@ import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 
 export const CHECK_CAP_MICROS = 30_000;
-const CHECKS_PER_CLIENT_PER_HOUR = 12;
+export const CHECKS_PER_CLIENT_PER_HOUR = 30;
 const HOUR_MS = 3_600_000;
 
 export class LedgerRefusal extends Error {

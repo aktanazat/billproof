@@ -11,7 +11,8 @@ import type { LineItem, PromiseTerm } from "@/lib/schemas";
 type Done = Extract<CheckState, { s: "done" }>;
 type Checked = Extract<CheckResult, { outcome: "checked" }>;
 
-const SHOWN_QUESTIONS = new Set<Question["kind"]>(["unagreed_fee", "repeated_charge", "partial_period", "conditions_unproven", "price_gap", "provider_mismatch"]);
+// A provider mismatch is said once, in the heading.
+const SHOWN_QUESTIONS = new Set<Question["kind"]>(["unagreed_fee", "repeated_charge", "partial_period", "conditions_unproven", "price_gap", "end_date_unread"]);
 const CALL_NAMES: Record<string, string> = { read_bill: "Read bill", reread_bill: "Reread bill", read_terms: "Read offer" };
 // Promises that simply have nothing on this bill are not worth a line.
 const UNUSED_TEXT: Record<UnusedReason, string | null> = {
@@ -58,6 +59,8 @@ function questionTitle(question: Question, lines: LineItem[], result: Checked): 
       return `${listNames(lines)} is too far from the promised amount to claim; check the offer`;
     case "provider_mismatch":
       return `The offer is from ${result.offerProvider ?? "another company"}, not ${result.reading.provider ?? "this company"}`;
+    case "end_date_unread":
+      return `Your offer for ${listNames(lines.filter((line) => line.amount_cents > 0))} has an end date that couldn't be read; check whether it has ended`;
     case "overlapping_claim":
       return "";
   }
@@ -188,7 +191,17 @@ export function ResultView({ state, dispatch }: { state: Done; dispatch: Dispatc
   const printed = result.reading.printed.current_charges;
 
   const heading =
-    result.claims.length > 0 ? null : !result.hadOffer ? (questions.length > 0 ? "Charges worth asking about" : "Nothing to flag on this bill") : "Nothing is billed above your offer";
+    result.claims.length > 0
+      ? null
+      : !result.hadOffer
+        ? questions.length > 0
+          ? "Charges worth asking about"
+          : "Nothing to flag on this bill"
+        : result.providerMismatch
+          ? `The offer is from ${result.offerProvider}, not ${provider ?? "this company"}`
+          : result.matchedPromiseIds.length === 0
+            ? "Couldn't match your offer to this bill"
+            : "Nothing is billed above your offer";
 
   return (
     <section className="mx-auto grid w-full max-w-[1180px] gap-8 px-6 py-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">

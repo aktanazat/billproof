@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { CHECK_CAP_MICROS, LedgerRefusal, openLedger } from "./ledger";
+import { CHECK_CAP_MICROS, CHECKS_PER_CLIENT_PER_HOUR, LedgerRefusal, openLedger } from "./ledger";
 
 describe("ledger", () => {
   test("refuses a call whose worst case would pass the per-check cap", () => {
@@ -32,12 +32,12 @@ describe("ledger", () => {
     expect(() => ledger.reserve(ledger.admitCheck("b"), 6_000)).toThrow("The demo's model budget is used up");
   });
 
-  test("a client gets twelve checks an hour", () => {
+  test("a client gets a fixed number of checks an hour", () => {
     const ledger = openLedger(":memory:", 1_000_000);
     const start = 1_800_000_000_000;
-    for (let i = 0; i < 12; i++) ledger.admitCheck("a", start + i);
-    expect(() => ledger.admitCheck("a", start + 12)).toThrow(LedgerRefusal);
-    expect(ledger.admitCheck("b", start + 12)).toEqual(expect.any(String));
+    for (let i = 0; i < CHECKS_PER_CLIENT_PER_HOUR; i++) ledger.admitCheck("a", start + i);
+    expect(() => ledger.admitCheck("a", start + CHECKS_PER_CLIENT_PER_HOUR)).toThrow(LedgerRefusal);
+    expect(ledger.admitCheck("b", start + CHECKS_PER_CLIENT_PER_HOUR)).toEqual(expect.any(String));
     expect(ledger.admitCheck("a", start + 3_600_001)).toEqual(expect.any(String));
   });
 });

@@ -187,6 +187,13 @@ describe("decide on the same bill after a 12-month promotion ended", () => {
     expect(decision.claims).toEqual([]);
     expect(decision.questions.filter((q) => q.kind === "partial_period")).toHaveLength(2);
   });
+
+  test("a time-limited promise whose end date was not read raises a question, never a $15 claim", () => {
+    const undated = promises.map((p) => ({ ...p, applies_until: null }));
+    const decision = decide(reading, undated, billText.get(internetExpired.id)!, offer(internetExpired));
+    expect(decision.claims).toEqual([]);
+    expect(decision.questions.filter((q) => q.kind === "end_date_unread")).toHaveLength(2);
+  });
 });
 
 describe("decide on the mobile bill with autopay on", () => {
@@ -252,7 +259,7 @@ describe("decide refuses claims the evidence does not carry", () => {
   test("an offer from another company yields a question, even when the names share a word", () => {
     const reading = readingOf(internetGuaranteed);
     const text = "Westline Fiber: Internet 500 for $45/mo, guaranteed through 2028";
-    const other = promise({ kind: "monthly_price", amount_cents: 4500, quote: text, covers_line_ids: idOf(reading, "Fiber 500 Internet") });
+    const other = promise({ kind: "monthly_price", amount_cents: 4500, applies_until: "2028-12-31", quote: text, covers_line_ids: idOf(reading, "Fiber 500 Internet") });
     const decision = decide(reading, [other], billText.get(internetGuaranteed.id)!, { kind: "text", text }, "Westline Fiber");
     expect(decision.claims).toEqual([]);
     expect(decision.questions.map((q) => q.kind)).toContain("provider_mismatch");
@@ -265,6 +272,7 @@ describe("decide refuses claims the evidence does not carry", () => {
       amount_cents: 5500,
       conditions: ["autopay", "paperless"],
       quote: "Monthly price: $55.00/mo with Autopay & Paperless (2-year price guarantee through 10/31/2027)",
+      applies_until: "2027-10-31",
       covers_line_ids: idOf(reading, "Fiber 500 Internet"),
     });
     const decision = decide(reading, [guaranteed], billText.get(internetGuaranteed.id)!, offer(internetGuaranteed), "Bayline");

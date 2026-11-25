@@ -9,6 +9,7 @@ services:
     volumes:
       - billproof-data:/data
     mem_limit: 512m
+    cpus: "1.5"
     restart: unless-stopped
 
   caddy:
@@ -23,6 +24,8 @@ services:
     depends_on:
       - app
     restart: unless-stopped
+    mem_limit: 128m
+    cpus: "0.5"
 
 volumes:
   billproof-data:

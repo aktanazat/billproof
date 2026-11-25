@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useReducer, useRef, type ChangeEvent, type DragEvent } from "react";
+import { useEffect, useReducer, useRef, useState, type ChangeEvent, type DragEvent } from "react";
 import { checkInput, initialState, reduce, type CheckAction, type Doc } from "@/lib/check-machine";
 import { formatMicros } from "@/lib/cost";
 import { MAX_BILL_PAGES, MAX_OFFER_PAGES, prepareFile, PrepareError } from "@/lib/prepare";
@@ -138,13 +138,20 @@ export function Checker({ samples }: { samples: Sample[] }) {
     }
   };
 
+  // A sample's bill and offer enter the check together; a later sample click wins over one still loading.
+  const sampleToken = useRef(0);
+  const [loadingSample, setLoadingSample] = useState<string | null>(null);
   const runSample = async (sample: Sample) => {
-    if (state.s !== "composing") return;
-    if (state.inputs.offerFile) dispatch({ type: "doc_removed", id: state.inputs.offerFile.id });
-    dispatch({ type: "offer_text", text: sample.proof });
-    const blob = await (await fetch(sample.bill)).blob();
-    await addFile("bill", new File([blob], `${sample.title}.pdf`, { type: "application/pdf" }));
-    dispatch({ type: "start" });
+    const token = ++sampleToken.current;
+    setLoadingSample(sample.id);
+    try {
+      const blob = await (await fetch(sample.bill)).blob();
+      const pages = await prepareFile(new File([blob], `${sample.title}.pdf`, { type: "application/pdf" }), MAX_BILL_PAGES);
+      if (token !== sampleToken.current) return;
+      dispatch({ type: "sample_ready", bill: { id: `sample-${token}`, name: `${sample.title}.pdf`, status: "ready", pages }, offerText: sample.proof });
+    } finally {
+      if (token === sampleToken.current) setLoadingSample(null);
+    }
   };
 
   if (state.s === "done") {
@@ -264,8 +271,14 @@ export function Checker({ samples }: { samples: Sample[] }) {
         <h2 className="text-[13px] text-ink-2">Samples</h2>
         <div className="mt-2 flex flex-wrap gap-2">
           {samples.map((sample) => (
-            <button key={sample.id} type="button" onClick={() => void runSample(sample)} className="rounded-[10px] bg-surface px-3.5 py-2 text-[15px] shadow-[0_0_0_1px_var(--hairline)] hover:bg-fill">
-              {sample.title}
+            <button
+              key={sample.id}
+              type="button"
+              disabled={loadingSample !== null}
+              onClick={() => void runSample(sample)}
+              className="rounded-[10px] bg-surface px-3.5 py-2 text-[15px] shadow-[0_0_0_1px_var(--hairline)] hover:bg-fill disabled:opacity-60"
+            >
+              {loadingSample === sample.id ? "Opening…" : sample.title}
             </button>
           ))}
         </div>

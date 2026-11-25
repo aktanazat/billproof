@@ -22,7 +22,8 @@ export type QuestionKind =
   | "conditions_unproven"
   | "overlapping_claim"
   | "price_gap"
-  | "provider_mismatch";
+  | "provider_mismatch"
+  | "end_date_unread";
 export type Question = { id: string; kind: QuestionKind; lineIds: string[]; promiseId: string | null };
 
 export type Explained = { id: string; kind: "promise_ended"; lineIds: string[]; promiseId: string; endedOn: string };
@@ -125,6 +126,10 @@ export function providersDiffer(billProvider: string | null, offerProvider: stri
 // more likely a misread amount than a real overcharge; it becomes a question.
 const MAX_PLAUSIBLE_SHARE = 0.5;
 
+// Wording that limits a promise in time. When the quote has it but no end date was read, the promise may
+// already have ended, so it can only raise a question.
+const TIME_LIMIT = /\b(through|thru|until|ends?|ending|expires?|for \d+ (months?|years?)|\d+[- ](month|year)|promo(tional)?|\d{1,2}\/\d{1,2}\/\d{2,4}|(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.? \d{1,2},? \d{4})\b/i;
+
 type Draft = Omit<Claim, "id">;
 
 export function decide(reading: Reading, promises: PromiseTerm[], bill: Source, proof: Source, offerProvider: string | null = null): Decision {
@@ -181,6 +186,10 @@ export function decide(reading: Reading, promises: PromiseTerm[], bill: Source, 
     }
     if (when.state !== "active" || covered.some((line) => line.prorated)) {
       questions.push({ kind: "partial_period", lineIds, promiseId: promise.id });
+      continue;
+    }
+    if (promise.applies_until === null && TIME_LIMIT.test(promise.quote)) {
+      questions.push({ kind: "end_date_unread", lineIds, promiseId: promise.id });
       continue;
     }
 
