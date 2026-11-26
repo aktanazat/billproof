@@ -281,6 +281,12 @@ export function compareBills(earlier: Reading, current: Reading): BillChange {
   return { earlierCents: sum(earlier.line_items), currentCents: sum(current.line_items), lines };
 }
 
+// The comparison with an earlier statement, or none when that statement's charges miss its own printed total: part
+// of it is cut off, and its missing lines would show as new on this bill.
+export function earlierChange(earlier: Reading, earlierSource: Source, current: Reading): BillChange | null {
+  return checkTotals(earlier, earlierSource).lineSum === "mismatch" ? null : compareBills(earlier, current);
+}
+
 const GENERIC_PROVIDER_WORDS = new Set(["fiber", "cable", "internet", "wireless", "mobile", "power", "energy", "electric", "gas", "water", "tv", "communications", "telecom", "broadband", "inc", "llc", "co", "corp", "company", "the", "and", "of"]);
 
 function distinctiveWords(name: string): Set<string> {

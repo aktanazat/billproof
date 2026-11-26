@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, test } from "vitest";
 import { rasterize } from "../../scripts/samples/raster";
 import { renderBillPdf } from "../../scripts/samples/render";
 import { internetExpired, internetGuaranteed, mobile, type BillSpec } from "../../scripts/samples/specs";
-import { checkTotals, compareBills, decide, settleChallenges, withoutHeadings, type Source } from "./decide";
+import { checkTotals, compareBills, decide, earlierChange, settleChallenges, withoutHeadings, type Source } from "./decide";
 import type { LineItem, LineKind, PromiseTerm, Reading } from "./schemas";
 
 const KIND_BY_LABEL: Record<string, LineKind> = {
@@ -477,6 +477,17 @@ describe("compare with an earlier bill", () => {
     const longer: Reading = { ...current, line_items: current.line_items.map((line) => (line.id === discount.id ? { ...line, label: "Autopay & Paperless Discount (-$5.00) Requires bank autopay", amount_cents: line.amount_cents - 500 } : line)) };
     const change = compareBills(current, longer);
     expect(change.lines).toEqual([{ label: "Autopay & Paperless Discount (-$5.00) Requires bank autopay", beforeCents: discount.amount_cents, afterCents: discount.amount_cents - 500 }]);
+  });
+
+  test("an earlier statement whose charges miss its own printed total is cut off, so nothing is compared", () => {
+    const photo: Source = { kind: "image" };
+    const current = readingOf(internetGuaranteed);
+    const printed = current.printed.current_charges;
+    if (!printed) throw new Error("the sample prints its current charges");
+    const cutOff: Reading = { ...current, line_items: current.line_items.filter((line) => line.label !== "Wi-Fi Gateway Rental") };
+    expect(earlierChange(cutOff, photo, current)).toBeNull();
+    const whole: Reading = { ...cutOff, printed: { ...cutOff.printed, current_charges: { ...printed, cents: printed.cents - 1500 } } };
+    expect(earlierChange(whole, photo, current)?.lines).toEqual([{ label: "Wi-Fi Gateway Rental", beforeCents: null, afterCents: 1500 }]);
   });
 });
 

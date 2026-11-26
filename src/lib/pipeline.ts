@@ -1,7 +1,7 @@
 import "server-only";
 import { createHash } from "node:crypto";
 import { ceilingMicros, LONG_CONTEXT_THRESHOLD } from "./cost";
-import { checkTotals, compareBills, decide, settleChallenges, withoutHeadings, type BillChange, type Claim, type Source } from "./decide";
+import { checkTotals, decide, earlierChange, settleChallenges, withoutHeadings, type BillChange, type Claim, type Source } from "./decide";
 import { buildRequest, countInputTokens, EmberError, send, type EmberCall, type Part } from "./ember";
 import { usd } from "./letter";
 import { CHECK_CAP_MICROS, LedgerRefusal, type Ledger } from "./ledger";
@@ -338,8 +338,10 @@ async function readEarlier(pages: PreparedPage[], current: Reading, run: Run, bi
   if (pages.length === 0) return null;
   try {
     const earlier = await paid(readBillCall(pages, "first"), run, { stage: "comparing", streams: [], bill });
-    // An earlier page with no charges read has nothing to compare against.
-    return earlier.outcome === "bill" && earlier.line_items.length > 0 ? compareBills(withIds(earlier), current) : null;
+    // An earlier page with no charges read has nothing to compare against; one cut off is left out by the rule.
+    if (earlier.outcome !== "bill" || earlier.line_items.length === 0) return null;
+    const source = sourceOf(pages);
+    return earlierChange(withHeadingsDropped(withIds(earlier), source), source, current);
   } catch (error) {
     if (error instanceof EmberError && error.kind === "truncated") return null;
     throw error;
