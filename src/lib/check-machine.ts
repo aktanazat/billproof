@@ -146,7 +146,8 @@ function compose(state: Extract<CheckState, { s: "composing" }>, action: CheckAc
     case "offer_text":
       return inputs.offer.kind === "file" || inputs.offer.kind === "call" ? state : withInputs({ ...inputs, offer: { kind: "text", text: action.text } });
     case "sample_ready":
-      return run({ ...state, inputs: action.inputs });
+      // A sample whose pictures didn't load stays on the start screen, with the reason on its row.
+      return checkInput(action.inputs) ? run({ ...state, inputs: action.inputs }) : withInputs(action.inputs);
     case "start":
       return checkInput(inputs) ? run(state) : state;
     default:

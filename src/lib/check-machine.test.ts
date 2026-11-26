@@ -29,6 +29,13 @@ describe("check machine", () => {
     expect(play([{ type: "removed", id: "o" }, { type: "start" }], state).s).toBe("running");
   });
 
+  test("a real post whose pictures are gone waits on the start screen with the reason instead of starting", () => {
+    const offer = { kind: "text" as const, text: "$55 a month" };
+    const gone = play([{ type: "sample_ready", inputs: { bills: [{ id: "p", name: "3 pictures from the post", status: "failed", message: "The pictures from this post are no longer online." }], offer } }]);
+    expect(gone).toMatchObject({ s: "composing", inputs: { bills: [{ status: "failed", message: "The pictures from this post are no longer online." }] } });
+    expect(play([{ type: "sample_ready", inputs: { bills: [{ id: "p", name: "3 pictures from the post", status: "ready", pages: [page] }], offer } }]).s).toBe("running");
+  });
+
   test("a check waits for every bill of a year to open", () => {
     const state = play([{ type: "bills_added", docs: [{ id: "a", name: "jan.pdf" }, { id: "b", name: "feb.pdf" }] }, { type: "doc_prepared", id: "a", pages: [page] }, { type: "start" }]);
     expect(state.s).toBe("composing");

@@ -518,10 +518,13 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
         if (!response.ok) return [];
         return prepareFile(new File([await response.blob()], `picture-${i + 1}.jpg`, { type: "image/jpeg" }), 1).catch(() => []);
       };
-      const pile = sample.pictures
-        ? [{ id: `sample-${token}-pile`, name: `${sample.pictures.length} pictures from the post`, status: "ready" as const, pages: (await Promise.all(sample.pictures.slice(0, MAX_BILL_PAGES).map(postPicture))).flat() }]
-        : [];
-      const bills: Doc[] = [...pdfs, ...pile];
+      const pile = async (pictures: string[]): Promise<Doc> => {
+        const read = Math.min(pictures.length, MAX_BILL_PAGES);
+        const name = read < pictures.length ? `${read} of ${pictures.length} pictures from the post` : `${pictures.length} pictures from the post`;
+        const pages = (await Promise.all(pictures.slice(0, MAX_BILL_PAGES).map(postPicture))).flat();
+        return pages.length > 0 ? { id: `sample-${token}-pile`, name, status: "ready", pages } : { id: `sample-${token}-pile`, name, status: "failed", message: "The pictures from this post are no longer online." };
+      };
+      const bills: Doc[] = [...pdfs, ...(sample.pictures ? [await pile(sample.pictures)] : [])];
       const offer: Inputs["offer"] =
         sample.offer.kind === "text"
           ? { kind: "text", text: sample.offer.text }
