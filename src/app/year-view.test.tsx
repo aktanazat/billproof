@@ -130,6 +130,20 @@ test("a month missing its statement date stays in its place by billing period, s
   expect(months.at(-1)).toBe("November 2026");
 });
 
+test("a company name missing from some statements is taken from the others for the heading", () => {
+  if (!year) throw new Error("the saved run has no year result");
+  const starting = (prefix: string) => year.months.find((month) => month.result.outcome === "checked" && month.result.reading.period_start?.startsWith(prefix))?.bill;
+  const blank = new Set([starting("2025-12"), starting("2026-08")]);
+  if (blank.has(undefined)) throw new Error("the sample has no December or August statement");
+  const months = year.months.map((month) => (blank.has(month.bill) && month.result.outcome === "checked" ? { ...month, result: { ...month.result, reading: { ...month.result.reading, provider: null } } } : month));
+  const blurred: YearResult = { ...year, months };
+  const running = { s: "running", inputs: initialState.inputs, attempts: 1, attempt: 1, stage: null, spentMicros: 0, live: {} } as unknown as CheckState;
+  const done = reduce(running, { type: "finished", attempt: 1, result: blurred });
+  if (done.s !== "done") throw new Error("the finished year did not become a done state");
+  const html = renderToStaticMarkup(createElement(YearView, { state: done, result: blurred, dispatch: () => {} }));
+  expect(html).toContain("to ask back from Bayline Fiber across 12 statements");
+});
+
 test("a month whose date was misread is labeled as written, never 'undefined'", () => {
   if (!year) throw new Error("the saved run has no year result");
   const misread: YearResult = { ...year, months: year.months.map((month, i) => (i === 0 && month.result.outcome === "checked" ? { ...month, result: { ...month.result, reading: { ...month.result.reading, period_start: "2026-13-12" } } } : month)) };

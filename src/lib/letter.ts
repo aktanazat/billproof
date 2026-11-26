@@ -224,8 +224,8 @@ export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<stri
 export function buildYearMessage(months: Checked[]): Message {
   const withClaims = months.filter((month) => month.claims.length > 0);
   const totalCents = withClaims.reduce((sum, month) => sum + month.claims.reduce((t, claim) => t + claim.amountCents, 0), 0);
-  const first = withClaims[0]?.reading;
-  // The months are one account's, so a number any of them shows stands for all; one month's unread number doesn't hide it.
+  // The months are one account's, so a number or company name any of them shows stands for all; one month's unread
+  // value doesn't hide it.
   const last4 = months.find((month) => month.reading.account_last4)?.reading.account_last4 ?? null;
   const account = last4 ? `account ending ${last4}` : "my account";
   // A promise already quoted for an earlier month is referred back to, not quoted again in full.
@@ -247,7 +247,7 @@ export function buildYearMessage(months: Checked[]): Message {
     });
   };
   const sections = sectionsFor("your representative", true);
-  const provider = first?.provider ?? null;
+  const provider = months.find((month) => month.reading.provider)?.reading.provider ?? null;
   const ask = withClaims.flatMap((month) => month.claims).length > 1 ? `In total, please credit ${usd(totalCents)} to ${account}.` : "";
   const opening = `I'm writing about ${account}. I checked my statements against the plan I signed up for.`;
   const chat = [`Hi, ${opening}`, ...sections, ask].filter(Boolean).join("\n\n");

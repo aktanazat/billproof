@@ -201,4 +201,13 @@ describe("a claim on a promise heard on a call", () => {
     const { email } = buildYearMessage([month("2026-10-12", "2026-11-11"), month("2026-11-12", "2026-12-11")]);
     expect(email).toMatch(/billing team,\n\nI'm writing about .+\. I checked my statements against the plan I signed up for\.\n\nFor /);
   });
+
+  test("a year message takes the company and account from any month that shows them", () => {
+    const unread = month("2026-10-12", "2026-11-11");
+    const read = month("2026-11-12", "2026-12-11");
+    const { email, complaint } = buildYearMessage([{ ...unread, reading: { ...unread.reading, provider: null } }, { ...read, reading: { ...read.reading, account_last4: "4415" } }]);
+    expect(email).toContain("Hello Bayline Fiber billing team,");
+    expect(email).toContain("Subject: Billing correction for account ending 4415");
+    expect(complaint).toContain("Company: Bayline Fiber");
+  });
 });

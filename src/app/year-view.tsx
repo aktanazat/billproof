@@ -81,7 +81,7 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
   const waiting = checked.some((month) => month.result.claims.some((claim) => markOf(month.bill, claim.id) === "needs_confirmation"));
   const firstBad = checked.findIndex((month) => claimed(month.result) > 0);
   const total = checked.reduce((t, month) => t + asked(month), 0);
-  const provider = checked[0]?.result.reading.provider ?? null;
+  const provider = checked.find((month) => month.result.reading.provider)?.result.reading.provider ?? null;
   const hadOffer = checked.some((month) => month.result.hadOffer);
   const callUrl = state.inputs.offer.kind === "call" && state.inputs.offer.call.status === "ready" ? state.inputs.offer.call.url : null;
 
