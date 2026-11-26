@@ -321,9 +321,11 @@ export function ResultView({
           ? `${questions.length} ${questions.length === 1 ? "charge" : "charges"} worth asking about`
           : !result.hadOffer
             ? "Nothing to flag on this bill"
-            : result.matchedPromiseIds.length === 0
-              ? "Couldn't match your offer to this bill"
-              : "Nothing is billed above your offer";
+            : result.promises.length === 0
+              ? "No price or promise found to check the bill against"
+              : result.matchedPromiseIds.length === 0
+                ? "Couldn't match your offer to this bill"
+                : "Nothing is billed above your offer";
 
   const notes = [
     ...(printed && result.totals.lineSum === "mismatch" ? [`The charges add up to ${usd(result.totals.lineSumCents)}, but the bill prints ${usd(printed.cents)}.`] : []),
