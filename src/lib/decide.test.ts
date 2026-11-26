@@ -113,17 +113,31 @@ describe("decide on the internet bill with an active price guarantee", () => {
   });
 
   // Carriers and posters name the discount other ways ("Auto-Pay", "automatic payment", Verizon's "Paper-free", "eBill");
-  // a price promised with autopay is net of it under any of these names, or the claim counts the discount as an overcharge.
-  test("counts the autopay discount under the names carriers give it", () => {
+  // a price promised with that condition is net of it under any of these names, and the discount shows the condition
+  // is met. Unrecognized, the discount proved nothing and the claim became a question.
+  test("counts the autopay or paperless discount under the names carriers give it", () => {
     const discount = idOf(reading, "Autopay & Paperless Discount")[0];
-    for (const label of ["Auto-Pay Discount", "Automatic Payment Discount", "Paper-free Billing Discount", "eBill Discount"]) {
+    for (const [label, condition] of [["Auto-Pay Discount", "autopay"], ["Automatic Payment Discount", "autopay"], ["Paper-free Billing Discount", "paperless"], ["eBill Discount", "paperless"]] as const) {
       const renamed: Reading = { ...reading, line_items: reading.line_items.map((line) => (line.id === discount ? { ...line, label } : line)) };
-      const decision = decide(renamed, promises, billText.get(internetGuaranteed.id)!, offer(internetGuaranteed));
+      const decision = decide(renamed, [{ ...promises[0], conditions: [condition] }, promises[1]], billText.get(internetGuaranteed.id)!, offer(internetGuaranteed));
       expect(decision.claims.map((c) => [c.kind, c.amountCents]), label).toEqual([
         ["price_above_promise", 1500],
         ["included_charged", 1500],
       ]);
     }
+  });
+
+  // A discount on the bill shows the company counts a condition as met only when it is that condition's discount: a
+  // promotional credit says nothing about autopay, and a customer not on autopay was owed no autopay price.
+  test("a promotional credit doesn't prove autopay or paperless billing, while a discount named for them does", () => {
+    const discount = idOf(reading, "Autopay & Paperless Discount")[0];
+    const withCredit = (label: string): Reading => ({ ...reading, autopay: { enrolled: null, quote: null }, line_items: reading.line_items.map((line) => (line.id === discount ? { ...line, label } : line)) });
+    const linked = { ...promises[0], covers_line_ids: [...promises[0].covers_line_ids, discount] };
+    const promo = decide(withCredit("Promotional Credit"), [linked], billText.get(internetGuaranteed.id)!, offer(internetGuaranteed));
+    expect(promo.claims).toEqual([]);
+    expect(promo.questions.filter((q) => q.promiseId).map((q) => q.kind)).toEqual(["conditions_unproven"]);
+    const named = decide(withCredit("Autopay & Paperless Discount"), [linked], billText.get(internetGuaranteed.id)!, offer(internetGuaranteed));
+    expect(named.claims.map((c) => [c.kind, c.amountCents])).toEqual([["price_above_promise", 1500]]);
   });
 
   test("the bill's own notice that the promotion ended does not drop a claim", () => {

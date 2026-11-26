@@ -342,6 +342,15 @@ const TIME_LIMIT = new RegExp(
 // posters write it about plan prices too ("the page prior to checkout said $70 a month").
 const DEVICE_OR_CART = /\b(due monthly|due today|add to cart|installments?|financ(ed|ing)|device payment)\b|\d% apr\b/i;
 
+// The words a bill's discount uses for the condition it rewards. A discount so named shows the company counts that
+// condition as met; a contract or other condition has no such discount, and a promotional credit proves none.
+const CONDITION_DISCOUNT: Partial<Record<PromiseTerm["conditions"][number], RegExp>> = {
+  autopay: /auto[\s-]?pay|automatic (bill )?payments?/i,
+  paperless: /paperless|paper-?free|\be-?bill/i,
+  bundle: /bundle|multi[- ]?(service|product)/i,
+};
+const discountFor = (condition: PromiseTerm["conditions"][number], line: LineItem) => CREDIT_KINDS[line.kind] === true && CONDITION_DISCOUNT[condition]?.test(line.label) === true;
+
 // Charges a government sets and the company only collects, whatever kind the reading gave them, including combined
 // "Taxes & fees" lines. "Tax Recovery" and "Regulatory Cost Recovery" fees are the company's own and don't match.
 const GOVERNMENT_FEE = /\b(franchise fee|peg|9-?1-?1|988|universal service|taxes|sales (and use )?tax|users? tax|excise tax|public,? educ)/i;
@@ -380,7 +389,7 @@ export function decide(reading: Reading, promises: PromiseTerm[], bill: Source, 
     // A price promised "with autopay" is net of that discount even when the discount line was not linked.
     const conditionCredits =
       promise.kind === "monthly_price" && promise.conditions.some((c) => c === "autopay" || c === "paperless")
-        ? reading.line_items.filter((line) => CREDIT_KINDS[line.kind] && !linked.includes(line) && /auto[\s-]?pay|automatic (bill )?payments?|paperless|paper-?free|\be-?bill/i.test(line.label))
+        ? reading.line_items.filter((line) => !linked.includes(line) && (discountFor("autopay", line) || discountFor("paperless", line)))
         : [];
     const covered = [...linked, ...conditionCredits];
     if (covered.length === 0) {
@@ -430,9 +439,8 @@ export function decide(reading: Reading, promises: PromiseTerm[], bill: Source, 
         unused.push({ promiseId: promise.id, reason: "device_or_cart_total" });
         continue;
       }
-      // A posted discount on the covered lines shows the company already counts the conditions as met.
-      const discountPosted = covered.some((line) => CREDIT_KINDS[line.kind]);
-      if (unproven.length > 0 && !discountPosted) {
+      // A discount posted for each unproven condition shows the company already counts them as met.
+      if (unproven.some((condition) => !covered.some((line) => discountFor(condition, line)))) {
         questions.push({ kind: "conditions_unproven", lineIds, promiseId: promise.id });
         continue;
       }
