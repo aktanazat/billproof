@@ -5,7 +5,8 @@ services:
     build: ..
     env_file: .env
     environment:
-      EVENT_BUDGET_MICROS: "6000000"
+      # The project's whole Meta spend stays under $10: local runs used $8.33, so this server may spend $1.60 in all.
+      EVENT_BUDGET_MICROS: "1600000"
     volumes:
       - billproof-data:/data
     mem_limit: 512m
