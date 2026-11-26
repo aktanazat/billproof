@@ -23,26 +23,38 @@ const feeKey = (label: string) => label.toLowerCase().replace(/[^a-z ]/g, "").re
 const BRANDS: [RegExp, string][] = [
   [/xfinity|comcast/i, "Xfinity"],
   [/verizon|fios/i, "Verizon"],
-  [/at&t|\batt\b/i, "AT&T"],
+  [/at&t|\batt/i, "AT&T"],
   [/spectrum|charter/i, "Spectrum"],
-  [/t-?mobile|metro/i, "T-Mobile"],
+  [/t[- ]?mobile|metro/i, "T-Mobile"],
+  [/google ?fiber/i, "Google Fiber"],
   [/google/i, "Google Fi"],
   [/directv/i, "DirecTV"],
   [/starlink/i, "Starlink"],
+  [/optimum/i, "Optimum"],
+  [/boost/i, "Boost Mobile"],
+  [/u\.?s\.? ?cellular/i, "US Cellular"],
+  [/centurylink/i, "CenturyLink"],
 ];
-// The name as printed, unless the reading lowercased it ("optimum") or wrote the brand in capitals ("SPECTRUM").
+const SMALL_WORDS = new Set(["by", "of", "and", "the", "for"]);
+
+// The name as printed, unless the reading lowercased it ("optimum") or wrote it in capitals ("KINETIC BY WINDSTREAM");
+// short capitals such as "DISH" are how the company writes itself and stay.
 function cased(name: string): string {
   const brand = BRANDS.find(([, canonical]) => canonical.toLowerCase() === name.toLowerCase())?.[1];
-  if (name === name.toUpperCase() && brand) return brand;
-  return name === name.toLowerCase() ? name.replace(/\b[a-z]/g, (letter) => letter.toUpperCase()) : name;
+  if (brand) return brand;
+  const words = name.split(" ").map((word, i) => {
+    const lower = word.toLowerCase();
+    if (i > 0 && SMALL_WORDS.has(lower)) return lower;
+    return word === lower || (word === word.toUpperCase() && word.length > 4) ? lower.charAt(0).toUpperCase() + lower.slice(1) : word;
+  });
+  return words.join(" ").replace(/\bT[- ]?Mobile\b/gi, "T-Mobile");
 }
 const companyOf = (provider: string | null) => (provider ? (BRANDS.find(([pattern]) => pattern.test(provider))?.[1] ?? cased(provider)) : "Unknown");
 
-// A bill whose company name wasn't read is named by the brand of its subreddit, when the subreddit is one.
+// A bill whose company name wasn't read is named by the company of its subreddit, when the subreddit is one company's.
 function displayName(bill: Checked): string | null {
   if (bill.provider) return cased(bill.provider);
-  const brand = BRANDS.find(([pattern]) => pattern.test(bill.sub))?.[1];
-  return brand ?? null;
+  return BRANDS.find(([pattern]) => pattern.test(bill.sub))?.[1] ?? null;
 }
 
 // Every real post whose author later wrote in the thread that the company paid them back for a charge Billproof
