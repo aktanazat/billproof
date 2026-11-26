@@ -116,6 +116,31 @@ describe("a missing autopay credit on a bill with no company name", () => {
   });
 });
 
+describe("a price claim across several lines on a dated bill", () => {
+  const planLine = (id: string, label: string): LineItem => ({ id, label, amount_cents: 3000, kind: "plan", page: 1, box: { x0: 80, y0: 400, x1: 920, y1: 420 }, quote: `${label} $30.00`, prorated: false });
+  const lines = [planLine("L1", "Unlimited Basic - Line 1"), planLine("L2", "Unlimited Basic - Line 2"), planLine("L3", "Unlimited Basic - Line 3")];
+  const promise: PromiseTerm = { id: "P1", kind: "monthly_price", description: "", amount_cents: 2500, per_line: true, conditions: [], applies_from: null, applies_until: null, quote: "$25/line per month", said_at_seconds: null, covers_line_ids: ["L1", "L2", "L3"] };
+  const base = billWith(lines);
+  const result: Checked = {
+    ...base,
+    reading: { ...base.reading, period_start: "2026-11-08", period_end: "2026-12-07" },
+    questions: [],
+    promises: [promise],
+    matchedPromiseIds: ["P1"],
+    claims: [{ id: "C1", kind: "price_above_promise", lineIds: ["L1", "L2", "L3"], promiseId: "P1", actualCents: 9000, expectedCents: 7500, amountCents: 1500, needsConfirmation: false, lookedFor: null }],
+  };
+  const message = buildMessage(result, new Set(["C1"]), new Set());
+
+  test("the chat names the period once, in its opening, and the lines take a plural verb", () => {
+    expect(message.chat).toContain("bill for Nov 8, 2026 to Dec 7, 2026.\n\nFor this bill, Unlimited Basic - Line 1, Unlimited Basic - Line 2 and Unlimited Basic - Line 3 come to $90.00, but my plan was confirmed at $75.00 a month");
+    expect(message.chat.split("Nov 8, 2026")).toHaveLength(2);
+  });
+
+  test("the complaint, which has no such opening, gives the period with the claim", () => {
+    expect(message.complaint).toContain("- For Nov 8, 2026 to Dec 7, 2026, Unlimited Basic - Line 1, Unlimited Basic - Line 2 and Unlimited Basic - Line 3 come to $90.00");
+  });
+});
+
 describe("a claim on a promise heard on a call", () => {
   const plan: LineItem = { id: "L1", label: "Fiber 500 Internet", amount_cents: 7000, kind: "plan", page: 1, box: { x0: 80, y0: 400, x1: 920, y1: 420 }, quote: "Fiber 500 Internet $70.00", prorated: false };
   const heard: PromiseTerm = { id: "P1", kind: "monthly_price", description: "", amount_cents: 5500, per_line: false, conditions: [], applies_from: null, applies_until: null, quote: "Fiber 500 is $55 a month", said_at_seconds: 14, covers_line_ids: ["L1"] };

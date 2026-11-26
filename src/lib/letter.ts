@@ -42,18 +42,20 @@ function citation(promise: PromiseTerm, onCall: boolean, speaker: string): strin
 // A claim as what happened, for a regulator, and what the company is asked to do about it. A missing credit mentions
 // autopay only when the promise depends on it; many promised credits (a line discount, a promotion) do not.
 function claimParts(claim: Claim, lines: LineItem[], promise: PromiseTerm, quoted: string, period: string): { fact: string; request: string } {
+  const charged = lines.filter((line) => line.amount_cents > 0);
+  const several = new Set(charged.map((line) => line.label)).size > 1;
   switch (claim.kind) {
     case "price_above_promise": {
       const discounted = lines.some((line) => line.amount_cents < 0) ? " after discounts" : "";
       return {
-        fact: `For ${period}, ${names(lines.filter((line) => line.amount_cents > 0))} comes to ${usd(claim.actualCents)}${discounted}, but my plan was confirmed at ${usd(claim.expectedCents)} a month (${quoted}).`,
+        fact: `For ${period}, ${names(charged)} ${several ? "come" : "comes"} to ${usd(claim.actualCents)}${discounted}, but my plan was confirmed at ${usd(claim.expectedCents)} a month (${quoted}).`,
         request: `Please credit the ${usd(claim.amountCents)} difference and correct the rate.`,
       };
     }
     case "included_charged":
       return {
-        fact: `I was charged ${usd(claim.amountCents)} for ${names(lines.filter((line) => line.amount_cents > 0))}, which was included at no extra cost (${quoted}).`,
-        request: `Please remove it and credit ${usd(claim.amountCents)}.`,
+        fact: `I was charged ${usd(claim.amountCents)} for ${names(charged)}, which ${several ? "were" : "was"} included at no extra cost (${quoted}).`,
+        request: `Please remove ${several ? "them" : "it"} and credit ${usd(claim.amountCents)}.`,
       };
     case "credit_missing": {
       const missing = `${claim.actualCents === 0 ? "no" : `only ${usd(claim.actualCents)} of the`} ${usd(claim.expectedCents)} monthly credit I was promised (${quoted})`;
@@ -138,17 +140,18 @@ export function increaseSentence(change: BillChange | null): string | null {
 export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<string>, includedQuestionIds: ReadonlySet<string>): Message {
   const lines = new Map(result.reading.line_items.map((line) => [line.id, line]));
   const promises = new Map(result.promises.map((promise) => [promise.id, promise]));
-  const period = periodText(result);
   const linesOf = (ids: string[]) => ids.flatMap((id) => lines.get(id) ?? []);
 
   const claims = result.claims.filter((claim) => selectedClaimIds.has(claim.id));
   const totalCents = claims.reduce((total, claim) => total + claim.amountCents, 0);
-  const claimPartsFor = (speaker: string) =>
+  // The chat, email and call open by naming the bill's period, so their claims say "this bill"; the complaint has no
+  // such opening and gives the period itself.
+  const claimPartsFor = (speaker: string, period: string) =>
     claims.flatMap((claim) => {
       const promise = promises.get(claim.promiseId);
       return promise ? [claimParts(claim, linesOf(claim.lineIds), promise, citation(promise, result.transcript !== null, speaker), period)] : [];
     });
-  const claimText = claimPartsFor("your representative").map(({ fact, request }) => `${fact} ${request}`);
+  const claimText = claimPartsFor("your representative", "this bill").map(({ fact, request }) => `${fact} ${request}`);
   const included = result.questions.filter((question) => includedQuestionIds.has(question.id));
   const fees = included.filter((question) => question.kind === "unagreed_fee").map((question) => linesOf(question.lineIds)).filter((lines) => lines.length > 0);
   const questionText = [
@@ -166,7 +169,7 @@ export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<stri
   const increase = increaseSentence(result.change);
   const body = [...claimText, ...(increase ? [increase] : []), ...questionText];
   const risen = increaseFact(result.change);
-  const regulatorBody = [...claimPartsFor(`${provider ?? "the company"}'s representative`).map(({ fact }) => fact), ...(risen ? [risen] : []), ...questionFacts];
+  const regulatorBody = [...claimPartsFor(`${provider ?? "the company"}'s representative`, periodText(result)).map(({ fact }) => fact), ...(risen ? [risen] : []), ...questionFacts];
 
   const about = aboutText(result, account);
   const chat = [`Hi, I'm writing about ${about}.`, ...body, ask].filter(Boolean).join("\n\n");
