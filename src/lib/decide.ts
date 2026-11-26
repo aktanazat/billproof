@@ -25,6 +25,7 @@ export type QuestionKind =
   | "unagreed_fee"
   | "repeated_charge"
   | "partial_period"
+  | "dates_unread"
   | "conditions_unproven"
   | "overlapping_claim"
   | "price_gap"
@@ -416,6 +417,11 @@ export function decide(reading: Reading, promises: PromiseTerm[], bill: Source, 
     }
     if (when.state === "not_started") {
       unused.push({ promiseId: promise.id, reason: "starts_later" });
+      continue;
+    }
+    // No date on the bill to set a dated promise against: whether it covered this bill is unknown, not partial.
+    if (when.state === "unknown") {
+      questions.push({ kind: "dates_unread", lineIds, promiseId: promise.id });
       continue;
     }
     if (when.state !== "active" || covered.some((line) => line.prorated)) {

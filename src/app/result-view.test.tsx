@@ -333,10 +333,12 @@ describe("the result page's wording", () => {
   // for one the bill doesn't show are met. A fee or a repeat has no promise and shows none.
   test("each note tied to a promise shows the promise, and a fee note shows none", () => {
     const promise = { id: "P1", kind: "monthly_price" as const, description: "", amount_cents: 3000, per_line: false, conditions: ["autopay" as const], applies_from: null, applies_until: null, quote: "$30 a month with autopay for 12 months", said_at_seconds: null, covers_line_ids: ["L1"] };
-    for (const kind of ["end_date_unread", "partial_period", "conditions_unproven"] as const) {
+    for (const kind of ["end_date_unread", "partial_period", "dates_unread", "conditions_unproven"] as const) {
       const result: Checked = { ...checked([line("L1", "Fiber 300", 3000, "plan")], [{ id: "Q1", kind, lineIds: ["L1"], promiseId: "P1" }]), promises: [promise] };
       expect(page(result), kind).toContain("Promised: “$30 a month with autopay for 12 months”");
     }
+    const undated: Checked = { ...checked([line("L1", "Fiber 300", 3000, "plan")], [{ id: "Q1", kind: "dates_unread", lineIds: ["L1"], promiseId: "P1" }]), promises: [promise] };
+    expect(page(undated)).toContain("This bill's dates couldn't be read, so whether your offer covered it is unclear");
     const fee: Checked = { ...checked([line("L1", "Fiber 300", 3000, "plan"), line("F1", "Network Fee", 399, "company_fee")], [{ id: "Q1", kind: "unagreed_fee", lineIds: ["F1"], promiseId: null }]), promises: [promise] };
     expect(page(fee)).not.toContain("Promised:");
   });

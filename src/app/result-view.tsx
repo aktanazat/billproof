@@ -13,7 +13,7 @@ import { BillPage, snapBox, type Mark } from "./bill-page";
 import { formatClock, inPlainWords, PlayButton } from "./evidence";
 
 // A provider mismatch is said once, in the heading.
-export const SHOWN_QUESTIONS = new Set<Question["kind"]>(["unagreed_fee", "repeated_charge", "partial_period", "conditions_unproven", "price_gap", "end_date_unread"]);
+export const SHOWN_QUESTIONS = new Set<Question["kind"]>(["unagreed_fee", "repeated_charge", "partial_period", "dates_unread", "conditions_unproven", "price_gap", "end_date_unread"]);
 const CALL_NAMES: Record<string, string> = { sort_pages: "Sort pictures", read_bill: "Read bill", reread_bill: "Reread bill", read_terms: "Read offer", read_call: "Listen to call", challenge: "Argue the company's side" };
 // Promises that simply have nothing on this bill are not worth a line.
 const UNUSED_TEXT: Record<UnusedReason, string | null> = {
@@ -65,6 +65,8 @@ function questionTitle(question: Question, lines: LineItem[], result: Checked): 
       return `${listNames(lines)} is charged ${lines.length} times`;
     case "partial_period":
       return "Your offer starts or ends during this bill";
+    case "dates_unread":
+      return "This bill's dates couldn't be read, so whether your offer covered it is unclear";
     case "conditions_unproven": {
       const named = (promise?.conditions ?? []).filter((c) => c !== "other").map((c) => CONDITION_NAMES[c]);
       return named.length > 0 ? `The bill doesn't show ${named.join(" or ")}, which your price depends on` : "The bill doesn't show that you meet your offer's conditions";

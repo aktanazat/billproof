@@ -158,11 +158,13 @@ describe("decide on the internet bill with an active price guarantee", () => {
     expect(settled.dropped.map((d) => d.claim.id)).toEqual([claims[1].id]);
   });
 
-  test("a cropped bill with no dates still gets claims for undated promises, and questions for dated ones", () => {
+  // With no dates read on the bill, nothing says whether a dated promise covered it; the question says that, not that
+  // the offer starts or ends during the bill (4 of the 5 real bills asked that had no dates read).
+  test("a cropped bill with no dates still gets claims for undated promises, and a dates question for dated ones", () => {
     const undated: Reading = { ...reading, statement_date: null, period_start: null, period_end: null, due_date: null };
     const decision = decide(undated, promises, billText.get(internetGuaranteed.id)!, offer(internetGuaranteed));
     expect(decision.claims.map((c) => [c.kind, c.amountCents])).toEqual([["included_charged", 1500]]);
-    expect(decision.questions.filter((q) => q.promiseId).map((q) => [q.kind, q.promiseId])).toEqual([["partial_period", "P1"]]);
+    expect(decision.questions.filter((q) => q.promiseId).map((q) => [q.kind, q.promiseId])).toEqual([["dates_unread", "P1"]]);
   });
 
   test("an offer rebuttal not in the offer's exact words keeps the claim for the person to confirm", () => {
