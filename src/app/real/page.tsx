@@ -30,7 +30,20 @@ const BRANDS: [RegExp, string][] = [
   [/directv/i, "DirecTV"],
   [/starlink/i, "Starlink"],
 ];
-const companyOf = (provider: string | null) => (provider ? (BRANDS.find(([pattern]) => pattern.test(provider))?.[1] ?? provider) : "Unknown");
+// The name as printed, unless the reading lowercased it ("optimum") or wrote the brand in capitals ("SPECTRUM").
+function cased(name: string): string {
+  const brand = BRANDS.find(([, canonical]) => canonical.toLowerCase() === name.toLowerCase())?.[1];
+  if (name === name.toUpperCase() && brand) return brand;
+  return name === name.toLowerCase() ? name.replace(/\b[a-z]/g, (letter) => letter.toUpperCase()) : name;
+}
+const companyOf = (provider: string | null) => (provider ? (BRANDS.find(([pattern]) => pattern.test(provider))?.[1] ?? cased(provider)) : "Unknown");
+
+// A bill whose company name wasn't read is named by the brand of its subreddit, when the subreddit is one.
+function displayName(bill: Checked): string | null {
+  if (bill.provider) return cased(bill.provider);
+  const brand = BRANDS.find(([pattern]) => pattern.test(bill.sub))?.[1];
+  return brand ?? null;
+}
 
 // Every real post whose author later wrote in the thread that the company paid them back for a charge Billproof
 // checks, in their own words. Found by reading the posters' own comments on every bill in the run; a roaming fee,
@@ -245,7 +258,7 @@ export default function RealBills() {
                 </div>
                 <div className="flex min-w-0 flex-col gap-1">
                   <p className="text-[13px] text-text-2">
-                    {[bill.provider, monthName(bill.period[0])].filter(Boolean).join(", ") || "Bill"}
+                    {[displayName(bill), monthName(bill.period[0])].filter(Boolean).join(", ") || "Bill"}
                   </p>
                   <p className="text-[15px] font-medium leading-snug">“{bill.title}”</p>
                   <Finding bill={bill} />
