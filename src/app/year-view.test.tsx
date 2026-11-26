@@ -48,11 +48,12 @@ test("a duplicate, another account's bill and an unreadable one are named as not
       { bill: 14, result: { outcome: "could_not_check", reason: "The page image is entirely black.", spentMicros: 0 } },
     ],
   };
-  const running = { s: "running", inputs: initialState.inputs, attempts: 1, attempt: 1, stage: null, spentMicros: 0, live: {} } as unknown as CheckState;
+  const bills = Array.from({ length: 15 }, (_, i) => ({ id: `b${i}`, name: i === 14 ? "december.jpg" : `bill-${i + 1}.pdf`, status: "preparing" as const }));
+  const running = { s: "running", inputs: { ...initialState.inputs, bills }, attempts: 1, attempt: 1, stage: null, spentMicros: 0, live: {} } as unknown as CheckState;
   const done = reduce(running, { type: "finished", attempt: 1, result: extra });
   if (done.s !== "done") throw new Error("the finished year did not become a done state");
   const html = renderToStaticMarkup(createElement(YearView, { state: done, result: extra, dispatch: () => {} }));
-  expect(html).toContain("Not counted: 1 bill couldn&#x27;t be read, 1 duplicate statement, 1 from another account");
+  expect(html).toContain("Not counted: december.jpg couldn&#x27;t be read, 1 duplicate statement, 1 from another account");
   expect(html).toMatch(/>\$70\.00<\/p><h1[^>]*>to ask back from Bayline Fiber across 12 statements/);
   expect([...html.matchAll(/aria-label="August 2026: /g)]).toHaveLength(1);
 });

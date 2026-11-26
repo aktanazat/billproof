@@ -37,7 +37,14 @@ function summarize(calls: CallRecord[]): CallRecord[] {
 export function YearView({ state, result, dispatch }: { state: Done; result: YearResult; dispatch: (action: CheckAction) => void }) {
   const [open, setOpen] = useState<number | null>(null);
   const read = result.months.flatMap((month) => (month.result.outcome === "checked" ? [{ bill: month.bill, result: month.result }] : [])).sort((a, b) => (a.result.reading.statement_date ?? "").localeCompare(b.result.reading.statement_date ?? ""));
-  const unread = result.months.length - read.length;
+  // A bill left out is named by its file, so the person knows which one to replace; a count stands in when a name is missing.
+  const leftOut = (outcome: "not_a_bill" | "could_not_check", one: string, many: string) => {
+    const months = result.months.filter((month) => month.result.outcome === outcome);
+    if (months.length === 0) return null;
+    const names = months.map((month) => state.inputs.bills[month.bill]?.name);
+    const verb = months.length === 1 ? one : many;
+    return names.every(Boolean) ? `${names.join(", ")} ${verb}` : `${months.length} ${months.length === 1 ? "file" : "files"} ${verb}`;
+  };
 
   // Statements are counted once, and only for the account most of them belong to.
   const accountOf = (month: (typeof read)[number]) => month.result.reading.account_last4 ?? "unknown";
@@ -79,7 +86,8 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
   const selectedMonths = checked.map((month) => ({ ...month.result, claims: month.result.claims.filter((claim) => markOf(month.bill, claim.id) === "selected") }));
   const message = selectedMonths.some((month) => month.claims.length > 0) ? buildYearMessage(selectedMonths) : null;
   const skipped = [
-    unread > 0 ? `${unread} ${unread === 1 ? "bill" : "bills"} couldn't be read` : null,
+    leftOut("could_not_check", "couldn't be read", "couldn't be read"),
+    leftOut("not_a_bill", "isn't a bill", "aren't bills"),
     duplicates > 0 ? `${duplicates} duplicate ${duplicates === 1 ? "statement" : "statements"}` : null,
     otherAccount > 0 ? `${otherAccount} from another account` : null,
   ].filter(Boolean);
