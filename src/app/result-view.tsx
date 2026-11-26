@@ -121,7 +121,7 @@ function ClaimRow({ claim, index, result, callUrl, mark, onToggle, onConfirm, on
   const heardAt = result.transcript && promise?.said_at_seconds !== null && promise?.said_at_seconds !== undefined ? promise.said_at_seconds : null;
   const focusIds = [...claim.lineIds];
   return (
-    <li tabIndex={0} onMouseEnter={() => onFocus(focusIds)} onMouseLeave={() => onFocus(null)} onFocus={() => onFocus(focusIds)} onBlur={() => onFocus(null)} className="flex flex-col gap-3 border-b border-line py-4 outline-none">
+    <li tabIndex={0} onMouseEnter={() => onFocus(focusIds)} onMouseLeave={() => onFocus(null)} onFocus={() => onFocus(focusIds)} onBlur={() => onFocus(null)} className="flex flex-col gap-3 border-b border-line py-4 outline-none focus-visible:bg-fill">
       <div className="flex items-start gap-3">
         <span className="mt-0.5 grid size-[18px] shrink-0 place-items-center rounded-full bg-red text-[11px] font-semibold text-white tabular-nums">{index + 1}</span>
         <h3 className="flex-1 text-[15px] font-semibold leading-snug">{claimTitle(claim, lines)}</h3>
@@ -230,7 +230,7 @@ export function MessageBox({ message }: { message: Message }) {
           </button>
         </div>
       </div>
-      <textarea ref={box} readOnly value={text} aria-label="Message to send" className="h-[280px] w-full resize-none rounded-xl bg-fill p-4 text-[15px] leading-[22px] focus:outline-none" />
+      <textarea ref={box} readOnly value={text} aria-label="Message to send" className="h-[280px] w-full resize-none rounded-xl bg-fill p-4 text-[15px] leading-[22px] focus:outline-none focus-visible:shadow-[inset_0_0_0_2px_var(--text)]" />
     </section>
   );
 }
@@ -459,7 +459,7 @@ export function ResultView({
                   const questionLines = linesOf(question.lineIds);
                   const canInclude = question.kind === "unagreed_fee" || question.kind === "repeated_charge";
                   return (
-                    <li key={question.id} tabIndex={0} onMouseEnter={() => setFocus(question.lineIds)} onMouseLeave={() => setFocus(null)} onFocus={() => setFocus(question.lineIds)} onBlur={() => setFocus(null)} className="flex flex-col gap-2 border-b border-line py-3 outline-none">
+                    <li key={question.id} tabIndex={0} onMouseEnter={() => setFocus(question.lineIds)} onMouseLeave={() => setFocus(null)} onFocus={() => setFocus(question.lineIds)} onBlur={() => setFocus(null)} className="flex flex-col gap-2 border-b border-line py-3 outline-none focus-visible:bg-fill">
                       <div className="flex items-baseline justify-between gap-4 text-[15px]">
                         <p>{questionTitle(question, questionLines, result)}</p>
                         {questionLines[0] && (
