@@ -177,7 +177,8 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
       {checked.length > 0 && (
         <section className="flex flex-col gap-4">
           <h2 className="text-[17px] font-semibold">{firstBad > 0 ? `Overcharged from ${monthOf(checked[firstBad].result, true)}` : "Overcharge by month"}</h2>
-          <ol className="grid grid-cols-6 gap-x-2 gap-y-6 lg:grid-cols-12" aria-label="Overcharge by month">
+          {/* Four columns on a phone, so an amount like "$1,250.00" fits under its month; six from tablet width. */}
+          <ol className="grid grid-cols-4 gap-x-2 gap-y-6 sm:grid-cols-6 lg:grid-cols-12" aria-label="Overcharge by month">
             {checked.map((month) => {
               const amount = claimed(month.result);
               const unconfirmed = month.result.claims.some((claim) => markOf(month.bill, claim.id) === "needs_confirmation");
