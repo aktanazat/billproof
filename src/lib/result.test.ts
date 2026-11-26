@@ -41,4 +41,11 @@ describe("a recorded call at the upload boundary", () => {
     new DataView(real.buffer).setUint32(40, 32_000, true);
     expect(checkInputSchema.safeParse(withCall(Buffer.from(real).toString("base64"))).success).toBe(false);
   });
+
+  // The check reads the header by decoding the upload's start, which throws on text that isn't valid base64; anyone
+  // can call the check directly, and an exception there became a server error instead of a refusal.
+  test("refuses, rather than failing on, a recording whose start isn't valid base64", () => {
+    const audio = wav(12);
+    expect(checkInputSchema.safeParse(withCall(`${audio.slice(0, 10)}=${audio.slice(11)}`)).success).toBe(false);
+  });
 });

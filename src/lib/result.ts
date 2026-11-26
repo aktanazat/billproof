@@ -19,10 +19,11 @@ export const CALL_SAMPLE_RATE = 16_000;
 // The long side pages are scaled to: by the browser for uploads, and by the server for a real post's pictures.
 export const PAGE_LONG_SIDE = 1600;
 
-// Seconds of audio in a base64 16 kHz mono 16-bit PCM WAV with the plain 44-byte header, or null for anything else.
-// The length comes from the bytes themselves, so a recording cannot claim to be shorter than it is.
+// Seconds of audio in a base64 16 kHz mono 16-bit PCM WAV with the plain 44-byte header, or null for anything else,
+// including text that isn't valid base64. The length comes from the bytes themselves, so a recording cannot claim to be
+// shorter than it is.
 export function wavSeconds(base64: string): number | null {
-  if (base64.length < 60 || base64.length % 4 !== 0) return null;
+  if (base64.length < 60 || base64.length % 4 !== 0 || !/^[A-Za-z0-9+/]*={0,2}$/.test(base64)) return null;
   const head = Uint8Array.from(atob(base64.slice(0, 60)), (ch) => ch.charCodeAt(0));
   const view = new DataView(head.buffer);
   const text = (offset: number, length: number) => String.fromCharCode(...head.subarray(offset, offset + length));
@@ -47,7 +48,7 @@ export const checkInputSchema = z.object({
       z.object({ kind: z.literal("text"), text: z.string().trim().min(1).max(MAX_OFFER_TEXT) }),
       z.object({ kind: z.literal("pages"), pages: z.array(page).min(1).max(4) }),
       // 16 kHz mono WAV, base64 without a data: prefix.
-      z.object({ kind: z.literal("audio"), wav: z.string().regex(/^[A-Za-z0-9+/=]+$/).max(10_500_000) }).refine((offer) => {
+      z.object({ kind: z.literal("audio"), wav: z.string().max(10_500_000) }).refine((offer) => {
         const seconds = wavSeconds(offer.wav);
         return seconds !== null && seconds <= MAX_CALL_SECONDS;
       }, "The recording must be 16 kHz mono WAV, at most 4 minutes"),
