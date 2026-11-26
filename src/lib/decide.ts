@@ -294,9 +294,30 @@ function distinctiveWords(name: string): Set<string> {
   return new Set(tokens(name).filter((word) => word.length > 1 && !GENERIC_PROVIDER_WORDS.has(word)));
 }
 
-// True only when both names are known and share no distinctive word ("Bayline Fiber" vs "Westline Fiber").
+// Companies that go by more than one name, each with the name it is shown by. Order matters: Google Fiber before Google Fi.
+export const BRANDS: [RegExp, string][] = [
+  [/xfinity|comcast/i, "Xfinity"],
+  [/verizon|fios/i, "Verizon"],
+  [/at&t|\batt/i, "AT&T"],
+  [/spectrum|charter/i, "Spectrum"],
+  [/\bt[- ]?mobile|metro/i, "T-Mobile"],
+  [/google ?fiber/i, "Google Fiber"],
+  [/google/i, "Google Fi"],
+  [/directv/i, "DirecTV"],
+  [/starlink/i, "Starlink"],
+  [/optimum/i, "Optimum"],
+  [/boost/i, "Boost Mobile"],
+  [/u\.?s\.? ?cellular/i, "US Cellular"],
+  [/centurylink/i, "CenturyLink"],
+];
+export const brandOf = (name: string): string | null => BRANDS.find(([pattern]) => pattern.test(name))?.[1] ?? null;
+
+// True only when both names are known and name different companies: different brands ("Google Fi" vs "Google
+// Fiber"), or, outside the brands, no distinctive word in common ("Bayline Fiber" vs "Westline Fiber").
 export function providersDiffer(billProvider: string | null, offerProvider: string | null): boolean {
   if (!billProvider || !offerProvider) return false;
+  const [billBrand, offerBrand] = [brandOf(billProvider), brandOf(offerProvider)];
+  if (billBrand && offerBrand) return billBrand !== offerBrand;
   const bill = distinctiveWords(billProvider);
   const offer = distinctiveWords(offerProvider);
   if (bill.size === 0 || offer.size === 0) return false;

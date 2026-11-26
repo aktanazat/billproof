@@ -4,6 +4,7 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { realRun } from "@/data/real-bills";
 import { formatMicros } from "@/lib/cost";
+import { BRANDS, brandOf } from "@/lib/decide";
 import { usd } from "@/lib/letter";
 import { claimedCents, unagreedCents, unagreedFees, type RealBill } from "@/lib/real-bills";
 import { livePaused } from "@/lib/server-ledger";
@@ -41,22 +42,6 @@ const monthName = (iso: string | null) => {
 const feeKey = (label: string) =>
   label.toLowerCase().replace(/\bcalifornia\b/, "ca").replace(/[^a-z ]/g, "").replace(/\s+/g, " ").trim().replace(/ (fee|charge|surcharge)$/, "");
 
-// Bills name the same company many ways ("xfinity", "Comcast", "Verizon Fios"); the table groups them by brand.
-const BRANDS: [RegExp, string][] = [
-  [/xfinity|comcast/i, "Xfinity"],
-  [/verizon|fios/i, "Verizon"],
-  [/at&t|\batt/i, "AT&T"],
-  [/spectrum|charter/i, "Spectrum"],
-  [/\bt[- ]?mobile|metro/i, "T-Mobile"],
-  [/google ?fiber/i, "Google Fiber"],
-  [/google/i, "Google Fi"],
-  [/directv/i, "DirecTV"],
-  [/starlink/i, "Starlink"],
-  [/optimum/i, "Optimum"],
-  [/boost/i, "Boost Mobile"],
-  [/u\.?s\.? ?cellular/i, "US Cellular"],
-  [/centurylink/i, "CenturyLink"],
-];
 const SMALL_WORDS = new Set(["by", "of", "and", "the", "for"]);
 
 // The name as printed, unless the reading lowercased it ("optimum") or wrote it in capitals ("KINETIC BY WINDSTREAM");
@@ -71,7 +56,8 @@ function cased(name: string): string {
   });
   return words.join(" ").replace(/\bT[- ]?Mobile\b/gi, "T-Mobile");
 }
-const companyOf = (provider: string | null) => (provider ? (BRANDS.find(([pattern]) => pattern.test(provider))?.[1] ?? cased(provider)) : "Unknown");
+// Bills name the same company many ways ("xfinity", "Comcast", "Verizon Fios"); the table groups them by brand.
+const companyOf = (provider: string | null) => (provider ? (brandOf(provider) ?? cased(provider)) : "Unknown");
 
 // Subreddits whose company goes by a longer name than some bills print ("Google", "Metro").
 const FULL_NAMES: Record<string, string> = { GoogleFi: "Google Fi", GoogleFiber: "Google Fiber", MetroPCS: "Metro by T-Mobile" };
@@ -79,7 +65,7 @@ const FULL_NAMES: Record<string, string> = { GoogleFi: "Google Fi", GoogleFiber:
 // A bill whose company name wasn't read is named by the company of its subreddit, when the subreddit is one company's;
 // a printed name that is the start of its subreddit's company name gets the whole name.
 function displayName(bill: Checked): string | null {
-  if (!bill.provider) return BRANDS.find(([pattern]) => pattern.test(bill.sub))?.[1] ?? null;
+  if (!bill.provider) return brandOf(bill.sub);
   const name = cased(bill.provider);
   const full = FULL_NAMES[bill.sub];
   return full && full.toLowerCase().startsWith(`${name.toLowerCase()} `) ? full : name;

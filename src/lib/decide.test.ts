@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, test } from "vitest";
 import { rasterize } from "../../scripts/samples/raster";
 import { renderBillPdf } from "../../scripts/samples/render";
 import { internetExpired, internetGuaranteed, mobile, type BillSpec } from "../../scripts/samples/specs";
-import { checkTotals, compareBills, decide, earlierChange, settleChallenges, withoutHeadings, type Source } from "./decide";
+import { checkTotals, compareBills, decide, earlierChange, providersDiffer, settleChallenges, withoutHeadings, type Source } from "./decide";
 import type { LineItem, LineKind, PromiseTerm, Reading } from "./schemas";
 
 const KIND_BY_LABEL: Record<string, LineKind> = {
@@ -646,5 +646,18 @@ describe("a checkout cart's monthly total", () => {
     expect(cart.unused.map((u) => u.reason)).toEqual(["device_or_cart_total"]);
     expect(priced("Unlimited Premium plan for $32.22 a month").claims.map((c) => c.amountCents)).toEqual([1257]);
     expect(priced("I was expecting $32.22 a month, and the page prior to checkout said so").claims.map((c) => c.amountCents)).toEqual([1257]);
+  });
+});
+
+// Posters name the company one way and its bill prints another ("Comcast" promised it, the bill says Xfinity); taken
+// for another company's offer, a real overcharge became only a question. Google Fi and Google Fiber are two services.
+describe("a company that goes by two names", () => {
+  test("is the same company on the offer and the bill, while two different services stay different", () => {
+    for (const [bill, offer] of [["Xfinity", "Comcast"], ["Spectrum", "Charter Communications"], ["AT&T", "ATT"], ["T-Mobile", "TMobile"], ["Verizon", "Fios"]]) {
+      expect(providersDiffer(bill, offer), `${bill} / ${offer}`).toBe(false);
+    }
+    expect(providersDiffer("Google Fiber", "Google Fi")).toBe(true);
+    expect(providersDiffer("Bayline Fiber", "Westline Fiber")).toBe(true);
+    expect(providersDiffer("Bayline Fiber", "Bayline")).toBe(false);
   });
 });
