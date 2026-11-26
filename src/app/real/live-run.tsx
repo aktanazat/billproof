@@ -34,6 +34,18 @@ export function LiveRun({ paused }: { paused: boolean }) {
     return () => clearInterval(timer);
   }, [state]);
 
+  // A run takes about a minute, often in a background tab; its title says whether it's still going, done or stopped
+  // part way, as the check screen's does. A run refused before it began leaves the title alone.
+  const phase = state === "running" ? "Checking" : state === "done" ? "Checked" : state === "refused" && tiles.length > 0 ? "Stopped" : null;
+  useEffect(() => {
+    if (!phase) return;
+    const before = document.title;
+    document.title = `${phase} — Billproof`;
+    return () => {
+      document.title = before;
+    };
+  }, [phase]);
+
   const run = async () => {
     setState("running");
     setTiles([]);
