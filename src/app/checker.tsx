@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useReducer, useRef, useState, type ChangeEvent, type DragEvent, type ReactNode } from "react";
 import { checkInput, initialState, offerOmitted, reduce, startBlocker, type Call, type CheckAction, type CheckState, type Doc, type Inputs } from "@/lib/check-machine";
@@ -445,7 +446,8 @@ function SampleButton({ sample, busy, loading, onRun }: { sample: Sample; busy: 
     <button type="button" disabled={busy} onClick={onRun} className="flex items-center gap-4 rounded-xl p-3 text-left hover:bg-fill disabled:cursor-wait">
       <span className="block h-[72px] w-14 shrink-0 overflow-hidden rounded-[4px] bg-white shadow-[inset_0_0_0_1px_var(--line)]">
         {/* A made-up sample is zoomed onto its header; a real post's picture can be any shape, so it is fitted. */}
-        {sample.pictures ? <Thumbnail src={sample.image} /> : <img src={sample.image} alt="" className="w-[230%] max-w-none -translate-x-[9%] -translate-y-[4%]" />}
+        {/* The previews sit below a phone's first screen, so they load as they scroll into view, at their shown size. */}
+        {sample.pictures ? <Thumbnail src={sample.image} lazy /> : <Image src={sample.image} alt="" width={1200} height={1553} sizes="129px" className="h-auto w-[230%] max-w-none -translate-x-[9%] -translate-y-[4%]" />}
       </span>
       <span className="min-w-0">
         <span className="block text-[15px] font-medium">{loading ? "Opening" : sample.title}</span>
