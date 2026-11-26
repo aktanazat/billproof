@@ -270,7 +270,9 @@ export function MessageBox({ message }: { message: Message }) {
         </div>
       </div>
       <div role="tabpanel" id={`${ids}-panel`} aria-labelledby={`${ids}-${format}`}>
-        <textarea ref={box} readOnly value={text} aria-label="Message to send" className="block h-[280px] w-full resize-none rounded-xl bg-fill p-4 text-[15px] leading-[22px] focus:outline-none focus-visible:shadow-[inset_0_0_0_2px_var(--text)]" />
+        <textarea ref={box} readOnly value={text} aria-label="Message to send" className="block h-[280px] w-full resize-none rounded-xl bg-fill p-4 text-[15px] leading-[22px] focus:outline-none focus-visible:shadow-[inset_0_0_0_2px_var(--text)] print:hidden" />
+        {/* A printed text box shows only what fits its height on screen; on paper the whole message prints instead. */}
+        <p className="hidden whitespace-pre-wrap text-[13px] leading-[19px] print:block">{text}</p>
       </div>
       {format === "complaint" && <p className="text-[13px] text-text-2">{COMPLAINT_WHERE}</p>}
       {/* The button's own "Copied" isn't spoken while it has focus; a status line is. A refused copy needs none: the
