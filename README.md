@@ -55,7 +55,7 @@ Checks: `pnpm typecheck`, `pnpm lint`, `pnpm test`.
 
 `pnpm eval` renders every synthetic bill in `scripts/samples/eval-specs.ts` as a PDF and as a phone photo, runs each through the real pipeline and Muse Ember, and scores claims, false claims, questions and explanations against the planted ground truth. The set includes clean lookalikes (promises honored, credits posted), an expired promotion, a promotion ending mid-cycle, an unproven autopay condition, an offer from another company, and an unsupported electricity rate plan. It also runs the same internet bill against two recorded calls (one promising two years, one only the first year) and a year of twelve statements where the price rises in month nine and a gateway fee appears in month eleven.
 
-Run on 2026-11-25 (`eval/run-2026-11-25b.json` holds every event, reading and model call):
+Run on 2026-11-26 on the code that is live, after every rule change below (`eval/results/2026-11-26T08-08-40.185Z.json` holds every event, reading and model call; the first full run, on 2026-11-25, scored the same and is in `eval/run-2026-11-25b.json`):
 
 | Input | Checks completed | Claims found | False claims | Questions found | Explained |
 | --- | --- | --- | --- | --- | --- |
@@ -64,7 +64,7 @@ Run on 2026-11-25 (`eval/run-2026-11-25b.json` holds every event, reading and mo
 | Recorded call | 2/2 | 2/2 | 0 | 4/4 | 2/2 |
 | Year of 12 bills | 12/12 | 6/6 | 0 | 0/0 | 0/0 |
 
-Median cost per single-bill check: 0.17¢, with the challenge step included. The year of twelve bills cost 2.4¢ and took 32 seconds. All 27 checks together: 69 paid Muse Ember calls (16 more steps reused an identical earlier reading), 209,378 input tokens (147,012 served from Meta's prompt cache), 119,116 output tokens including reasoning, $0.066. The bills and calls are synthetic (the calls are synthesized voices), so these numbers show the pipeline holds its rules; real bills and calls are messier.
+Median cost per single-bill check: 0.15¢, with the challenge step included. The year of twelve bills cost 2.1¢ and took 28 seconds. All 27 checks together: 69 paid Muse Ember calls (16 more steps reused an identical earlier reading), 229,354 input tokens (216,796 served from Meta's prompt cache), 124,475 output tokens including reasoning, $0.064. The bills and calls are synthetic (the calls are synthesized voices), so these numbers show the pipeline holds its rules; real bills and calls are messier.
 
 `pnpm samples` regenerates the sample bills, the two recorded calls and the year of statements on the start screen.
 
