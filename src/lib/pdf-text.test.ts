@@ -1,6 +1,6 @@
 import type { TextContent } from "pdfjs-dist/types/src/display/api";
 import { expect, test } from "vitest";
-import { pageText } from "./pdf-text";
+import { pageRows, pageText } from "./pdf-text";
 
 // Items as pdf.js returned them for a hand-built page, with their x, baseline and width.
 const item = (str: string, x: number, width: number, hasEOL = false) => ({ str, dir: "ltr", width, height: 12, transform: [12, 0, 0, 12, x, 700], fontName: "F1", hasEOL });
@@ -16,4 +16,12 @@ test("a word whose font changes partway reads as one word", () => {
 test("cells in separate table columns stay separate words", () => {
   expect(pageText(page(item("Fiber 500 Internet", 72, 94.72), item(" ", 166.72, 233.28), item("$70.00", 400, 36.7)))).toBe("Fiber 500 Internet $70.00");
   expect(pageText(page(item("Fiber 500 Internet", 72, 94.72), item("$70.00", 400, 36.7)))).toBe("Fiber 500 Internet $70.00");
+});
+
+// Rows place a charge's mark on its printed line by finding the line's name in a row; "Fib er" hid it, and the mark
+// fell back to the model's own box, which can be a row off.
+test("a printed row keeps a word whole when its font changes partway, and table columns apart", () => {
+  const viewport = { width: 612, height: 792, convertToViewportPoint: (x: number, y: number) => [x, 792 - y] } as unknown as Parameters<typeof pageRows>[1];
+  expect(pageRows(page(item("Fib", 72, 16.67), item("er 500 Internet $70.00", 88.67, 122.06)), viewport).map((row) => row.text)).toEqual(["Fiber 500 Internet $70.00"]);
+  expect(pageRows(page(item("Fiber 500 Internet", 72, 94.72), item("$70.00", 400, 36.7)), viewport).map((row) => row.text)).toEqual(["Fiber 500 Internet $70.00"]);
 });

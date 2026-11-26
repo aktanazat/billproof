@@ -26,7 +26,8 @@ export function pageRows(content: TextContent, viewport: PageViewport): TextRow[
   return rows.map((row) => {
     row.sort((a, b) => a.x0 - b.x0);
     return {
-      text: row.map((cell) => cell.text).join(" "),
+      // A cell that starts where the one before it ends continues it, as in pageText (on this grid, under 1 unit).
+      text: row.map((cell, i) => (i > 0 && Math.abs(cell.x0 - row[i - 1].x1) < 1 && /\S$/.test(row[i - 1].text) && /^\S/.test(cell.text) ? "" : i > 0 ? " " : "") + cell.text).join(""),
       box: { x0: Math.min(...row.map((c) => c.x0)), x1: Math.max(...row.map((c) => c.x1)), y0: Math.min(...row.map((c) => c.top)), y1: Math.max(...row.map((c) => c.base)) + 2 },
     };
   });
