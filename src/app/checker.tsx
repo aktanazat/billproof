@@ -460,13 +460,27 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
   }, []);
 
   // Closing or reloading the tab loses everything here: added files, a check already being paid for, a drafted message.
-  // While there's any of that, the browser asks before leaving; a page with nothing added leaves freely.
+  // While there's any of that, the browser asks before leaving; a page with nothing added leaves freely. A link to
+  // another Billproof page moves without a reload, which the browser doesn't ask about, so the page asks itself.
   const hasWork = state.s !== "composing" || state.inputs.bills.length > 0 || state.inputs.offer.kind !== "none";
   useEffect(() => {
     if (!hasWork) return;
     const ask = (event: BeforeUnloadEvent) => event.preventDefault();
+    const leave = (event: MouseEvent) => {
+      // A click that opens a new tab or window keeps this page, and so its work.
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      const anchor = event.target instanceof Element ? event.target.closest("a[href]") : null;
+      if (!(anchor instanceof HTMLAnchorElement) || anchor.target === "_blank") return;
+      const url = new URL(anchor.href, location.href);
+      if (url.origin !== location.origin || url.pathname + url.search === location.pathname + location.search) return;
+      if (!window.confirm("Leave this page? The files you added, and any check or result, will be lost.")) event.preventDefault();
+    };
     window.addEventListener("beforeunload", ask);
-    return () => window.removeEventListener("beforeunload", ask);
+    document.addEventListener("click", leave, true);
+    return () => {
+      window.removeEventListener("beforeunload", ask);
+      document.removeEventListener("click", leave, true);
+    };
   }, [hasWork]);
 
   const runningAttempt = state.s === "running" ? state.attempt : null;
