@@ -265,7 +265,7 @@ function WorkingYear({ state, onCancel, dispatch }: { state: Exclude<CheckState,
       <div className="flex items-baseline justify-between gap-6 pb-6">
         {/* Keyed to the attempt and its state, so focus lands here when a check starts and again when it stops: the
             button pressed to start or retry is gone by then, and focus would otherwise drop to the top of the page. */}
-        <h1 key={`${state.attempts}-${state.s}`} ref={focusOnShow} tabIndex={-1} className="text-[28px] font-semibold tracking-[-0.02em] outline-none">
+        <h1 key={`${state.attempts}-${state.s}`} ref={focusOnShow} tabIndex={-1} className="text-[28px] font-semibold leading-[1.2] tracking-[-0.02em] outline-none">
           {state.s === "running" ? `Reading ${bills.length} bills` : "Stopped"}
         </h1>
         <p className="text-[13px] text-text-2 tabular-nums">
@@ -357,7 +357,7 @@ function Working({ state, onCancel, dispatch }: { state: Exclude<CheckState, { s
         <div className="flex items-baseline justify-between gap-4">
           {/* Only the step is announced: the thinking text and the spend change many times a second. */}
           {/* Keyed to the attempt and its state, so focus lands here when a check starts and again when it stops. */}
-          <h1 key={`${state.attempts}-${state.s}`} ref={focusOnShow} tabIndex={-1} aria-live="polite" className="text-[28px] font-semibold tracking-[-0.02em] outline-none">
+          <h1 key={`${state.attempts}-${state.s}`} ref={focusOnShow} tabIndex={-1} aria-live="polite" className="text-[28px] font-semibold leading-[1.2] tracking-[-0.02em] outline-none">
             {current?.label ?? (running ? "Starting" : "Stopped")}
           </h1>
           {state.spentMicros > 0 && <p className="text-[13px] text-text-2 tabular-nums">{formatMicros(state.spentMicros)}</p>}

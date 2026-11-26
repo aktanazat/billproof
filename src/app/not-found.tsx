@@ -10,7 +10,7 @@ export default function NotFound() {
     <main className="flex min-h-full flex-col">
       <SiteHeader current={null} />
       <section className="mx-auto flex w-full max-w-[1120px] flex-col items-start gap-3 px-6 pt-16">
-        <h1 className="text-[28px] font-semibold tracking-[-0.02em]">This page doesn&apos;t exist</h1>
+        <h1 className="text-[28px] font-semibold leading-[1.2] tracking-[-0.02em]">This page doesn&apos;t exist</h1>
         <p className="text-[17px] text-text-2">The address may be mistyped, or the page has moved.</p>
         <div className="mt-2 flex gap-2">
           <Link href="/" className="inline-flex h-9 items-center rounded-lg bg-text px-4 text-[15px] font-medium text-white hover:bg-black">

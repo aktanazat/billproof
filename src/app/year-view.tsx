@@ -149,7 +149,7 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
     <section className="mx-auto w-full max-w-[1120px] px-6 pb-24 pt-6">
       <header className="flex flex-wrap items-end justify-between gap-4 pb-8">
         <div ref={cameBackFrom === null ? focusOnShow : undefined} tabIndex={-1} className="outline-none">
-          <h1 className={firstBad >= 0 ? undefined : "text-[28px] font-semibold tracking-[-0.02em]"}>
+          <h1 className={firstBad >= 0 ? undefined : "text-[28px] font-semibold leading-[1.2] tracking-[-0.02em]"}>
             {firstBad >= 0 ? (
               <>
                 <span className="block text-[40px] font-semibold leading-none tracking-[-0.02em] tabular-nums">{usd(total)}</span>{" "}
