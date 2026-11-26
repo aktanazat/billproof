@@ -45,10 +45,11 @@ const capitalized = (text: string) => `${text[0].toUpperCase()}${text.slice(1)}`
 
 // A promise heard on a recorded call is cited as what the representative said, with the moment it was said; who
 // "the representative" is depends on who reads it ("your representative" to the company, its name to a regulator).
-function citation(promise: PromiseTerm, onCall: boolean, speaker: string): string {
+// `call` names that call: "the call" in writing, "an earlier call" in a script said on a call with the company.
+function citation(promise: PromiseTerm, onCall: boolean, speaker: string, call = "the call"): string {
   if (!onCall || promise.said_at_seconds === null) return `"${promise.quote.trim()}"`;
   const at = `${Math.floor(promise.said_at_seconds / 60)}:${String(Math.floor(promise.said_at_seconds % 60)).padStart(2, "0")}`;
-  return `${speaker} told me on the call, at ${at} in my recording: "${promise.quote.trim()}"`;
+  return `${speaker} told me on ${call}, at ${at} in my recording: "${promise.quote.trim()}"`;
 }
 
 // A claim as what happened, for a regulator, and what the company is asked to do about it. A missing credit mentions
@@ -246,17 +247,18 @@ export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<stri
   // The chat, email and call open by naming the bill's period, so their claims say "this bill"; the complaint has no
   // such opening and gives the period itself. Either way it is named on the first claim only, as a year names each
   // month's once.
-  const claimPartsFor = (speaker: string, period: string) => {
+  const claimPartsFor = (speaker: string, period: string, call?: string) => {
     let named = false;
     return claims.flatMap((claim) => {
       const promise = promises.get(claim.promiseId);
       if (!promise) return [];
-      const parts = claimParts(claim, linesOf(claim.lineIds), promise, citation(promise, result.transcript !== null, speaker), named ? null : period);
+      const parts = claimParts(claim, linesOf(claim.lineIds), promise, citation(promise, result.transcript !== null, speaker, call), named ? null : period);
       named = true;
       return [parts];
     });
   };
   const claimText = claimPartsFor("your representative", "this bill").map(({ fact, request }) => `${fact} ${request}`);
+  const spokenClaimText = claimPartsFor("your representative", "this bill", "an earlier call").map(({ fact, request }) => `${fact} ${request}`);
   const included = result.questions.filter((question) => includedQuestionIds.has(question.id));
   const fees = included.filter((question) => question.kind === "unagreed_fee").map((question) => linesOf(question.lineIds)).filter((lines) => lines.length > 0);
   // Only an offer from this company can show a fee wasn't part of the plan; without one, the fee is just asked about.
@@ -296,7 +298,7 @@ export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<stri
   ].join("\n");
   const call = [
     `I'm calling about ${about}.`,
-    ...numberedTotalAfter(claimText, ask, asked),
+    ...numberedTotalAfter(spokenClaimText, ask, asked),
     callClose(totalCents > 0, questionText.length > 0 || increase !== null),
   ]
     .filter(Boolean)
@@ -317,7 +319,7 @@ export function buildYearMessage(months: Checked[]): Message {
   const account = last4 ? `account ending ${last4}` : "my account";
   // A promise already quoted for an earlier month is referred back to, not quoted again in full; a month names its
   // statement once, on its first claim. Read aloud, a call script refers back to what was said, not to "above".
-  const sectionsFor = (speaker: string, asking: boolean, quotedBefore: string) => {
+  const sectionsFor = (speaker: string, asking: boolean, quotedBefore: string, call?: string) => {
     const quoted = new Set<string>();
     return withClaims.map((month) => {
       const lines = new Map(month.reading.line_items.map((line) => [line.id, line]));
@@ -327,7 +329,7 @@ export function buildYearMessage(months: Checked[]): Message {
         const promise = promises.get(claim.promiseId);
         if (!promise) return [];
         const key = promise.quote.trim();
-        const cite = quoted.has(key) ? quotedBefore : citation(promise, month.transcript !== null, speaker);
+        const cite = quoted.has(key) ? quotedBefore : citation(promise, month.transcript !== null, speaker, call);
         quoted.add(key);
         const { fact, request } = claimParts(claim, claim.lineIds.flatMap((id) => lines.get(id) ?? []), promise, cite, named ? null : periodText(month));
         named = true;
@@ -390,7 +392,7 @@ export function buildYearMessage(months: Checked[]): Message {
   ].join("\n");
   const call = [
     `I'm calling about ${account}.`,
-    ...numberedTotalAfter(sectionsFor("your representative", true, "as I mentioned"), ask, asked),
+    ...numberedTotalAfter(sectionsFor("your representative", true, "as I mentioned", "an earlier call"), ask, asked),
     callClose(totalCents > 0, asked.length > 0),
   ]
     .filter(Boolean)

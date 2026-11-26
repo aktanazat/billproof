@@ -54,6 +54,18 @@ test("the total to credit follows the claims it adds up, before any fee question
   expect(message.complaint).toContain("- I was charged $15.00 for Wi-Fi Gateway Rental, which was included at no extra cost");
 });
 
+// Read aloud on a call with the company, "on the call" sounds like this one; the script says the earlier call.
+test("a call script cites what the representative said on an earlier call, not 'on the call'", () => {
+  const run = JSON.parse(readFileSync(path.join(import.meta.dirname, "../../eval/run-2026-11-26.json"), "utf8")) as { raw: { id: string; events: CheckEvent[] }[] };
+  const event = run.raw.find((r) => r.id === "call-two-years")?.events.find((e) => e.type === "result");
+  if (event?.type !== "result" || event.result.outcome !== "checked") throw new Error("the saved run has no call result");
+  const result = event.result;
+  const message = buildMessage(result, new Set(result.claims.map((c) => c.id)), new Set());
+  expect(message.call).toContain("your representative told me on an earlier call, at 0:11 in my recording");
+  expect(message.call).not.toContain("on the call");
+  expect(message.email).toContain("your representative told me on the call, at 0:11 in my recording");
+});
+
 const fee = (id: string, label: string, cents: number): LineItem => ({ id, label, amount_cents: cents, kind: "company_fee", page: 1, box: { x0: 80, y0: 400, x1: 920, y1: 420 }, quote: `${label} $${(cents / 100).toFixed(2)}`, prorated: false });
 
 function billWith(lines: LineItem[]): Checked {
