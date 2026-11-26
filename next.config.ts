@@ -5,6 +5,10 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   cacheComponents: true,
   partialPrefetching: true,
+  // The resizer fetches whatever local path it is asked for; only the samples and the Reddit bills are pictures.
+  images: {
+    localPatterns: [{ pathname: "/samples/**", search: "" }, { pathname: "/api/real-image/**", search: "" }],
+  },
   turbopack: {
     rules: {
       "*.css": {
