@@ -1,5 +1,5 @@
 import { afterEach, expect, test, vi } from "vitest";
-import { PrepareError, prepareFile } from "./prepare";
+import { isRecording, PrepareError, prepareFile } from "./prepare";
 
 const withResolvers = Promise.withResolvers;
 afterEach(() => {
@@ -29,4 +29,15 @@ test("an iPhone HEIC photo is read where the browser can decode it, and refused 
   vi.stubGlobal("createImageBitmap", async () => ({ width: 3024, height: 4032, close: () => {} }));
   vi.stubGlobal("document", { createElement: () => canvas });
   await expect(prepareFile(heic, 1)).resolves.toMatchObject({ pages: [{ image: "data:image/jpeg;base64,AAAA" }], omitted: 0 });
+});
+
+// Android phones and call-recorder apps save calls as .3gp, which the system labels video, and a call can be a screen
+// recording; browsers take the sound from both. Sent down the document path they were refused as "Add a PDF or a
+// photo of the bill."
+test("a call saved by an Android phone or as a video is opened as a recording; a PDF or photo is not", () => {
+  expect(isRecording(new File([], "Call with Xfinity.3gp", { type: "video/3gpp" }))).toBe(true);
+  expect(isRecording(new File([], "ScreenRecording_0412.mp4", { type: "video/mp4" }))).toBe(true);
+  expect(isRecording(new File([], "call_20261104.3gp", { type: "" }))).toBe(true);
+  expect(isRecording(new File([], "offer.pdf", { type: "application/pdf" }))).toBe(false);
+  expect(isRecording(new File([], "IMG_0412.HEIC", { type: "image/heic" }))).toBe(false);
 });

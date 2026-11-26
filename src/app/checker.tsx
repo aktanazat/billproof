@@ -5,7 +5,7 @@ import { useEffect, useReducer, useRef, useState, type ChangeEvent, type DragEve
 import { checkInput, initialState, offerOmitted, reduce, startBlocker, type Call, type CheckAction, type CheckState, type Doc, type Inputs } from "@/lib/check-machine";
 import { formatMicros } from "@/lib/cost";
 import { usd } from "@/lib/letter";
-import { isAudio, MAX_BILL_PAGES, MAX_OFFER_PAGES, prepareCall, prepareFile, PrepareError } from "@/lib/prepare";
+import { isRecording, MAX_BILL_PAGES, MAX_OFFER_PAGES, prepareCall, prepareFile, PrepareError } from "@/lib/prepare";
 import { MAX_BILLS, MAX_CALL_SECONDS, type CheckEvent, type CheckInput, type PageKind, type Stage } from "@/lib/result";
 import { BillPage, snapBox, Thumbnail, type Mark } from "./bill-page";
 import { formatClock, Waveform } from "./evidence";
@@ -24,7 +24,7 @@ export type Sample = {
 };
 
 const BILL_ACCEPT = "application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif";
-const OFFER_ACCEPT = "application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif,audio/*,.m4a,.mp3,.wav";
+const OFFER_ACCEPT = "application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif,audio/*,video/*,.m4a,.mp3,.wav,.3gp";
 
 function isCheckEvent(value: unknown): value is CheckEvent {
   return typeof value === "object" && value !== null && "type" in value && typeof value.type === "string";
@@ -593,7 +593,7 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
     const file = files[0];
     setOfferExtra(files.length - 1);
     const docId = id();
-    if (!isAudio(file)) {
+    if (!isRecording(file)) {
       dispatch({ type: "offer_file_added", id: docId, name: file.name });
       return prepareDoc(docId, file, MAX_OFFER_PAGES);
     }

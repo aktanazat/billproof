@@ -99,8 +99,10 @@ export async function prepareFile(file: File, maxPages: number): Promise<Prepare
 
 const CALL_SAMPLE_RATE = 16_000;
 
-export function isAudio(file: File): boolean {
-  return file.type.startsWith("audio/") || /\.(m4a|mp3|wav|aac|caf|ogg|webm)$/i.test(file.name);
+// A call can arrive as a video too: Android saves calls as .3gp, labelled video, and a call can be screen recorded.
+// The browser takes the sound from either, or the recording says it couldn't be opened.
+export function isRecording(file: File): boolean {
+  return /^(audio|video)\//.test(file.type) || /\.(m4a|mp3|wav|aac|caf|ogg|opus|oga|flac|amr|webm|3gp|3ga|mp4|mov)$/i.test(file.name);
 }
 
 function wavBase64(samples: Float32Array, sampleRate: number): string {
