@@ -441,6 +441,24 @@ describe("the result page's other sections", () => {
     expect(t).toContain("You: How much is Fiber 500?");
   });
 
+  // An ended promise is the whole reason a charge has no claim; heard on a call, it can be played like a claim's quote,
+  // rather than found again in the transcript.
+  test("an ended promise from a call can be played from the moment it was said", () => {
+    const promise: Checked["promises"][number] = { id: "P1", kind: "monthly_price", description: "", amount_cents: 5500, per_line: false, conditions: [], applies_from: null, applies_until: "2026-10-27", quote: "Fiber 500 is $55 a month for your first 12 months", said_at_seconds: 13, covers_line_ids: ["L1"] };
+    const result: Checked = {
+      ...checked([line("L1", "Fiber 500 Internet", 7000, "plan")], []),
+      promises: [promise],
+      matchedPromiseIds: ["P1"],
+      explained: [{ id: "E1", kind: "promise_ended", lineIds: ["L1"], promiseId: "P1", endedOn: "2026-10-27" }],
+      transcript: [
+        { speaker: "customer", start_seconds: 7, text: "How much is Fiber 500?" },
+        { speaker: "company", start_seconds: 13, text: "Fiber 500 is $55 a month for your first 12 months." },
+        { speaker: "customer", start_seconds: 23, text: "Thanks." },
+      ],
+    };
+    expect(page(result)).toContain('aria-label="Play what was said at 0:13"');
+  });
+
   test("a picture that isn't a bill, or a bill that can't be read, says what to add instead", () => {
     const render = (result: Parameters<typeof ResultView>[0]["result"]) => text(renderToStaticMarkup(createElement(ResultView, { result, bill: 0, pages: [], omittedPages: { bill: 0, offer: 0 }, callUrl: null, selection: { claims: {}, questions: {} }, dispatch: () => {}, backLabel: "Check another bill", onBack: () => {} })).replace(/&#x27;/g, "'"));
     expect(render({ outcome: "not_a_bill", spentMicros: 0 })).toContain("This isn't a bill Add the statement itself: the PDF, or screenshots of the page that shows the billing period and each charge.");

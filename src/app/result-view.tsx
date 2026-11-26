@@ -105,6 +105,11 @@ function turnEnd(transcript: TranscriptTurn[] | null, at: number): number | null
   return transcript?.find((turn) => turn.start_seconds > at + 0.5)?.start_seconds ?? null;
 }
 
+// When a promise was said on the call, the second it was said; a quote from a written offer has none.
+function heardAt(result: Checked, promise: PromiseTerm | undefined): number | null {
+  return result.transcript && promise?.said_at_seconds !== null && promise?.said_at_seconds !== undefined ? promise.said_at_seconds : null;
+}
+
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="flex flex-col">
@@ -118,7 +123,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 function ClaimRow({ claim, index, result, callUrl, mark, onToggle, onConfirm, onFocus }: { claim: TestedClaim; index: number; result: Checked; callUrl: string | null; mark: string | undefined; onToggle: () => void; onConfirm: () => void; onFocus: (ids: string[] | null) => void }) {
   const lines = claim.lineIds.flatMap((id) => result.reading.line_items.find((line) => line.id === id) ?? []);
   const promise = result.promises.find((p) => p.id === claim.promiseId);
-  const heardAt = result.transcript && promise?.said_at_seconds !== null && promise?.said_at_seconds !== undefined ? promise.said_at_seconds : null;
+  const heard = heardAt(result, promise);
   const focusIds = [...claim.lineIds];
   // A charge's controls are spoken with its title after the words shown, so a list of them tells the charges apart.
   const title = claimTitle(claim, lines);
@@ -145,8 +150,8 @@ function ClaimRow({ claim, index, result, callUrl, mark, onToggle, onConfirm, on
         <dt className="text-text-2">Promised</dt>
         <dd className="tabular-nums sm:text-right">{usd(claim.expectedCents)}</dd>
         <dd className="col-span-2 flex items-start gap-2 text-text-2 sm:col-span-1">
-          {heardAt !== null && <PlayButton url={callUrl} from={heardAt} to={turnEnd(result.transcript, heardAt)} label={`Play what was said at ${formatClock(heardAt)}`} />}
-          <span className={heardAt !== null ? "pt-[5px]" : ""}>“{promise?.quote}”</span>
+          {heard !== null && <PlayButton url={callUrl} from={heard} to={turnEnd(result.transcript, heard)} label={`Play what was said at ${formatClock(heard)}`} />}
+          <span className={heard !== null ? "pt-[5px]" : ""}>“{promise?.quote}”</span>
         </dd>
       </dl>
 
@@ -523,12 +528,18 @@ export function ResultView({
               <ul>
                 {result.explained.map((item) => {
                   const promise = promises.get(item.promiseId);
+                  const heard = heardAt(result, promise);
                   return (
                     <li key={item.id} className="flex flex-col gap-1 border-b border-line py-3">
                       <p className="text-[15px]">
                         {listNames(charged(linesOf(item.lineIds)))}: the promise ended {shortDate(item.endedOn)}, before this bill
                       </p>
-                      {promise && <p className="text-[13px] leading-[18px] text-text-2">“{promise.quote}”</p>}
+                      {promise && (
+                        <p className="flex items-start gap-2 text-[13px] leading-[18px] text-text-2">
+                          {heard !== null && <PlayButton url={callUrl} from={heard} to={turnEnd(result.transcript, heard)} label={`Play what was said at ${formatClock(heard)}`} />}
+                          <span className={heard !== null ? "pt-[5px]" : ""}>“{promise.quote}”</span>
+                        </p>
+                      )}
                     </li>
                   );
                 })}
