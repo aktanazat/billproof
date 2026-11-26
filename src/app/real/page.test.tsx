@@ -2,6 +2,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { expect, test } from "vitest";
 import { realRun } from "@/data/real-bills";
+import { formatMicros } from "@/lib/cost";
 import { unagreedFees } from "@/lib/real-bills";
 import RealBills from "./page";
 
@@ -77,4 +78,16 @@ test("a fee printed two ways is one fee on the most-common list", () => {
   expect(count("Broadcast TV Fee")).toBe("6 bills");
   expect(count("Regulatory Cost Recovery")).toBe("5 bills");
   expect(list).not.toContain("California Cost Recovery Charge");
+});
+
+// The run's total kept adding the partial re-runs made while the checks improved ($1.56 against $0.93 across the
+// posts' own costs), so "the whole run cost $1.56" and a cost per post divided from it overstated what checking costs.
+test("the cost per post is what the posts' checks cost, and the census total is said to include its re-reads", () => {
+  const read = realRun.results.filter((bill) => !(bill.outcome === "error" && bill.error === "images unavailable"));
+  const perPost = read.reduce((t, bill) => t + bill.spentMicros, 0) / read.length;
+  expect(text[text.indexOf("Cost per post") + 1]).toBe(formatMicros(perPost));
+  const intro = text.find((part) => part.includes("public Reddit posts about"))!;
+  expect(intro).toContain(formatMicros(realRun.spentMicros));
+  expect(intro).toMatch(/re-read/);
+  expect(intro).not.toContain("The whole run");
 });
