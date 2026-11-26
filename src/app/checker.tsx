@@ -39,6 +39,13 @@ async function streamCheck(input: CheckInput, attempt: number, signal: AbortSign
     if (!signal.aborted) fail("The connection dropped before the check started.", 0);
     return;
   }
+  // Every reply from the check is a stream of events; anything else came from the proxy in front of it (an upload over
+  // its size limit, or the app restarting during a deploy), before any reading started, so nothing was spent.
+  if (!response.headers.get("Content-Type")?.startsWith("application/x-ndjson")) {
+    const tooLarge = response.status === 413;
+    dispatch({ type: "errored", attempt, failure: tooLarge ? "bad_input" : "network", message: tooLarge ? "These files are too large. Try fewer pages or a smaller photo." : "Billproof couldn't be reached. Try again in a minute.", spentMicros: 0, retryable: !tooLarge });
+    return;
+  }
   if (!response.body) return fail("The server sent no response.", 0);
   const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
   let buffer = "";

@@ -45,6 +45,13 @@ export function LiveRun({ paused }: { paused: boolean }) {
       setMessage("The connection dropped. Try again.");
       return;
     }
+    // Every reply from the run is a stream of events; anything else came from the proxy in front of it (the app
+    // restarting during a deploy) before the run started.
+    if (!response.headers.get("Content-Type")?.startsWith("application/x-ndjson")) {
+      setState("refused");
+      setMessage("Billproof couldn't be reached. Try again in a minute.");
+      return;
+    }
     const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
     let buffer = "";
     let ended = false;
