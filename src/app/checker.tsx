@@ -27,6 +27,7 @@ export type Sample = {
 const BILL_ACCEPT = "application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif";
 const OFFER_ACCEPT = "application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif,audio/*,video/*,.m4a,.mp3,.wav,.3gp";
 const isPdf = (file: File) => file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+const LEAVE_QUESTION = "Leave this page? The files you added, and any check or result, will be lost.";
 
 function isCheckEvent(value: unknown): value is CheckEvent {
   return typeof value === "object" && value !== null && "type" in value && typeof value.type === "string";
@@ -501,9 +502,13 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
   // While there's any of that, the browser asks before leaving; a page with nothing added leaves freely. A link to
   // another Billproof page moves without a reload, which the browser doesn't ask about, so the page asks itself.
   const hasWork = state.s !== "composing" || state.inputs.bills.length > 0 || state.inputs.offer.kind !== "none";
+  const leaving = useRef(false);
   useEffect(() => {
     if (!hasWork) return;
-    const ask = (event: BeforeUnloadEvent) => event.preventDefault();
+    // A Back the visitor already agreed to doesn't ask a second time.
+    const ask = (event: BeforeUnloadEvent) => {
+      if (!leaving.current) event.preventDefault();
+    };
     const leave = (event: MouseEvent) => {
       // A click that opens a new tab or window keeps this page, and so its work.
       if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
@@ -511,7 +516,7 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
       if (!(anchor instanceof HTMLAnchorElement) || anchor.target === "_blank") return;
       const url = new URL(anchor.href, location.href);
       if (url.origin !== location.origin || url.pathname + url.search === location.pathname + location.search) return;
-      if (!window.confirm("Leave this page? The files you added, and any check or result, will be lost.")) event.preventDefault();
+      if (!window.confirm(LEAVE_QUESTION)) event.preventDefault();
     };
     window.addEventListener("beforeunload", ask);
     document.addEventListener("click", leave, true);
@@ -520,6 +525,43 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
       document.removeEventListener("click", leave, true);
     };
   }, [hasWork]);
+
+  // Back within the site (to the real-bills page a post was opened from) doesn't unload the page, and iPhone Safari
+  // never shows the browser's prompt; so while there's work, a history entry for this same address takes the first
+  // Back, and the page asks there. An entry still waiting once the work is gone is passed straight through. The router
+  // keeps a page it navigated away from and shows it again later (Forward, or another post opened from the real-bills
+  // page), so the guard is set up afresh each time the page shows, for the address it shows.
+  const work = useRef(hasWork);
+  const guardedHref = useRef<string | null>(null);
+  useEffect(() => {
+    work.current = hasWork;
+    if (!hasWork) return;
+    if (!history.state?.billproofGuard) history.pushState({ ...history.state, billproofGuard: true }, "");
+    guardedHref.current = location.href;
+  }, [hasWork]);
+  useEffect(() => {
+    leaving.current = false;
+    const back = () => {
+      if (leaving.current) return;
+      // Forward onto the guard entry: it guards again.
+      if (history.state?.billproofGuard) {
+        guardedHref.current = location.href;
+        return;
+      }
+      // Only a Back from the guard to its own address is this page's to answer.
+      if (guardedHref.current !== location.href) return;
+      guardedHref.current = null;
+      if (work.current && !window.confirm(LEAVE_QUESTION)) {
+        history.pushState({ ...history.state, billproofGuard: true }, "");
+        guardedHref.current = location.href;
+        return;
+      }
+      leaving.current = true;
+      history.back();
+    };
+    window.addEventListener("popstate", back);
+    return () => window.removeEventListener("popstate", back);
+  }, []);
 
   // A check can take a minute, often in a background tab; its title says whether it's still going, done or stopped,
   // and the start screen's own title comes back after.
