@@ -170,7 +170,8 @@ function DocRow({ doc, onRemove }: { doc: Doc; onRemove: () => void }) {
     <div className="flex items-center gap-3 py-1.5">
       <div className="h-10 w-8 shrink-0 overflow-hidden rounded-[4px] bg-white outline-1 -outline-offset-1 outline-line">{doc.status === "ready" && <Thumbnail src={doc.pages[0].image} />}</div>
       <div className="min-w-0 flex-1">
-        <div className="truncate text-[15px]">{doc.name}</div>
+        {/* Wrapped, not cut off: statements often share a long name up to the month, the part that tells them apart. */}
+        <div className="text-[15px] wrap-anywhere">{doc.name}</div>
         <div className={`text-[13px] ${doc.status === "failed" ? "text-red" : "text-text-2"}`} role={doc.status === "failed" ? "alert" : undefined}>
           {detail}
         </div>
@@ -184,7 +185,7 @@ function CallRow({ call, onRemove }: { call: Call; onRemove: () => void }) {
   return (
     <div className="flex items-center gap-3 py-1.5">
       <div className="min-w-0 flex-1">
-        <div className="truncate text-[15px]">{call.name}</div>
+        <div className="text-[15px] wrap-anywhere">{call.name}</div>
         {call.status === "ready" ? (
           <div className="mt-1 flex items-center gap-3">
             <Waveform peaks={call.peaks} className="h-6 flex-1" />
