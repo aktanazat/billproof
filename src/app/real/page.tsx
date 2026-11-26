@@ -17,9 +17,13 @@ async function LiveRunNow() {
   return <LiveRun paused={livePaused()} />;
 }
 
+const realDescription = "Bills people posted publicly about Xfinity, Spectrum, AT&T, Verizon and others, each checked by Muse Ember against what the poster says they were promised.";
+
 export const metadata: Metadata = {
   title: "Real bills — Billproof",
-  description: "Bills people posted publicly about Xfinity, Spectrum, AT&T, Verizon and others, each checked by Muse Ember against what the poster says they were promised.",
+  description: realDescription,
+  // Setting this page's own card text replaces the inherited one, image included, so the image is named again.
+  openGraph: { siteName: "Billproof", type: "website", title: "Real bills — Billproof", description: realDescription, images: "/opengraph-image" },
 };
 
 type Checked = Extract<RealBill, { outcome: "checked" }>;
