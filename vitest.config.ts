@@ -11,8 +11,9 @@ export default defineConfig({
         test: { name: "lib", include: ["src/**/*.test.ts", "scripts/**/*.test.ts"] },
       },
       {
-        // Page components render with React's client build, which the react-server condition leaves out.
-        resolve: { alias: { "@": path.resolve(import.meta.dirname, "src") } },
+        // Page components render with React's client build, which the react-server condition leaves out; pages that
+        // load data through `server-only` get its empty module, as they do inside Next's server build.
+        resolve: { alias: { "@": path.resolve(import.meta.dirname, "src"), "server-only": path.resolve(import.meta.dirname, "node_modules/server-only/empty.js") } },
         test: { name: "ui", include: ["src/**/*.test.tsx"] },
       },
     ],
