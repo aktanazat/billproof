@@ -72,6 +72,13 @@ describe("a message with no dollar claim", () => {
     expect(message.email).toContain("Please reply with an explanation of these charges and anything you will correct on my bill.");
     expect(`${message.email}\n${message.call}`).not.toContain("the date the credit will post");
   });
+
+  test("the complaint states the fees as facts for the regulator, while the email asks the company", () => {
+    const message = buildMessage(result, new Set(), new Set(["Q1", "Q2"]));
+    expect(message.complaint).toContain("- The bill charges the Broadcast TV Fee ($47.23) and TV Access Fee ($14.00, charged 2 times), which were not part of the plan I agreed to.");
+    expect(message.complaint).not.toContain("Please explain");
+    expect(message.email).toContain("Please explain the Broadcast TV Fee ($47.23) and TV Access Fee ($14.00, charged 2 times).");
+  });
 });
 
 describe("a claim on a promise heard on a call", () => {

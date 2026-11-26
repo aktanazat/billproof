@@ -52,18 +52,25 @@ function claimSentence(claim: Claim, lines: LineItem[], quoted: string, period: 
   }
 }
 
-function repeatSentence(lines: LineItem[]): string {
-  return `${names(lines)} appears ${lines.length} times (${lines.map((line) => usd(line.amount_cents)).join(" and ")}). Please confirm whether this is a duplicate and credit it if so.`;
+// A repeated charge as a fact, for a regulator, and as a request, for the company.
+const repeatFact = (lines: LineItem[]) => `${names(lines)} appears ${lines.length} times on the bill (${lines.map((line) => usd(line.amount_cents)).join(" and ")}).`;
+const repeatSentence = (lines: LineItem[]) => `${repeatFact(lines)} Please confirm whether this is a duplicate and credit it if so.`;
+
+// Every fee asked about goes in one sentence, each with its amount ("the Broadcast TV Fee ($47.23), Regional Sports
+// Fee ($19.86) and …"), rather than the same sentence once per fee: a request to the company, a fact to a regulator.
+function feeList(fees: LineItem[][]): string {
+  const named = fees.map((lines) => `${names(lines)} (${lines.length > 1 ? `${usd(lines.reduce((t, line) => t + line.amount_cents, 0))}, charged ${lines.length} times` : usd(lines[0].amount_cents)})`);
+  return named.length === 1 ? named[0] : `${named.slice(0, -1).join(", ")} and ${named.at(-1)}`;
 }
 
-// Every fee asked about goes in one request, each with its amount ("the Broadcast TV Fee ($47.23), Regional Sports
-// Fee ($19.86) and …"), rather than the same sentence once per fee.
 function feeSentence(fees: LineItem[][]): string {
-  const named = fees.map((lines) => `${names(lines)} (${lines.length > 1 ? `${usd(lines.reduce((t, line) => t + line.amount_cents, 0))}, charged ${lines.length} times` : usd(lines[0].amount_cents)})`);
-  const list = named.length === 1 ? named[0] : `${named.slice(0, -1).join(", ")} and ${named.at(-1)}`;
   return fees.length === 1
-    ? `Please explain the ${list}. It was not part of the plan I agreed to; if it is not required, please remove it.`
-    : `Please explain the ${list}. They were not part of the plan I agreed to; if they are not required, please remove them.`;
+    ? `Please explain the ${feeList(fees)}. It was not part of the plan I agreed to; if it is not required, please remove it.`
+    : `Please explain the ${feeList(fees)}. They were not part of the plan I agreed to; if they are not required, please remove them.`;
+}
+
+function feeFact(fees: LineItem[][]): string {
+  return `The bill charges the ${feeList(fees)}, which ${fees.length === 1 ? "was" : "were"} not part of the plan I agreed to.`;
 }
 
 export type Message = { totalCents: number; chat: string; email: string; call: string; complaint: string };
@@ -87,15 +94,21 @@ function complaintText(provider: string, account: string, problem: string, facts
   ].join("\n");
 }
 
-// When the pictures held an earlier statement and this bill is higher, the message asks why, naming what rose most.
-export function increaseSentence(change: BillChange | null): string | null {
+// When the pictures held an earlier statement and this bill is higher: the rise, naming what rose most, as a fact.
+function increaseFact(change: BillChange | null): string | null {
   if (!change || change.currentCents <= change.earlierCents) return null;
   const rose = change.lines.flatMap((line) => {
     if (line.afterCents === null || line.afterCents <= (line.beforeCents ?? 0)) return [];
     return [line.beforeCents === null ? `${line.label} (${usd(line.afterCents)}) is new` : `${line.label} went from ${usd(line.beforeCents)} to ${usd(line.afterCents)}`];
   });
   const named = rose.length > 0 ? `: ${rose.slice(0, 3).join("; ")}` : "";
-  return `This bill is ${usd(change.currentCents - change.earlierCents)} higher than the one before${named}. Please explain the increase and correct anything I didn't agree to.`;
+  return `This bill is ${usd(change.currentCents - change.earlierCents)} higher than the one before${named}.`;
+}
+
+// The same rise as a request to the company: the message asks why.
+export function increaseSentence(change: BillChange | null): string | null {
+  const fact = increaseFact(change);
+  return fact && `${fact} Please explain the increase and correct anything I didn't agree to.`;
 }
 
 export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<string>, includedQuestionIds: ReadonlySet<string>): Message {
@@ -118,13 +131,18 @@ export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<stri
     ...(fees.length > 0 ? [feeSentence(fees)] : []),
     ...included.filter((question) => question.kind === "repeated_charge").map((question) => repeatSentence(linesOf(question.lineIds))),
   ];
+  const questionFacts = [
+    ...(fees.length > 0 ? [feeFact(fees)] : []),
+    ...included.filter((question) => question.kind === "repeated_charge").map((question) => repeatFact(linesOf(question.lineIds))),
+  ];
 
   const provider = result.reading.provider ?? "your company";
   const account = result.reading.account_last4 ? `account ending ${result.reading.account_last4}` : "my account";
   const ask = totalCents > 0 ? `In total, please credit ${usd(totalCents)} to ${account}.` : "";
   const increase = increaseSentence(result.change);
   const body = [...claimText, ...(increase ? [increase] : []), ...questionText];
-  const regulatorBody = [...claimTextFor(`${result.reading.provider ?? "the company"}'s representative`), ...(increase ? [increase] : []), ...questionText];
+  const risen = increaseFact(result.change);
+  const regulatorBody = [...claimTextFor(`${result.reading.provider ?? "the company"}'s representative`), ...(risen ? [risen] : []), ...questionFacts];
 
   const about = aboutText(result, account);
   const chat = [`Hi, I'm writing about ${about}.`, ...body, ask].filter(Boolean).join("\n\n");
