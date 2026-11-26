@@ -15,7 +15,8 @@ function finish(tile: Tile, result: SingleResult): Tile {
   const line = (id: string) => result.reading.line_items.find((item) => item.id === id)?.amount_cents ?? 0;
   const feeCents = result.questions.filter((q) => q.kind === "unagreed_fee").reduce((t, q) => t + q.lineIds.reduce((s, id) => s + line(id), 0), 0);
   const claimCents = result.claims.reduce((t, claim) => t + claim.amountCents, 0);
-  return { ...tile, stage: "done", provider: result.reading.provider ?? tile.provider, feeCents, claimCents, note: claimCents > 0 ? `${usd(claimCents)} above the promise` : feeCents > 0 ? `${usd(feeCents)} in fees` : "Nothing above the post" };
+  const claimNote = result.claims.every((claim) => claim.kind === "credit_missing") ? "credit missing" : "above the promise";
+  return { ...tile, stage: "done", provider: result.reading.provider ?? tile.provider, feeCents, claimCents, note: claimCents > 0 ? `${usd(claimCents)} ${claimNote}` : feeCents > 0 ? `${usd(feeCents)} in fees` : "Nothing above the post" };
 }
 
 export function LiveRun() {
