@@ -7,7 +7,7 @@ import type { LiveEvent } from "@/lib/real-bills";
 import type { SingleResult, Stage } from "@/lib/result";
 import { Thumbnail } from "../bill-page";
 
-type Tile = { id: string; title: string; provider: string | null; picture: string; stage: Stage | "waiting" | "done" | "failed"; lines: number; spent: number; feeCents: number; claimCents: number; note: string };
+type Tile = { id: string; title: string; provider: string | null; picture: string; stage: Stage | "waiting" | "done" | "failed" | "stopped"; lines: number; spent: number; feeCents: number; claimCents: number; note: string };
 
 const STAGE_TEXT: Record<Stage, string> = { sorting: "Sorting pictures", reading_bill: "Reading", rereading_bill: "Reading again", reading_offer: "Reading the post", comparing: "Comparing", challenging: "Checking the company's side" };
 
@@ -101,6 +101,8 @@ export function LiveRun({ paused }: { paused: boolean }) {
       if (!ended) {
         setState("refused");
         setMessage("The run stopped early. Try again later.");
+        // Nothing more will arrive, so a tile still reading or waiting would claim work that is no longer happening.
+        setTiles((all) => all.map((tile) => (tile.stage === "done" || tile.stage === "failed" ? tile : { ...tile, stage: "stopped", note: "Stopped" })));
       }
     }
   };
@@ -147,7 +149,7 @@ export function LiveRun({ paused }: { paused: boolean }) {
           </dl>
           <ol className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
             {tiles.map((tile) => {
-              const live = tile.stage === "waiting" || tile.stage === "done" || tile.stage === "failed" ? null : tile.stage;
+              const live = tile.stage === "waiting" || tile.stage === "done" || tile.stage === "failed" || tile.stage === "stopped" ? null : tile.stage;
               const found = tile.feeCents + tile.claimCents > 0;
               return (
                 <li key={tile.id} className={`flex flex-col gap-2 rounded-xl p-2 transition-colors ${live ? "bg-fill" : ""}`}>
