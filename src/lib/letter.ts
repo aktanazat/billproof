@@ -118,12 +118,13 @@ function feeFact(fees: LineItem[][], offerCovers: boolean): string {
 export type Message = { totalCents: number; chat: string; email: string; call: string; complaint: string };
 
 // The written complaint a regulator takes when the company won't fix it: the FCC for phone, internet and TV,
-// the state utility commission for electric, gas and water. The person fills in what the company already said.
-function complaintText(provider: string | null, account: string, problem: string, facts: string[], claims: Claim[]): string {
+// the state utility commission for electric, gas and water. The person fills in what the company already said, and
+// any company name or account number the bill didn't show: "my account" means nothing to a regulator.
+function complaintText(provider: string | null, last4: string | null, problem: string, facts: string[], claims: Claim[]): string {
   const totalCents = claims.reduce((total, claim) => total + claim.amountCents, 0);
   return [
     `Company: ${provider ?? "[company name]"}`,
-    `Account: ${account}`,
+    `Account: ${last4 ? `account ending ${last4}` : "[account number]"}`,
     `Problem: ${problem}`,
     "",
     "What happened:",
@@ -216,7 +217,7 @@ export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<stri
     .filter(Boolean)
     .join("\n\n");
   const problem = claims.length > 0 ? claimProblem(claims) : fees.length > 0 && offerCovers ? "fees on my bill I never agreed to." : "charges on my bill the company hasn't explained.";
-  return { totalCents, chat, email, call, complaint: complaintText(provider, account, problem, regulatorBody, claims) };
+  return { totalCents, chat, email, call, complaint: complaintText(provider, result.reading.account_last4, problem, regulatorBody, claims) };
 }
 
 // One message for a year of statements: each month's claims under its statement, then the total.
@@ -250,5 +251,5 @@ export function buildYearMessage(months: Checked[]): Message {
   const chat = [`Hi, ${opening}`, ...sections, ask].filter(Boolean).join("\n\n");
   const email = [`Subject: Billing correction for ${account}`, "", provider ? `Hello ${provider} billing team,` : "Hello billing team,", "", opening, "", ...sections.flatMap((s) => [s, ""]), ...(ask ? [ask, ""] : []), "Please reply with the corrected amount and the date the credit will post.", "", "Thank you,", "[Your name]"].join("\n");
   const call = [`I'm calling about ${account}.`, ...sections.map((s, i) => `${i + 1}. ${s}`), ask, "Before ending the call, ask for a reference number and the date the credit will post."].filter(Boolean).join("\n\n");
-  return { totalCents, chat, email, call, complaint: complaintText(provider, account, claimProblem(withClaims.flatMap((month) => month.claims)), sectionsFor(`${provider ?? "the company"}'s representative`, false), withClaims.flatMap((month) => month.claims)) };
+  return { totalCents, chat, email, call, complaint: complaintText(provider, first?.account_last4 ?? null, claimProblem(withClaims.flatMap((month) => month.claims)), sectionsFor(`${provider ?? "the company"}'s representative`, false), withClaims.flatMap((month) => month.claims)) };
 }

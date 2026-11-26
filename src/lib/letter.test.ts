@@ -130,11 +130,15 @@ describe("a missing autopay credit on a bill with no company name", () => {
     expect(onAutopay.chat).toContain('My account is on autopay, but this bill has no $7.50 monthly credit I was promised ("50% discount that showed -$7.50 per line"). Please apply the missing $7.50.');
   });
 
-  test("an unread company name is left for the person to fill in, never written as 'your company'", () => {
+  test("an unread company name or account number is left for the person to fill in, never written as 'your company' or 'my account' to a regulator", () => {
     expect(message.email).toContain("Hello billing team,");
     expect(message.complaint).toContain("Company: [company name]");
+    expect(message.complaint).toContain("Account: [account number]");
     expect(message.complaint).toContain("[date you contacted the company and their answer]");
     expect(`${message.email}\n${message.complaint}`).not.toContain("your company");
+    expect(message.chat).toContain("my account");
+    const withAccount = buildMessage({ ...result, reading: { ...result.reading, account_last4: "4415" } }, new Set(["C1"]), new Set());
+    expect(withAccount.complaint).toContain("Account: account ending 4415");
   });
 });
 
