@@ -9,9 +9,11 @@ export function usd(cents: number): string {
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
+// A date the reading got wrong (month 13, day 45) is shown as written rather than as "undefined 5, 2026".
 export function shortDate(iso: string): string {
   const [y, m, d] = iso.split("-").map(Number);
-  return `${MONTHS[m - 1]} ${d}, ${y}`;
+  const month = MONTHS[m - 1];
+  return month && d >= 1 && d <= 31 ? `${month} ${d}, ${y}` : iso;
 }
 
 function periodText(result: Checked): string {

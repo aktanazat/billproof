@@ -47,6 +47,14 @@ function billWith(lines: LineItem[]): Checked {
   };
 }
 
+test("a date the reading got wrong is shown as written, never as 'undefined'", () => {
+  const base = billWith([fee("F1", "Broadcast TV Fee", 4723)]);
+  const misread: Checked = { ...base, reading: { ...base.reading, period_start: "2026-13-05", period_end: "2026-12-04" } };
+  const { chat } = buildMessage(misread, new Set(), new Set(["Q1"]));
+  expect(chat).toContain("bill for 2026-13-05 to Dec 4, 2026");
+  expect(chat).not.toContain("undefined");
+});
+
 describe("the message's fee questions", () => {
   const result = billWith([fee("F1", "Broadcast TV Fee", 4723), fee("F2", "TV Access Fee", 700), fee("F3", "TV Access Fee", 700), fee("F4", "Regional Sports Fee", 1986)]);
 
