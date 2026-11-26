@@ -1,7 +1,8 @@
 #!/bin/sh
-# Updates the live site: saves the running app's log, pulls, and rebuilds. A rebuild replaces the app's container, and
+# Updates the live site: saves the running app's log, pulls, and rebuilds. A rebuild replaces the app's container,
+# which cuts off any check running in it, so the deploy stops first while a check may be running (active-checks.mjs).
 # Docker deletes a container's log with it, so the log is appended to logs/app.log first: all of it the first time,
-# then only what came since that container's last save, since a deploy with no changes keeps the same container.
+# then only what came since that container's last save.
 set -eu
 
 # The whole script is read before it runs, since `git pull` below can rewrite this file mid-run.
@@ -10,6 +11,7 @@ main() {
   mkdir -p logs
   container=$(docker ps -q --filter name=billproof-app-1)
   if [ -n "$container" ]; then
+    docker exec -i "$container" node --input-type=module - <deploy/active-checks.mjs || exit 1
     last=$(grep "^=== container $container," logs/app.log 2>/dev/null | tail -1 | sed 's/.*, saved //')
     now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
     {
