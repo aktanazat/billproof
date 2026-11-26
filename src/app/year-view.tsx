@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { CheckAction, CheckState } from "@/lib/check-machine";
 import { buildYearMessage, usd } from "@/lib/letter";
 import type { CallRecord, Checked, YearResult } from "@/lib/result";
-import { MessageBox, ResultView, Trace } from "./result-view";
+import { MessageBox, ResultView, SHOWN_QUESTIONS, Trace } from "./result-view";
 
 type Done = Extract<CheckState, { s: "done" }>;
 
@@ -84,18 +84,22 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
   const provider = checked.find((month) => month.result.reading.provider)?.result.reading.provider ?? null;
   const hadOffer = checked.some((month) => month.result.hadOffer);
   // With nothing owed, the heading says what the offer was compared with, as a single bill's does: an offer from
-  // another company, one with no price or promise, or promises that fit no line is not a match.
+  // another company, fees worth asking about, one with no price or promise, or promises that fit no line is not a match.
   const otherCompany = checked.find((month) => month.result.providerMismatch)?.result.offerProvider ?? null;
   const compared = (month: (typeof read)[number]) => month.result.matchedPromiseIds.length > 0;
-  const verdict = !hadOffer
-    ? `Read ${checked.length} statements; there was no offer to check them against`
-    : otherCompany
-      ? `The offer is from ${otherCompany}, not ${provider ?? "this company"}`
-      : !checked.some((month) => month.result.promises.length > 0)
-        ? "No price or promise found to check the statements against"
-        : !checked.some(compared)
-          ? "Couldn't match your offer to these statements"
-          : `All ${checked.length} statements match the offer`;
+  const asks = (month: (typeof read)[number]) => month.result.questions.some((question) => SHOWN_QUESTIONS.has(question.kind));
+  const asking = checked.filter(asks).length;
+  const verdict = otherCompany
+    ? `The offer is from ${otherCompany}, not ${provider ?? "this company"}`
+    : asking > 0
+      ? `Charges worth asking about on ${asking} of ${checked.length} statements`
+      : !hadOffer
+        ? `Read ${checked.length} statements; there was no offer to check them against`
+        : !checked.some((month) => month.result.promises.length > 0)
+          ? "No price or promise found to check the statements against"
+          : !checked.some(compared)
+            ? "Couldn't match your offer to these statements"
+            : `All ${checked.length} statements match the offer`;
   const callUrl = state.inputs.offer.kind === "call" && state.inputs.offer.call.status === "ready" ? state.inputs.offer.call.url : null;
 
   if (open !== null) {
@@ -140,7 +144,7 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
             const unconfirmed = month.result.claims.some((claim) => markOf(month.bill, claim.id) === "needs_confirmation");
             return (
               <li key={month.bill}>
-                <button type="button" onClick={() => setOpen(month.bill)} className="group flex w-full flex-col gap-2 rounded-lg text-left" aria-label={`${monthOf(month.result, true)}: ${amount > 0 ? `${usd(amount)} overcharged` : !hadOffer ? "no offer to compare" : compared(month) ? "matches the offer" : "not compared with the offer"}${unconfirmed ? ", to confirm" : ""}`}>
+                <button type="button" onClick={() => setOpen(month.bill)} className="group flex w-full flex-col gap-2 rounded-lg text-left" aria-label={`${monthOf(month.result, true)}: ${amount > 0 ? `${usd(amount)} overcharged` : asks(month) ? "charges worth asking about" : !hadOffer ? "no offer to compare" : compared(month) ? "matches the offer" : "not compared with the offer"}${unconfirmed ? ", to confirm" : ""}`}>
                   <div className="flex h-28 items-end rounded-t-md border-b border-line px-1.5 group-hover:bg-fill">
                     {amount > 0 && <div className="w-full rounded-t-[3px] bg-red" style={{ height: `${Math.max(8, (amount / largest) * 100)}%` }} />}
                   </div>

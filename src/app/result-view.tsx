@@ -12,7 +12,7 @@ import { BillPage, snapBox, type Mark } from "./bill-page";
 import { formatClock, PlayButton } from "./evidence";
 
 // A provider mismatch is said once, in the heading.
-const SHOWN_QUESTIONS = new Set<Question["kind"]>(["unagreed_fee", "repeated_charge", "partial_period", "conditions_unproven", "price_gap", "end_date_unread"]);
+export const SHOWN_QUESTIONS = new Set<Question["kind"]>(["unagreed_fee", "repeated_charge", "partial_period", "conditions_unproven", "price_gap", "end_date_unread"]);
 const CALL_NAMES: Record<string, string> = { sort_pages: "Sort pictures", read_bill: "Read bill", reread_bill: "Reread bill", read_terms: "Read offer", read_call: "Listen to call", challenge: "Argue the company's side" };
 // Promises that simply have nothing on this bill are not worth a line.
 const UNUSED_TEXT: Record<UnusedReason, string | null> = {

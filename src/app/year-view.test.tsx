@@ -129,6 +129,25 @@ test("a year whose offer couldn't be compared says why, never that every stateme
   }
 });
 
+test("a year with no claims but fees worth asking about says so, not that every statement matches", () => {
+  if (!year) throw new Error("the saved run has no year result");
+  const asking = new Set(["2026-08", "2026-09"]);
+  const months = year.months.map((month) => {
+    if (month.result.outcome !== "checked") return month;
+    const fee = asking.has(month.result.reading.period_start?.slice(0, 7) ?? "") ? [{ id: "Q1", kind: "unagreed_fee" as const, lineIds: [month.result.reading.line_items[0].id], promiseId: null }] : [];
+    return { ...month, result: { ...month.result, claims: [], questions: fee } };
+  });
+  const result: YearResult = { ...year, months };
+  const running = { s: "running", inputs: initialState.inputs, attempts: 1, attempt: 1, stage: null, spentMicros: 0, live: {} } as unknown as CheckState;
+  const done = reduce(running, { type: "finished", attempt: 1, result });
+  if (done.s !== "done") throw new Error("the finished year did not become a done state");
+  const html = renderToStaticMarkup(createElement(YearView, { state: done, result, dispatch: () => {} }));
+  expect(html).toContain(">Charges worth asking about on 2 of 12 statements</h1>");
+  expect(html).not.toContain("All 12 statements match the offer");
+  expect(html).toContain("August 2026: charges worth asking about");
+  expect(html).toContain("July 2026: matches the offer");
+});
+
 test("a year of statements is headed with its total and the month the overcharge began", () => {
   const html = yearPage();
   expect(html).toContain("$70.00");
