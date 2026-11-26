@@ -305,9 +305,10 @@ function distinctiveWords(name: string): Set<string> {
 export const BRANDS: [RegExp, string][] = [
   [/xfinity|comcast/i, "Xfinity"],
   [/verizon|fios/i, "Verizon"],
-  [/at&t|\batt/i, "AT&T"],
+  [/at&t|\batt(\b|fiber)/i, "AT&T"],
   [/spectrum|charter/i, "Spectrum"],
-  [/\bt[- ]?mobile|metro/i, "T-Mobile"],
+  // Metro, MetroPCS and Metro by T-Mobile; Metronet is another company.
+  [/\bt[- ]?mobile|\bmetro(\s?pcs)?\b/i, "T-Mobile"],
   [/google ?fiber/i, "Google Fiber"],
   [/google/i, "Google Fi"],
   [/directv/i, "DirecTV"],

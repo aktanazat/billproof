@@ -715,5 +715,12 @@ describe("a company that goes by two names", () => {
     expect(providersDiffer("Google Fiber", "Google Fi")).toBe(true);
     expect(providersDiffer("Bayline Fiber", "Westline Fiber")).toBe(true);
     expect(providersDiffer("Bayline Fiber", "Bayline")).toBe(false);
+    // A brand is its whole name: Metronet is a fiber company of its own, not Metro by T-Mobile.
+    expect(providersDiffer("T-Mobile", "Metronet")).toBe(true);
+    expect(providersDiffer("AT&T", "Attention Wireless")).toBe(true);
+    expect(providersDiffer("T-Mobile", "MetroPCS")).toBe(false);
+    expect(providersDiffer("AT&T", "ATT Fiber")).toBe(false);
+    // r/ATTFiber, 90 of the posts, is named AT&T when its bill prints no company.
+    expect(providersDiffer("AT&T", "ATTFiber")).toBe(false);
   });
 });
