@@ -58,6 +58,9 @@ async function streamCheck(input: CheckInput, attempt: number, signal: AbortSign
           case "stage":
             dispatch({ type: "stage", attempt, stage: event.stage });
             break;
+          case "reread":
+            dispatch({ type: "reread", attempt, bill: event.bill });
+            break;
           case "spent":
             dispatch({ type: "spent", attempt, micros: event.micros });
             break;

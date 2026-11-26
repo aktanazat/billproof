@@ -50,6 +50,7 @@ export type CheckAction =
   | { type: "start" }
   | { type: "sample_ready"; inputs: Inputs }
   | { type: "stage"; attempt: number; stage: Stage }
+  | { type: "reread"; attempt: number; bill: number }
   | { type: "spent"; attempt: number; micros: number }
   | { type: "thought"; attempt: number; stage: Stage; text: string }
   | { type: "line_read"; attempt: number; bill: number; line: SeenLine }
@@ -160,8 +161,9 @@ function running(state: Extract<CheckState, { s: "running" }>, action: CheckActi
   const live = state.live;
   switch (action.type) {
     case "stage":
-      // A second reading of the bill replaces the first one's lines.
-      return { ...state, stage: action.stage, live: action.stage === "rereading_bill" ? { ...live, lines: {} } : live };
+      return { ...state, stage: action.stage };
+    case "reread":
+      return { ...state, live: { ...live, lines: { ...live.lines, [action.bill]: [] } } };
     case "spent":
       return { ...state, spentMicros: action.micros };
     case "thought": {

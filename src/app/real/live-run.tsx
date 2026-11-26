@@ -77,6 +77,8 @@ export function LiveRun() {
                     return { ...tile, stage: inner.stage };
                   case "line":
                     return { ...tile, lines: tile.lines + 1 };
+                  case "reread":
+                    return { ...tile, lines: 0 };
                   case "spent":
                     return { ...tile, spent: inner.micros };
                   case "result":

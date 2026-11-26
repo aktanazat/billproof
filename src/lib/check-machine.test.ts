@@ -51,6 +51,22 @@ describe("check machine", () => {
     expect(play([{ type: "start" }], back)).toMatchObject({ s: "running", attempt: 2 });
   });
 
+  test("a month read a second time starts its lines over without touching the other months", () => {
+    const seen = (label: string) => ({ label, amount_cents: 1000, kind: "plan", page: 1, box: null });
+    const state = play([
+      { type: "bills_added", docs: [{ id: "a", name: "jan.pdf" }, { id: "b", name: "feb.pdf" }] },
+      { type: "doc_prepared", id: "a", pages: [page] },
+      { type: "doc_prepared", id: "b", pages: [page] },
+      { type: "start" },
+      { type: "line_read", attempt: 1, bill: 0, line: seen("Internet") },
+      { type: "line_read", attempt: 1, bill: 1, line: seen("Internet") },
+      { type: "line_read", attempt: 1, bill: 1, line: seen("TV") },
+      { type: "reread", attempt: 1, bill: 1 },
+      { type: "line_read", attempt: 1, bill: 1, line: seen("Internet") },
+    ]);
+    expect(state).toMatchObject({ s: "running", live: { lines: { 0: [{ label: "Internet" }], 1: [{ label: "Internet" }] } } });
+  });
+
   test("a check waits for every bill of a year to open", () => {
     const state = play([{ type: "bills_added", docs: [{ id: "a", name: "jan.pdf" }, { id: "b", name: "feb.pdf" }] }, { type: "doc_prepared", id: "a", pages: [page] }, { type: "start" }]);
     expect(state.s).toBe("composing");

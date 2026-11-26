@@ -119,6 +119,8 @@ export type CheckResult = SingleResult | YearResult;
 
 export type CheckEvent =
   | { type: "stage"; stage: Stage }
+  // A bill is being read a second time: the lines already streamed for it are replaced, not added to.
+  | { type: "reread"; bill: number }
   | { type: "sorted"; bill: number; kinds: PageKind[] }
   | { type: "spent"; micros: number }
   | { type: "thinking"; stage: Stage; text: string }

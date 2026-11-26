@@ -366,6 +366,10 @@ async function checkOne(uploaded: PreparedPage[], given: OfferInput | null, run:
   const stage = (s: Stage) => {
     if (!run.year) deps.emit({ type: "stage", stage: s });
   };
+  const reread = () => {
+    deps.emit({ type: "reread", bill });
+    stage("rereading_bill");
+  };
   const spent = () => deps.ledger.spentForCheck(run.checkId);
   const { billPages, olderPages, offer } = await sortPages(uploaded, given, run, bill);
   if (billPages.length === 0) return { outcome: "not_a_bill", spentMicros: spent() };
@@ -373,14 +377,14 @@ async function checkOne(uploaded: PreparedPage[], given: OfferInput | null, run:
   const source = sourceOf(pages);
 
   stage("reading_bill");
-  let raw = await readFirst(pages, run, bill, () => stage("rereading_bill"));
+  let raw = await readFirst(pages, run, bill, reread);
   if (raw.outcome === "not_a_bill") return { outcome: "not_a_bill", spentMicros: spent() };
   if (raw.outcome === "unreadable") return { outcome: "could_not_check", reason: raw.unreadable_reason ?? "The amounts on this bill could not be read.", spentMicros: spent() };
   let reading = withHeadingsDropped(withIds(raw), source);
   let totals = checkTotals(reading, source);
 
   if (totals.lineSum === "mismatch") {
-    stage("rereading_bill");
+    reread();
     const second = await paid(readBillCall(pages, "second"), run, { stage: "rereading_bill", streams: ["line_items"], bill });
     const secondReading = withHeadingsDropped(withIds(second), source);
     const secondTotals = checkTotals(secondReading, source);
