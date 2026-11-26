@@ -94,3 +94,32 @@ describe("the result page's wording", () => {
     expect(page(result)).toContain("The bill doesn't show that you meet your offer's conditions");
   });
 });
+
+describe("the result page's heading", () => {
+  const plan = line("L1", "Internet 1000", 8000, "plan");
+  const promise: Checked["promises"][number] = { id: "P1", kind: "monthly_price", description: "", amount_cents: 7000, per_line: false, conditions: [], applies_from: null, applies_until: null, quote: "$70 a month", said_at_seconds: null, covers_line_ids: ["L1"] };
+  const heading = (result: Checked, selection?: Parameters<typeof ResultView>[0]["selection"]) => {
+    const html = page(result, selection);
+    return [...html.matchAll(/<(h1|p)[^>]*>([^<]*(?:<[^h/][^>]*>[^<]*)*)<\/\1>/g)].slice(0, 2).map((m) => m[2].replace(/<[^>]+>/g, "")).join(" ");
+  };
+
+  test.each([
+    ["no offer was given", { ...checked([plan], []), hadOffer: false }, "Nothing to flag on this bill"],
+    ["the offer is another company's", { ...checked([plan], []), providerMismatch: true, offerProvider: "Westline Cable" }, "The offer is from Westline Cable, not AT&T"],
+    ["one question is worth asking", checked([plan, line("F1", "Network Fee", 399, "company_fee")], [{ id: "Q1", kind: "unagreed_fee", lineIds: ["F1"], promiseId: null }]), "1 charge worth asking about"],
+    ["no promise matched a line", { ...checked([plan], []), promises: [promise] }, "Couldn't match your offer to this bill"],
+    ["every promise was kept", { ...checked([plan], []), promises: [promise], matchedPromiseIds: ["P1"] }, "Nothing is billed above your offer"],
+  ])("when %s", (_case, result, expected) => {
+    expect(heading(result)).toContain(expected);
+  });
+
+  test("a claim is headed with the amount to ask back and the company", () => {
+    const result: Checked = {
+      ...checked([plan], []),
+      promises: [promise],
+      matchedPromiseIds: ["P1"],
+      claims: [{ id: "C1", kind: "price_above_promise", lineIds: ["L1"], promiseId: "P1", actualCents: 8000, expectedCents: 7000, amountCents: 1000, needsConfirmation: false, lookedFor: null }],
+    };
+    expect(heading(result, { claims: { C1: "selected" }, questions: {} })).toContain("$10.00 to ask back from AT&T");
+  });
+});
