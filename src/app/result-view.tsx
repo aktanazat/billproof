@@ -223,9 +223,25 @@ export function MessageBox({ message }: { message: Message }) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-[17px] font-semibold">Message</h2>
         <div className="flex flex-wrap items-center gap-2">
-          <div role="tablist" aria-label="Message format" className="inline-flex rounded-lg bg-fill p-0.5">
+          {/* Tabs as screen readers announce them: one Tab stop, the selected tab; the arrow keys, Home and End move
+              between them and select as they go. */}
+          <div
+            role="tablist"
+            aria-label="Message format"
+            className="inline-flex rounded-lg bg-fill p-0.5"
+            onKeyDown={(event) => {
+              const at = formats.findIndex(([value]) => value === format);
+              const to = { ArrowRight: at + 1, ArrowLeft: at - 1, Home: 0, End: formats.length - 1 }[event.key];
+              if (to === undefined) return;
+              event.preventDefault();
+              const [next] = formats[(to + formats.length) % formats.length];
+              setFormat(next);
+              setCopied("no");
+              document.getElementById(`${ids}-${next}`)?.focus();
+            }}
+          >
             {formats.map(([value, label]) => (
-              <button key={value} id={`${ids}-${value}`} role="tab" type="button" aria-selected={format === value} aria-controls={`${ids}-panel`} onClick={() => { setFormat(value); setCopied("no"); }} className={`h-7 whitespace-nowrap rounded-md px-1.5 text-[13px] sm:px-3 ${format === value ? "bg-white font-medium shadow-[0_1px_2px_rgb(0_0_0/0.12)]" : "text-text-2 hover:text-text"}`}>
+              <button key={value} id={`${ids}-${value}`} role="tab" type="button" tabIndex={format === value ? 0 : -1} aria-selected={format === value} aria-controls={`${ids}-panel`} onClick={() => { setFormat(value); setCopied("no"); }} className={`h-7 whitespace-nowrap rounded-md px-1.5 text-[13px] sm:px-3 ${format === value ? "bg-white font-medium shadow-[0_1px_2px_rgb(0_0_0/0.12)]" : "text-text-2 hover:text-text"}`}>
                 {label}
               </button>
             ))}

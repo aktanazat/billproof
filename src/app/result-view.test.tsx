@@ -84,7 +84,7 @@ test("the main heading of a result with money to ask back, single or year, names
 
 // HTML lets a button hold only inline content, and a tab must name the panel it shows; otherwise browsers repair the
 // markup their own ways and screen readers announce tabs that lead nowhere. Checked on every saved result page.
-test("every saved result page keeps its buttons to inline content and gives each tab its panel", () => {
+test("every saved result page keeps its buttons to inline content and gives each tab its panel and one Tab stop", () => {
   const run = JSON.parse(readFileSync(path.join(import.meta.dirname, "../../eval/run-2026-11-26.json"), "utf8")) as { raw: { id: string; events: CheckEvent[] }[] };
   const done = (result: CheckResult) => {
     const running = { s: "running", inputs: initialState.inputs, attempts: 1, attempt: 1, stage: null, spentMicros: 0, live: {} } as unknown as CheckState;
@@ -106,6 +106,9 @@ test("every saved result page keeps its buttons to inline content and gives each
     const panels = new Set([...html.matchAll(/<[^>]*role="tabpanel"[^>]*>/g)].map((m) => m[0].match(/\bid="([^"]+)"/)?.[1]));
     const tabs = [...html.matchAll(/<[^>]*role="tab"[^>]*>/g)].map((m) => m[0].match(/aria-controls="([^"]+)"/)?.[1]);
     expect(tabs.filter((target) => !target || !panels.has(target))).toEqual([]);
+    // Tabs are one stop for the Tab key, the selected one; the arrow keys move between them.
+    const stops = [...html.matchAll(/<[^>]*role="tab"[^>]*>/g)].map((m) => `${/aria-selected="true"/.test(m[0])} ${m[0].match(/tabindex="(-?\d)"/i)?.[1] ?? "none"}`);
+    expect(stops.filter((stop) => stop !== "true 0" && stop !== "false -1")).toEqual([]);
   }
 });
 
