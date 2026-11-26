@@ -562,6 +562,17 @@ describe("promises read from a person's own words", () => {
     expect(decide(internet, [like], photo, photo).claims.map((c) => c.kind)).toEqual(["price_above_promise"]);
   });
 
+  // A rough word before a speed, a length of time or a data amount says nothing about the price: 15 real sentences
+  // were taken as rough prices only that way ("around 600 Mbps", "~45 min", "about 1 Gb").
+  test("a rough speed, time or data amount beside an exact price leaves the price a promise", () => {
+    for (const quote of ["$55 a month at typical speeds around 600 Mbps", "$55 a month, chat took ~45 min to confirm", "$55 a month for about 1 Gb down", "$55 a month; it took about 3 weeks to set up"]) {
+      const said = promise({ kind: "monthly_price", amount_cents: 5500, quote, covers_line_ids: plan });
+      expect(decide(internet, [said], photo, photo).claims.map((c) => c.kind), quote).toEqual(["price_above_promise"]);
+    }
+    const dollars = promise({ kind: "monthly_price", amount_cents: 5500, quote: "they said about 55 dollars a month", covers_line_ids: plan });
+    expect(decide(internet, [dollars], photo, photo).unused).toEqual([{ promiseId: "P1", reason: "amount_approximate" }]);
+  });
+
   test("a price for some months or \"a year\" with no end date read is a question", () => {
     for (const quote of ["$55/mo. for 12 mos.", "$55 a month for a year"]) {
       const limited = promise({ kind: "monthly_price", amount_cents: 5500, quote, covers_line_ids: plan });
