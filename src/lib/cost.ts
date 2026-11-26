@@ -29,5 +29,6 @@ export function formatMicros(micros: number): string {
   if (micros === 0) return "0¢";
   if (cents < 0.001) return "under 0.001¢";
   if (cents >= 1) return `$${(cents / 100).toFixed(2)}`;
-  return `${cents.toFixed(cents >= 0.1 ? 2 : 3)}¢`;
+  // Three decimals only where the third carries a figure: 0.09¢, not 0.090¢.
+  return `${cents >= 0.1 ? cents.toFixed(2) : cents.toFixed(3).replace(/0$/, "")}¢`;
 }
