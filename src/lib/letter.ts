@@ -244,12 +244,18 @@ export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<stri
   const claims = result.claims.filter((claim) => selectedClaimIds.has(claim.id));
   const totalCents = claims.reduce((total, claim) => total + claim.amountCents, 0);
   // The chat, email and call open by naming the bill's period, so their claims say "this bill"; the complaint has no
-  // such opening and gives the period itself.
-  const claimPartsFor = (speaker: string, period: string) =>
-    claims.flatMap((claim) => {
+  // such opening and gives the period itself. Either way it is named on the first claim only, as a year names each
+  // month's once.
+  const claimPartsFor = (speaker: string, period: string) => {
+    let named = false;
+    return claims.flatMap((claim) => {
       const promise = promises.get(claim.promiseId);
-      return promise ? [claimParts(claim, linesOf(claim.lineIds), promise, citation(promise, result.transcript !== null, speaker), period)] : [];
+      if (!promise) return [];
+      const parts = claimParts(claim, linesOf(claim.lineIds), promise, citation(promise, result.transcript !== null, speaker), named ? null : period);
+      named = true;
+      return [parts];
     });
+  };
   const claimText = claimPartsFor("your representative", "this bill").map(({ fact, request }) => `${fact} ${request}`);
   const included = result.questions.filter((question) => includedQuestionIds.has(question.id));
   const fees = included.filter((question) => question.kind === "unagreed_fee").map((question) => linesOf(question.lineIds)).filter((lines) => lines.length > 0);
