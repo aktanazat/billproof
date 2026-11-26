@@ -108,12 +108,27 @@ function activity(promise: PromiseTerm, reading: Reading): Activity {
 }
 
 export type Equation = "ok" | "mismatch" | "not_printed";
-export type Totals = { lineSum: Equation; balance: Equation; lineSumCents: number };
+// "subtotal": the first `subtotalLines` charges add up to the printed amount, a subtotal printed before the rest
+// (taxes, a later section). Those lines are confirmed; the ones after it are not checked by the bill.
+export type LineSum = Equation | "subtotal";
+export type Totals = { lineSum: LineSum; balance: Equation; lineSumCents: number; subtotalLines: number | null };
 
 // A printed summary value counts only when its quote carries the amount and, on a PDF, appears on the bill.
 function printedValue(value: Reading["printed"]["total_due"], bill: Source): number | null {
   if (!value || !quoteHasAmount(value.quote, value.cents)) return null;
   return bill.kind === "image" || quoteFoundIn(value.quote, bill.text) ? value.cents : null;
+}
+
+// How many leading lines add up to the printed amount (the most that do), when at least two do and some lines
+// come after them.
+function subtotalLength(lines: LineItem[], printed: number): number | null {
+  let running = 0;
+  let longest: number | null = null;
+  for (let i = 0; i < lines.length - 1; i++) {
+    running += lines[i].amount_cents;
+    if (i >= 1 && printed !== 0 && Math.abs(running - printed) <= 1) longest = i + 1;
+  }
+  return longest;
 }
 
 // E1: the lines add up to the printed current charges. E2: previous balance − payments + current charges = total due.
@@ -123,12 +138,15 @@ export function checkTotals(reading: Reading, bill: Source): Totals {
   const current = printedValue(reading.printed.current_charges, bill);
   const due = printedValue(reading.printed.total_due, bill);
   const lineSumCents = sum(reading.line_items);
-  const lineSum: Equation = current === null ? "not_printed" : Math.abs(current - lineSumCents) <= 1 ? "ok" : "mismatch";
+  // A bill that shows only its totals has no charges for them to check.
+  const subtotalLines = current === null || reading.line_items.length === 0 || Math.abs(current - lineSumCents) <= 1 ? null : subtotalLength(reading.line_items, current);
+  const lineSum: LineSum = current === null || reading.line_items.length === 0 ? "not_printed" : Math.abs(current - lineSumCents) <= 1 ? "ok" : subtotalLines !== null ? "subtotal" : "mismatch";
+  const newCharges = lineSum === "subtotal" ? lineSumCents : current;
   let balance: Equation = "not_printed";
-  if (previous !== null && payments !== null && current !== null && due !== null) {
-    balance = Math.abs(previous - Math.abs(payments) + current - due) <= 1 ? "ok" : "mismatch";
+  if (previous !== null && payments !== null && newCharges !== null && due !== null) {
+    balance = Math.abs(previous - Math.abs(payments) + newCharges - due) <= 1 ? "ok" : "mismatch";
   }
-  return { lineSum, balance, lineSumCents };
+  return { lineSum, balance, lineSumCents, subtotalLines };
 }
 
 const sum = (lines: LineItem[]) => lines.reduce((total, line) => total + line.amount_cents, 0);

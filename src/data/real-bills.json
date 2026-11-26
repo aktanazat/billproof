@@ -532,7 +532,7 @@
         null
       ],
       "lines": 8,
-      "lineSum": "mismatch",
+      "lineSum": "subtotal",
       "billPages": [
         0
       ],
@@ -658,7 +658,7 @@
         null
       ],
       "lines": 0,
-      "lineSum": "mismatch",
+      "lineSum": "not_printed",
       "billPages": [
         0
       ],
@@ -6566,7 +6566,7 @@
         "2025-10-31"
       ],
       "lines": 0,
-      "lineSum": "mismatch",
+      "lineSum": "not_printed",
       "billPages": [
         1
       ],
@@ -7472,7 +7472,7 @@
         null
       ],
       "lines": 7,
-      "lineSum": "mismatch",
+      "lineSum": "subtotal",
       "billPages": [
         0
       ],
@@ -9922,7 +9922,7 @@
         "2026-04-26"
       ],
       "lines": 5,
-      "lineSum": "mismatch",
+      "lineSum": "subtotal",
       "billPages": [
         0
       ],
@@ -13025,7 +13025,7 @@
         null
       ],
       "lines": 0,
-      "lineSum": "mismatch",
+      "lineSum": "not_printed",
       "billPages": [
         0
       ],
@@ -15347,7 +15347,7 @@
         "2026-09-05"
       ],
       "lines": 5,
-      "lineSum": "mismatch",
+      "lineSum": "subtotal",
       "billPages": [
         0,
         1
@@ -19112,7 +19112,7 @@
         null
       ],
       "lines": 6,
-      "lineSum": "mismatch",
+      "lineSum": "subtotal",
       "billPages": [
         0
       ],
@@ -19575,7 +19575,7 @@
         "2026-11-07"
       ],
       "lines": 0,
-      "lineSum": "mismatch",
+      "lineSum": "not_printed",
       "billPages": [
         0
       ],
@@ -21270,7 +21270,7 @@
         null
       ],
       "lines": 3,
-      "lineSum": "mismatch",
+      "lineSum": "subtotal",
       "billPages": [
         0
       ],
@@ -21316,7 +21316,7 @@
         null
       ],
       "lines": 14,
-      "lineSum": "mismatch",
+      "lineSum": "subtotal",
       "billPages": [
         0
       ],

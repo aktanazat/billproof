@@ -376,6 +376,16 @@ describe("decide refuses claims the evidence does not carry", () => {
     expect(checkTotals(invented, billText.get(internetGuaranteed.id)!).lineSum).toBe("not_printed");
     expect(checkTotals(reading, billText.get(internetGuaranteed.id)!).lineSum).toBe("ok");
   });
+
+  test("a printed subtotal matched by the leading lines counts as a subtotal; any other amount is a mismatch", () => {
+    const reading = readingOf(internetGuaranteed);
+    const lines = reading.line_items;
+    const beforeLast = lines.slice(0, -1).reduce((t, line) => t + line.amount_cents, 0);
+    const printedAs = (cents: number): Reading => ({ ...reading, printed: { ...reading.printed, current_charges: { cents, quote: `Monthly charges ${usd(cents)}` } } });
+    expect(checkTotals(printedAs(beforeLast), { kind: "image" })).toMatchObject({ lineSum: "subtotal", subtotalLines: lines.length - 1 });
+    expect(checkTotals(printedAs(beforeLast + 37), { kind: "image" })).toMatchObject({ lineSum: "mismatch", subtotalLines: null });
+    expect(checkTotals({ ...printedAs(beforeLast), line_items: [] }, { kind: "image" }).lineSum).toBe("not_printed");
+  });
 });
 
 describe("compare with an earlier bill", () => {

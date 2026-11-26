@@ -353,6 +353,11 @@ export function ResultView({
               Read {result.reading.line_items.length} charges that add up to the {usd(printed.cents)} printed on the bill.
             </p>
           )}
+          {printed && result.totals.lineSum === "subtotal" && result.totals.subtotalLines !== null && (
+            <p className="mt-2 text-[13px] text-text-2">
+              The first {result.totals.subtotalLines} of {result.reading.line_items.length} charges add up to the {usd(printed.cents)} subtotal printed on the bill.
+            </p>
+          )}
         </div>
         {back}
       </header>
