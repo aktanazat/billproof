@@ -166,6 +166,22 @@ describe("the result page's other sections", () => {
     expect(t).toContain("Not used: Spectrum offered a $20 credit (this kind of promise isn't checked yet).");
   });
 
+  test("a claim dropped after checking the company's side shows struck through with the quote that answered it", () => {
+    const promise: Checked["promises"][number] = { id: "P1", kind: "included", description: "", amount_cents: 0, per_line: false, conditions: [], applies_from: null, applies_until: null, quote: "Xumo Stream Box included", said_at_seconds: null, covers_line_ids: ["L1"] };
+    const claim: Checked["claims"][number] = { id: "C1", kind: "included_charged", lineIds: ["L1"], promiseId: "P1", actualCents: 500, expectedCents: 0, amountCents: 500, needsConfirmation: true, lookedFor: null };
+    const result: Checked = {
+      ...checked([line("L1", "Xumo Stream Box", 500, "equipment")], []),
+      promises: [promise],
+      matchedPromiseIds: ["P1"],
+      dropped: [{ claim, lookedFor: "a discount for the box", counterQuote: "Xumo Stream Box Discount -$5.00", source: "bill" }],
+    };
+    const html = page(result);
+    const t = text(html);
+    expect(t).toContain("Dropped after checking the company's side Xumo Stream Box was supposed to be included $5.00 The bill says “Xumo Stream Box Discount -$5.00”");
+    expect(html).toMatch(/line-through[^>]*>\$5\.00</);
+    expect(t).toContain("Nothing is billed above your offer");
+  });
+
   test("a missing credit is titled as missing and shows what was credited against what was promised", () => {
     const credit: Checked["promises"][number] = { id: "P1", kind: "recurring_credit", description: "", amount_cents: 750, per_line: false, conditions: [], applies_from: null, applies_until: null, quote: "-$7.50 per line", said_at_seconds: null, covers_line_ids: ["L1"] };
     const missing: Checked["claims"][number] = { id: "C1", kind: "credit_missing", lineIds: ["L1"], promiseId: "P1", actualCents: 0, expectedCents: 750, amountCents: 750, needsConfirmation: false, lookedFor: null };
