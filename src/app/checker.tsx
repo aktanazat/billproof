@@ -663,9 +663,9 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
         return prepareFile(new File([await response.blob()], `picture-${i + 1}.jpg`, { type: "image/jpeg" }), 1).then((prepared) => prepared.pages, () => []);
       };
       const pile = async (pictures: string[]): Promise<Doc> => {
-        const read = Math.min(pictures.length, MAX_BILL_PAGES);
-        const name = read < pictures.length ? `${read} of ${pictures.length} pictures from the post` : pictures.length === 1 ? "The picture from the post" : `${pictures.length} pictures from the post`;
+        // Named by the pictures read: past the page limit, or with some gone from Reddit, it says how many of the post's.
         const pages = (await Promise.all(pictures.slice(0, MAX_BILL_PAGES).map(postPicture))).flat();
+        const name = pages.length > 0 && pages.length < pictures.length ? `${pages.length} of ${pictures.length} pictures from the post` : pictures.length === 1 ? "The picture from the post" : `${pictures.length} pictures from the post`;
         const gone = pictures.length === 1 ? "The picture from this post is no longer online." : "The pictures from this post are no longer online.";
         return pages.length > 0 ? { id: `sample-${token}-pile`, name, status: "ready", pages, omitted: 0 } : { id: `sample-${token}-pile`, name, status: "failed", message: gone };
       };
