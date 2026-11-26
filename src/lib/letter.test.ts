@@ -224,6 +224,14 @@ describe("a claim on a promise heard on a call", () => {
     expect(chat).toMatch(/In total, please credit \$\d+\.\d{2} to /);
   });
 
+  // The call script is read aloud to a representative, who has no "above" to look at.
+  test("a year call script refers back to a promise as said, not as quoted above", () => {
+    const { call } = buildYearMessage([month("2026-10-12", "2026-11-11"), month("2026-11-12", "2026-12-11")]);
+    expect(call.match(/"Fiber 500 is \$55 a month"/g)).toHaveLength(1);
+    expect(call).not.toContain("as quoted above");
+    expect(call).toContain("confirmed at $55.00 a month (as I mentioned)");
+  });
+
   test("a year email opens by saying which account and what was checked, as its chat does", () => {
     const { email } = buildYearMessage([month("2026-10-12", "2026-11-11"), month("2026-11-12", "2026-12-11")]);
     expect(email).toMatch(/billing team,\n\nI'm writing about .+\. I checked my statements against the plan I signed up for\.\n\nFor /);

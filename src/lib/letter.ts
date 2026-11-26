@@ -266,8 +266,8 @@ export function buildYearMessage(months: Checked[]): Message {
   const last4 = months.find((month) => month.reading.account_last4)?.reading.account_last4 ?? null;
   const account = last4 ? `account ending ${last4}` : "my account";
   // A promise already quoted for an earlier month is referred back to, not quoted again in full; a month names its
-  // statement once, on its first claim.
-  const sectionsFor = (speaker: string, asking: boolean) => {
+  // statement once, on its first claim. Read aloud, a call script refers back to what was said, not to "above".
+  const sectionsFor = (speaker: string, asking: boolean, quotedBefore: string) => {
     const quoted = new Set<string>();
     return withClaims.map((month) => {
       const lines = new Map(month.reading.line_items.map((line) => [line.id, line]));
@@ -277,7 +277,7 @@ export function buildYearMessage(months: Checked[]): Message {
         const promise = promises.get(claim.promiseId);
         if (!promise) return [];
         const key = promise.quote.trim();
-        const cite = quoted.has(key) ? "as quoted above" : citation(promise, month.transcript !== null, speaker);
+        const cite = quoted.has(key) ? quotedBefore : citation(promise, month.transcript !== null, speaker);
         quoted.add(key);
         const { fact, request } = claimParts(claim, claim.lineIds.flatMap((id) => lines.get(id) ?? []), promise, cite, named ? null : periodText(month));
         named = true;
@@ -286,13 +286,13 @@ export function buildYearMessage(months: Checked[]): Message {
       return sentences.join(" ");
     });
   };
-  const sections = sectionsFor("your representative", true);
+  const sections = sectionsFor("your representative", true, "as quoted above");
   const provider = months.find((month) => month.reading.provider)?.reading.provider ?? null;
   const ask = withClaims.flatMap((month) => month.claims).length > 1 ? `In total, please credit ${usd(totalCents)} to ${account}.` : "";
   const opening = `I'm writing about ${account}. I checked my statements against the plan I signed up for.`;
   const chat = [`Hi, ${opening}`, ...sections, ask].filter(Boolean).join("\n\n");
   const email = [`Subject: Billing correction for ${account}`, "", provider ? `Hello ${provider} billing team,` : "Hello billing team,", "", opening, "", ...sections.flatMap((s) => [s, ""]), ...(ask ? [ask, ""] : []), "Please reply with the corrected amount and the date the credit will post.", "", "Thank you,", "[Your name]"].join("\n");
-  const call = [`I'm calling about ${account}.`, ...sections.map((s, i) => `${i + 1}. ${s}`), ask, "Before ending the call, ask for a reference number and the date the credit will post."].filter(Boolean).join("\n\n");
+  const call = [`I'm calling about ${account}.`, ...sectionsFor("your representative", true, "as I mentioned").map((s, i) => `${i + 1}. ${s}`), ask, "Before ending the call, ask for a reference number and the date the credit will post."].filter(Boolean).join("\n\n");
   // Shorter accounts for a complaint too long for the regulator's form: each month in a line, then each month's amount
   // with every promise quoted once, then the amounts alone.
   const regulator = `${provider ?? "the company"}'s representative`;
@@ -313,6 +313,6 @@ export function buildYearMessage(months: Checked[]): Message {
     return `For ${periodText(month)}: ${month.claims.map((claim) => shortClaim(claim, claim.lineIds.flatMap((id) => lines.get(id) ?? []))).join("; ")}.`;
   });
   const amounts = withClaims.map((month) => `${capitalized(periodText(month))}: ${usd(month.claims.reduce((t, claim) => t + claim.amountCents, 0))} more than I was promised.`);
-  const complaint = complaintText(provider, last4, claimProblem(claims), [sectionsFor(regulator, false), [promisedLine, ...byMonth], [promisedLine, ...amounts], amounts], claims);
+  const complaint = complaintText(provider, last4, claimProblem(claims), [sectionsFor(regulator, false, "as quoted above"), [promisedLine, ...byMonth], [promisedLine, ...amounts], amounts], claims);
   return { totalCents, chat, email, call, complaint };
 }
