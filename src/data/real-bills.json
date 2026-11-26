@@ -6310,35 +6310,9 @@
       "images": [
         "https://preview.redd.it/kfd7zohxpcvf1.png?width=504&format=png&auto=webp&s=20c0e388c606afac06edfc2d1088096d1069d28e"
       ],
-      "ms": 14230,
-      "outcome": "checked",
-      "provider": "AT&T",
-      "period": [
-        null,
-        null
-      ],
-      "lines": 7,
-      "lineSum": "not_printed",
-      "billPages": [
-        0
-      ],
-      "claims": [],
-      "dropped": [],
-      "questions": [
-        {
-          "kind": "end_date_unread",
-          "lines": [
-            "AT&T FIBER — INTERNET 1000",
-            "$20 off for 12 months"
-          ],
-          "cents": 5999
-        }
-      ],
-      "explained": 0,
-      "hadOffer": true,
-      "matchedPromises": 1,
-      "spentMicros": 3114,
-      "change": null
+      "ms": 1,
+      "outcome": "not_a_bill",
+      "spentMicros": 0
     },
     {
       "id": "1ohqie2",
@@ -7641,26 +7615,9 @@
       "images": [
         "https://preview.redd.it/6xw8z2m2a27g1.png?width=340&format=png&auto=webp&s=49c35e7a2be66ba095853ac2a42b5a59881364e7"
       ],
-      "ms": 10532,
-      "outcome": "checked",
-      "provider": "AT&T",
-      "period": [
-        null,
-        null
-      ],
-      "lines": 6,
-      "lineSum": "ok",
-      "billPages": [
-        0
-      ],
-      "change": null,
-      "claims": [],
-      "dropped": [],
-      "questions": [],
-      "explained": 0,
-      "hadOffer": true,
-      "matchedPromises": 0,
-      "spentMicros": 2484
+      "ms": 3145,
+      "outcome": "not_a_bill",
+      "spentMicros": 513
     },
     {
       "id": "1pw9gdi",
@@ -8994,34 +8951,9 @@
       "images": [
         "https://i.redd.it/g63jfxvc7slg1.png"
       ],
-      "ms": 20841,
-      "outcome": "checked",
-      "provider": "Spectrum",
-      "period": [
-        null,
-        null
-      ],
-      "lines": 4,
-      "lineSum": "ok",
-      "billPages": [
-        0
-      ],
-      "claims": [],
-      "dropped": [],
-      "questions": [
-        {
-          "kind": "unagreed_fee",
-          "lines": [
-            "CA Cost Recovery Charge"
-          ],
-          "cents": 125
-        }
-      ],
-      "explained": 0,
-      "hadOffer": true,
-      "matchedPromises": 1,
-      "spentMicros": 4755,
-      "change": null
+      "ms": 1,
+      "outcome": "not_a_bill",
+      "spentMicros": 0
     },
     {
       "id": "1rtmacq",
@@ -14754,26 +14686,9 @@
         "https://preview.redd.it/2ejw69yt4glh1.jpg?width=1001&format=pjpg&auto=webp&s=41818fcdca728b20becf08f33cf411a2fe3d43eb",
         "https://preview.redd.it/s9xdm9yt4glh1.jpg?width=1179&format=pjpg&auto=webp&s=1937b24234dd520925035fd63cc72bc12937ac66"
       ],
-      "ms": 23470,
-      "outcome": "checked",
-      "provider": null,
-      "period": [
-        null,
-        null
-      ],
-      "lines": 8,
-      "lineSum": "mismatch",
-      "billPages": [
-        1
-      ],
-      "claims": [],
-      "dropped": [],
-      "questions": [],
-      "explained": 0,
-      "hadOffer": true,
-      "matchedPromises": 0,
-      "spentMicros": 4592,
-      "change": null
+      "ms": 8283,
+      "outcome": "not_a_bill",
+      "spentMicros": 1369
     },
     {
       "id": "1w0r3uf",
@@ -25639,26 +25554,9 @@
       "images": [
         "https://i.redd.it/pjthgv50cu8h1.jpeg"
       ],
-      "ms": 12510,
-      "outcome": "checked",
-      "provider": null,
-      "period": [
-        null,
-        null
-      ],
-      "lines": 0,
-      "lineSum": "not_printed",
-      "billPages": [
-        0
-      ],
-      "claims": [],
-      "dropped": [],
-      "questions": [],
-      "explained": 0,
-      "hadOffer": true,
-      "matchedPromises": 0,
-      "spentMicros": 2651,
-      "change": null
+      "ms": 5350,
+      "outcome": "not_a_bill",
+      "spentMicros": 845
     },
     {
       "id": "o8wfts",
