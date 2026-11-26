@@ -22,6 +22,8 @@ export type Prepared = { pages: ShownPage[]; omitted: number };
 // A long bill keeps its charges at the front, so a PDF past the limit is read from its first pages and the rest are
 // counted as left out, rather than refused: few people can cut pages out of a PDF.
 async function preparePdf(file: File, maxPages: number): Promise<Prepared> {
+  // pdf.js's legacy build still needs Promise.withResolvers (Safari 17.4+); without it every PDF fails, so say what works.
+  if (typeof Promise.withResolvers !== "function") throw new PrepareError("This browser can't read PDFs. Update Safari, or add photos or screenshots of the bill instead.");
   // pdf.js is browser-only and large; it loads when the first PDF is opened, never during server rendering. pdf.js
   // supports Safari only through its legacy build (Safari 18+, per its FAQ); the standard build targets the latest
   // Firefox and Chrome and calls features older Safari lacks.

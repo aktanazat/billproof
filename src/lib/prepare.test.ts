@@ -12,3 +12,9 @@ test("opening a file works in Safari 16.4 to 17.3, which lack Promise.withResolv
   // The test runner can't decode an image, so the file ends in the app's own error rather than a crash.
   await expect(prepareFile(new File(["not an image"], "bill.png", { type: "image/png" }), 1)).rejects.toThrow(PrepareError);
 });
+
+test("a PDF on a browser too old for pdf.js says to update or use photos, never to unlock the file", async () => {
+  Promise.withResolvers = undefined as unknown as typeof Promise.withResolvers;
+  const pdf = new File(["%PDF-1.7"], "bill.pdf", { type: "application/pdf" });
+  await expect(prepareFile(pdf, 6)).rejects.toThrow(new PrepareError("This browser can't read PDFs. Update Safari, or add photos or screenshots of the bill instead."));
+});
