@@ -12,6 +12,8 @@ const page = z.object({
 export type PreparedPage = z.infer<typeof page>;
 
 export const MAX_BILLS = 12;
+export const MAX_BILL_PAGES = 6;
+export const MAX_OFFER_PAGES = 4;
 // Characters of written offer a check reads; a page past this is held back on the start screen with the reason.
 export const MAX_OFFER_TEXT = 20_000;
 export const MAX_CALL_SECONDS = 240;
@@ -42,11 +44,11 @@ export function wavSeconds(base64: string): number | null {
 }
 
 export const checkInputSchema = z.object({
-  bills: z.array(z.object({ pages: z.array(page).min(1).max(6) })).min(1).max(MAX_BILLS),
+  bills: z.array(z.object({ pages: z.array(page).min(1).max(MAX_BILL_PAGES) })).min(1).max(MAX_BILLS),
   offer: z
     .discriminatedUnion("kind", [
       z.object({ kind: z.literal("text"), text: z.string().trim().min(1).max(MAX_OFFER_TEXT) }),
-      z.object({ kind: z.literal("pages"), pages: z.array(page).min(1).max(4) }),
+      z.object({ kind: z.literal("pages"), pages: z.array(page).min(1).max(MAX_OFFER_PAGES) }),
       // 16 kHz mono WAV, base64 without a data: prefix.
       z.object({ kind: z.literal("audio"), wav: z.string().max(10_500_000) }).refine((offer) => {
         const seconds = wavSeconds(offer.wav);

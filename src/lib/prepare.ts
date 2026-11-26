@@ -6,8 +6,6 @@ export type ShownPage = PreparedPage & { rows: TextRow[] | null };
 
 const JPEG_QUALITY = 0.85;
 const DEADLINE_MS = 20_000;
-export const MAX_BILL_PAGES = 6;
-export const MAX_OFFER_PAGES = 4;
 
 export class PrepareError extends Error {}
 

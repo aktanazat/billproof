@@ -6,8 +6,8 @@ import { useEffect, useLayoutEffect, useReducer, useRef, useState, type ChangeEv
 import { checkInput, initialState, offerOmitted, reduce, startBlocker, type Call, type CheckAction, type CheckState, type Doc, type Inputs } from "@/lib/check-machine";
 import { formatMicros } from "@/lib/cost";
 import { usd } from "@/lib/letter";
-import { isPicture, isRecording, MAX_BILL_PAGES, MAX_OFFER_PAGES, prepareCall, prepareFile, PrepareError } from "@/lib/prepare";
-import { MAX_BILLS, MAX_CALL_SECONDS, type CheckEvent, type CheckInput, type PageKind, type Stage } from "@/lib/result";
+import { isPicture, isRecording, prepareCall, prepareFile, PrepareError } from "@/lib/prepare";
+import { MAX_BILL_PAGES, MAX_BILLS, MAX_CALL_SECONDS, MAX_OFFER_PAGES, type CheckEvent, type CheckInput, type PageKind, type Stage } from "@/lib/result";
 import { BillPage, snapBox, Thumbnail, type Mark } from "./bill-page";
 import { formatClock, inPlainWords, Waveform } from "./evidence";
 import { focusOnShow, ResultView } from "./result-view";

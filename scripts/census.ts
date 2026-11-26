@@ -4,12 +4,12 @@
 // Each input line: { id, sub, title, text, images: string[], permalink, created }.
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { MAX_POST_PICTURES, postPages } from "../src/data/real-pages";
+import { postPages } from "../src/data/real-pages";
 import { formatMicros } from "../src/lib/cost";
 import { openLedger } from "../src/lib/ledger";
 import { runCheck } from "../src/lib/pipeline";
 import { claimedCents, postNotes, type RealBill, type RealRun } from "../src/lib/real-bills";
-import type { CheckEvent, CheckInput, CheckResult } from "../src/lib/result";
+import { MAX_BILL_PAGES, type CheckEvent, type CheckInput, type CheckResult } from "../src/lib/result";
 
 type Post = { id: string; sub: string; title: string; text: string; images: string[]; permalink: string; created: number };
 
@@ -17,7 +17,7 @@ const CONCURRENCY = 8;
 
 // Only what a reader of the results page needs: no names, account numbers or addresses.
 function summary(post: Post, result: CheckResult | null, error: string | null, ms: number, positions: number[]): RealBill {
-  const base = { id: post.id, sub: post.sub, permalink: post.permalink, created: post.created, title: post.title, text: post.text, images: post.images.slice(0, MAX_POST_PICTURES), ms };
+  const base = { id: post.id, sub: post.sub, permalink: post.permalink, created: post.created, title: post.title, text: post.text, images: post.images.slice(0, MAX_BILL_PAGES), ms };
   if (!result) return { ...base, outcome: "error", error, spentMicros: 0 };
   if (result.outcome === "year") throw new Error("A post is one bill");
   if (result.outcome !== "checked") return { ...base, outcome: result.outcome, spentMicros: result.spentMicros };

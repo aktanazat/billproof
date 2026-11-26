@@ -1,15 +1,13 @@
 import "server-only";
 import sharp from "sharp";
-import { PAGE_LONG_SIDE, type PreparedPage } from "@/lib/result";
-
-export const MAX_POST_PICTURES = 6;
+import { MAX_BILL_PAGES, PAGE_LONG_SIDE, type PreparedPage } from "@/lib/result";
 
 // A post's pictures as the check reads them: fetched from Reddit, turned upright, scaled like an upload. A picture
 // that is gone or unreadable is skipped; `positions` holds each loaded page's place among the post's pictures, so a
 // page number from the check still points at the right picture.
 export async function postPages(images: string[]): Promise<{ pages: PreparedPage[]; positions: number[] }> {
   const loaded = await Promise.all(
-    images.slice(0, MAX_POST_PICTURES).map(async (url) => {
+    images.slice(0, MAX_BILL_PAGES).map(async (url) => {
       try {
         const response = await fetch(url, { headers: { "User-Agent": "billproof/0.1" }, signal: AbortSignal.timeout(30_000) });
         if (!response.ok) return null;
