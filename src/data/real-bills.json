@@ -6585,10 +6585,7 @@
       "hadOffer": true,
       "matchedPromises": 0,
       "spentMicros": 3012,
-      "change": {
-        "earlierCents": 0,
-        "currentCents": 0
-      }
+      "change": null
     },
     {
       "id": "1ovo10q",
