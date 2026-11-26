@@ -228,7 +228,7 @@ export default function RealBills() {
                   <Finding bill={bill} />
                   <Change bill={bill} />
                   <div className="mt-1 flex gap-2">
-                    <Link href={`/?post=${id}`} className="inline-flex h-8 items-center rounded-lg bg-text px-3 text-[13px] font-medium text-white hover:bg-black">
+                    <Link href={`/?post=${id}`} rel="nofollow" prefetch={false} className="inline-flex h-8 items-center rounded-lg bg-text px-3 text-[13px] font-medium text-white hover:bg-black">
                       Check it live
                     </Link>
                     <a href={bill.permalink} className="inline-flex h-8 items-center rounded-lg px-2 text-[13px] text-text-2 hover:bg-fill hover:text-text">
@@ -304,7 +304,7 @@ export default function RealBills() {
                   <Change bill={bill} />
                 </div>
                 <div className="col-start-2 flex items-center gap-2 sm:col-start-3 sm:flex-col sm:items-end">
-                  <Link href={`/?post=${bill.id}`} className="inline-flex h-8 items-center rounded-lg bg-text px-3 text-[13px] font-medium text-white hover:bg-black">
+                  <Link href={`/?post=${bill.id}`} rel="nofollow" prefetch={false} className="inline-flex h-8 items-center rounded-lg bg-text px-3 text-[13px] font-medium text-white hover:bg-black">
                     Check it live
                   </Link>
                   <a href={bill.permalink} className="inline-flex h-8 items-center rounded-lg px-2 text-[13px] text-text-2 hover:bg-fill hover:text-text">
