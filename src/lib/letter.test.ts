@@ -61,3 +61,15 @@ describe("the message's fee questions", () => {
     expect(chat).toContain("Please explain the Regional Sports Fee ($19.86). It was not part of the plan I agreed to; if it is not required, please remove it.");
   });
 });
+
+describe("a message with no dollar claim", () => {
+  const result = billWith([fee("F1", "Broadcast TV Fee", 4723), fee("F2", "TV Access Fee", 700), fee("F3", "TV Access Fee", 700), fee("F4", "Regional Sports Fee", 1986)]);
+
+  test("names fees as the complaint's problem and asks for no credit", () => {
+    const message = buildMessage(result, new Set(), new Set(["Q1"]));
+    expect(message.complaint).toContain("Problem: fees on my bill I never agreed to.");
+    expect(message.complaint).not.toContain("billed above the price I was promised");
+    expect(message.email).toContain("Please reply with an explanation of these charges and anything you will correct on my bill.");
+    expect(`${message.email}\n${message.call}`).not.toContain("the date the credit will post");
+  });
+});

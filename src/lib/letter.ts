@@ -64,11 +64,11 @@ export type Message = { totalCents: number; chat: string; email: string; call: s
 
 // The written complaint a regulator takes when the company won't fix it: the FCC for phone, internet and TV,
 // the state utility commission for electric, gas and water. The person fills in what the company already said.
-function complaintText(provider: string, account: string, facts: string[], totalCents: number): string {
+function complaintText(provider: string, account: string, problem: string, facts: string[], totalCents: number): string {
   return [
     `Company: ${provider}`,
     `Account: ${account}`,
-    "Problem: billed above the price I was promised.",
+    `Problem: ${problem}`,
     "",
     "What happened:",
     ...facts.map((fact) => `- ${fact}`),
@@ -128,7 +128,7 @@ export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<stri
     "",
     ...body.flatMap((sentence) => [sentence, ""]),
     ...(ask ? [ask, ""] : []),
-    "Please reply with the corrected amount and the date the credit will post.",
+    totalCents > 0 ? "Please reply with the corrected amount and the date the credit will post." : "Please reply with an explanation of these charges and anything you will correct on my bill.",
     "",
     "Thank you,",
     "[Your name]",
@@ -137,11 +137,13 @@ export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<stri
     `I'm calling about ${about}.`,
     ...body.map((sentence, i) => `${i + 1}. ${sentence}`),
     ask,
-    "Before ending the call, ask for a reference number and the date the credit will post.",
+    totalCents > 0 ? "Before ending the call, ask for a reference number and the date the credit will post." : "Before ending the call, ask for a reference number and what will change on the next bill.",
   ]
     .filter(Boolean)
     .join("\n\n");
-  return { totalCents, chat, email, call, complaint: complaintText(provider, account, body, totalCents) };
+  // A complaint names the problem the message raises: a price above a promise, fees never agreed to, or charges unexplained.
+  const problem = totalCents > 0 ? "billed above the price I was promised." : fees.length > 0 ? "fees on my bill I never agreed to." : "charges on my bill the company hasn't explained.";
+  return { totalCents, chat, email, call, complaint: complaintText(provider, account, problem, body, totalCents) };
 }
 
 // One message for a year of statements: each month's claims under its statement, then the total.
@@ -163,5 +165,5 @@ export function buildYearMessage(months: Checked[]): Message {
   const chat = [`Hi, I'm writing about ${account}. I checked my statements against the plan I signed up for.`, ...sections, ask].filter(Boolean).join("\n\n");
   const email = [`Subject: Billing correction for ${account}`, "", `Hello ${first?.provider ?? "billing"} team,`, "", ...sections.flatMap((s) => [s, ""]), ...(ask ? [ask, ""] : []), "Please reply with the corrected amount and the date the credit will post.", "", "Thank you,", "[Your name]"].join("\n");
   const call = [`I'm calling about ${account}.`, ...sections.map((s, i) => `${i + 1}. ${s}`), ask, "Before ending the call, ask for a reference number and the date the credit will post."].filter(Boolean).join("\n\n");
-  return { totalCents, chat, email, call, complaint: complaintText(first?.provider ?? "the company", account, sections, totalCents) };
+  return { totalCents, chat, email, call, complaint: complaintText(first?.provider ?? "the company", account, "billed above the price I was promised.", sections, totalCents) };
 }
