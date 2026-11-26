@@ -1,13 +1,15 @@
-// Money amounts written with a dollar sign ("$55", "-$5.00", "$1,299.99") or with cents ("75.00").
+// Money amounts written with a dollar sign ("$55", "-$5.00", "$1,299.99", "$55.5", "$.99") or with cents ("75.00").
 // Bare integers ("Fiber 500") are not money.
-const MONEY = /(-)?\$\s?(\d{1,3}(?:,\d{3})+|\d+)(?:\.(\d{2}))?|(-)?\b(\d{1,3}(?:,\d{3})+|\d+)\.(\d{2})\b/g;
+// Groups: dollars and cents after "$", cents alone after "$.", and dollars and cents written without "$".
+const MONEY = /\$\s?(?:(\d{1,3}(?:,\d{3})+|\d+)(?:\.(\d{1,2})(?!\d))?|\.(\d{2})(?!\d))|\b(\d{1,3}(?:,\d{3})+|\d+)\.(\d{2})\b/g;
 
 export function moneyIn(text: string): number[] {
   const found: number[] = [];
-  for (const m of text.matchAll(MONEY)) {
-    const whole = (m[2] ?? m[5]).replaceAll(",", "");
-    const frac = m[3] ?? m[6] ?? "00";
-    found.push(Number(whole) * 100 + Number(frac));
+  for (const [, whole, cents, only, bare, bareCents] of text.matchAll(MONEY)) {
+    const dollars = Number((whole ?? bare ?? "0").replaceAll(",", ""));
+    // One decimal is tenths of a dollar: "$55.5" is $55.50.
+    const fraction = only ?? bareCents ?? (cents ?? "00").padEnd(2, "0");
+    found.push(dollars * 100 + Number(fraction));
   }
   return found;
 }
