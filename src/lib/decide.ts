@@ -157,6 +157,19 @@ function splitsIntoParts(lines: LineItem[], parts: number[]): boolean {
   return lines.slice(at).every((line) => line.amount_cents === 0);
 }
 
+// Part totals nest ("Services & Equipment $58.00" over "Services $22.00" and "Equipment $36.00"); a total that equals
+// the totals printed right after it is their parent and is left out.
+function innermostParts(parts: number[]): number[] {
+  return parts.filter((part, i) => {
+    let following = 0;
+    for (let j = i + 1; j < parts.length; j++) {
+      following += parts[j];
+      if (near(following, part)) return false;
+    }
+    return true;
+  });
+}
+
 // E1: the lines add up to the printed current charges, a printed subtotal, or, with what was carried over, the
 // amount due. E2: previous balance − payments + current charges = total due.
 export function checkTotals(reading: Reading, bill: Source): Totals {
@@ -171,7 +184,8 @@ export function checkTotals(reading: Reading, bill: Source): Totals {
   const currentMatches = current !== null && near(current, lineSumCents);
   const subtotalLines = current === null || currentMatches || lines.length === 0 ? null : subtotalLength(lines, current);
   const parts = (reading.printed.section_totals ?? []).map((part) => printedValue(part, bill));
-  const partsMatch = parts.every((part) => part !== null) && splitsIntoParts(lines, parts.filter((part) => part !== null));
+  const printedParts = parts.filter((part) => part !== null);
+  const partsMatch = printedParts.length === parts.length && (splitsIntoParts(lines, printedParts) || splitsIntoParts(lines, innermostParts(printedParts)));
   // A bill that shows only its totals has no charges for them to check. Checks that cover every charge come first.
   const lineSum: LineSum =
     lines.length === 0 ? "not_printed"

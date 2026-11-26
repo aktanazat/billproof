@@ -365,7 +365,7 @@ export function ResultView({
           )}
           {result.totals.lineSum === "sections" && (
             <p className="mt-2 text-[13px] text-text-2">
-              Read {result.reading.line_items.length} charges that add up to {result.reading.printed.section_totals.length === 1 ? "the subtotal" : `each of the ${result.reading.printed.section_totals.length} subtotals`} printed on the bill.
+              Read {result.reading.line_items.length} charges that add up to the subtotals printed on the bill.
             </p>
           )}
         </div>

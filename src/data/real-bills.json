@@ -1,7 +1,7 @@
 {
   "ranAt": "2026-11-26T01:23:28.124Z",
   "seconds": 1331.95443675,
-  "spentMicros": 1512330,
+  "spentMicros": 1520339,
   "posts": 1517,
   "results": [
     {
@@ -4570,7 +4570,8 @@
       "images": [
         "https://i.redd.it/uu4sg4a6cn7f1.jpeg"
       ],
-      "ms": 8202,
+      "ms": 10073,
+      "spentMicros": 1612,
       "outcome": "checked",
       "provider": null,
       "period": [
@@ -4578,10 +4579,11 @@
         null
       ],
       "lines": 2,
-      "lineSum": "not_printed",
+      "lineSum": "sections",
       "billPages": [
         0
       ],
+      "change": null,
       "claims": [],
       "dropped": [],
       "questions": [
@@ -4595,9 +4597,7 @@
       ],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 0,
-      "spentMicros": 1675,
-      "change": null
+      "matchedPromises": 0
     },
     {
       "id": "1lv2h82",
@@ -7199,7 +7199,8 @@
       "images": [
         "https://i.redd.it/28587myqu24g1.jpeg"
       ],
-      "ms": 8567,
+      "ms": 9021,
+      "spentMicros": 2104,
       "outcome": "checked",
       "provider": "Fios",
       "period": [
@@ -7207,18 +7208,17 @@
         null
       ],
       "lines": 6,
-      "lineSum": "not_printed",
+      "lineSum": "sections",
       "billPages": [
         0
       ],
+      "change": null,
       "claims": [],
       "dropped": [],
       "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 0,
-      "spentMicros": 1917,
-      "change": null
+      "matchedPromises": 0
     },
     {
       "id": "1pgb2r7",
@@ -19921,29 +19921,29 @@
         "https://preview.redd.it/8eu1zqbj95vh1.jpg?width=1080&format=pjpg&auto=webp&s=f0876a77a982e95d458f6bf7c27f466fe954f41a",
         "https://preview.redd.it/hksmywid95vh1.jpg?width=1080&format=pjpg&auto=webp&s=7dc595bafea5dadbe34b7c5547e25c6876203236"
       ],
-      "ms": 24167,
+      "ms": 19814,
+      "spentMicros": 4293,
       "outcome": "checked",
-      "provider": "Xfinity",
+      "provider": "xfinity",
       "period": [
         "2026-09-16",
         "2026-10-15"
       ],
       "lines": 3,
-      "lineSum": "not_printed",
+      "lineSum": "sections",
       "billPages": [
         0
       ],
+      "change": {
+        "earlierCents": 5000,
+        "currentCents": 6151
+      },
       "claims": [],
       "dropped": [],
       "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 0,
-      "spentMicros": 4773,
-      "change": {
-        "earlierCents": 5000,
-        "currentCents": 6151
-      }
+      "matchedPromises": 0
     },
     {
       "id": "1x7vo1b",

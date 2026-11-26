@@ -411,6 +411,9 @@ describe("decide refuses claims the evidence does not carry", () => {
     expect(checkTotals(onlyParts([part(first), part(rest)]), { kind: "image" }).lineSum).toBe("sections");
     expect(checkTotals(onlyParts([part(first), part(rest + 100)]), { kind: "image" }).lineSum).toBe("not_printed");
     expect(checkTotals(onlyParts([part(rest), part(first)]), { kind: "image" }).lineSum).toBe("not_printed");
+    // A total that repeats the totals right under it (an outer section over an inner one) is their parent.
+    expect(checkTotals(onlyParts([part(first), part(rest), part(rest)]), { kind: "image" }).lineSum).toBe("sections");
+    expect(checkTotals(onlyParts([part(first + rest), part(first), part(rest)]), { kind: "image" }).lineSum).toBe("sections");
   });
 
   test("a heading read as a charge is dropped when that makes the bill add up, and a real double charge stays", () => {
