@@ -36,12 +36,15 @@ function listNames(lines: LineItem[]): string {
 
 const charged = (lines: LineItem[]) => lines.filter((line) => line.amount_cents > 0);
 
+// A title's verb agrees with the names it lists: one charge "is", several "are".
+const several = (lines: LineItem[]) => new Set(lines.map((line) => line.label)).size > 1;
+
 function claimTitle(claim: Claim, lines: LineItem[]): string {
   switch (claim.kind) {
     case "price_above_promise":
-      return `${listNames(charged(lines))} is billed above the promised price`;
+      return `${listNames(charged(lines))} ${several(charged(lines)) ? "are" : "is"} billed above the promised price`;
     case "included_charged":
-      return `${listNames(charged(lines))} was supposed to be included`;
+      return `${listNames(charged(lines))} ${several(charged(lines)) ? "were" : "was"} supposed to be included`;
     case "credit_missing":
       return claim.actualCents === 0 ? "The promised credit is missing" : "The promised credit is short";
   }
@@ -63,7 +66,7 @@ function questionTitle(question: Question, lines: LineItem[], result: Checked): 
       return named.length > 0 ? `The bill doesn't show ${named.join(" or ")}, which your price depends on` : "The bill doesn't show that you meet your offer's conditions";
     }
     case "price_gap":
-      return `${listNames(lines)} is too far from the promised amount to claim`;
+      return `${listNames(lines)} ${several(lines) ? "are" : "is"} too far from the promised amount to claim`;
     case "provider_mismatch":
       return `The offer is from ${result.offerProvider ?? "another company"}, not ${result.reading.provider ?? "this company"}`;
     case "end_date_unread":

@@ -168,4 +168,13 @@ describe("the result page's other sections", () => {
     expect(t).toContain("Credited $0.00 Number share plan $15.00 Promised $7.50");
     expect(t).not.toContain("Charged above the promise");
   });
+
+  test("a claim's title agrees with how many charges it names", () => {
+    const promise: Checked["promises"][number] = { id: "P1", kind: "monthly_price", description: "", amount_cents: 2500, per_line: true, conditions: [], applies_from: null, applies_until: null, quote: "$25/line per month", said_at_seconds: null, covers_line_ids: ["L1", "L2", "L3"] };
+    const lines = [line("L1", "Unlimited Basic - Line 1", 3000, "plan"), line("L2", "Unlimited Basic - Line 2", 3000, "plan"), line("L3", "Unlimited Basic - Line 3", 3000, "plan")];
+    const claim = (lineIds: string[], actualCents: number, expectedCents: number): Checked["claims"][number] => ({ id: "C1", kind: "price_above_promise", lineIds, promiseId: "P1", actualCents, expectedCents, amountCents: actualCents - expectedCents, needsConfirmation: false, lookedFor: null });
+    const render = (c: Checked["claims"][number]) => text(page({ ...checked(lines, []), promises: [promise], matchedPromiseIds: ["P1"], claims: [c] }, { claims: { C1: "selected" }, questions: {} }));
+    expect(render(claim(["L1", "L2", "L3"], 9000, 7500))).toContain("Unlimited Basic - Line 1, Unlimited Basic - Line 2 and Unlimited Basic - Line 3 are billed above the promised price");
+    expect(render(claim(["L1"], 3000, 2500))).toContain("Unlimited Basic - Line 1 is billed above the promised price");
+  });
 });
