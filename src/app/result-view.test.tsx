@@ -351,6 +351,24 @@ describe("the result page's wording", () => {
     };
     expect(page(result)).toContain('aria-label="Play what was said at 0:13"');
   });
+
+  // On a call result, the words that defeated a claim were said on the call: they are labelled so, and can be played
+  // from the line of the call that holds them.
+  test("a claim dropped by words from the call says so and plays them", () => {
+    const claim: Checked["claims"][number] = { id: "C1", kind: "price_above_promise", lineIds: ["L1"], promiseId: "P1", actualCents: 7000, expectedCents: 5500, amountCents: 1500, needsConfirmation: false, lookedFor: null };
+    const result: Checked = {
+      ...checked([line("L1", "Fiber 500", 7000, "plan")], []),
+      transcript: [
+        { speaker: "company", start_seconds: 11, text: "Fiber 500 is $55 a month." },
+        { speaker: "company", start_seconds: 26, text: "That price is for the first 12 months, then the regular rate applies." },
+      ],
+      dropped: [{ claim, lookedFor: "A limit on the promised price.", counterQuote: "for the first 12 months, then the regular rate applies", source: "offer" }],
+    };
+    const html = page(result);
+    expect(html).toContain("Said on the call “for the first 12 months, then the regular rate applies”");
+    expect(html).toContain('aria-label="Play what was said at 0:26"');
+    expect(html).not.toContain("The offer says");
+  });
 });
 
 describe("the result page's heading", () => {

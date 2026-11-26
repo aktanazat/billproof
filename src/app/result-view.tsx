@@ -110,6 +110,12 @@ function heardAt(result: Checked, promise: PromiseTerm | undefined): number | nu
   return result.transcript && promise?.said_at_seconds !== null && promise?.said_at_seconds !== undefined ? promise.said_at_seconds : null;
 }
 
+// Where words quoted from the call were said: the start of the line of the transcript that holds them, if one does.
+function quotedAt(transcript: TranscriptTurn[] | null, quote: string): number | null {
+  const flat = (text: string) => text.toLowerCase().replace(/\s+/g, " ").trim();
+  return transcript?.find((turn) => flat(turn.text).includes(flat(quote)))?.start_seconds ?? null;
+}
+
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="flex flex-col">
@@ -470,17 +476,24 @@ export function ResultView({
           {result.dropped.length > 0 && (
             <Section title="Dropped after checking the company's side">
               <ul>
-                {result.dropped.map((item) => (
-                  <li key={item.claim.id} className="flex flex-col gap-1 border-b border-line py-3">
-                    <div className="flex items-baseline justify-between gap-4 text-[15px]">
-                      <p>{claimTitle(item.claim, linesOf(item.claim.lineIds))}</p>
-                      <p className="text-text-2 line-through tabular-nums">{usd(item.claim.amountCents)}</p>
-                    </div>
-                    <p className="text-[13px] leading-[18px] text-text-2">
-                      {item.source === "bill" ? "The bill says" : "The offer says"} “{item.counterQuote}”
-                    </p>
-                  </li>
-                ))}
+                {result.dropped.map((item) => {
+                  // On a call result the offer is the call, so words from it were said there, at a moment that can be played.
+                  const said = item.source === "offer" && result.transcript ? quotedAt(result.transcript, item.counterQuote) : null;
+                  return (
+                    <li key={item.claim.id} className="flex flex-col gap-1 border-b border-line py-3">
+                      <div className="flex items-baseline justify-between gap-4 text-[15px]">
+                        <p>{claimTitle(item.claim, linesOf(item.claim.lineIds))}</p>
+                        <p className="text-text-2 line-through tabular-nums">{usd(item.claim.amountCents)}</p>
+                      </div>
+                      <p className="flex items-start gap-2 text-[13px] leading-[18px] text-text-2">
+                        {said !== null && <PlayButton url={callUrl} from={said} to={turnEnd(result.transcript, said)} label={`Play what was said at ${formatClock(said)}`} />}
+                        <span className={said !== null ? "pt-[5px]" : ""}>
+                          {item.source === "bill" ? "The bill says" : result.transcript ? "Said on the call" : "The offer says"} “{item.counterQuote}”
+                        </span>
+                      </p>
+                    </li>
+                  );
+                })}
               </ul>
             </Section>
           )}
