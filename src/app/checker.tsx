@@ -633,9 +633,10 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
       };
       const pile = async (pictures: string[]): Promise<Doc> => {
         const read = Math.min(pictures.length, MAX_BILL_PAGES);
-        const name = read < pictures.length ? `${read} of ${pictures.length} pictures from the post` : `${pictures.length} pictures from the post`;
+        const name = read < pictures.length ? `${read} of ${pictures.length} pictures from the post` : pictures.length === 1 ? "The picture from the post" : `${pictures.length} pictures from the post`;
         const pages = (await Promise.all(pictures.slice(0, MAX_BILL_PAGES).map(postPicture))).flat();
-        return pages.length > 0 ? { id: `sample-${token}-pile`, name, status: "ready", pages, omitted: 0 } : { id: `sample-${token}-pile`, name, status: "failed", message: "The pictures from this post are no longer online." };
+        const gone = pictures.length === 1 ? "The picture from this post is no longer online." : "The pictures from this post are no longer online.";
+        return pages.length > 0 ? { id: `sample-${token}-pile`, name, status: "ready", pages, omitted: 0 } : { id: `sample-${token}-pile`, name, status: "failed", message: gone };
       };
       const bills: Doc[] = [...pdfs, ...(sample.pictures ? [await pile(sample.pictures)] : [])];
       const offer: Inputs["offer"] =
