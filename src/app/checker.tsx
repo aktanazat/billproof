@@ -427,7 +427,9 @@ function SampleButton({ sample, busy, loading, onRun }: { sample: Sample; busy: 
 }
 
 async function fetchFile(url: string, name: string, type: string): Promise<File> {
-  return new File([await (await fetch(url)).blob()], name, { type });
+  const response = await fetch(url).catch(() => null);
+  if (!response?.ok) throw new PrepareError("This sample couldn't be downloaded. Check the connection and try again.");
+  return new File([await response.blob()], name, { type });
 }
 
 export function Checker({ samples, realSamples, startWith }: { samples: Sample[]; realSamples: Sample[]; startWith: Sample | null }) {
@@ -534,6 +536,11 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
           : { kind: "call", call: { id: `sample-${token}-call`, name: "Sales call.m4a", status: "ready", ...(await prepareCall(await fetchFile(sample.offer.url, "Sales call.m4a", "audio/mp4"), MAX_CALL_SECONDS)) } };
       if (token !== sampleToken.current) return;
       dispatch({ type: "sample_ready", inputs: { bills, offer } });
+    } catch (error) {
+      // A failed download or a file that won't open stays on the start screen with the reason on its row.
+      if (token !== sampleToken.current) return;
+      const message = error instanceof PrepareError ? error.message : "This sample couldn't be opened. Try again.";
+      dispatch({ type: "sample_ready", inputs: { bills: [{ id: `sample-${token}-failed`, name: sample.title, status: "failed", message }], offer: { kind: "none" } } });
     } finally {
       if (token === sampleToken.current) setLoadingSample(null);
     }
