@@ -813,7 +813,9 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
         <p className="text-[13px] text-text-2">Read by Meta&apos;s Muse Ember. Files aren&apos;t stored.</p>
         <div className="flex flex-wrap items-center gap-3">
-          <p role="status" className="text-[13px] text-text-2">
+          {/* Kept on the page so a reason that appears is announced; while empty it takes no slot, or the row's gap
+              would push the button in from the edge where it wraps on a phone. */}
+          <p role="status" className="text-[13px] text-text-2 empty:absolute">
             {blocker}
           </p>
           <button type="button" disabled={!ready} onClick={() => dispatch({ type: "start" })} className="h-11 rounded-lg bg-text px-6 text-[15px] font-medium text-white hover:bg-black disabled:bg-fill-2 disabled:text-text-2">
