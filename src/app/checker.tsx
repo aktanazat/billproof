@@ -901,7 +901,10 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
                 <span className="sm:hidden">Choose</span>
                 <span className="hidden sm:inline">Drop</span> the bill, or every screenshot you have
               </span>
-              <span className="text-[13px] text-text-2">PDFs, photos, chats with the company, or paste a screenshot. Up to 12 months of bills at once.</span>
+              {/* A phone offers Paste only in a text box, where it would go to the offer, so the hint is for computers. */}
+              <span className="text-[13px] text-text-2">
+                PDFs, photos, chats with the company<span className="hidden sm:inline">, or paste a screenshot</span>. Up to 12 months of bills at once.
+              </span>
             </FileTarget>
           )}
         </div>
