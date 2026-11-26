@@ -342,7 +342,9 @@ export function ResultView({
     ...(result.hadOffer ? [`Compared ${read} ${read === 1 ? "charge" : "charges"} with ${result.matchedPromiseIds.length} ${result.matchedPromiseIds.length === 1 ? "promise" : "promises"}.`] : []),
     ...result.unused.flatMap((item) => {
       const why = UNUSED_TEXT[item.reason];
-      return why ? [`Not used: ${promises.get(item.promiseId)?.description ?? "a promise"} (${why}).`] : [];
+      // The reading writes some descriptions as sentences; the reason follows in brackets, so their own period goes.
+      const description = promises.get(item.promiseId)?.description.replace(/[.\s]+$/, "") || "a promise";
+      return why ? [`Not used: ${description} (${why}).`] : [];
     }),
   ];
 

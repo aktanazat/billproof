@@ -151,12 +151,19 @@ describe("the result page's other sections", () => {
       ...base,
       reading,
       totals: checkTotals(reading, { kind: "image" }),
-      promises: [{ id: "P1", kind: "monthly_price", description: "Phone at $32.22 a month", amount_cents: 3222, per_line: false, conditions: [], applies_from: null, applies_until: null, quote: "Due monthly $32.22", said_at_seconds: null, covers_line_ids: ["L1"] }],
-      unused: [{ promiseId: "P1", reason: "device_or_cart_total" }],
+      promises: [
+        { id: "P1", kind: "monthly_price", description: "Phone at $32.22 a month", amount_cents: 3222, per_line: false, conditions: [], applies_from: null, applies_until: null, quote: "Due monthly $32.22", said_at_seconds: null, covers_line_ids: ["L1"] },
+        { id: "P2", kind: "other", description: "Spectrum offered a $20 credit.", amount_cents: 2000, per_line: false, conditions: [], applies_from: null, applies_until: null, quote: "We'll credit $20", said_at_seconds: null, covers_line_ids: [] },
+      ],
+      unused: [
+        { promiseId: "P1", reason: "device_or_cart_total" },
+        { promiseId: "P2", reason: "kind_not_checked" },
+      ],
     };
     const t = text(page(result));
     expect(t).toContain("The charges add up to $80.00, but the bill prints $90.00.");
     expect(t).toContain("Not used: Phone at $32.22 a month (it's a device payment or order total, not a plan price).");
+    expect(t).toContain("Not used: Spectrum offered a $20 credit (this kind of promise isn't checked yet).");
   });
 
   test("a missing credit is titled as missing and shows what was credited against what was promised", () => {
