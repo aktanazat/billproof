@@ -12,6 +12,12 @@ billproof.aktan.us {
 	request_body {
 		max_size 41MB
 	}
+	# Standard protections that can't break the demo. Framing is left allowed, in case the judges' site embeds it.
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+	}
 	reverse_proxy app:3000 {
 		# The check streams Muse Ember's reading line by line; pass each line through as it arrives.
 		flush_interval -1
