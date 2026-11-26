@@ -362,4 +362,18 @@ describe("a year message with fees to ask about", () => {
     expect(unnamed.chat).toContain("Modem Rental appears 2 times on one bill ($15.00 and $15.00).");
     expect(buildYearMessage([october, doubled({ due_date: "2026-12-05" })]).chat).toContain("On the bill due Dec 5, 2026, Modem Rental appears 2 times");
   });
+
+  // Without an offer from this company there was no plan to check the statements against, so the opening doesn't say so.
+  test("a year checked without an offer doesn't open by saying it was checked against the plan", () => {
+    const noOffer = buildYearMessage([{ ...october, hadOffer: false }, { ...november, hadOffer: false }]);
+    expect(`${noOffer.chat}\n${noOffer.email}`).not.toContain("against the plan I signed up for");
+    expect(noOffer.chat).toMatch(/^Hi, I'm writing about account ending 2271\.\n/);
+    expect(buildYearMessage([october, november]).chat).toContain("I checked my statements against the plan I signed up for.");
+  });
+
+  // A year's complaint covers many statements, so its fees are said of the statements, not of "the bill".
+  test("a year complaint says its fees are on the statements", () => {
+    const { complaint } = buildYearMessage([october, november]);
+    expect(complaint).toContain("- My statements charge the Broadcast TV Fee ($31.50) and Regional Sports Fee ($19.86), which were not part of the plan I agreed to.");
+  });
 });

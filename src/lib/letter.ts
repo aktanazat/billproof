@@ -138,8 +138,9 @@ function feeSentence(fees: LineItem[][], offerCovers: boolean): string {
   return offerCovers ? `Please explain the ${feeList(fees)}. ${one ? "It was" : "They were"} not part of the plan I agreed to; if ${remove}` : `Please explain the ${feeList(fees)}. If ${remove}`;
 }
 
-function feeFact(fees: LineItem[][], offerCovers: boolean): string {
-  return offerCovers ? `The bill charges the ${feeList(fees)}, which ${fees.length === 1 ? "was" : "were"} not part of the plan I agreed to.` : `The bill charges the ${feeList(fees)}, which the company hasn't explained.`;
+// `charges` names what printed the fees: one bill, or a year's statements.
+function feeFact(fees: LineItem[][], offerCovers: boolean, charges = "The bill charges"): string {
+  return offerCovers ? `${charges} the ${feeList(fees)}, which ${fees.length === 1 ? "was" : "were"} not part of the plan I agreed to.` : `${charges} the ${feeList(fees)}, which the company hasn't explained.`;
 }
 
 export type Message = { totalCents: number; chat: string; email: string; call: string; complaint: string };
@@ -319,7 +320,8 @@ export function buildYearMessage(months: Checked[]): Message {
   );
   const feeText = [...(fees.length > 0 ? [feeSentence(fees, offerCovers)] : []), ...repeats.map(({ month, lines }) => repeatOn(month, lines, repeatSentence))];
   const ask = withClaims.flatMap((month) => month.claims).length > 1 ? `In total, please credit ${usd(totalCents)} to ${account}.` : "";
-  const opening = `I'm writing about ${account}. I checked my statements against the plan I signed up for.`;
+  // Only an offer from this company is a plan the statements were checked against.
+  const opening = offerCovers ? `I'm writing about ${account}. I checked my statements against the plan I signed up for.` : `I'm writing about ${account}.`;
   const chat = [`Hi, ${opening}`, ...sections, ...feeText, ask].filter(Boolean).join("\n\n");
   const email = [
     totalCents > 0 ? `Subject: Billing correction for ${account}` : `Subject: Questions about the charges on ${account}`,
@@ -363,7 +365,7 @@ export function buildYearMessage(months: Checked[]): Message {
     return `For ${periodText(month)}: ${month.claims.map((claim) => shortClaim(claim, claim.lineIds.flatMap((id) => lines.get(id) ?? []))).join("; ")}.`;
   });
   const amounts = withClaims.map((month) => `${capitalized(periodText(month))}: ${usd(month.claims.reduce((t, claim) => t + claim.amountCents, 0))} more than I was promised.`);
-  const feeFacts = [...(fees.length > 0 ? [feeFact(fees, offerCovers)] : []), ...repeats.map(({ month, lines }) => repeatOn(month, lines, repeatFact))];
+  const feeFacts = [...(fees.length > 0 ? [feeFact(fees, offerCovers, "My statements charge")] : []), ...repeats.map(({ month, lines }) => repeatOn(month, lines, repeatFact))];
   const problem = claims.length > 0 ? claimProblem(claims) : fees.length > 0 && offerCovers ? "fees on my bill I never agreed to." : "charges on my bill the company hasn't explained.";
   const versions = claims.length > 0 ? [sectionsFor(regulator, false, "as quoted above"), [promisedLine, ...byMonth], [promisedLine, ...amounts], amounts] : [[]];
   const complaint = complaintText(provider, last4, problem, versions.map((facts) => [...facts, ...feeFacts]), claims);
