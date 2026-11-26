@@ -518,7 +518,7 @@ export function ResultView({
           )}
 
           {result.change && result.change.lines.length > 0 && (
-            <Section title={`${result.change.currentCents >= result.change.earlierCents ? "Up" : "Down"} ${usd(Math.abs(result.change.currentCents - result.change.earlierCents))} since the earlier bill`}>
+            <Section title={result.change.currentCents === result.change.earlierCents ? "Same total as the earlier bill" : `${result.change.currentCents > result.change.earlierCents ? "Up" : "Down"} ${usd(Math.abs(result.change.currentCents - result.change.earlierCents))} since the earlier bill`}>
               <ul>
                 {result.change.lines.map((line) => (
                   <li key={line.label} className="flex items-baseline justify-between gap-4 border-b border-line py-3 text-[15px]">

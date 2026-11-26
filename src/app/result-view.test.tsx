@@ -367,6 +367,14 @@ describe("the result page's other sections", () => {
     expect(text(page(result))).toContain("Down $12.86 since the earlier bill");
   });
 
+  // Lines can move while the total stays put; "Up $0.00" says it rose when it didn't.
+  test("a bill with the same total but changed lines says the total is the same", () => {
+    const result: Checked = { ...checked([line("L1", "Plan", 5000, "plan")], []), change: { earlierCents: 6000, currentCents: 6000, lines: [{ label: "Plan", beforeCents: 5000, afterCents: 6000 }, { label: "Discount", beforeCents: 1000, afterCents: 0 }] } };
+    const t = text(page(result));
+    expect(t).not.toContain("Up $0.00");
+    expect(t).toContain("Same total as the earlier bill");
+  });
+
   test("the checking notes say when the charges miss the printed total and why a promise went unused", () => {
     const base = checked([line("L1", "Internet 1000", 8000, "plan")], []);
     const reading: Reading = { ...base.reading, printed: { ...base.reading.printed, current_charges: { cents: 9000, quote: "Total $90.00" } } };
