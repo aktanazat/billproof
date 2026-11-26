@@ -1,7 +1,7 @@
 {
   "ranAt": "2026-11-26T01:23:28.124Z",
   "seconds": 1331.95443675,
-  "spentMicros": 1483168,
+  "spentMicros": 1488824,
   "posts": 1517,
   "results": [
     {
@@ -7891,7 +7891,7 @@
         "https://preview.redd.it/2c2zxjedg39g1.jpg?width=1440&format=pjpg&auto=webp&s=441c37fbb9560da8922831b50ac71f8e4121cc87",
         "https://preview.redd.it/klt9lpidg39g1.jpg?width=1440&format=pjpg&auto=webp&s=43295db7c8bc856d322292995802c775c8644943"
       ],
-      "ms": 16510,
+      "ms": 16308,
       "outcome": "checked",
       "provider": "Spectrum",
       "period": [
@@ -7899,10 +7899,14 @@
         null
       ],
       "lines": 3,
-      "lineSum": "not_printed",
+      "lineSum": "ok",
       "billPages": [
         1
       ],
+      "change": {
+        "earlierCents": 5125,
+        "currentCents": 6625
+      },
       "claims": [],
       "dropped": [],
       "questions": [
@@ -7917,11 +7921,7 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 2707,
-      "change": {
-        "earlierCents": 5125,
-        "currentCents": 6625
-      }
+      "spentMicros": 2920
     },
     {
       "id": "1q71n1t",
@@ -20506,7 +20506,7 @@
         "https://i.redd.it/0nvsfbsaqvvh1.png",
         "https://i.redd.it/epxjnasaqvvh1.png"
       ],
-      "ms": 19523,
+      "ms": 14499,
       "outcome": "checked",
       "provider": "AT&T",
       "period": [
@@ -20514,14 +20514,22 @@
         "2026-10-28"
       ],
       "lines": 17,
-      "lineSum": "not_printed",
+      "lineSum": "ok",
       "billPages": [
         0,
         1
       ],
+      "change": null,
       "claims": [],
       "dropped": [],
       "questions": [
+        {
+          "kind": "unagreed_fee",
+          "lines": [
+            "TX State Cost Recovery Charge"
+          ],
+          "cents": 27
+        },
         {
           "kind": "unagreed_fee",
           "lines": [
@@ -20535,20 +20543,12 @@
             "TX State Cost Recovery Charge"
           ],
           "cents": 14
-        },
-        {
-          "kind": "unagreed_fee",
-          "lines": [
-            "TX State Cost Recovery Charge"
-          ],
-          "cents": 27
         }
       ],
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 3666,
-      "change": null
+      "spentMicros": 2736
     },
     {
       "id": "1xdgnqs",
