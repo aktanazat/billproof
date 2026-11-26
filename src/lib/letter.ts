@@ -225,7 +225,9 @@ export function buildYearMessage(months: Checked[]): Message {
   const withClaims = months.filter((month) => month.claims.length > 0);
   const totalCents = withClaims.reduce((sum, month) => sum + month.claims.reduce((t, claim) => t + claim.amountCents, 0), 0);
   const first = withClaims[0]?.reading;
-  const account = first?.account_last4 ? `account ending ${first.account_last4}` : "my account";
+  // The months are one account's, so a number any of them shows stands for all; one month's unread number doesn't hide it.
+  const last4 = months.find((month) => month.reading.account_last4)?.reading.account_last4 ?? null;
+  const account = last4 ? `account ending ${last4}` : "my account";
   // A promise already quoted for an earlier month is referred back to, not quoted again in full.
   const sectionsFor = (speaker: string, asking: boolean) => {
     const quoted = new Set<string>();
@@ -251,5 +253,5 @@ export function buildYearMessage(months: Checked[]): Message {
   const chat = [`Hi, ${opening}`, ...sections, ask].filter(Boolean).join("\n\n");
   const email = [`Subject: Billing correction for ${account}`, "", provider ? `Hello ${provider} billing team,` : "Hello billing team,", "", opening, "", ...sections.flatMap((s) => [s, ""]), ...(ask ? [ask, ""] : []), "Please reply with the corrected amount and the date the credit will post.", "", "Thank you,", "[Your name]"].join("\n");
   const call = [`I'm calling about ${account}.`, ...sections.map((s, i) => `${i + 1}. ${s}`), ask, "Before ending the call, ask for a reference number and the date the credit will post."].filter(Boolean).join("\n\n");
-  return { totalCents, chat, email, call, complaint: complaintText(provider, first?.account_last4 ?? null, claimProblem(withClaims.flatMap((month) => month.claims)), sectionsFor(`${provider ?? "the company"}'s representative`, false), withClaims.flatMap((month) => month.claims)) };
+  return { totalCents, chat, email, call, complaint: complaintText(provider, last4, claimProblem(withClaims.flatMap((month) => month.claims)), sectionsFor(`${provider ?? "the company"}'s representative`, false), withClaims.flatMap((month) => month.claims)) };
 }

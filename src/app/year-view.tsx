@@ -48,18 +48,22 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
     return names.every(Boolean) ? `${names.join(", ")} ${verb}` : `${months.length} ${months.length === 1 ? "file" : "files"} ${verb}`;
   };
 
-  // Statements are counted once, and only for the account most of them belong to.
-  const accountOf = (month: (typeof read)[number]) => month.result.reading.account_last4 ?? "unknown";
+  // Statements are counted once, and only for the account most of them show. One whose number couldn't be read is
+  // counted with it: only a different number printed on the bill makes it another account's.
   const tally = new Map<string, number>();
-  for (const month of read) tally.set(accountOf(month), (tally.get(accountOf(month)) ?? 0) + 1);
+  for (const month of read) {
+    const number = month.result.reading.account_last4;
+    if (number) tally.set(number, (tally.get(number) ?? 0) + 1);
+  }
   const account = [...tally.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+  const anotherAccount = (month: (typeof read)[number]) => Boolean(account && month.result.reading.account_last4 && month.result.reading.account_last4 !== account);
   const seen = new Set<string>();
   const checked: typeof read = [];
   const skippedMonths = { duplicates: 0, otherAccount: 0 };
   for (const month of read) {
     const { period_start, period_end, statement_date } = month.result.reading;
     const key = [period_start, period_end, statement_date].join("|");
-    if (accountOf(month) !== account) skippedMonths.otherAccount += 1;
+    if (anotherAccount(month)) skippedMonths.otherAccount += 1;
     else if (seen.has(key)) skippedMonths.duplicates += 1;
     else {
       seen.add(key);

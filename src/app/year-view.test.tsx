@@ -58,6 +58,21 @@ test("a duplicate, another account's bill and an unreadable one are named as not
   expect([...html.matchAll(/aria-label="August 2026: /g)]).toHaveLength(1);
 });
 
+test("a statement whose account number couldn't be read counts with the year's account, and the message keeps the number", () => {
+  if (!year) throw new Error("the saved run has no year result");
+  const august = year.months.find((month) => month.result.outcome === "checked" && month.result.reading.period_start?.startsWith("2026-08"));
+  if (!august || august.result.outcome !== "checked") throw new Error("the sample has no August statement");
+  const unread = { ...august.result, reading: { ...august.result.reading, account_last4: null } };
+  const blurred: YearResult = { ...year, months: year.months.map((month) => (month.bill === august.bill ? { ...month, result: unread } : month)) };
+  const running = { s: "running", inputs: initialState.inputs, attempts: 1, attempt: 1, stage: null, spentMicros: 0, live: {} } as unknown as CheckState;
+  const done = reduce(running, { type: "finished", attempt: 1, result: blurred });
+  if (done.s !== "done") throw new Error("the finished year did not become a done state");
+  const html = renderToStaticMarkup(createElement(YearView, { state: done, result: blurred, dispatch: () => {} }));
+  expect(html).toMatch(/>\$70\.00<\/p><h1[^>]*>to ask back from Bayline Fiber across 12 statements/);
+  expect(html).not.toContain("another account");
+  expect(html).toContain("In total, please credit $70.00 to account ending 4415.");
+});
+
 test("a year with nothing owed shows no $0.00, and says plainly when there was no offer to check against", () => {
   if (!year) throw new Error("the saved run has no year result");
   const clean = (hadOffer: boolean): YearResult => ({ ...year, months: year.months.map((month) => (month.result.outcome === "checked" ? { ...month, result: { ...month.result, claims: [], hadOffer, promises: hadOffer ? month.result.promises : [], matchedPromiseIds: hadOffer ? month.result.matchedPromiseIds : [] } } : month)) });
