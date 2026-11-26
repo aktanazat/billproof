@@ -68,6 +68,12 @@ test("each month of a year check reports its own Muse Ember steps and cost; the 
   }
   expect(done.result.calls).toHaveLength(4);
   expect(done.result.spentMicros).toBe(2 * (COST.read_bill + COST.read_terms));
+  // The running cost shown while bills are read side by side is what finished calls cost: it only rises, and never
+  // passes the final cost, as it did while other bills' calls still held their worst-case reservations.
+  const running = events.flatMap((event) => (event.type === "spent" ? [event.micros] : []));
+  expect(running.length).toBeGreaterThan(0);
+  expect(running).toEqual([...running].sort((a, b) => a - b));
+  expect(Math.max(...running)).toBeLessThanOrEqual(done.result.spentMicros);
 });
 
 test("a claim the company's side defeats with the offer's own words is dropped, with that quote, and asks for nothing", async () => {

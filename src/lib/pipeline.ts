@@ -293,7 +293,9 @@ async function paid<T>(call: EmberCall<T>, run: Run, live: Live): Promise<T> {
     if (outputCache.size >= CACHE_MAX) outputCache.delete(outputCache.keys().next().value ?? "");
     outputCache.set(key, { output: result.output, at: Date.now() });
     (run.calls[live.bill] ??= []).push({ name: call.name, effort: call.effort, ...result.usage, costMicros: result.costMicros, reused: false });
-    deps.emit({ type: "spent", micros: deps.ledger.spentForCheck(run.checkId) });
+    // What finished calls cost, not the ledger's total: that holds other bills' calls still open at their worst case,
+    // so with bills read side by side it overstated the cost and fell back as they settled.
+    deps.emit({ type: "spent", micros: run.calls.flat().reduce((total, done) => total + done.costMicros, 0) });
     return result.output;
   } catch (error) {
     if (error instanceof EmberError && error.billedMicros !== null) deps.ledger.settle(attempt, error.billedMicros);
