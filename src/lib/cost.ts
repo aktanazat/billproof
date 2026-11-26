@@ -28,7 +28,8 @@ export function formatMicros(micros: number): string {
   // A reused reading costs nothing; a cost too small for three decimals still isn't nothing.
   if (micros === 0) return "0¢";
   if (cents < 0.001) return "under 0.001¢";
-  if (cents >= 1) return `$${(cents / 100).toFixed(2)}`;
-  // Three decimals only where the third carries a figure: 0.09¢, not 0.090¢.
-  return `${cents >= 0.1 ? cents.toFixed(2) : cents.toFixed(3).replace(/0$/, "")}¢`;
+  // Under a dollar, where checks cost, cents keep the figure: 1.13¢, not "$0.01". No trailing zeros: 0.09¢, 3¢.
+  const shown = cents.toFixed(cents >= 0.1 ? 2 : 3);
+  if (Number(shown) >= 100) return `$${(cents / 100).toFixed(2)}`;
+  return `${shown.replace(/\.?0+$/, "")}¢`;
 }
