@@ -337,6 +337,20 @@ describe("the result page's wording", () => {
     const fee: Checked = { ...checked([line("L1", "Fiber 300", 3000, "plan"), line("F1", "Network Fee", 399, "company_fee")], [{ id: "Q1", kind: "unagreed_fee", lineIds: ["F1"], promiseId: null }]), promises: [promise] };
     expect(page(fee)).not.toContain("Promised:");
   });
+
+  // A promise heard on a call can be played from where it was said, under a note as under a claim.
+  test("a note's promise heard on a call can be played from the moment it was said", () => {
+    const promise = { id: "P1", kind: "monthly_price" as const, description: "", amount_cents: 3000, per_line: false, conditions: [], applies_from: null, applies_until: null, quote: "$30 a month for 12 months", said_at_seconds: 13, covers_line_ids: ["L1"] };
+    const result: Checked = {
+      ...checked([line("L1", "Fiber 300", 3000, "plan")], [{ id: "Q1", kind: "partial_period", lineIds: ["L1"], promiseId: "P1" }]),
+      promises: [promise],
+      transcript: [
+        { speaker: "company", start_seconds: 13, text: "$30 a month for 12 months." },
+        { speaker: "customer", start_seconds: 20, text: "Thanks." },
+      ],
+    };
+    expect(page(result)).toContain('aria-label="Play what was said at 0:13"');
+  });
 });
 
 describe("the result page's heading", () => {

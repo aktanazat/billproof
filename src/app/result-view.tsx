@@ -493,6 +493,7 @@ export function ResultView({
                   const canInclude = question.kind === "unagreed_fee" || question.kind === "repeated_charge";
                   // A note judged against a promise (its dates, its conditions, its price) shows the promise with it.
                   const judgedAgainst = question.promiseId ? promises.get(question.promiseId) : undefined;
+                  const heard = heardAt(result, judgedAgainst);
                   return (
                     <li key={question.id} tabIndex={0} onMouseEnter={() => setFocus(question.lineIds)} onMouseLeave={() => setFocus(null)} onFocus={() => setFocus(question.lineIds)} onBlur={() => setFocus(null)} className="flex flex-col gap-2 border-b border-line py-3 outline-none focus-visible:bg-fill">
                       <div className="flex items-baseline justify-between gap-4 text-[15px]">
@@ -506,7 +507,12 @@ export function ResultView({
                           </p>
                         )}
                       </div>
-                      {judgedAgainst && <p className="text-[13px] leading-[18px] text-text-2">Promised: “{judgedAgainst.quote}”</p>}
+                      {judgedAgainst && (
+                        <p className="flex items-start gap-2 text-[13px] leading-[18px] text-text-2">
+                          {heard !== null && <PlayButton url={callUrl} from={heard} to={turnEnd(result.transcript, heard)} label={`Play what was said at ${formatClock(heard)}`} />}
+                          <span className={heard !== null ? "pt-[5px]" : ""}>Promised: “{judgedAgainst.quote}”</span>
+                        </p>
+                      )}
                       {canInclude && (
                         <label className="inline-flex cursor-pointer items-center gap-2 text-[13px] text-text-2 select-none">
                           <input type="checkbox" checked={selection.questions[question.id] === true} onChange={() => dispatch({ type: "toggle_question", bill, id: question.id })} aria-label={`Ask in message: ${questionTitle(question, questionLines, result)}`} className="size-4 accent-[var(--text)]" />
