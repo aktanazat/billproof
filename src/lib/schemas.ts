@@ -59,7 +59,6 @@ export const billReadingSchema = z.object({
 export type BillReading = z.infer<typeof billReadingSchema>;
 
 export const PROMISE_KINDS = ["monthly_price", "included", "recurring_credit", "other"] as const;
-export type PromiseKind = (typeof PROMISE_KINDS)[number];
 
 export const termsSchema = z.object({
   transcript: z
