@@ -220,4 +220,11 @@ describe("the result page's other sections", () => {
     expect(t).toContain("AT&T: Thanks for calling.");
     expect(t).toContain("You: How much is Fiber 500?");
   });
+
+  test("a picture that isn't a bill, or a bill that can't be read, says what to add instead", () => {
+    const render = (result: Parameters<typeof ResultView>[0]["result"]) => text(renderToStaticMarkup(createElement(ResultView, { result, bill: 0, pages: [], callUrl: null, selection: { claims: {}, questions: {} }, dispatch: () => {}, backLabel: "Check another bill", onBack: () => {} })).replace(/&#x27;/g, "'"));
+    expect(render({ outcome: "not_a_bill", spentMicros: 0 })).toContain("This isn't a bill Add the statement itself: the PDF, or screenshots of the page that shows the billing period and each charge.");
+    const unread = render({ outcome: "could_not_check", reason: "The page image is entirely black.", spentMicros: 0 });
+    expect(unread).toContain("Couldn't check this bill The page image is entirely black. Try the PDF from the company's website, or screenshots that show every charge and the total, uncropped.");
+  });
 });
