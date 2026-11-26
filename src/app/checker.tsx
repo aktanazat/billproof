@@ -109,7 +109,8 @@ function FileTarget({ label, accept, multiple, onFiles, children, className }: {
     event.preventDefault();
     setOver(false);
     const files = [...event.dataTransfer.files];
-    if (files.length) onFiles(multiple ? files : files.slice(0, 1));
+    // Every dropped file goes on; a target that takes one says what happened to the rest.
+    if (files.length) onFiles(files);
   };
   return (
     <div
@@ -438,6 +439,8 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
   const [state, dispatch] = useReducer(reduce, initialState);
   // Files dropped past the 12-bill limit, so the person knows some were left out rather than finding months missing.
   const [leftOut, setLeftOut] = useState(0);
+  // The offer takes one file; a drop of several keeps the first and says where the rest belong.
+  const [offerExtra, setOfferExtra] = useState(0);
   const controllers = useRef(new Map<number, AbortController>());
   const nextId = useRef(0);
   const id = () => `doc-${++nextId.current}`;
@@ -495,7 +498,9 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
     }
   };
 
-  const addOffer = async (file: File) => {
+  const addOffer = async (files: File[]) => {
+    const file = files[0];
+    setOfferExtra(files.length - 1);
     const docId = id();
     if (!isAudio(file)) {
       dispatch({ type: "offer_file_added", id: docId, name: file.name });
@@ -626,6 +631,11 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
           {offer.kind === "file" ? (
             <div className="mt-2">
               <DocRow doc={offer.doc} onRemove={() => dispatch({ type: "removed", id: offer.doc.id })} />
+              {offerExtra > 0 && (
+                <p role="status" className="mt-1 text-[13px] text-text-2">
+                  Only the first file was added. To include several screenshots of the offer, drop them in the bill box with the bill, and Billproof sorts them.
+                </p>
+              )}
             </div>
           ) : offer.kind === "call" ? (
             <div className="mt-2">
@@ -640,7 +650,7 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
                 aria-label="What you were promised"
                 className="mt-2 block min-h-[88px] w-full flex-1 resize-none rounded-lg bg-white p-3 text-[15px] leading-[22px] shadow-[inset_0_0_0_1px_var(--line)] placeholder:text-text-2 focus:outline-none focus-visible:shadow-[inset_0_0_0_2px_var(--text)]"
               />
-              <FileTarget label="Add the offer as a file or recording" accept={OFFER_ACCEPT} onFiles={(files) => void addOffer(files[0])} className="mt-2 h-8 rounded-lg px-2 text-[13px] text-text-2 hover:bg-fill-2 hover:text-text">
+              <FileTarget label="Add the offer as a file or recording" accept={OFFER_ACCEPT} onFiles={(files) => void addOffer(files)} className="mt-2 h-8 rounded-lg px-2 text-[13px] text-text-2 hover:bg-fill-2 hover:text-text">
                 Add a screenshot, PDF or call recording instead
               </FileTarget>
             </>
