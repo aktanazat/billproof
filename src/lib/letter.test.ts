@@ -384,5 +384,10 @@ describe("a year message with fees to ask about", () => {
     expect(buildMessage(claimed, new Set(["C1"]), new Set(["Q1"])).email).toContain(reply);
     expect(buildYearMessage([october, claimed]).email).toContain(reply);
     expect(buildMessage(claimed, new Set(["C1"]), new Set()).email).toContain("Please reply with the corrected amount and the date the credit will post.");
+    // The call script ends the same way: the credit's date, and what the fee answers change.
+    const close = "Before ending the call, ask for a reference number, the date the credit will post, and what will change on the next bill.";
+    expect(buildMessage(claimed, new Set(["C1"]), new Set(["Q1"])).call).toContain(close);
+    expect(buildYearMessage([october, claimed]).call).toContain(close);
+    expect(buildMessage(claimed, new Set(["C1"]), new Set()).call).toContain("Before ending the call, ask for a reference number and the date the credit will post.");
   });
 });

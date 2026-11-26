@@ -201,6 +201,12 @@ function replyAsk(credit: boolean, questions: boolean): string {
   return questions ? "Please reply with the corrected amount, the date the credit will post, and an explanation of the charges I asked about." : "Please reply with the corrected amount and the date the credit will post.";
 }
 
+// What a call script reminds the caller to get before hanging up, by the same measure.
+function callClose(credit: boolean, questions: boolean): string {
+  if (!credit) return "Before ending the call, ask for a reference number and what will change on the next bill.";
+  return questions ? "Before ending the call, ask for a reference number, the date the credit will post, and what will change on the next bill." : "Before ending the call, ask for a reference number and the date the credit will post.";
+}
+
 export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<string>, includedQuestionIds: ReadonlySet<string>): Message {
   const lines = new Map(result.reading.line_items.map((line) => [line.id, line]));
   const promises = new Map(result.promises.map((promise) => [promise.id, promise]));
@@ -258,7 +264,7 @@ export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<stri
     `I'm calling about ${about}.`,
     ...numbered(body),
     ask,
-    totalCents > 0 ? "Before ending the call, ask for a reference number and the date the credit will post." : "Before ending the call, ask for a reference number and what will change on the next bill.",
+    callClose(totalCents > 0, questionText.length > 0 || increase !== null),
   ]
     .filter(Boolean)
     .join("\n\n");
@@ -347,7 +353,7 @@ export function buildYearMessage(months: Checked[]): Message {
     `I'm calling about ${account}.`,
     ...numbered([...sectionsFor("your representative", true, "as I mentioned"), ...feeText]),
     ask,
-    totalCents > 0 ? "Before ending the call, ask for a reference number and the date the credit will post." : "Before ending the call, ask for a reference number and what will change on the next bill.",
+    callClose(totalCents > 0, feeText.length > 0),
   ]
     .filter(Boolean)
     .join("\n\n");
