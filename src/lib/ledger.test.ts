@@ -1,3 +1,7 @@
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import { DatabaseSync } from "node:sqlite";
 import { describe, expect, test } from "vitest";
 import { CHECK_CAP_MICROS, CHECKS_PER_CLIENT_PER_HOUR, LedgerRefusal, openLedger } from "./ledger";
 
@@ -75,5 +79,22 @@ describe("ledger", () => {
       if (i % 2 === 0) ledger.settle(ledger.reserve(check, 1_000, CHECK_CAP_MICROS), 0);
     }
     expect(ledger.admitCheck("a", start + 60_000)).toEqual(expect.any(String));
+  });
+
+  // The address is kept only for the hourly limit; the ledger file holds no visitor's address past that hour.
+  test("a visitor's address is cleared from checks more than an hour old", () => {
+    const dir = mkdtempSync(path.join(tmpdir(), "billproof-ledger-"));
+    try {
+      const file = path.join(dir, "ledger.db");
+      const ledger = openLedger(file, 1_000_000);
+      const start = 1_800_000_000_000;
+      ledger.admitCheck("203.0.113.7", start);
+      ledger.admitCheck("198.51.100.4", start + 30 * 60_000);
+      ledger.admitCheck("192.0.2.1", start + 61 * 60_000);
+      const stored = new DatabaseSync(file, { readOnly: true }).prepare("SELECT client FROM checks ORDER BY created_at").all();
+      expect(stored.map((row) => row.client)).toEqual(["", "198.51.100.4", "192.0.2.1"]);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });

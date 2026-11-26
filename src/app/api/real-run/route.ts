@@ -36,6 +36,8 @@ export async function POST(request: Request) {
   const now = Date.now();
   const client = clientKey(request);
   while (startedRuns.length > 0 && now - startedRuns[0] > HOUR_MS) startedRuns.shift();
+  // A visitor's address is kept only for their hour.
+  for (const [key, at] of lastRunByClient) if (now - at >= HOUR_MS) lastRunByClient.delete(key);
   if (running) return refusal("A live run is already going. Try again in a minute.", 503);
   if (startedRuns.length >= RUNS_PER_HOUR) return refusal(`The live run has been used a lot this hour. Try again ${inMinutes(startedRuns[0] + HOUR_MS - now)}.`, 429);
   const last = lastRunByClient.get(client) ?? 0;

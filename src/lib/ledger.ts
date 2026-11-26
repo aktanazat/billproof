@@ -70,6 +70,8 @@ export function openLedger(file: string, eventCapMicros: number): Ledger {
     `SELECT COUNT(*) AS n, MIN(created_at) AS oldest FROM checks WHERE client = ? AND created_at > ? AND EXISTS (SELECT 1 FROM attempts WHERE attempts.check_id = checks.id AND (state != 'settled' OR actual > 0))`,
   );
   const insertCheck = db.prepare(`INSERT INTO checks (id, client, created_at) VALUES (?, ?, ?)`);
+  // The address is kept only for the hourly limit (owner approval 2026-11-27: "yes"); older checks keep their spend.
+  const forgetClients = db.prepare(`UPDATE checks SET client = '' WHERE created_at <= ? AND client != ''`);
   const insertAttempt = db.prepare(`INSERT INTO attempts (id, check_id, reserved, state, created_at) VALUES (?, ?, ?, 'reserved', ?)`);
   const settleAttempt = db.prepare(`UPDATE attempts SET state = 'settled', actual = ? WHERE id = ? AND state = 'reserved'`);
   const loseAttempt = db.prepare(`UPDATE attempts SET state = 'unknown' WHERE id = ? AND state = 'reserved'`);
@@ -90,8 +92,13 @@ export function openLedger(file: string, eventCapMicros: number): Ledger {
     }
   }
 
+  // On open too, so a restart clears what aged out while no check was admitted.
+  forgetClients.run(Date.now() - HOUR_MS);
+
   return {
     admitCheck(client: string, now = Date.now()): string {
+      // Outside the admission, so a refused check (the budget spent) doesn't roll the clearing back.
+      forgetClients.run(now - HOUR_MS);
       return writeTransaction(() => {
         // The page says checks are paused at this point, so a check started anyway is refused before anything is sent.
         if (eventCapMicros - micros(eventSpent.get()) < CHECK_CAP_MICROS) throw new LedgerRefusal("budget_spent", BUDGET_SPENT);
