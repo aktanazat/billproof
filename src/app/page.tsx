@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { z } from "zod";
 import { realRun } from "@/data/real-bills";
 import { usd } from "@/lib/letter";
-import { postNotes, unagreedFees, type RealBill } from "@/lib/real-bills";
+import { postNotes, unagreedCents, type RealBill } from "@/lib/real-bills";
 import { livePaused } from "@/lib/server-ledger";
 import data from "../../public/samples/index.json";
 import { Checker, type Sample } from "./checker";
@@ -42,12 +42,11 @@ function realSample(id: string | undefined): Sample | null {
 }
 
 // The three real bills with the most in company fees the poster never mentions agreeing to.
-const feeCents = (bill: RealBill) => unagreedFees(bill).reduce((t, fee) => t + fee.cents, 0);
 const realSamples = [...realRun.results]
-  .sort((a, b) => feeCents(b) - feeCents(a))
+  .sort((a, b) => unagreedCents(b) - unagreedCents(a))
   .slice(0, 3)
-  .filter((bill) => feeCents(bill) > 0)
-  .map((bill) => sampleOf(bill, `${usd(feeCents(bill))} in fees nobody agreed to`));
+  .filter((bill) => unagreedCents(bill) > 0)
+  .map((bill) => sampleOf(bill, `${usd(unagreedCents(bill))} in fees nobody agreed to`));
 
 // The post id is request data, so it is read inside a boundary; the plain start screen renders without it.
 async function CheckerFor({ searchParams }: { searchParams: PageProps<"/">["searchParams"] }) {

@@ -2,14 +2,13 @@
 
 import { useState } from "react";
 import { offerOmitted, type CheckAction, type CheckState } from "@/lib/check-machine";
-import { buildYearMessage, usd } from "@/lib/letter";
+import { buildYearMessage, MONTHS, usd } from "@/lib/letter";
 import type { CallRecord, Checked, YearResult } from "@/lib/result";
 import { inPlainWords } from "./evidence";
 import { focusOnShow, MessageBox, ResultView, SHOWN_QUESTIONS, Trace } from "./result-view";
 
 type Done = Extract<CheckState, { s: "done" }>;
 
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const LONG_MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 // A statement is placed and named by when its billing starts, or its statement date when the period wasn't read.

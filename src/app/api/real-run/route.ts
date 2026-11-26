@@ -1,7 +1,7 @@
 import { realRun } from "@/data/real-bills";
 import { postPages } from "@/data/real-pages";
 import { runCheck } from "@/lib/pipeline";
-import { LIVE_PAUSED, postNotes, unagreedFees, type LiveEvent } from "@/lib/real-bills";
+import { LIVE_PAUSED, postNotes, unagreedCents, type LiveEvent } from "@/lib/real-bills";
 import { clientKey, fromOwnPage, livePaused, serverLedger } from "@/lib/server-ledger";
 
 const BATCH = 24;
@@ -10,10 +10,9 @@ const HOUR_MS = 60 * 60_000;
 const RUNS_PER_HOUR = 6;
 
 // The real bills with the most to show come first: fees nobody agreed to, then any other bill.
-const feeCents = (bill: (typeof realRun.results)[number]) => unagreedFees(bill).reduce((t, fee) => t + fee.cents, 0);
 const batch = realRun.results
   .filter((bill) => bill.outcome === "checked")
-  .sort((a, b) => feeCents(b) - feeCents(a))
+  .sort((a, b) => unagreedCents(b) - unagreedCents(a))
   .slice(0, BATCH);
 
 // Spend limits for the button: one run at a time, a few runs an hour across the server, one per address an hour.

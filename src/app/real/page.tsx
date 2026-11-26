@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import { realRun } from "@/data/real-bills";
 import { formatMicros } from "@/lib/cost";
 import { usd } from "@/lib/letter";
-import { claimedCents, unagreedFees, type RealBill } from "@/lib/real-bills";
+import { claimedCents, unagreedCents, unagreedFees, type RealBill } from "@/lib/real-bills";
 import { livePaused } from "@/lib/server-ledger";
 import { Thumbnail } from "../bill-page";
 import { alt as cardAlt, size as cardSize } from "../opengraph-image";
@@ -197,7 +197,7 @@ export default function RealBills() {
       .reduce((map, bill) => {
         const name = companyOf(bill.provider);
         const seen = map.get(name) ?? { name, bills: 0, withFees: 0, feeCents: 0 };
-        const cents = unagreedFees(bill).reduce((t, fee) => t + fee.cents, 0);
+        const cents = unagreedCents(bill);
         return map.set(name, { name, bills: seen.bills + 1, withFees: seen.withFees + (cents > 0 ? 1 : 0), feeCents: seen.feeCents + cents });
       }, new Map<string, { name: string; bills: number; withFees: number; feeCents: number }>())
       .values(),

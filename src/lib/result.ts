@@ -15,7 +15,9 @@ export const MAX_BILLS = 12;
 // Characters of written offer a check reads; a page past this is held back on the start screen with the reason.
 export const MAX_OFFER_TEXT = 20_000;
 export const MAX_CALL_SECONDS = 240;
-const CALL_SAMPLE_RATE = 16_000;
+export const CALL_SAMPLE_RATE = 16_000;
+// The long side pages are scaled to: by the browser for uploads, and by the server for a real post's pictures.
+export const PAGE_LONG_SIDE = 1600;
 
 // Seconds of audio in a base64 16 kHz mono 16-bit PCM WAV with the plain 44-byte header, or null for anything else.
 // The length comes from the bytes themselves, so a recording cannot claim to be shorter than it is.

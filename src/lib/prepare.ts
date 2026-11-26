@@ -1,10 +1,9 @@
 import { pageRows, pageText, type TextRow } from "./pdf-text";
-import type { PreparedPage } from "./result";
+import { CALL_SAMPLE_RATE, PAGE_LONG_SIDE, type PreparedPage } from "./result";
 
 // A page as the browser keeps it: what is sent to the check, plus the printed rows used to place marks exactly.
 export type ShownPage = PreparedPage & { rows: TextRow[] | null };
 
-const LONG_SIDE = 1600;
 const JPEG_QUALITY = 0.85;
 const DEADLINE_MS = 20_000;
 export const MAX_BILL_PAGES = 6;
@@ -37,7 +36,7 @@ async function preparePdf(file: File, maxPages: number): Promise<Prepared> {
     for (let n = 1; n <= read; n++) {
       const page = await doc.getPage(n);
       const base = page.getViewport({ scale: 1 });
-      const viewport = page.getViewport({ scale: LONG_SIDE / Math.max(base.width, base.height) });
+      const viewport = page.getViewport({ scale: PAGE_LONG_SIDE / Math.max(base.width, base.height) });
       const canvas = document.createElement("canvas");
       canvas.width = Math.ceil(viewport.width);
       canvas.height = Math.ceil(viewport.height);
@@ -72,7 +71,7 @@ async function prepareImage(file: File): Promise<Prepared> {
   } catch {
     throw new PrepareError(isHeic(file) ? "HEIC photos can't be read in this browser. Export the photo as JPEG, or open Billproof in Safari." : "This image could not be opened. Use a JPEG, PNG or WebP.");
   }
-  const scale = Math.min(1, LONG_SIDE / Math.max(bitmap.width, bitmap.height));
+  const scale = Math.min(1, PAGE_LONG_SIDE / Math.max(bitmap.width, bitmap.height));
   const canvas = document.createElement("canvas");
   canvas.width = Math.round(bitmap.width * scale);
   canvas.height = Math.round(bitmap.height * scale);
@@ -99,8 +98,6 @@ export async function prepareFile(file: File, maxPages: number): Promise<Prepare
     clearTimeout(timer);
   }
 }
-
-const CALL_SAMPLE_RATE = 16_000;
 
 // A call can arrive as a video too: Android saves calls as .3gp, labelled video, and a call can be screen recorded.
 // The browser takes the sound from either, or the recording says it couldn't be opened.

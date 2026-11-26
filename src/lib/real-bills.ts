@@ -64,6 +64,7 @@ export type RealRun = z.infer<typeof realRunSchema>;
 
 export const claimedCents = (bill: RealBill) => (bill.outcome === "checked" ? bill.claims.reduce((t, claim) => t + claim.amountCents, 0) : 0);
 export const unagreedFees = (bill: RealBill) => (bill.outcome === "checked" ? bill.questions.filter((q) => q.kind === "unagreed_fee") : []);
+export const unagreedCents = (bill: RealBill) => unagreedFees(bill).reduce((t, fee) => t + fee.cents, 0);
 
 // What the poster wrote is the only record of the promise; it is passed as the customer's own notes.
 export function postNotes(post: Pick<RealBill, "title" | "text">): string {
