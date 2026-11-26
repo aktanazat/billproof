@@ -10,9 +10,16 @@ export default function PageError({ error, reset }: { error: Error & { digest?: 
   useEffect(() => {
     console.error(error);
   }, [error]);
+  // The page already has a title; a second one would be invalid, so its text is swapped while this shows.
+  useEffect(() => {
+    const before = document.title;
+    document.title = "Something went wrong — Billproof";
+    return () => {
+      document.title = before;
+    };
+  }, []);
   return (
     <main className="flex min-h-full flex-col">
-      <title>Something went wrong — Billproof</title>
       <SiteHeader current={null} />
       <section className="mx-auto flex w-full max-w-[1120px] flex-col items-start gap-3 px-6 pt-16">
         <h1 className="text-[28px] font-semibold tracking-[-0.02em]">Something went wrong showing this page</h1>
