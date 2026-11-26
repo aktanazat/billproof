@@ -87,7 +87,8 @@ export type CheckDeps = { ledger: Ledger; client: string; signal: AbortSignal; e
 
 // One check's spend context: its ledger row, its cap, and the calls it made.
 // `halted` holds the first failure of a year check: no bill starts a new paid call after it.
-type Run = { checkId: string; capMicros: number; deps: CheckDeps; calls: CallRecord[]; year: boolean; halted: unknown };
+// `calls` holds each bill's Muse Ember steps under its index, so a month of a year check reports only its own.
+type Run = { checkId: string; capMicros: number; deps: CheckDeps; calls: CallRecord[][]; year: boolean; halted: unknown };
 
 class CheckStop extends Error {
   constructor(
@@ -260,7 +261,7 @@ async function paid<T>(call: EmberCall<T>, run: Run, live: Live): Promise<T> {
   if (hit && Date.now() - hit.at < CACHE_TTL_MS) {
     const parsed = call.schema.safeParse(hit.output);
     if (parsed.success) {
-      run.calls.push({ name: call.name, effort: call.effort, inputTokens: 0, cachedTokens: 0, outputTokens: 0, costMicros: 0, reused: true });
+      (run.calls[live.bill] ??= []).push({ name: call.name, effort: call.effort, inputTokens: 0, cachedTokens: 0, outputTokens: 0, costMicros: 0, reused: true });
       const json = JSON.stringify(hit.output);
       for (const stream of streams) for (const item of completedObjects(json, stream)) emitItem(stream, item, live, deps);
       return parsed.data;
@@ -289,7 +290,7 @@ async function paid<T>(call: EmberCall<T>, run: Run, live: Live): Promise<T> {
     deps.ledger.settle(attempt, result.costMicros);
     if (outputCache.size >= CACHE_MAX) outputCache.delete(outputCache.keys().next().value ?? "");
     outputCache.set(key, { output: result.output, at: Date.now() });
-    run.calls.push({ name: call.name, effort: call.effort, ...result.usage, costMicros: result.costMicros, reused: false });
+    (run.calls[live.bill] ??= []).push({ name: call.name, effort: call.effort, ...result.usage, costMicros: result.costMicros, reused: false });
     deps.emit({ type: "spent", micros: deps.ledger.spentForCheck(run.checkId) });
     return result.output;
   } catch (error) {
@@ -378,7 +379,10 @@ async function checkOne(uploaded: PreparedPage[], given: OfferInput | null, run:
     deps.emit({ type: "reread", bill });
     stage("rereading_bill");
   };
-  const spent = () => deps.ledger.spentForCheck(run.checkId);
+  const own = () => run.calls[bill] ?? [];
+  // A single check reports the ledger's figure, which also holds a call cut off mid-way; a month of a year reports
+  // the cost of its own steps, since the ledger's figure is the whole year's so far.
+  const spent = () => (run.year ? own().reduce((total, call) => total + call.costMicros, 0) : deps.ledger.spentForCheck(run.checkId));
   const { billPages, olderPages, offer } = await sortPages(uploaded, given, run, bill);
   if (billPages.length === 0) return { outcome: "not_a_bill", spentMicros: spent() };
   const pages = billPages.map((i) => uploaded[i]);
@@ -445,7 +449,7 @@ async function checkOne(uploaded: PreparedPage[], given: OfferInput | null, run:
     change,
     hadOffer: offer !== null,
     spentMicros: spent(),
-    calls: run.calls,
+    calls: own(),
   };
 }
 
@@ -485,7 +489,7 @@ async function check(input: CheckInput, checkId: string, capMicros: number, deps
     return { bill: index, result };
   });
   deps.emit({ type: "stage", stage: "comparing" });
-  return { outcome: "year", months, spentMicros: deps.ledger.spentForCheck(checkId), calls: run.calls };
+  return { outcome: "year", months, spentMicros: deps.ledger.spentForCheck(checkId), calls: run.calls.flat() };
 }
 
 const RETRYABLE: Record<CheckFailure, boolean> = {
