@@ -1,7 +1,7 @@
 {
   "ranAt": "2026-11-26T01:23:28.124Z",
   "seconds": 1331.95443675,
-  "spentMicros": 1482676,
+  "spentMicros": 1483168,
   "posts": 1517,
   "results": [
     {
@@ -15487,26 +15487,9 @@
       "images": [
         "https://preview.redd.it/i4znhum7kenh1.png?width=3288&format=png&auto=webp&s=5d6410e7c2b5bbbeca9fd4891fef8f5f7dcf96f6"
       ],
-      "ms": 15875,
-      "outcome": "checked",
-      "provider": "AT&T",
-      "period": [
-        null,
-        null
-      ],
-      "lines": 7,
-      "lineSum": "not_printed",
-      "billPages": [
-        0
-      ],
-      "claims": [],
-      "dropped": [],
-      "questions": [],
-      "explained": 0,
-      "hadOffer": true,
-      "matchedPromises": 0,
-      "spentMicros": 3541,
-      "change": null
+      "ms": 4257,
+      "outcome": "not_a_bill",
+      "spentMicros": 492
     },
     {
       "id": "1w8zf6p",
@@ -15560,7 +15543,7 @@
       ],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 0,
+      "matchedPromises": 1,
       "spentMicros": 4945,
       "change": null
     },
