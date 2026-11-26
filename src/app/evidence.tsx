@@ -29,6 +29,11 @@ export function useClip(url: string | null) {
   }, []);
   const play = (from: number, to: number | null) => {
     if (!url) return;
+    // The button shows a pause icon while its own moment plays; pressing it then stops instead of starting over.
+    if (playing === from) {
+      shared.audio?.pause();
+      return;
+    }
     shared.audio?.pause();
     const audio = new Audio(url);
     shared.audio = audio;
@@ -39,7 +44,7 @@ export function useClip(url: string | null) {
     audio.onpause = () => setPlaying(null);
     audio.onended = () => setPlaying(null);
     setPlaying(from);
-    void audio.play();
+    audio.play().catch(() => setPlaying(null));
   };
   return { play, playing };
 }
