@@ -460,8 +460,11 @@ export function decide(reading: Reading, promises: PromiseTerm[], bill: Source, 
   }
 
   // A charge printed once for each person or phone line is not a repeat: when the bill's own part totals split its
-  // lines, copies that fall under different parts belong to different people.
+  // lines, copies that fall under different parts belong to different people. Copies on different pictures are
+  // either separate tabs or the same line pictured twice by overlapping screenshots; on a PDF, pages are one statement.
   const partOf = linesByPart(reading, bill)?.runs ?? null;
+  const samePlace = (a: LineItem, b: LineItem) =>
+    (bill.kind !== "image" || a.page === b.page) && (partOf === null || !partOf.has(a.id) || !partOf.has(b.id) || partOf.get(a.id) === partOf.get(b.id));
   const byKey = new Map<string, LineItem[]>();
   for (const line of reading.line_items) {
     if (line.kind === "government_tax" || line.amount_cents <= 0) continue;
@@ -469,8 +472,8 @@ export function decide(reading: Reading, promises: PromiseTerm[], bill: Source, 
     byKey.set(key, [...(byKey.get(key) ?? []), line]);
   }
   for (const group of byKey.values()) {
-    const sharePart = partOf === null || group.some((line) => !partOf.has(line.id)) || new Set(group.map((line) => partOf.get(line.id))).size < group.length;
-    if (group.length > 1 && sharePart && !group.every((line) => claimed.has(line.id))) {
+    const repeated = group.some((line, i) => group.slice(i + 1).some((other) => samePlace(line, other)));
+    if (repeated && !group.every((line) => claimed.has(line.id))) {
       questions.push({ kind: "repeated_charge", lineIds: group.map((line) => line.id), promiseId: null });
     }
   }

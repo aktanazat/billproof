@@ -536,7 +536,7 @@ describe("promises read from a person's own words", () => {
 describe("charges printed once per person", () => {
   const base = readingOf(internetGuaranteed);
   const line = (id: string, label: string, cents: number, kind: LineKind, page: number) => ({ id, label, amount_cents: cents, kind, page, box: { x0: 80, y0: 400, x1: 920, y1: 420 }, quote: `${label} $${(cents / 100).toFixed(2)}`, prorated: false });
-  const tabs = [line("L1", "Unlimited plan", 3000, "plan", 1), line("L2", "Pixel bill credit", -2080, "credit", 1), line("L3", "Taxes & regulatory fees", 293, "government_tax", 1), line("L4", "Unlimited plan", 3000, "plan", 2), line("L5", "Taxes & regulatory fees", 293, "government_tax", 2)];
+  const tabs = [line("L1", "Unlimited plan", 3000, "plan", 1), line("L2", "Pixel bill credit", -2080, "credit", 1), line("L3", "Taxes & regulatory fees", 293, "government_tax", 1), line("L4", "Unlimited plan", 3000, "plan", 1), line("L5", "Taxes & regulatory fees", 293, "government_tax", 1)];
   const photo: Source = { kind: "image" };
   const repeats = (reading: Reading) => decide(reading, [], photo, photo).questions.filter((q) => q.kind === "repeated_charge");
 
@@ -548,6 +548,13 @@ describe("charges printed once per person", () => {
   test("the same copies with no part totals to tell them apart are still asked about", () => {
     const unsplit: Reading = { ...base, line_items: tabs, printed: { ...base.printed, current_charges: null, total_due: null, section_totals: [] } };
     expect(repeats(unsplit).map((q) => q.lineIds)).toEqual([["L1", "L4"]]);
+  });
+
+  test("copies on different pictures are not asked about, while copies on different pages of a PDF still are", () => {
+    const pictured: Reading = { ...base, line_items: tabs.map((l) => (l.id === "L4" || l.id === "L5" ? { ...l, page: 2 } : l)), printed: { ...base.printed, current_charges: null, total_due: null, section_totals: [] } };
+    expect(repeats(pictured)).toEqual([]);
+    const pdf: Source = { kind: "text", text: tabs.map((l) => l.quote).join("\n") };
+    expect(decide(pictured, [], pdf, pdf).questions.filter((q) => q.kind === "repeated_charge").map((q) => q.lineIds)).toEqual([["L1", "L4"]]);
   });
 
   test("per-line copies are told apart even when a section with no total of its own follows the parts, or a grand total follows them", () => {

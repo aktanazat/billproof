@@ -16699,16 +16699,7 @@
       ],
       "claims": [],
       "dropped": [],
-      "questions": [
-        {
-          "kind": "repeated_charge",
-          "lines": [
-            "Unlimited Standard plan",
-            "Unlimited Standard plan"
-          ],
-          "cents": 8000
-        }
-      ],
+      "questions": [],
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
