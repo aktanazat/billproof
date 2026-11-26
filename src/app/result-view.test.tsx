@@ -92,6 +92,26 @@ describe("the result page's wording", () => {
     expect(after("Q1", "Q2")).not.toContain("Message to send");
   });
 
+  test("confirming the marked line drops 'once you confirm' from the heading and puts the claim in the message", () => {
+    const promise: Checked["promises"][number] = { id: "P1", kind: "recurring_credit", description: "", amount_cents: 750, per_line: false, conditions: [], applies_from: null, applies_until: null, quote: "-$7.50 per line", said_at_seconds: null, covers_line_ids: ["L1"] };
+    const result: Checked = {
+      ...checked([line("L1", "Number share plan", 1500, "plan")], []),
+      promises: [promise],
+      matchedPromiseIds: ["P1"],
+      claims: [{ id: "C1", kind: "credit_missing", lineIds: ["L1"], promiseId: "P1", actualCents: 0, expectedCents: 750, amountCents: 750, needsConfirmation: true, lookedFor: null }],
+    };
+    const running = { s: "running", inputs: initialState.inputs, attempts: 1, attempt: 1, stage: null, spentMicros: 0, live: {} } as unknown as CheckState;
+    const waiting = reduce(running, { type: "finished", attempt: 1, result });
+    const confirmed = reduce(waiting, { type: "confirm_claim", bill: 0, id: "C1" });
+    if (waiting.s !== "done" || confirmed.s !== "done") throw new Error("the finished check did not become a done state");
+    const before = page(result, waiting.selections[0]);
+    expect(before).toContain("to ask back from AT&T, once you confirm the marked line<");
+    expect(before).not.toContain("Message to send");
+    const after = page(result, confirmed.selections[0]);
+    expect(after).toContain("to ask back from AT&T<");
+    expect(after.replace(/&quot;/g, '"')).toContain('This bill has no $7.50 monthly credit I was promised ("-$7.50 per line"). Please apply the missing $7.50.');
+  });
+
   test("a claim waiting on one marked line asks to confirm the marked line", () => {
     const result: Checked = {
       ...checked([line("L1", "Number share plan", 1500, "plan")], []),
