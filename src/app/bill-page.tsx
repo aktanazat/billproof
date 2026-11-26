@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { quoteExactIn } from "@/lib/evidence";
 import type { TextRow } from "@/lib/pdf-text";
 
 export type Box = { x0: number; y0: number; x1: number; y1: number };
@@ -35,14 +36,12 @@ export function Thumbnail({ src, lazy = false }: { src: string; lazy?: boolean }
   );
 }
 
-const norm = (text: string) => text.toLowerCase().replace(/\s+/g, " ").trim();
-
-// On a PDF, a charge is marked on the printed row that carries its label, nearest where Muse Ember placed it;
-// the model's own box can be a row off. Photos have no rows and keep the model's box.
+// On a PDF, a charge is marked on the printed row that carries its label as whole words, read past look-alike
+// characters as quotes are, nearest where Muse Ember placed it; the model's own box can be a row off. Photos have no
+// rows and keep the model's box.
 export function snapBox(box: Box | null, label: string, rows: TextRow[] | null): Box | null {
   if (!rows) return box;
-  const want = norm(label);
-  const hits = rows.filter((row) => norm(row.text).includes(want));
+  const hits = rows.filter((row) => quoteExactIn(label, row.text));
   if (hits.length === 0 || (!box && hits.length > 1)) return box;
   if (!box) return hits[0].box;
   const middle = (b: Box) => (b.y0 + b.y1) / 2;
