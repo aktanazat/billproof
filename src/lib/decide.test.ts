@@ -532,3 +532,29 @@ describe("promises read from a person's own words", () => {
     expect(asked(named("Company fees & surcharges"))).toBe(1);
   });
 });
+
+describe("charges printed once per person", () => {
+  const base = readingOf(internetGuaranteed);
+  const line = (id: string, label: string, cents: number, kind: LineKind, page: number) => ({ id, label, amount_cents: cents, kind, page, box: { x0: 80, y0: 400, x1: 920, y1: 420 }, quote: `${label} $${(cents / 100).toFixed(2)}`, prorated: false });
+  const tabs = [line("L1", "Unlimited plan", 3000, "plan", 1), line("L2", "Pixel bill credit", -2080, "credit", 1), line("L3", "Taxes & regulatory fees", 293, "government_tax", 1), line("L4", "Unlimited plan", 3000, "plan", 2), line("L5", "Taxes & regulatory fees", 293, "government_tax", 2)];
+  const photo: Source = { kind: "image" };
+  const repeats = (reading: Reading) => decide(reading, [], photo, photo).questions.filter((q) => q.kind === "repeated_charge");
+
+  test("the same plan on two people's tabs, each with its own printed total, is not asked about", () => {
+    const split: Reading = { ...base, line_items: tabs, printed: { ...base.printed, current_charges: null, total_due: null, section_totals: [{ cents: 1213, quote: "Total $12.13" }, { cents: 3293, quote: "Total $32.93" }] } };
+    expect(repeats(split)).toEqual([]);
+  });
+
+  test("the same copies with no part totals to tell them apart are still asked about", () => {
+    const unsplit: Reading = { ...base, line_items: tabs, printed: { ...base.printed, current_charges: null, total_due: null, section_totals: [] } };
+    expect(repeats(unsplit).map((q) => q.lineIds)).toEqual([["L1", "L4"]]);
+  });
+
+  test("per-line copies are told apart even when a section with no total of its own follows the parts, or a grand total follows them", () => {
+    const split = (section_totals: Reading["printed"]["section_totals"], extra: LineItem[] = []): Reading => ({ ...base, line_items: [...tabs, ...extra], printed: { ...base.printed, current_charges: null, total_due: null, section_totals } });
+    const parts = [{ cents: 1213, quote: "Total $12.13" }, { cents: 3293, quote: "Total $32.93" }];
+    expect(repeats(split(parts, [line("L6", "Home phone", 4000, "plan", 3)]))).toEqual([]);
+    expect(repeats(split([...parts, { cents: 4506, quote: "Total $45.06" }]))).toEqual([]);
+    expect(checkTotals(split([...parts, { cents: 4506, quote: "Total $45.06" }]), photo).lineSum).toBe("sections");
+  });
+});

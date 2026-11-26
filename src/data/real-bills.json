@@ -17341,30 +17341,6 @@
             "TN Bus Tax Recovery Fee"
           ],
           "cents": 1
-        },
-        {
-          "kind": "repeated_charge",
-          "lines": [
-            "Unlimited Premium PL - 2 Lines",
-            "Unlimited Premium PL - 2 Lines"
-          ],
-          "cents": 17198
-        },
-        {
-          "kind": "repeated_charge",
-          "lines": [
-            "Administrative & Regulatory Cost Recovery Fee",
-            "Administrative & Regulatory Cost Recovery Fee"
-          ],
-          "cents": 998
-        },
-        {
-          "kind": "repeated_charge",
-          "lines": [
-            "TN Bus Tax Recovery Fee",
-            "TN Bus Tax Recovery Fee"
-          ],
-          "cents": 2
         }
       ],
       "explained": 0,
@@ -17716,49 +17692,6 @@
             "Company fees & surcharges"
           ],
           "cents": 508
-        },
-        {
-          "kind": "repeated_charge",
-          "lines": [
-            "Monthly charges",
-            "Monthly charges",
-            "Monthly charges",
-            "Monthly charges",
-            "Monthly charges"
-          ],
-          "cents": 25495
-        },
-        {
-          "kind": "repeated_charge",
-          "lines": [
-            "Company fees & surcharges",
-            "Company fees & surcharges",
-            "Company fees & surcharges",
-            "Company fees & surcharges",
-            "Company fees & surcharges"
-          ],
-          "cents": 2650
-        },
-        {
-          "kind": "repeated_charge",
-          "lines": [
-            "Monthly charges",
-            "Monthly charges",
-            "Monthly charges",
-            "Monthly charges"
-          ],
-          "cents": 4396
-        },
-        {
-          "kind": "repeated_charge",
-          "lines": [
-            "Company fees & surcharges",
-            "Company fees & surcharges",
-            "Company fees & surcharges",
-            "Company fees & surcharges",
-            "Company fees & surcharges"
-          ],
-          "cents": 2540
         }
       ],
       "explained": 0,
@@ -21037,38 +20970,6 @@
             "Company fees & surcharges"
           ],
           "cents": 520
-        },
-        {
-          "kind": "repeated_charge",
-          "lines": [
-            "Plan",
-            "Plan"
-          ],
-          "cents": 8000
-        },
-        {
-          "kind": "repeated_charge",
-          "lines": [
-            "Company fees & surcharges",
-            "Company fees & surcharges"
-          ],
-          "cents": 1034
-        },
-        {
-          "kind": "repeated_charge",
-          "lines": [
-            "Plan",
-            "Plan"
-          ],
-          "cents": 9600
-        },
-        {
-          "kind": "repeated_charge",
-          "lines": [
-            "Company fees & surcharges",
-            "Company fees & surcharges"
-          ],
-          "cents": 1040
         }
       ],
       "explained": 0,
@@ -23021,22 +22922,6 @@
             "Company fees & surcharges"
           ],
           "cents": 520
-        },
-        {
-          "kind": "repeated_charge",
-          "lines": [
-            "Plan",
-            "Plan"
-          ],
-          "cents": 9250
-        },
-        {
-          "kind": "repeated_charge",
-          "lines": [
-            "Company fees & surcharges",
-            "Company fees & surcharges"
-          ],
-          "cents": 1040
         }
       ],
       "explained": 0,

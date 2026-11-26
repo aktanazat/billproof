@@ -139,35 +139,51 @@ function subtotalLength(lines: LineItem[], printed: number): number | null {
 
 const near = (a: number, b: number) => Math.abs(a - b) <= 1;
 
-// Whether the lines, in printed order, split into runs that add up to each part total in turn, using every line;
-// $0 lines after the last part belong to it.
-function splitsIntoParts(lines: LineItem[], parts: number[]): boolean {
-  if (parts.length === 0 || lines.length === 0) return false;
+type PartRuns = { runs: Map<string, number>; complete: boolean };
+
+// Which part total each line falls under when the lines, in printed order, split into runs that add up to each part
+// total in turn; $0 lines after the last part belong to it. complete is whether every line falls under a part; lines
+// after the last part with an amount are left without one. Null when a part total isn't met.
+function partRuns(lines: LineItem[], parts: number[]): PartRuns | null {
+  if (parts.length === 0 || lines.length === 0) return null;
+  const runs = new Map<string, number>();
   let at = 0;
-  for (const part of parts) {
+  for (const [index, part] of parts.entries()) {
     let running = 0;
     let taken = 0;
     while (at < lines.length && (taken === 0 || !near(running, part))) {
       running += lines[at].amount_cents;
+      runs.set(lines[at].id, index);
       at += 1;
       taken += 1;
     }
-    if (!near(running, part)) return false;
+    if (!near(running, part)) return null;
   }
-  return lines.slice(at).every((line) => line.amount_cents === 0);
+  const rest = lines.slice(at);
+  const complete = rest.every((line) => line.amount_cents === 0);
+  if (complete) for (const line of rest) runs.set(line.id, parts.length - 1);
+  return { runs, complete };
 }
 
 // Part totals nest ("Services & Equipment $58.00" over "Services $22.00" and "Equipment $36.00"); a total that equals
-// the totals printed right after it is their parent and is left out.
+// the totals printed right after it, or two or more printed right before it, is their parent and is left out.
 function innermostParts(parts: number[]): number[] {
-  return parts.filter((part, i) => {
-    let following = 0;
-    for (let j = i + 1; j < parts.length; j++) {
-      following += parts[j];
-      if (near(following, part)) return false;
-    }
-    return true;
-  });
+  const parentOf = (part: number, others: number[], fewest: number) => {
+    let running = 0;
+    return others.some((other, n) => near((running += other), part) && n + 1 >= fewest);
+  };
+  return parts.filter((part, i) => !parentOf(part, parts.slice(i + 1), 1) && !parentOf(part, parts.slice(0, i).reverse(), 2));
+}
+
+// The part each line falls under, from the part totals the bill prints, or their innermost ones when they nest; a
+// split that uses every line is preferred.
+function linesByPart(reading: Reading, bill: Source): PartRuns | null {
+  const parts = (reading.printed.section_totals ?? []).map((part) => printedValue(part, bill));
+  if (parts.some((part) => part === null)) return null;
+  const printed = parts.filter((part) => part !== null);
+  const asPrinted = partRuns(reading.line_items, printed);
+  const innermost = partRuns(reading.line_items, innermostParts(printed));
+  return asPrinted?.complete ? asPrinted : innermost?.complete ? innermost : (asPrinted ?? innermost);
 }
 
 // E1: the lines add up to the printed current charges, a printed subtotal, or, with what was carried over, the
@@ -183,9 +199,7 @@ export function checkTotals(reading: Reading, bill: Source): Totals {
   const carriedCents = previous === null ? 0 : previous - Math.abs(payments ?? 0);
   const currentMatches = current !== null && near(current, lineSumCents);
   const subtotalLines = current === null || currentMatches || lines.length === 0 ? null : subtotalLength(lines, current);
-  const parts = (reading.printed.section_totals ?? []).map((part) => printedValue(part, bill));
-  const printedParts = parts.filter((part) => part !== null);
-  const partsMatch = printedParts.length === parts.length && (splitsIntoParts(lines, printedParts) || splitsIntoParts(lines, innermostParts(printedParts)));
+  const partsMatch = linesByPart(reading, bill)?.complete === true;
   // A bill that shows only its totals has no charges for them to check. A printed total the charges miss is a
   // mismatch even when part totals agree: something the parts don't show is on the bill.
   const lineSum: LineSum =
@@ -445,6 +459,9 @@ export function decide(reading: Reading, promises: PromiseTerm[], bill: Source, 
     }
   }
 
+  // A charge printed once for each person or phone line is not a repeat: when the bill's own part totals split its
+  // lines, copies that fall under different parts belong to different people.
+  const partOf = linesByPart(reading, bill)?.runs ?? null;
   const byKey = new Map<string, LineItem[]>();
   for (const line of reading.line_items) {
     if (line.kind === "government_tax" || line.amount_cents <= 0) continue;
@@ -452,7 +469,8 @@ export function decide(reading: Reading, promises: PromiseTerm[], bill: Source, 
     byKey.set(key, [...(byKey.get(key) ?? []), line]);
   }
   for (const group of byKey.values()) {
-    if (group.length > 1 && !group.every((line) => claimed.has(line.id))) {
+    const sharePart = partOf === null || group.some((line) => !partOf.has(line.id)) || new Set(group.map((line) => partOf.get(line.id))).size < group.length;
+    if (group.length > 1 && sharePart && !group.every((line) => claimed.has(line.id))) {
       questions.push({ kind: "repeated_charge", lineIds: group.map((line) => line.id), promiseId: null });
     }
   }
