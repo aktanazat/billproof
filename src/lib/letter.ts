@@ -207,6 +207,14 @@ function callClose(credit: boolean, questions: boolean): string {
   return questions ? "Before ending the call, ask for a reference number, the date the credit will post, and what will change on the next bill." : "Before ending the call, ask for a reference number and the date the credit will post.";
 }
 
+// The total adds up the claims only, so it comes right after them and before any question, which it doesn't cover.
+const totalAfter = (claims: string[], total: string, rest: string[]) => [...claims, ...(total ? [total] : []), ...rest];
+// The same for a call script, whose points are numbered across the total ("1.", "2.", the total, "3.").
+function numberedTotalAfter(claims: string[], total: string, rest: string[]): string[] {
+  const points = numbered([...claims, ...rest]);
+  return totalAfter(points.slice(0, claims.length), total, points.slice(claims.length));
+}
+
 export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<string>, includedQuestionIds: ReadonlySet<string>): Message {
   const lines = new Map(result.reading.line_items.map((line) => [line.id, line]));
   const promises = new Map(result.promises.map((promise) => [promise.id, promise]));
@@ -240,12 +248,12 @@ export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<stri
   // A total helps only when it adds up several claims; after one, it repeats the amount just asked for.
   const ask = claims.length > 1 ? `In total, please credit ${usd(totalCents)} to ${account}.` : "";
   const increase = increaseSentence(result.change);
-  const body = [...claimText, ...(increase ? [increase] : []), ...questionText];
+  const asked = [...(increase ? [increase] : []), ...questionText];
   const risen = increaseFact(result.change);
   const regulatorBody = [...claimPartsFor(`${provider ?? "the company"}'s representative`, periodText(result)).map(({ fact }) => fact), ...(risen ? [risen] : []), ...questionFacts];
 
   const about = aboutText(result, account);
-  const chat = [`Hi, I'm writing about ${about}.`, ...body, ask].filter(Boolean).join("\n\n");
+  const chat = [`Hi, I'm writing about ${about}.`, ...totalAfter(claimText, ask, asked)].join("\n\n");
   const email = [
     totalCents > 0 ? `Subject: Billing correction for ${account}` : `Subject: Questions about the charges on ${account}`,
     "",
@@ -253,8 +261,7 @@ export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<stri
     "",
     `I'm writing about ${about}.`,
     "",
-    ...body.flatMap((sentence) => [sentence, ""]),
-    ...(ask ? [ask, ""] : []),
+    ...totalAfter(claimText, ask, asked).flatMap((sentence) => [sentence, ""]),
     replyAsk(totalCents > 0, questionText.length > 0 || increase !== null),
     "",
     "Thank you,",
@@ -262,8 +269,7 @@ export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<stri
   ].join("\n");
   const call = [
     `I'm calling about ${about}.`,
-    ...numbered(body),
-    ask,
+    ...numberedTotalAfter(claimText, ask, asked),
     callClose(totalCents > 0, questionText.length > 0 || increase !== null),
   ]
     .filter(Boolean)
@@ -334,7 +340,7 @@ export function buildYearMessage(months: Checked[]): Message {
   const ask = withClaims.flatMap((month) => month.claims).length > 1 ? `In total, please credit ${usd(totalCents)} to ${account}.` : "";
   // Only an offer from this company is a plan the statements were checked against.
   const opening = offerCovers ? `I'm writing about ${account}. I checked my statements against the plan I signed up for.` : `I'm writing about ${account}.`;
-  const chat = [`Hi, ${opening}`, ...sections, ...feeText, ask].filter(Boolean).join("\n\n");
+  const chat = [`Hi, ${opening}`, ...totalAfter(sections, ask, feeText)].join("\n\n");
   const email = [
     totalCents > 0 ? `Subject: Billing correction for ${account}` : `Subject: Questions about the charges on ${account}`,
     "",
@@ -342,8 +348,7 @@ export function buildYearMessage(months: Checked[]): Message {
     "",
     opening,
     "",
-    ...[...sections, ...feeText].flatMap((s) => [s, ""]),
-    ...(ask ? [ask, ""] : []),
+    ...totalAfter(sections, ask, feeText).flatMap((s) => [s, ""]),
     replyAsk(totalCents > 0, feeText.length > 0),
     "",
     "Thank you,",
@@ -351,8 +356,7 @@ export function buildYearMessage(months: Checked[]): Message {
   ].join("\n");
   const call = [
     `I'm calling about ${account}.`,
-    ...numbered([...sectionsFor("your representative", true, "as I mentioned"), ...feeText]),
-    ask,
+    ...numberedTotalAfter(sectionsFor("your representative", true, "as I mentioned"), ask, feeText),
     callClose(totalCents > 0, feeText.length > 0),
   ]
     .filter(Boolean)

@@ -31,6 +31,20 @@ test("no message built from a saved result has a doubled space, stray punctuatio
   expect(found).toEqual([]);
 });
 
+// The total adds up the claims only, so it follows them: after the fee questions it read as if the fees were in it.
+test("the total to credit follows the claims it adds up, before any fee question", () => {
+  const run = JSON.parse(readFileSync(path.join(import.meta.dirname, "../../eval/run-2026-11-26.json"), "utf8")) as { raw: { id: string; variant?: string; events: CheckEvent[] }[] };
+  const event = run.raw.find((r) => r.id === "internet-guaranteed" && r.variant === "pdf")?.events.find((e) => e.type === "result");
+  if (event?.type !== "result" || event.result.outcome !== "checked") throw new Error("the saved run has no guaranteed-price result");
+  const result = event.result;
+  const message = buildMessage(result, new Set(result.claims.map((c) => c.id)), new Set(result.questions.map((q) => q.id)));
+  for (const body of [message.chat, message.email, message.call]) {
+    expect(body.indexOf("In total, please credit $30.00")).toBeGreaterThan(-1);
+    expect(body.indexOf("In total, please credit $30.00")).toBeLessThan(body.indexOf("Please explain the Network Enhancement Fee"));
+  }
+  expect(message.call).toContain("In total, please credit $30.00 to account ending 4415.\n\n3. Please explain the Network Enhancement Fee");
+});
+
 const fee = (id: string, label: string, cents: number): LineItem => ({ id, label, amount_cents: cents, kind: "company_fee", page: 1, box: { x0: 80, y0: 400, x1: 920, y1: 420 }, quote: `${label} $${(cents / 100).toFixed(2)}`, prorated: false });
 
 function billWith(lines: LineItem[]): Checked {
