@@ -501,8 +501,15 @@ export function settleChallenges(claims: Claim[], challenges: Challenge[], readi
       else kept.push({ ...claim, lookedFor: challenge.looked_for });
       continue;
     }
-    if (onSource) dropped.push({ claim, lookedFor: challenge.looked_for, counterQuote: quote, source: "offer" });
+    if (onSource || offerChargeExplains(claim, quote, where)) dropped.push({ claim, lookedFor: challenge.looked_for, counterQuote: quote, source: "offer" });
     else kept.push({ ...claim, lookedFor: challenge.looked_for, needsConfirmation: true });
   }
   return { claims: kept, dropped };
+}
+
+// A picture of an offer has no text to hold a rebuttal to, but a fee or tax the offer itself lists for exactly the
+// amount a price claim is over ("California Cost Recovery Charge $1.25") is a charge the customer was shown, and a
+// bill line that rolls it into the price is not above the promise.
+function offerChargeExplains(claim: Claim, quote: string, offer: Source): boolean {
+  return offer.kind === "image" && claim.kind === "price_above_promise" && (FEE_WORDS.test(quote) || /\btax(es)?\b/i.test(quote)) && moneyIn(quote).map(Math.abs).includes(claim.amountCents);
 }

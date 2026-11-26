@@ -145,6 +145,19 @@ describe("decide on the internet bill with an active price guarantee", () => {
     expect(settled.claims[0].needsConfirmation).toBe(true);
   });
 
+  test("on a pictured offer, a fee the offer lists for exactly the amount over the price drops the claim, a discount does not", () => {
+    const photo: Source = { kind: "image" };
+    const bill = billText.get(internetGuaranteed.id)!;
+    const { claims } = decide(reading, promises, bill, offer(internetGuaranteed));
+    const price = claims.find((c) => c.kind === "price_above_promise")!;
+    const rebut = (counter_quote: string) => [{ claim_id: price.id, looked_for: "a charge the offer lists", verdict: "refuted" as const, counter_quote, counter_source: "offer" as const }];
+    const fee = settleChallenges(claims, rebut("Network Access Charge $15.00"), reading, bill, photo);
+    expect(fee.dropped.map((d) => d.claim.id)).toEqual([price.id]);
+    const discount = settleChallenges(claims, rebut("Discount of $15.00 for 24 months"), reading, bill, photo);
+    expect(discount.dropped).toEqual([]);
+    expect(discount.claims.find((c) => c.id === price.id)?.needsConfirmation).toBe(true);
+  });
+
   test("asks about company fees no promise covers, never about taxes", () => {
     const decision = decide(reading, promises, billText.get(internetGuaranteed.id)!, offer(internetGuaranteed));
     const asked = decision.questions.filter((q) => q.kind === "unagreed_fee").flatMap((q) => q.lineIds);
