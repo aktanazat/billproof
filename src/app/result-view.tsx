@@ -208,7 +208,7 @@ export function MessageBox({ message }: { message: Message }) {
         <div className="flex flex-wrap items-center gap-2">
           <div role="tablist" aria-label="Message format" className="inline-flex rounded-lg bg-fill p-0.5">
             {formats.map(([value, label]) => (
-              <button key={value} role="tab" type="button" aria-selected={format === value} onClick={() => { setFormat(value); setCopied("no"); }} className={`h-7 whitespace-nowrap rounded-md px-2.5 text-[13px] sm:px-3 ${format === value ? "bg-white font-medium shadow-[0_1px_2px_rgb(0_0_0/0.12)]" : "text-text-2 hover:text-text"}`}>
+              <button key={value} role="tab" type="button" aria-selected={format === value} onClick={() => { setFormat(value); setCopied("no"); }} className={`h-7 whitespace-nowrap rounded-md px-1.5 text-[13px] sm:px-3 ${format === value ? "bg-white font-medium shadow-[0_1px_2px_rgb(0_0_0/0.12)]" : "text-text-2 hover:text-text"}`}>
                 {label}
               </button>
             ))}
@@ -416,7 +416,7 @@ export function ResultView({
         {back}
       </header>
 
-      <div className="grid gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
         <div className="flex flex-col gap-4 lg:sticky lg:top-6 lg:self-start">
           {billPages.map((page, index) => (
             <BillPage key={index} image={page.image} alt={`Bill page ${index + 1}`} marks={marks.filter((m) => m.page === index + 1)} focus={focusLines} />
