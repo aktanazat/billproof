@@ -44,7 +44,8 @@ export type UnusedReason =
   | "no_price"
   | "no_credit_amount"
   | "item_not_named"
-  | "amount_approximate";
+  | "amount_approximate"
+  | "device_or_cart_total";
 export type Unused = { promiseId: string; reason: UnusedReason };
 
 export type Decision = {
@@ -303,6 +304,10 @@ const MAX_PLAUSIBLE_SHARE = 0.5;
 // already have ended, so it can only raise a question.
 const TIME_LIMIT = /\b(through|thru|until|ends?|ending|expires?|for (\d+|a|one|two|three) (months?|mos?|years?|yrs?)|\d+[- ](months?|mos?|years?)|promo(tional)?|\d{1,2}\/\d{1,2}\/\d{2,4}|(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.? \d{1,2},? \d{4})\b/i;
 
+// A checkout cart's monthly total or a device's financing ("Due monthly $32.22", "for 36 mos. at 0% APR") is what a
+// new order or phone costs, not the price promised for a plan already on the bill.
+const DEVICE_OR_CART = /\b(due monthly|due today|check ?out|add to cart|installments?|financ(ed|ing)|device payment)\b|\d% apr\b/i;
+
 // Charges a government sets and the company only collects, whatever kind the reading gave them, including combined
 // "Taxes & fees" lines. "Tax Recovery" and "Regulatory Cost Recovery" fees are the company's own and don't match.
 const GOVERNMENT_FEE = /\b(franchise fee|peg|9-?1-?1|988|universal service|taxes|sales (and use )?tax|users? tax|excise tax|public,? educ)/i;
@@ -385,6 +390,10 @@ export function decide(reading: Reading, promises: PromiseTerm[], bill: Source, 
     if (promise.kind === "monthly_price") {
       if (promise.amount_cents === null || planLines.length === 0) {
         unused.push({ promiseId: promise.id, reason: "no_price" });
+        continue;
+      }
+      if (DEVICE_OR_CART.test(promise.quote)) {
+        unused.push({ promiseId: promise.id, reason: "device_or_cart_total" });
         continue;
       }
       // A posted discount on the covered lines shows the company already counts the conditions as met.

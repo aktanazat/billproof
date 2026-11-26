@@ -26,6 +26,7 @@ const UNUSED_TEXT: Record<UnusedReason, string | null> = {
   no_credit_amount: "it names no credit amount",
   item_not_named: "the charge linked to it isn't the item it names",
   amount_approximate: "its amount is only approximate",
+  device_or_cart_total: "it's a device payment or order total, not a plan price",
 };
 
 function listNames(lines: LineItem[]): string {

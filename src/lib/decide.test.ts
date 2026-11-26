@@ -585,3 +585,17 @@ describe("a fee printed twice", () => {
     expect(questions.filter((q) => q.lineIds.includes("F1")).map((q) => [q.kind, q.lineIds])).toEqual([["unagreed_fee", ["F1", "F2"]]]);
   });
 });
+
+describe("a checkout cart's monthly total", () => {
+  test("is not held against the plan as its promised price, while a plan price in the same wording otherwise still is", () => {
+    const base = readingOf(internetGuaranteed);
+    const plan = { id: "L1", label: "Unlimited Premium plan", amount_cents: 4479, kind: "plan" as const, page: 1, box: { x0: 80, y0: 400, x1: 920, y1: 420 }, quote: "Unlimited Premium plan $44.79", prorated: false };
+    const reading: Reading = { ...base, line_items: [plan], printed: { ...base.printed, current_charges: null, total_due: null, section_totals: [] } };
+    const photo: Source = { kind: "image" };
+    const priced = (quote: string) => decide(reading, [promise({ kind: "monthly_price", amount_cents: 3222, quote, covers_line_ids: ["L1"] })], photo, photo);
+    const cart = priced("Due monthly $32.22");
+    expect(cart.claims).toEqual([]);
+    expect(cart.unused.map((u) => u.reason)).toEqual(["device_or_cart_total"]);
+    expect(priced("Unlimited Premium plan for $32.22 a month").claims.map((c) => c.amountCents)).toEqual([1257]);
+  });
+});
