@@ -48,6 +48,16 @@ describe("check machine", () => {
     expect(startBlocker(opening.inputs)).toBeNull();
   });
 
+  // The server reads up to 20,000 characters of offer; past that it refused the whole check as files it couldn't
+  // prepare. A pasted terms page that long is caught on the start screen, with the reason and what to keep.
+  test("an offer pasted past the length the check reads holds the check back, saying so", () => {
+    const long = play([...readyBill, { type: "offer_text", text: "Fiber 500 for $55 a month. ".repeat(1_000) }, { type: "start" }]);
+    if (long.s !== "composing") throw new Error("an overlong offer started the check");
+    expect(startBlocker(long.inputs)).toBe("The offer is 26,999 characters; a check reads up to 20,000. Keep the part with the prices and what's included.");
+    const trimmed = play([{ type: "offer_text", text: "Fiber 500 for $55 a month." }, { type: "start" }], long);
+    expect(trimmed.s).toBe("running");
+  });
+
   test("a real post whose pictures are gone waits on the start screen with the reason instead of starting", () => {
     const offer = { kind: "text" as const, text: "$55 a month" };
     const gone = play([{ type: "sample_ready", inputs: { bills: [{ id: "p", name: "3 pictures from the post", status: "failed", message: "The pictures from this post are no longer online." }], offer } }]);

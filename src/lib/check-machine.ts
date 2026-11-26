@@ -1,6 +1,6 @@
 import type { PreparedCall, ShownPage } from "./prepare";
 import type { TranscriptTurn } from "./schemas";
-import type { CheckFailure, CheckInput, CheckResult, PageKind, PreparedPage, SeenChallenge, SeenLine, SeenPromise, SingleResult, Stage } from "./result";
+import { MAX_OFFER_TEXT, type CheckFailure, type CheckInput, type CheckResult, type PageKind, type PreparedPage, type SeenChallenge, type SeenLine, type SeenPromise, type SingleResult, type Stage } from "./result";
 
 export type Doc =
   | { id: string; name: string; status: "preparing" }
@@ -111,8 +111,11 @@ export function checkInput(inputs: Inputs): CheckInput | null {
   switch (offer.kind) {
     case "none":
       return { bills, offer: null };
-    case "text":
-      return { bills, offer: offer.text.trim() ? { kind: "text", text: offer.text.trim() } : null };
+    case "text": {
+      const text = offer.text.trim();
+      if (text.length > MAX_OFFER_TEXT) return null;
+      return { bills, offer: text ? { kind: "text", text } : null };
+    }
     case "file":
       return offer.doc.status === "ready" ? { bills, offer: { kind: "pages", pages: sent(offer.doc.pages) } } : null;
     case "call":
@@ -121,10 +124,13 @@ export function checkInput(inputs: Inputs): CheckInput | null {
 }
 
 // Why a check can't start, for beside the disabled button. A file that failed to open holds it back until removed, and
-// its row says only what went wrong with it; a file still opening says so on its row, and an empty screen is plain.
+// its row says only what went wrong with it; so does an offer longer than a check reads. A file still opening says so
+// on its row, and an empty screen is plain.
 export function startBlocker(inputs: Inputs): string | null {
   const offerFailed = (inputs.offer.kind === "file" && inputs.offer.doc.status === "failed") || (inputs.offer.kind === "call" && inputs.offer.call.status === "failed");
-  return offerFailed || inputs.bills.some((doc) => doc.status === "failed") ? "Remove the file that couldn't be opened to continue." : null;
+  if (offerFailed || inputs.bills.some((doc) => doc.status === "failed")) return "Remove the file that couldn't be opened to continue.";
+  const written = inputs.offer.kind === "text" ? inputs.offer.text.trim().length : 0;
+  return written > MAX_OFFER_TEXT ? `The offer is ${written.toLocaleString("en-US")} characters; a check reads up to ${MAX_OFFER_TEXT.toLocaleString("en-US")}. Keep the part with the prices and what's included.` : null;
 }
 
 function run(state: CheckState): CheckState {
