@@ -8,14 +8,19 @@ import type { CheckEvent } from "./result";
 // Muse Ember is replaced by fixed answers so whole checks run offline; this file holds only tests that need that,
 // since the mock applies to every test in it. `scenario` sets what the bill charges and what the company's side quotes.
 const COST = { read_bill: 1000, read_terms: 500, challenge: 700 } as const;
-const scenario = { billedCents: 5500, counterQuote: null as string | null };
-vi.mock("./ember", async (actual) => ({
-  ...(await actual<typeof Ember>()),
+const scenario = { billedCents: 5500, counterQuote: null as string | null, tooLong: null as string | null };
+// A failure thrown here is built from the same module copy the pipeline is given, so it is recognised as Muse Ember's.
+vi.mock("./ember", async (actual) => {
+  const real = await actual<typeof Ember>();
+  return {
+  ...real,
   countInputTokens: async () => 1000,
   send: async (request: { call: { name: string }; body: { input: { content: { type: string; image_url?: string; text?: string }[] }[] } }) => {
     const name = request.call.name as keyof typeof COST;
     const content = request.body.input[0].content;
     const month = content.some((part) => part.image_url?.endsWith("B") || part.text?.includes("February")) ? "February" : "January";
+    // Too long for both readings, the first and the second with twice the room.
+    if ((name === "read_bill" || (name as string) === "reread_bill") && month === scenario.tooLong) throw new real.EmberError("truncated", "max_output_tokens", 900);
     if (name === "challenge") {
       const ids = content.flatMap((part) => [...(part.text ?? "").matchAll(/^Claim (\S+) \(/gm)].map((m) => m[1]));
       const challenges = ids.map((id) => ({ claim_id: id, looked_for: "A later price in the offer.", verdict: scenario.counterQuote ? "refuted" : "stands", counter_quote: scenario.counterQuote, counter_source: scenario.counterQuote ? "offer" : null }));
@@ -43,7 +48,8 @@ vi.mock("./ember", async (actual) => ({
           };
     return { output, usage: { inputTokens: 1000, cachedTokens: 0, outputTokens: 100 }, costMicros: COST[name] };
   },
-}));
+  };
+});
 
 test("each month of a year check reports its own Muse Ember steps and cost; the year reports them all", async () => {
   const events: CheckEvent[] = [];
@@ -79,4 +85,21 @@ test("a claim the company's side defeats with the offer's own words is dropped, 
   expect(done.result.dropped).toMatchObject([{ claim: { kind: "price_above_promise", amountCents: 1500 }, counterQuote: scenario.counterQuote, source: "offer" }]);
   const message = buildMessage(done.result, new Set(done.result.dropped.map((d) => d.claim.id)), new Set());
   expect(`${message.chat}\n${message.complaint}`).not.toContain("$15.00");
+});
+
+// A year stops at its first failure. One that belongs to a single bill says which, so the person can fix that one;
+// "This bill is too long" alone, among twelve, leaves them guessing at another paid try.
+test("a year stopped by one bill's failure names that bill by its place in the list", async () => {
+  scenario.billedCents = 5500;
+  scenario.counterQuote = null;
+  scenario.tooLong = "February";
+  const events: CheckEvent[] = [];
+  const page = (tag: string) => ({ image: `data:image/png;base64,iVBORw0KGgo${tag}`, text: null });
+  await runCheck(
+    // Pages no other test sends, so no reading remembered from an earlier test answers for them.
+    { bills: [{ pages: [page("AA")] }, { pages: [page("BB")] }], offer: { kind: "text", text: "Fiber 500 for $55 a month" } },
+    { ledger: openLedger(":memory:", 1_000_000), client: "test", signal: new AbortController().signal, emit: (event) => events.push(event) },
+  );
+  scenario.tooLong = null;
+  expect(events.at(-1)).toMatchObject({ type: "error", failure: "truncated", message: "Bill 2 in the list: This bill is too long for Muse Ember to read in one check. Use the pages with the charges.", retryable: false });
 });

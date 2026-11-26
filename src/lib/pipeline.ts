@@ -269,7 +269,7 @@ async function paid<T>(call: EmberCall<T>, run: Run, live: Live): Promise<T> {
   }
 
   const inputTokens = await countInputTokens(request, deps.signal);
-  if (inputTokens > LONG_CONTEXT_THRESHOLD) throw new CheckStop("bad_input", "These files are too large to read in one check", false);
+  if (inputTokens > LONG_CONTEXT_THRESHOLD) throw new CheckStop("bad_input", "These files are too large to read in one check.", false);
   if (run.halted) throw run.halted;
   const attempt = deps.ledger.reserve(run.checkId, ceilingMicros(inputTokens, call.maxOutputTokens), run.capMicros);
   let written = "";
@@ -484,12 +484,23 @@ async function check(input: CheckInput, checkId: string, capMicros: number, deps
 
   deps.emit({ type: "stage", stage: "reading_bill" });
   const months = await mapLimit(input.bills, YEAR_CONCURRENCY, run, async (bill, index) => {
-    const result = await checkOne(bill.pages, input.offer, run, index);
+    const result = await checkOne(bill.pages, input.offer, run, index).catch((error: unknown) => {
+      throw ofBill(error, index);
+    });
     deps.emit({ type: "month", bill: index, result });
     return { bill: index, result };
   });
   deps.emit({ type: "stage", stage: "comparing" });
   return { outcome: "year", months, spentMicros: deps.ledger.spentForCheck(checkId), calls: run.calls.flat() };
+}
+
+// A year stops at its first failure. One that belongs to a single bill (too long to read, declined, too large) names it
+// by its place in the list, so the person can fix that statement rather than guess among twelve and pay to try again.
+function ofBill(error: unknown, bill: number): unknown {
+  const named = (message: string) => `Bill ${bill + 1} in the list: ${message}`;
+  if (error instanceof EmberError && (error.kind === "truncated" || error.kind === "refused")) return new CheckStop(error.kind, named(PLAIN[error.kind]), false);
+  if (error instanceof CheckStop && error.failure === "bad_input") return new CheckStop(error.failure, named(error.message), error.retryable);
+  return error;
 }
 
 const RETRYABLE: Record<CheckFailure, boolean> = {
