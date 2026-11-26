@@ -1,7 +1,7 @@
 {
   "ranAt": "2026-11-26T01:23:28.124Z",
-  "seconds": 1178.30447525,
-  "spentMicros": 1429146,
+  "seconds": 1225.29443675,
+  "spentMicros": 1460579,
   "posts": 1517,
   "results": [
     {
@@ -2817,7 +2817,7 @@
       "images": [
         "https://preview.redd.it/krtm19hvkh3e1.png?width=941&format=png&auto=webp&s=296b22795182d2df7e29266673f3f9815fd9946c"
       ],
-      "ms": 20245,
+      "ms": 21395,
       "outcome": "checked",
       "provider": "Xfinity",
       "period": [
@@ -2829,6 +2829,7 @@
       "billPages": [
         0
       ],
+      "change": null,
       "claims": [],
       "dropped": [],
       "questions": [
@@ -2857,8 +2858,7 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 1,
-      "spentMicros": 4879,
-      "change": null
+      "spentMicros": 4746
     },
     {
       "id": "1ioi06i",
@@ -3716,7 +3716,7 @@
         "https://preview.redd.it/0gac8e9f82qe1.png?width=700&format=png&auto=webp&s=7f1a68cdd1d7fbb276ca5109cbd7f790453bbe64",
         "https://preview.redd.it/yl7c669f82qe1.png?width=810&format=png&auto=webp&s=35a9b3fe8e523ac47948eddbe01128faf0f34e3c"
       ],
-      "ms": 44535,
+      "ms": 46781,
       "outcome": "checked",
       "provider": "Xfinity",
       "period": [
@@ -3724,10 +3724,14 @@
         null
       ],
       "lines": 13,
-      "lineSum": "mismatch",
+      "lineSum": "not_printed",
       "billPages": [
         0
       ],
+      "change": {
+        "earlierCents": 18802,
+        "currentCents": 28314
+      },
       "claims": [],
       "dropped": [],
       "questions": [
@@ -3756,11 +3760,7 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 9883,
-      "change": {
-        "earlierCents": 18802,
-        "currentCents": 28314
-      }
+      "spentMicros": 10222
     },
     {
       "id": "1ksgbep",
@@ -3962,26 +3962,9 @@
       "images": [
         "https://i.redd.it/7p0j3z1t4d1f1.jpeg"
       ],
-      "ms": 9971,
-      "outcome": "checked",
-      "provider": null,
-      "period": [
-        null,
-        null
-      ],
-      "lines": 2,
-      "lineSum": "not_printed",
-      "billPages": [
-        0
-      ],
-      "claims": [],
-      "dropped": [],
-      "questions": [],
-      "explained": 0,
-      "hadOffer": true,
-      "matchedPromises": 0,
-      "spentMicros": 1864,
-      "change": null
+      "ms": 7197,
+      "outcome": "not_a_bill",
+      "spentMicros": 1193
     },
     {
       "id": "1l262l9",
@@ -6697,7 +6680,7 @@
       "images": [
         "https://preview.redd.it/yors7rftkyzf1.png?width=537&format=png&auto=webp&s=afdc5077ba0ce990ceae22e0b0090a44d040bf61"
       ],
-      "ms": 22018,
+      "ms": 16767,
       "outcome": "checked",
       "provider": "Spectrum",
       "period": [
@@ -6709,6 +6692,7 @@
       "billPages": [
         0
       ],
+      "change": null,
       "claims": [
         {
           "kind": "included_charged",
@@ -6735,8 +6719,7 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 1,
-      "spentMicros": 4725,
-      "change": null
+      "spentMicros": 3480
     },
     {
       "id": "1oto0l0",
@@ -7362,22 +7345,26 @@
       "billPages": [
         1
       ],
-      "claims": [
+      "claims": [],
+      "dropped": [],
+      "questions": [
         {
-          "kind": "credit_missing",
-          "amountCents": 388,
-          "actualCents": 1612,
-          "expectedCents": 2000,
+          "kind": "end_date_unread",
           "lines": [
             "Spectrum Internet Advantage",
             "Promotional Discount"
           ],
-          "promise": "$50-$20=$20 discount for a year.",
-          "needsConfirmation": true
+          "cents": 2420
+        },
+        {
+          "kind": "end_date_unread",
+          "lines": [
+            "Spectrum Internet Advantage",
+            "Promotional Discount"
+          ],
+          "cents": 2420
         }
       ],
-      "dropped": [],
-      "questions": [],
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 2,
@@ -7672,7 +7659,7 @@
       "images": [
         "https://preview.redd.it/6xw8z2m2a27g1.png?width=340&format=png&auto=webp&s=49c35e7a2be66ba095853ac2a42b5a59881364e7"
       ],
-      "ms": 19391,
+      "ms": 10532,
       "outcome": "checked",
       "provider": "AT&T",
       "period": [
@@ -7684,28 +7671,14 @@
       "billPages": [
         0
       ],
-      "claims": [
-        {
-          "kind": "price_above_promise",
-          "amountCents": 1800,
-          "actualCents": 5500,
-          "expectedCents": 3700,
-          "lines": [
-            "Internet 1000 (Fiber 1 GIG)",
-            "$25 Off Ongoing",
-            "AutoPay/Paperless Billing Discount"
-          ],
-          "promise": "$55/mo for a gig or $37 if you have AT&T cell phones",
-          "needsConfirmation": true
-        }
-      ],
+      "change": null,
+      "claims": [],
       "dropped": [],
       "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 2,
-      "spentMicros": 4274,
-      "change": null
+      "matchedPromises": 0,
+      "spentMicros": 2484
     },
     {
       "id": "1pw9gdi",
@@ -9269,6 +9242,21 @@
       "dropped": [],
       "questions": [
         {
+          "kind": "end_date_unread",
+          "lines": [
+            "Spectrum Internet Gig",
+            "Promotional Discount"
+          ],
+          "cents": 4000
+        },
+        {
+          "kind": "end_date_unread",
+          "lines": [
+            "Advanced WiFi"
+          ],
+          "cents": 0
+        },
+        {
           "kind": "unagreed_fee",
           "lines": [
             "CA Cost Recovery Charge"
@@ -10658,7 +10646,7 @@
       "images": [
         "https://external-preview.redd.it/-ns4IzJHZ_vucmIuugJkdJ-_ni6iQQioaWoEy3893QE.png?auto=webp&s=a3b8de1a5e20ffec2d66fe01260a15a36290ad85"
       ],
-      "ms": 12071,
+      "ms": 15215,
       "outcome": "checked",
       "provider": null,
       "period": [
@@ -10670,29 +10658,26 @@
       "billPages": [
         0
       ],
-      "claims": [],
-      "dropped": [],
-      "questions": [
+      "change": null,
+      "claims": [
         {
-          "kind": "conditions_unproven",
+          "kind": "credit_missing",
+          "amountCents": 750,
+          "actualCents": 0,
+          "expectedCents": 750,
           "lines": [
             "Number share plan"
           ],
-          "cents": 1500
-        },
-        {
-          "kind": "end_date_unread",
-          "lines": [
-            "Number share plan"
-          ],
-          "cents": 1500
+          "promise": "I had two new Apple watches signed up for Number shared plans that were each $15 shared plan, but came with 50% discount that showed -$7.50 per line.",
+          "needsConfirmation": true
         }
       ],
+      "dropped": [],
+      "questions": [],
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 2,
-      "spentMicros": 2566,
-      "change": null
+      "spentMicros": 2995
     },
     {
       "id": "1tptj3u",
@@ -11926,19 +11911,7 @@
       "billPages": [
         1
       ],
-      "claims": [
-        {
-          "kind": "credit_missing",
-          "amountCents": 1500,
-          "actualCents": 0,
-          "expectedCents": 1500,
-          "lines": [
-            "Internet 300 (Fiber 300) Stand-alone"
-          ],
-          "promise": "Price after discounts: $15/mo. for 12 mos. for new customers and $10/mo. with elig. Autopay and paperless bill. Ltd. avail./areas. See offer details",
-          "needsConfirmation": true
-        }
-      ],
+      "claims": [],
       "dropped": [],
       "questions": [
         {
@@ -11949,7 +11922,14 @@
           "cents": 7500
         },
         {
-          "kind": "conditions_unproven",
+          "kind": "end_date_unread",
+          "lines": [
+            "Internet 300 (Fiber 300) Stand-alone"
+          ],
+          "cents": 7500
+        },
+        {
+          "kind": "end_date_unread",
           "lines": [
             "Internet 300 (Fiber 300) Stand-alone"
           ],
@@ -13082,22 +13062,18 @@
       "billPages": [
         2
       ],
-      "claims": [
+      "claims": [],
+      "dropped": [],
+      "questions": [
         {
-          "kind": "price_above_promise",
-          "amountCents": 3000,
-          "actualCents": 7000,
-          "expectedCents": 4000,
+          "kind": "end_date_unread",
           "lines": [
             "Spectrum Internet Gig",
             "Promotional Discount"
           ],
-          "promise": "The person on the phone offered me a discounted rate of $40 for two years for internet service if I added two spectrum mobile lines to my account.",
-          "needsConfirmation": true
+          "cents": 7000
         }
       ],
-      "dropped": [],
-      "questions": [],
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 1,
@@ -13808,18 +13784,11 @@
             "Plans"
           ],
           "cents": 13396
-        },
-        {
-          "kind": "price_gap",
-          "lines": [
-            "Plans"
-          ],
-          "cents": 13396
         }
       ],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 2,
+      "matchedPromises": 1,
       "spentMicros": 3359,
       "change": null
     },
@@ -14305,7 +14274,7 @@
       ],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 1,
+      "matchedPromises": 0,
       "spentMicros": 2336,
       "change": null
     },
@@ -16731,21 +16700,7 @@
       "billPages": [
         0
       ],
-      "claims": [
-        {
-          "kind": "credit_missing",
-          "amountCents": 1000,
-          "actualCents": 1000,
-          "expectedCents": 2000,
-          "lines": [
-            "ONE Plan Tablet",
-            "ONE Plan Tablet",
-            "Kickback Discount"
-          ],
-          "promise": "I had it in my iPad for the longest time but rarely used it to take advantage of the free $10 credit most months.",
-          "needsConfirmation": true
-        }
-      ],
+      "claims": [],
       "dropped": [],
       "questions": [],
       "explained": 0,
@@ -21219,23 +21174,17 @@
         2,
         3
       ],
-      "claims": [
+      "claims": [],
+      "dropped": [],
+      "questions": [
         {
-          "kind": "price_above_promise",
-          "amountCents": 2000,
-          "actualCents": 4000,
-          "expectedCents": 2000,
+          "kind": "end_date_unread",
           "lines": [
-            "Premium 2.0 - 4+ Lines",
             "Discount for switching to AT&T with own device",
             "Discount for Military & Veteran Appreciation"
           ],
-          "promise": "I was quoted approximately $269 per month for four wireless lines, with home internet supposedly costing around $20 per month.",
-          "needsConfirmation": true
-        }
-      ],
-      "dropped": [],
-      "questions": [
+          "cents": -2000
+        },
         {
           "kind": "unagreed_fee",
           "lines": [
@@ -21299,7 +21248,7 @@
       ],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 4,
+      "matchedPromises": 1,
       "spentMicros": 7702,
       "change": null
     },
@@ -21359,7 +21308,7 @@
         "https://i.redd.it/shqt93pgabxh1.png",
         "https://i.redd.it/zf67qxogabxh1.jpeg"
       ],
-      "ms": 51926,
+      "ms": 30005,
       "outcome": "checked",
       "provider": "Xfinity",
       "period": [
@@ -21371,98 +21320,23 @@
       "billPages": [
         0
       ],
-      "claims": [
-        {
-          "kind": "price_above_promise",
-          "amountCents": 7650,
-          "actualCents": 20650,
-          "expectedCents": 13000,
-          "lines": [
-            "Premier Triple Play",
-            "Premier Triple Play"
-          ],
-          "promise": "Internet\n$130.00/mo",
-          "needsConfirmation": true
-        },
-        {
-          "kind": "included_charged",
-          "amountCents": 2800,
-          "actualCents": 2800,
-          "expectedCents": 0,
-          "lines": [
-            "TV Box + Remote"
-          ],
-          "promise": "First 4K TV Box",
-          "needsConfirmation": true
-        },
-        {
-          "kind": "included_charged",
-          "amountCents": 1060,
-          "actualCents": 1060,
-          "expectedCents": 0,
-          "lines": [
-            "Regional Sports Fee"
-          ],
-          "promise": "Sports & News",
-          "needsConfirmation": true
-        }
-      ],
+      "change": null,
+      "claims": [],
       "dropped": [],
       "questions": [
         {
-          "kind": "price_gap",
+          "kind": "unagreed_fee",
           "lines": [
-            "Premier Triple Play",
-            "Premier Triple Play"
+            "Broadcast TV Fee"
           ],
-          "cents": 20650
+          "cents": 2900
         },
         {
-          "kind": "price_gap",
+          "kind": "unagreed_fee",
           "lines": [
-            "Premier Triple Play",
-            "Premier Triple Play"
+            "Regional Sports Fee"
           ],
-          "cents": 20650
-        },
-        {
-          "kind": "conditions_unproven",
-          "lines": [
-            "Premier Triple Play",
-            "Premier Triple Play"
-          ],
-          "cents": 20650
-        },
-        {
-          "kind": "end_date_unread",
-          "lines": [
-            "Peacock Premium Included"
-          ],
-          "cents": 0
-        },
-        {
-          "kind": "overlapping_claim",
-          "lines": [
-            "Premier Triple Play",
-            "Premier Triple Play"
-          ],
-          "cents": 20650
-        },
-        {
-          "kind": "overlapping_claim",
-          "lines": [
-            "Premier Triple Play",
-            "Premier Triple Play"
-          ],
-          "cents": 20650
-        },
-        {
-          "kind": "overlapping_claim",
-          "lines": [
-            "Premier Triple Play",
-            "Premier Triple Play"
-          ],
-          "cents": 20650
+          "cents": 1060
         },
         {
           "kind": "unagreed_fee",
@@ -21474,9 +21348,8 @@
       ],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 13,
-      "spentMicros": 12587,
-      "change": null
+      "matchedPromises": 0,
+      "spentMicros": 6313
     },
     {
       "id": "1xm7w5l",

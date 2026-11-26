@@ -4,7 +4,7 @@ import { useState, type ReactNode } from "react";
 import type { CheckAction, Selection } from "@/lib/check-machine";
 import { formatMicros } from "@/lib/cost";
 import type { Claim, Question, TestedClaim, UnusedReason } from "@/lib/decide";
-import { buildMessage, shortDate, usd, type Message } from "@/lib/letter";
+import { buildMessage, increaseSentence, shortDate, usd, type Message } from "@/lib/letter";
 import type { ShownPage } from "@/lib/prepare";
 import type { CallRecord, Checked, SingleResult } from "@/lib/result";
 import type { LineItem, PromiseTerm, TranscriptTurn } from "@/lib/schemas";
@@ -25,6 +25,7 @@ const UNUSED_TEXT: Record<UnusedReason, string | null> = {
   no_price: "it names no price for a plan on this bill",
   no_credit_amount: "it names no credit amount",
   item_not_named: "the charge linked to it isn't the item it names",
+  amount_approximate: "its amount is only approximate",
 };
 
 function listNames(lines: LineItem[]): string {
@@ -307,7 +308,7 @@ export function ResultView({
 
   const selectedIds = new Set(Object.entries(selection.claims).filter(([, mark]) => mark === "selected").map(([id]) => id));
   const includedIds = new Set(Object.entries(selection.questions).filter(([, on]) => on).map(([id]) => id));
-  const message = selectedIds.size + includedIds.size > 0 ? buildMessage(result, selectedIds, includedIds) : null;
+  const message = selectedIds.size + includedIds.size > 0 || increaseSentence(result.change) ? buildMessage(result, selectedIds, includedIds) : null;
 
   const verdict =
     result.claims.length > 0

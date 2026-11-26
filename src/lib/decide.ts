@@ -43,7 +43,8 @@ export type UnusedReason =
   | "starts_later"
   | "no_price"
   | "no_credit_amount"
-  | "item_not_named";
+  | "item_not_named"
+  | "amount_approximate";
 export type Unused = { promiseId: string; reason: UnusedReason };
 
 export type Decision = {
@@ -81,9 +82,13 @@ export function lineIsEvidenced(line: LineItem, bill: Source): boolean {
   return bill.kind === "image" ? line.box !== null : quoteFoundIn(line.quote, bill.text);
 }
 
+// "About $20", "approximately $269": a guess at a price is not a promise of it.
+const APPROXIMATE = /(\b(approximately|approx\.?|around|roughly|about|supposedly|estimated)\s+|~\s*)\$?\d/i;
+
 function promiseEvidenceProblem(promise: PromiseTerm, proof: Source): UnusedReason | null {
   if (proof.kind !== "image" && !quoteFoundIn(promise.quote, proof.text)) return "quote_not_in_offer";
   if (promise.amount_cents !== null && !quoteHasAmount(promise.quote, promise.amount_cents)) return "amount_not_in_quote";
+  if (promise.amount_cents !== null && APPROXIMATE.test(promise.quote)) return "amount_approximate";
   return null;
 }
 
@@ -176,7 +181,7 @@ const MAX_PLAUSIBLE_SHARE = 0.5;
 
 // Wording that limits a promise in time. When the quote has it but no end date was read, the promise may
 // already have ended, so it can only raise a question.
-const TIME_LIMIT = /\b(through|thru|until|ends?|ending|expires?|for \d+ (months?|years?)|\d+[- ](month|year)|promo(tional)?|\d{1,2}\/\d{1,2}\/\d{2,4}|(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.? \d{1,2},? \d{4})\b/i;
+const TIME_LIMIT = /\b(through|thru|until|ends?|ending|expires?|for (\d+|a|one|two|three) (months?|mos?|years?|yrs?)|\d+[- ](months?|mos?|years?)|promo(tional)?|\d{1,2}\/\d{1,2}\/\d{2,4}|(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.? \d{1,2},? \d{4})\b/i;
 
 type Draft = Omit<Claim, "id">;
 
@@ -242,7 +247,8 @@ export function decide(reading: Reading, promises: PromiseTerm[], bill: Source, 
     }
 
     const planLines = covered.filter((line) => line.kind === "plan");
-    const units = promise.per_line ? Math.max(planLines.length, 1) : 1;
+    // A $0 plan line (a free line, a paused tablet) gets no per-line price or credit.
+    const units = promise.per_line ? Math.max(planLines.filter((line) => line.amount_cents > 0).length, 1) : 1;
     const autopayProven = reading.autopay.enrolled === true && reading.autopay.quote !== null && (bill.kind === "image" || quoteFoundIn(reading.autopay.quote, bill.text));
     // Only autopay can be proven from a bill; paperless, bundle and contract terms cannot.
     const unproven = promise.conditions.filter((condition) => !(condition === "autopay" && autopayProven));

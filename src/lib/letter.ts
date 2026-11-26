@@ -1,4 +1,4 @@
-import type { Claim, Question } from "./decide";
+import type { BillChange, Claim, Question } from "./decide";
 import type { Checked } from "./result";
 import type { LineItem, PromiseTerm } from "./schemas";
 
@@ -78,6 +78,17 @@ function complaintText(provider: string, account: string, facts: string[], total
   ].join("\n");
 }
 
+// When the pictures held an earlier statement and this bill is higher, the message asks why, naming what rose most.
+export function increaseSentence(change: BillChange | null): string | null {
+  if (!change || change.currentCents <= change.earlierCents) return null;
+  const rose = change.lines.flatMap((line) => {
+    if (line.afterCents === null || line.afterCents <= (line.beforeCents ?? 0)) return [];
+    return [line.beforeCents === null ? `${line.label} (${usd(line.afterCents)}) is new` : `${line.label} went from ${usd(line.beforeCents)} to ${usd(line.afterCents)}`];
+  });
+  const named = rose.length > 0 ? `: ${rose.slice(0, 3).join("; ")}` : "";
+  return `This bill is ${usd(change.currentCents - change.earlierCents)} higher than the one before${named}. Please explain the increase and correct anything I didn't agree to.`;
+}
+
 export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<string>, includedQuestionIds: ReadonlySet<string>): Message {
   const lines = new Map(result.reading.line_items.map((line) => [line.id, line]));
   const promises = new Map(result.promises.map((promise) => [promise.id, promise]));
@@ -97,7 +108,8 @@ export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<stri
   const provider = result.reading.provider ?? "your company";
   const account = result.reading.account_last4 ? `account ending ${result.reading.account_last4}` : "my account";
   const ask = totalCents > 0 ? `In total, please credit ${usd(totalCents)} to ${account}.` : "";
-  const body = [...claimText, ...questionText];
+  const increase = increaseSentence(result.change);
+  const body = [...claimText, ...(increase ? [increase] : []), ...questionText];
 
   const about = aboutText(result, account);
   const chat = [`Hi, I'm writing about ${about}.`, ...body, ask].filter(Boolean).join("\n\n");

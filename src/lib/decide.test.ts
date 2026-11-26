@@ -393,3 +393,35 @@ describe("compare with an earlier bill", () => {
     expect(change.currentCents - change.earlierCents).toBe(2500);
   });
 });
+
+describe("promises read from a person's own words", () => {
+  const photo: Source = { kind: "image" };
+  const boxed = (reading: Reading): Reading => ({ ...reading, line_items: reading.line_items.map((line) => ({ ...line, box: { x0: 80, y0: 400, x1: 920, y1: 420 } })) });
+  const internet = boxed(readingOf(internetGuaranteed));
+  const plan = idOf(internet, "Fiber 500 Internet");
+
+  test("an approximate price is not a promise", () => {
+    const guess = promise({ kind: "monthly_price", amount_cents: 5500, quote: "they said it would be around $55/mo", covers_line_ids: plan });
+    const decision = decide(internet, [guess], photo, photo);
+    expect(decision.claims).toEqual([]);
+    expect(decision.unused).toEqual([{ promiseId: "P1", reason: "amount_approximate" }]);
+    expect(decide(internet, [{ ...guess, quote: "they said it would be $55/mo" }], photo, photo).claims.map((c) => c.kind)).toEqual(["price_above_promise"]);
+  });
+
+  test("a price for some months or \"a year\" with no end date read is a question", () => {
+    for (const quote of ["$55/mo. for 12 mos.", "$55 a month for a year"]) {
+      const limited = promise({ kind: "monthly_price", amount_cents: 5500, quote, covers_line_ids: plan });
+      const decision = decide(internet, [limited], photo, photo);
+      expect(decision.claims).toEqual([]);
+      expect(decision.questions.filter((q) => q.promiseId).map((q) => q.kind)).toEqual(["end_date_unread"]);
+    }
+  });
+
+  test("a per-line credit is owed once per charged line, not for a $0 line", () => {
+    const phones = boxed(readingOf(mobile));
+    const [first, second] = phones.line_items.filter((line) => line.kind === "plan");
+    const withFreeLine: Reading = { ...phones, line_items: phones.line_items.map((line) => (line.id === second.id ? { ...line, amount_cents: 0, quote: `${line.label} $0.00` } : line)) };
+    const credit = promise({ kind: "recurring_credit", amount_cents: 500, per_line: true, quote: "$5 off every line", covers_line_ids: [first.id, second.id] });
+    expect(decide(withFreeLine, [credit], photo, photo).claims.map((c) => c.amountCents)).toEqual([500]);
+  });
+});
