@@ -146,6 +146,13 @@ describe("a message with no dollar claim", () => {
     expect(message.complaint).not.toContain("Please explain");
     expect(message.email).toContain("Please explain the Broadcast TV Fee ($47.23) and TV Access Fee ($14.00, charged 2 times).");
   });
+
+  // A rise since the earlier bill is the first fact the regulator reads, so the problem names it too.
+  test("a price rise is named in the complaint's problem, with the fees or alone", () => {
+    const risen: Checked = { ...result, change: { earlierCents: 7249, currentCents: 9249, lines: [{ label: "Fiber 500 Internet", beforeCents: 5500, afterCents: 7500 }] } };
+    expect(buildMessage(risen, new Set(), new Set(["Q1"])).complaint).toContain("Problem: a price increase and fees on my bill I never agreed to.");
+    expect(buildMessage(risen, new Set(), new Set()).complaint).toContain("Problem: a price increase on my bill the company hasn't explained.");
+  });
 });
 
 describe("a missing autopay credit on a bill with no company name", () => {

@@ -107,6 +107,14 @@ function claimProblem(claims: Claim[]): string {
   return kinds.size === 1 ? PROBLEM[claims[0].kind] : "billed more than I was promised.";
 }
 
+// With no claim, the problem names what the complaint goes on to state: a rise since the earlier bill, fees the plan
+// didn't include (or that the company hasn't explained, with no offer of its own to go by), or both.
+function questionProblem(fees: boolean, offerCovers: boolean, rise: boolean): string {
+  const charges = fees && offerCovers ? "fees on my bill I never agreed to." : "charges on my bill the company hasn't explained.";
+  if (!rise) return charges;
+  return fees ? `a price increase and ${charges}` : "a price increase on my bill the company hasn't explained.";
+}
+
 // What the complaint asks for on future bills, by the same rule: a price is a rate, a credit is applied, an included
 // item is not charged.
 const REMEDY: Record<Claim["kind"], string> = {
@@ -274,7 +282,7 @@ export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<stri
   ]
     .filter(Boolean)
     .join("\n\n");
-  const problem = claims.length > 0 ? claimProblem(claims) : fees.length > 0 && offerCovers ? "fees on my bill I never agreed to." : "charges on my bill the company hasn't explained.";
+  const problem = claims.length > 0 ? claimProblem(claims) : questionProblem(fees.length > 0, offerCovers, risen !== null);
   const shortFacts = [...(claims.length > 0 ? [`For ${periodText(result)}: ${claims.map((claim) => shortClaim(claim, linesOf(claim.lineIds))).join("; ")}.`] : []), ...(risen ? [risen] : []), ...questionFacts];
   return { totalCents, chat, email, call, complaint: complaintText(provider, result.reading.account_last4, problem, [regulatorBody, shortFacts], claims) };
 }
@@ -382,7 +390,7 @@ export function buildYearMessage(months: Checked[]): Message {
   });
   const amounts = withClaims.map((month) => `${capitalized(periodText(month))}: ${usd(month.claims.reduce((t, claim) => t + claim.amountCents, 0))} more than I was promised.`);
   const feeFacts = [...(fees.length > 0 ? [feeFact(fees, offerCovers, "My statements charge")] : []), ...repeats.map(({ month, lines }) => repeatOn(month, lines, repeatFact))];
-  const problem = claims.length > 0 ? claimProblem(claims) : fees.length > 0 && offerCovers ? "fees on my bill I never agreed to." : "charges on my bill the company hasn't explained.";
+  const problem = claims.length > 0 ? claimProblem(claims) : questionProblem(fees.length > 0, offerCovers, false);
   const versions = claims.length > 0 ? [sectionsFor(regulator, false, "as quoted above"), [promisedLine, ...byMonth], [promisedLine, ...amounts], amounts] : [[]];
   const complaint = complaintText(provider, last4, problem, versions.map((facts) => [...facts, ...feeFacts]), claims);
   return { totalCents, chat, email, call, complaint };
