@@ -9,7 +9,7 @@ const play = (actions: CheckAction[], from: CheckState = initialState) => action
 
 const readyBill: CheckAction[] = [
   { type: "bills_added", docs: [{ id: "b", name: "bill.pdf" }] },
-  { type: "doc_prepared", id: "b", pages: [page] },
+  { type: "doc_prepared", id: "b", pages: [page], omitted: 0 },
 ];
 
 describe("check machine", () => {
@@ -33,7 +33,7 @@ describe("check machine", () => {
     const offer = { kind: "text" as const, text: "$55 a month" };
     const gone = play([{ type: "sample_ready", inputs: { bills: [{ id: "p", name: "3 pictures from the post", status: "failed", message: "The pictures from this post are no longer online." }], offer } }]);
     expect(gone).toMatchObject({ s: "composing", inputs: { bills: [{ status: "failed", message: "The pictures from this post are no longer online." }] } });
-    expect(play([{ type: "sample_ready", inputs: { bills: [{ id: "p", name: "3 pictures from the post", status: "ready", pages: [page] }], offer } }]).s).toBe("running");
+    expect(play([{ type: "sample_ready", inputs: { bills: [{ id: "p", name: "3 pictures from the post", status: "ready", pages: [page], omitted: 0 }], offer } }]).s).toBe("running");
   });
 
   test("a failure from an attempt already given up on is ignored, and only a retryable failure can be retried", () => {
@@ -56,7 +56,7 @@ describe("check machine", () => {
   test("a year check that stops partway keeps the months it finished; a retry starts them over", () => {
     const year: CheckAction[] = [
       { type: "bills_added", docs: [{ id: "jan", name: "jan.pdf" }, { id: "feb", name: "feb.pdf" }, { id: "mar", name: "mar.pdf" }] },
-      ...["jan", "feb", "mar"].map((id): CheckAction => ({ type: "doc_prepared", id, pages: [page] })),
+      ...["jan", "feb", "mar"].map((id): CheckAction => ({ type: "doc_prepared", id, pages: [page], omitted: 0 })),
       { type: "start" },
       { type: "month_done", attempt: 1, bill: 0, result: notABill },
     ];
@@ -77,8 +77,8 @@ describe("check machine", () => {
     const seen = (label: string) => ({ label, amount_cents: 1000, kind: "plan", page: 1, box: null });
     const state = play([
       { type: "bills_added", docs: [{ id: "a", name: "jan.pdf" }, { id: "b", name: "feb.pdf" }] },
-      { type: "doc_prepared", id: "a", pages: [page] },
-      { type: "doc_prepared", id: "b", pages: [page] },
+      { type: "doc_prepared", id: "a", pages: [page], omitted: 0 },
+      { type: "doc_prepared", id: "b", pages: [page], omitted: 0 },
       { type: "start" },
       { type: "line_read", attempt: 1, bill: 0, line: seen("Internet") },
       { type: "line_read", attempt: 1, bill: 1, line: seen("Internet") },
@@ -98,13 +98,13 @@ describe("check machine", () => {
       { type: "prep_failed", id: "c", message: "This recording could not be opened." },
     ]);
     expect(state).toMatchObject({ s: "composing", inputs: { offer: { kind: "file", doc: { id: "f", status: "preparing" } } } });
-    expect(play([{ type: "doc_prepared", id: "f", pages: [page] }, { type: "start" }], state).s).toBe("running");
+    expect(play([{ type: "doc_prepared", id: "f", pages: [page], omitted: 0 }, { type: "start" }], state).s).toBe("running");
   });
 
   test("a check waits for every bill of a year to open", () => {
-    const state = play([{ type: "bills_added", docs: [{ id: "a", name: "jan.pdf" }, { id: "b", name: "feb.pdf" }] }, { type: "doc_prepared", id: "a", pages: [page] }, { type: "start" }]);
+    const state = play([{ type: "bills_added", docs: [{ id: "a", name: "jan.pdf" }, { id: "b", name: "feb.pdf" }] }, { type: "doc_prepared", id: "a", pages: [page], omitted: 0 }, { type: "start" }]);
     expect(state.s).toBe("composing");
-    expect(play([{ type: "doc_prepared", id: "b", pages: [page] }, { type: "start" }], state).s).toBe("running");
+    expect(play([{ type: "doc_prepared", id: "b", pages: [page], omitted: 0 }, { type: "start" }], state).s).toBe("running");
   });
 
   test("a call still being converted holds the check", () => {
@@ -114,7 +114,7 @@ describe("check machine", () => {
   });
 
   test("a file removed while opening does not come back when it finishes", () => {
-    const state = play([{ type: "bills_added", docs: [{ id: "b", name: "bill.pdf" }] }, { type: "removed", id: "b" }, { type: "doc_prepared", id: "b", pages: [page] }]);
+    const state = play([{ type: "bills_added", docs: [{ id: "b", name: "bill.pdf" }] }, { type: "removed", id: "b" }, { type: "doc_prepared", id: "b", pages: [page], omitted: 0 }]);
     expect(state).toMatchObject({ s: "composing", inputs: { bills: [] } });
   });
 

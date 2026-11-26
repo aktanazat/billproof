@@ -16,16 +16,21 @@ function canvasToJpeg(canvas: HTMLCanvasElement): string {
   return canvas.toDataURL("image/jpeg", JPEG_QUALITY);
 }
 
-async function preparePdf(file: File, maxPages: number): Promise<ShownPage[]> {
+// A file ready to read: its pages, and how many pages past the limit were left out.
+export type Prepared = { pages: ShownPage[]; omitted: number };
+
+// A long bill keeps its charges at the front, so a PDF past the limit is read from its first pages and the rest are
+// counted as left out, rather than refused: few people can cut pages out of a PDF.
+async function preparePdf(file: File, maxPages: number): Promise<Prepared> {
   // pdf.js is browser-only and large; it loads when the first PDF is opened, never during server rendering.
   const { getDocument, GlobalWorkerOptions } = await import("pdfjs-dist");
   GlobalWorkerOptions.workerSrc = "/pdfjs/pdf.worker.min.mjs";
   const task = getDocument({ data: new Uint8Array(await file.arrayBuffer()), standardFontDataUrl: "/pdfjs/standard_fonts/" });
   try {
     const doc = await task.promise;
-    if (doc.numPages > maxPages) throw new PrepareError(`This PDF has ${doc.numPages} pages. Use the pages with the charges, up to ${maxPages}.`);
+    const read = Math.min(doc.numPages, maxPages);
     const pages: ShownPage[] = [];
-    for (let n = 1; n <= doc.numPages; n++) {
+    for (let n = 1; n <= read; n++) {
       const page = await doc.getPage(n);
       const base = page.getViewport({ scale: 1 });
       const viewport = page.getViewport({ scale: LONG_SIDE / Math.max(base.width, base.height) });
@@ -41,7 +46,7 @@ async function preparePdf(file: File, maxPages: number): Promise<ShownPage[]> {
       const text = pageText(content);
       pages.push({ image: canvasToJpeg(canvas), text: text.length > 0 ? text : null, rows: text.length > 0 ? pageRows(content, base) : null });
     }
-    return pages;
+    return { pages, omitted: doc.numPages - read };
   } catch (error) {
     if (error instanceof PrepareError) throw error;
     throw new PrepareError("This PDF could not be opened. If it has a password, save an unlocked copy.");
@@ -50,7 +55,7 @@ async function preparePdf(file: File, maxPages: number): Promise<ShownPage[]> {
   }
 }
 
-async function prepareImage(file: File): Promise<ShownPage[]> {
+async function prepareImage(file: File): Promise<Prepared> {
   let bitmap: ImageBitmap;
   try {
     bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
@@ -65,10 +70,10 @@ async function prepareImage(file: File): Promise<ShownPage[]> {
   if (!context) throw new PrepareError("This browser could not draw the image.");
   context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
   bitmap.close();
-  return [{ image: canvasToJpeg(canvas), text: null, rows: null }];
+  return { pages: [{ image: canvasToJpeg(canvas), text: null, rows: null }], omitted: 0 };
 }
 
-export async function prepareFile(file: File, maxPages: number): Promise<ShownPage[]> {
+export async function prepareFile(file: File, maxPages: number): Promise<Prepared> {
   const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
   if (!isPdf && /\.(heic|heif)$/i.test(file.name)) throw new PrepareError("HEIC photos can't be read here. Export the photo as JPEG and try again.");
   if (!isPdf && !file.type.startsWith("image/")) throw new PrepareError("Add a PDF or a photo of the bill.");

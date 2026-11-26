@@ -4,7 +4,8 @@ import type { CheckFailure, CheckInput, CheckResult, PageKind, PreparedPage, See
 
 export type Doc =
   | { id: string; name: string; status: "preparing" }
-  | { id: string; name: string; status: "ready"; pages: ShownPage[] }
+  // `omitted`: pages past the limit that were left out of a long PDF.
+  | { id: string; name: string; status: "ready"; pages: ShownPage[]; omitted: number }
   | { id: string; name: string; status: "failed"; message: string };
 
 // A recorded call: the WAV Muse Ember hears, and a playable URL of the original file for the person.
@@ -45,7 +46,7 @@ export type CheckAction =
   | { type: "bills_added"; docs: { id: string; name: string }[] }
   | { type: "offer_file_added"; id: string; name: string }
   | { type: "call_added"; id: string; name: string }
-  | { type: "doc_prepared"; id: string; pages: ShownPage[] }
+  | { type: "doc_prepared"; id: string; pages: ShownPage[]; omitted: number }
   | { type: "call_prepared"; id: string; call: PreparedCall }
   | { type: "prep_failed"; id: string; message: string }
   | { type: "removed"; id: string }
@@ -132,7 +133,7 @@ function compose(state: Extract<CheckState, { s: "composing" }>, action: CheckAc
     case "call_added":
       return withInputs({ ...inputs, offer: { kind: "call", call: { id: action.id, name: action.name, status: "preparing" } } });
     case "doc_prepared": {
-      const ready = (doc: Doc): Doc => prepared(doc, action.id, (d) => ({ id: d.id, name: d.name, status: "ready", pages: action.pages }));
+      const ready = (doc: Doc): Doc => prepared(doc, action.id, (d) => ({ id: d.id, name: d.name, status: "ready", pages: action.pages, omitted: action.omitted }));
       const offer = inputs.offer.kind === "file" ? { kind: "file" as const, doc: ready(inputs.offer.doc) } : inputs.offer;
       return withInputs({ bills: inputs.bills.map(ready), offer });
     }

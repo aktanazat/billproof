@@ -150,7 +150,8 @@ function RemoveButton({ onRemove }: { onRemove: () => void }) {
 }
 
 function DocRow({ doc, onRemove }: { doc: Doc; onRemove: () => void }) {
-  const detail = doc.status === "preparing" ? "Opening" : doc.status === "failed" ? doc.message : doc.pages.length === 1 ? "1 page" : `${doc.pages.length} pages`;
+  const pagesText = (doc: Extract<Doc, { status: "ready" }>) => (doc.omitted > 0 ? `First ${doc.pages.length} of ${doc.pages.length + doc.omitted} pages` : doc.pages.length === 1 ? "1 page" : `${doc.pages.length} pages`);
+  const detail = doc.status === "preparing" ? "Opening" : doc.status === "failed" ? doc.message : pagesText(doc);
   return (
     <div className="flex items-center gap-3 py-1.5">
       <div className="h-10 w-8 shrink-0 overflow-hidden rounded-[4px] bg-white shadow-[inset_0_0_0_1px_var(--line)]">{doc.status === "ready" && <Thumbnail src={doc.pages[0].image} />}</div>
@@ -457,7 +458,7 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
 
   const prepareDoc = async (docId: string, file: File, maxPages: number) => {
     try {
-      dispatch({ type: "doc_prepared", id: docId, pages: await prepareFile(file, maxPages) });
+      dispatch({ type: "doc_prepared", id: docId, ...(await prepareFile(file, maxPages)) });
     } catch (error) {
       dispatch({ type: "prep_failed", id: docId, message: error instanceof PrepareError ? error.message : "This file could not be opened." });
     }
@@ -484,8 +485,8 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
       return;
     }
     try {
-      const pages = (await Promise.all(group.map((file) => prepareFile(file, 1)))).flat();
-      dispatch({ type: "doc_prepared", id: docId, pages });
+      const pages = (await Promise.all(group.map((file) => prepareFile(file, 1)))).flatMap((prepared) => prepared.pages);
+      dispatch({ type: "doc_prepared", id: docId, pages, omitted: 0 });
     } catch (error) {
       dispatch({ type: "prep_failed", id: docId, message: error instanceof PrepareError ? error.message : "One of these pictures could not be opened." });
     }
@@ -515,20 +516,20 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
       const pdfs = await Promise.all(
         sample.bills.map(async (url, i): Promise<Doc> => {
           const name = sample.bills.length > 1 ? `${sample.title} ${i + 1}.pdf` : `${sample.title}.pdf`;
-          return { id: `sample-${token}-${i}`, name, status: "ready", pages: await prepareFile(await fetchFile(url, name, "application/pdf"), MAX_BILL_PAGES) };
+          return { id: `sample-${token}-${i}`, name, status: "ready", ...(await prepareFile(await fetchFile(url, name, "application/pdf"), MAX_BILL_PAGES)) };
         }),
       );
       // A real post's picture can be gone from Reddit; the check reads the ones still there, as the server does.
       const postPicture = async (url: string, i: number) => {
         const response = await fetch(url);
         if (!response.ok) return [];
-        return prepareFile(new File([await response.blob()], `picture-${i + 1}.jpg`, { type: "image/jpeg" }), 1).catch(() => []);
+        return prepareFile(new File([await response.blob()], `picture-${i + 1}.jpg`, { type: "image/jpeg" }), 1).then((prepared) => prepared.pages, () => []);
       };
       const pile = async (pictures: string[]): Promise<Doc> => {
         const read = Math.min(pictures.length, MAX_BILL_PAGES);
         const name = read < pictures.length ? `${read} of ${pictures.length} pictures from the post` : `${pictures.length} pictures from the post`;
         const pages = (await Promise.all(pictures.slice(0, MAX_BILL_PAGES).map(postPicture))).flat();
-        return pages.length > 0 ? { id: `sample-${token}-pile`, name, status: "ready", pages } : { id: `sample-${token}-pile`, name, status: "failed", message: "The pictures from this post are no longer online." };
+        return pages.length > 0 ? { id: `sample-${token}-pile`, name, status: "ready", pages, omitted: 0 } : { id: `sample-${token}-pile`, name, status: "failed", message: "The pictures from this post are no longer online." };
       };
       const bills: Doc[] = [...pdfs, ...(sample.pictures ? [await pile(sample.pictures)] : [])];
       const offer: Inputs["offer"] =
