@@ -102,6 +102,7 @@ describe("a missing autopay credit on a bill with no company name", () => {
     expect(message.chat).not.toContain("autopay");
     expect(message.complaint).not.toContain("Please");
     expect(message.chat).toContain("Please apply the missing $7.50.");
+    expect(message.chat).not.toContain("In total");
   });
 
   test("a missing credit mentions autopay only when the promise depends on it", () => {
@@ -169,5 +170,6 @@ describe("a claim on a promise heard on a call", () => {
     const { chat } = buildYearMessage([month("2026-10-12", "2026-11-11"), month("2026-11-12", "2026-12-11")]);
     expect(chat.match(/"Fiber 500 is \$55 a month"/g)).toHaveLength(1);
     expect(chat).toContain("confirmed at $55.00 a month (as quoted above)");
+    expect(chat).toMatch(/In total, please credit \$\d+\.\d{2} to /);
   });
 });

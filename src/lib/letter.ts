@@ -178,7 +178,8 @@ export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<stri
 
   const provider = result.reading.provider;
   const account = result.reading.account_last4 ? `account ending ${result.reading.account_last4}` : "my account";
-  const ask = totalCents > 0 ? `In total, please credit ${usd(totalCents)} to ${account}.` : "";
+  // A total helps only when it adds up several claims; after one, it repeats the amount just asked for.
+  const ask = claims.length > 1 ? `In total, please credit ${usd(totalCents)} to ${account}.` : "";
   const increase = increaseSentence(result.change);
   const body = [...claimText, ...(increase ? [increase] : []), ...questionText];
   const risen = increaseFact(result.change);
@@ -238,7 +239,7 @@ export function buildYearMessage(months: Checked[]): Message {
   };
   const sections = sectionsFor("your representative", true);
   const provider = first?.provider ?? null;
-  const ask = totalCents > 0 ? `In total, please credit ${usd(totalCents)} to ${account}.` : "";
+  const ask = withClaims.flatMap((month) => month.claims).length > 1 ? `In total, please credit ${usd(totalCents)} to ${account}.` : "";
   const chat = [`Hi, I'm writing about ${account}. I checked my statements against the plan I signed up for.`, ...sections, ask].filter(Boolean).join("\n\n");
   const email = [`Subject: Billing correction for ${account}`, "", provider ? `Hello ${provider} billing team,` : "Hello billing team,", "", ...sections.flatMap((s) => [s, ""]), ...(ask ? [ask, ""] : []), "Please reply with the corrected amount and the date the credit will post.", "", "Thank you,", "[Your name]"].join("\n");
   const call = [`I'm calling about ${account}.`, ...sections.map((s, i) => `${i + 1}. ${s}`), ask, "Before ending the call, ask for a reference number and the date the credit will post."].filter(Boolean).join("\n\n");
