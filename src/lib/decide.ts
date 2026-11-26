@@ -359,7 +359,7 @@ export function decide(reading: Reading, promises: PromiseTerm[], bill: Source, 
     // A price promised "with autopay" is net of that discount even when the discount line was not linked.
     const conditionCredits =
       promise.kind === "monthly_price" && promise.conditions.some((c) => c === "autopay" || c === "paperless")
-        ? reading.line_items.filter((line) => CREDIT_KINDS[line.kind] && !linked.includes(line) && /auto\s?pay|paperless/i.test(line.label))
+        ? reading.line_items.filter((line) => CREDIT_KINDS[line.kind] && !linked.includes(line) && /auto[\s-]?pay|automatic (bill )?payments?|paperless|paper-?free|\be-?bill/i.test(line.label))
         : [];
     const covered = [...linked, ...conditionCredits];
     if (covered.length === 0) {

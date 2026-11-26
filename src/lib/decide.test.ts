@@ -112,6 +112,20 @@ describe("decide on the internet bill with an active price guarantee", () => {
     ]);
   });
 
+  // Carriers and posters name the discount other ways ("Auto-Pay", "automatic payment", Verizon's "Paper-free", "eBill");
+  // a price promised with autopay is net of it under any of these names, or the claim counts the discount as an overcharge.
+  test("counts the autopay discount under the names carriers give it", () => {
+    const discount = idOf(reading, "Autopay & Paperless Discount")[0];
+    for (const label of ["Auto-Pay Discount", "Automatic Payment Discount", "Paper-free Billing Discount", "eBill Discount"]) {
+      const renamed: Reading = { ...reading, line_items: reading.line_items.map((line) => (line.id === discount ? { ...line, label } : line)) };
+      const decision = decide(renamed, promises, billText.get(internetGuaranteed.id)!, offer(internetGuaranteed));
+      expect(decision.claims.map((c) => [c.kind, c.amountCents]), label).toEqual([
+        ["price_above_promise", 1500],
+        ["included_charged", 1500],
+      ]);
+    }
+  });
+
   test("the bill's own notice that the promotion ended does not drop a claim", () => {
     const bill = billText.get(internetGuaranteed.id)!;
     const { claims } = decide(reading, promises, bill, offer(internetGuaranteed));
