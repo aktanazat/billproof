@@ -232,7 +232,8 @@ const sum = (lines: LineItem[]) => lines.reduce((total, line) => total + line.am
 
 export type BillChange = { earlierCents: number; currentCents: number; lines: { label: string; beforeCents: number | null; afterCents: number | null }[] };
 
-const labelKey = (label: string) => label.toLowerCase().replace(/\s+/g, " ").trim();
+// Amounts in parentheses ("2 Product Discount (-$20.00)") are detail, not part of the name.
+const labelKey = (label: string) => label.toLowerCase().replace(/\([^)]*\)/g, " ").replace(/\s+/g, " ").trim();
 
 function centsByLabel(reading: Reading): Map<string, { label: string; cents: number }> {
   const totals = new Map<string, { label: string; cents: number }>();
@@ -245,10 +246,18 @@ function centsByLabel(reading: Reading): Map<string, { label: string; cents: num
 }
 
 // What moved between an earlier statement and this one: lines with the same label are summed, and only lines
-// whose amount changed, appeared or went away are kept, the biggest move first.
+// whose amount changed, appeared or went away are kept, the biggest move first. A line one month prints with extra
+// words after its name ("2 Product Discount" then "2 Product Discount Automatic Payments…") is the same line.
 export function compareBills(earlier: Reading, current: Reading): BillChange {
   const before = centsByLabel(earlier);
   const after = centsByLabel(current);
+  for (const key of [...before.keys()].filter((k) => !after.has(k))) {
+    const longer = [...after.keys()].filter((k) => !before.has(k) && (k.startsWith(`${key} `) || key.startsWith(`${k} `)));
+    const entry = before.get(key);
+    if (longer.length !== 1 || !entry) continue;
+    before.delete(key);
+    before.set(longer[0], entry);
+  }
   const move = (line: BillChange["lines"][number]) => Math.abs((line.afterCents ?? 0) - (line.beforeCents ?? 0));
   const lines = [...new Set([...before.keys(), ...after.keys()])]
     .map((key) => ({ label: after.get(key)?.label ?? before.get(key)?.label ?? key, beforeCents: before.get(key)?.cents ?? null, afterCents: after.get(key)?.cents ?? null }))

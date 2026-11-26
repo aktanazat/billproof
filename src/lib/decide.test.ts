@@ -448,6 +448,14 @@ describe("compare with an earlier bill", () => {
     ]);
     expect(change.currentCents - change.earlierCents).toBe(2500);
   });
+
+  test("a line whose name gains fine print between months is compared as one change", () => {
+    const current = readingOf(internetGuaranteed);
+    const discount = current.line_items.find((line) => line.label === "Autopay & Paperless Discount")!;
+    const longer: Reading = { ...current, line_items: current.line_items.map((line) => (line.id === discount.id ? { ...line, label: "Autopay & Paperless Discount (-$5.00) Requires bank autopay", amount_cents: line.amount_cents - 500 } : line)) };
+    const change = compareBills(current, longer);
+    expect(change.lines).toEqual([{ label: "Autopay & Paperless Discount (-$5.00) Requires bank autopay", beforeCents: discount.amount_cents, afterCents: discount.amount_cents - 500 }]);
+  });
 });
 
 describe("promises read from a person's own words", () => {
