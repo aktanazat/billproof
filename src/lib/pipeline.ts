@@ -406,7 +406,9 @@ async function checkOne(uploaded: PreparedPage[], given: OfferInput | null, run:
   }
 
   stage("comparing");
-  const change = await readEarlier(olderPages.map((i) => uploaded[i]), reading, run, bill);
+  // When the charges read miss the bill's own printed total, part of this bill isn't in the picture, and comparing it
+  // with a whole earlier bill would report charges as gone that are only cut off.
+  const change = totals.lineSum === "mismatch" ? null : await readEarlier(olderPages.map((i) => uploaded[i]), reading, run, bill);
   const decision = decide(reading, promises, source, proof, offerProvider);
 
   let tested: ReturnType<typeof settleChallenges> = { claims: decision.claims.map((claim) => ({ ...claim, lookedFor: null })), dropped: [] };

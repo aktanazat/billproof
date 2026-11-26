@@ -8063,10 +8063,7 @@
       "billPages": [
         2
       ],
-      "change": {
-        "earlierCents": 8956,
-        "currentCents": 9045
-      },
+      "change": null,
       "claims": [],
       "dropped": [],
       "questions": [],
