@@ -301,7 +301,9 @@ export function ResultView({
   const questions = result.questions.filter((q) => SHOWN_QUESTIONS.has(q.kind));
   // A claim waiting for the person to confirm still counts toward what can be asked back.
   const askTotal = result.claims.reduce((total, claim) => total + (selection.claims[claim.id] === "unselected" ? 0 : claim.amountCents), 0);
-  const waiting = result.claims.some((claim) => selection.claims[claim.id] === "needs_confirmation");
+  const unconfirmed = result.claims.filter((claim) => selection.claims[claim.id] === "needs_confirmation");
+  const waiting = unconfirmed.length > 0;
+  const markedLines = new Set(unconfirmed.flatMap((claim) => claim.lineIds)).size;
   const provider = result.reading.provider;
   const printed = result.reading.printed.current_charges;
   // Pictures sorted out as chats or offers aren't bill pages; line items count pages within the bill.
@@ -352,7 +354,7 @@ export function ResultView({
               <p className="text-[40px] font-semibold leading-none tracking-[-0.02em] tabular-nums">{usd(askTotal)}</p>
               <h1 className="mt-2 text-[17px] text-text-2">
                 to ask back{provider ? ` from ${provider}` : ""}
-                {waiting ? (result.transcript ? ", once you confirm what you heard" : ", once you confirm the marked lines") : ""}
+                {waiting ? (result.transcript ? ", once you confirm what you heard" : `, once you confirm the marked ${markedLines === 1 ? "line" : "lines"}`) : ""}
               </h1>
             </>
           )}

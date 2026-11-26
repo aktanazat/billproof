@@ -1,4 +1,4 @@
-import type { BillChange, Claim, Question } from "./decide";
+import type { BillChange, Claim } from "./decide";
 import type { Checked } from "./result";
 import type { LineItem, PromiseTerm } from "./schemas";
 
@@ -46,15 +46,18 @@ function claimSentence(claim: Claim, lines: LineItem[], promise: PromiseTerm, pe
   }
 }
 
-function questionSentence(question: Question, lines: LineItem[]): string | null {
-  switch (question.kind) {
-    case "unagreed_fee":
-      return `Please explain the ${names(lines)} (${lines.length > 1 ? `${usd(lines.reduce((t, line) => t + line.amount_cents, 0))}, charged ${lines.length} times` : usd(lines[0].amount_cents)}). It was not part of the plan I agreed to; if it is not required, please remove it.`;
-    case "repeated_charge":
-      return `${names(lines)} appears ${lines.length} times (${lines.map((line) => usd(line.amount_cents)).join(" and ")}). Please confirm whether this is a duplicate and credit it if so.`;
-    default:
-      return null;
-  }
+function repeatSentence(lines: LineItem[]): string {
+  return `${names(lines)} appears ${lines.length} times (${lines.map((line) => usd(line.amount_cents)).join(" and ")}). Please confirm whether this is a duplicate and credit it if so.`;
+}
+
+// Every fee asked about goes in one request, each with its amount ("the Broadcast TV Fee ($47.23), Regional Sports
+// Fee ($19.86) and …"), rather than the same sentence once per fee.
+function feeSentence(fees: LineItem[][]): string {
+  const named = fees.map((lines) => `${names(lines)} (${lines.length > 1 ? `${usd(lines.reduce((t, line) => t + line.amount_cents, 0))}, charged ${lines.length} times` : usd(lines[0].amount_cents)})`);
+  const list = named.length === 1 ? named[0] : `${named.slice(0, -1).join(", ")} and ${named.at(-1)}`;
+  return fees.length === 1
+    ? `Please explain the ${list}. It was not part of the plan I agreed to; if it is not required, please remove it.`
+    : `Please explain the ${list}. They were not part of the plan I agreed to; if they are not required, please remove them.`;
 }
 
 export type Message = { totalCents: number; chat: string; email: string; call: string; complaint: string };
@@ -101,9 +104,12 @@ export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<stri
     const promise = promises.get(claim.promiseId);
     return promise ? [claimSentence(claim, linesOf(claim.lineIds), promise, period, result.transcript !== null)] : [];
   });
-  const questionText = result.questions
-    .filter((question) => includedQuestionIds.has(question.id))
-    .flatMap((question) => questionSentence(question, linesOf(question.lineIds)) ?? []);
+  const included = result.questions.filter((question) => includedQuestionIds.has(question.id));
+  const fees = included.filter((question) => question.kind === "unagreed_fee").map((question) => linesOf(question.lineIds)).filter((lines) => lines.length > 0);
+  const questionText = [
+    ...(fees.length > 0 ? [feeSentence(fees)] : []),
+    ...included.filter((question) => question.kind === "repeated_charge").map((question) => repeatSentence(linesOf(question.lineIds))),
+  ];
 
   const provider = result.reading.provider ?? "your company";
   const account = result.reading.account_last4 ? `account ending ${result.reading.account_last4}` : "my account";
