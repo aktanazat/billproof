@@ -81,6 +81,35 @@ describe("a message with no dollar claim", () => {
   });
 });
 
+describe("a missing autopay credit on a bill with no company name", () => {
+  const credit: LineItem = { id: "L1", label: "Apple Watch line", amount_cents: 1500, kind: "plan", page: 1, box: { x0: 80, y0: 400, x1: 920, y1: 420 }, quote: "Apple Watch line $15.00", prorated: false };
+  const promise: PromiseTerm = { id: "P1", kind: "recurring_credit", description: "", amount_cents: 750, per_line: false, conditions: [], applies_from: null, applies_until: null, quote: "50% discount that showed -$7.50 per line", said_at_seconds: null, covers_line_ids: ["L1"] };
+  const base = billWith([credit]);
+  const result: Checked = {
+    ...base,
+    reading: { ...base.reading, provider: null },
+    questions: [],
+    promises: [promise],
+    matchedPromiseIds: ["P1"],
+    claims: [{ id: "C1", kind: "credit_missing", lineIds: ["L1"], promiseId: "P1", actualCents: 0, expectedCents: 750, amountCents: 750, needsConfirmation: false, lookedFor: null }],
+  };
+  const message = buildMessage(result, new Set(["C1"]), new Set());
+
+  test("the complaint names a missing credit as the problem and states it without asking the regulator for it", () => {
+    expect(message.complaint).toContain("Problem: a credit I was promised is missing from my bill.");
+    expect(message.complaint).toContain('- My account is on autopay, but this bill has no $7.50 monthly credit I was promised ("50% discount that showed -$7.50 per line").\n');
+    expect(message.complaint).not.toContain("Please");
+    expect(message.chat).toContain("Please apply the missing $7.50.");
+  });
+
+  test("an unread company name is left for the person to fill in, never written as 'your company'", () => {
+    expect(message.email).toContain("Hello billing team,");
+    expect(message.complaint).toContain("Company: [company name]");
+    expect(message.complaint).toContain("[date you contacted the company and their answer]");
+    expect(`${message.email}\n${message.complaint}`).not.toContain("your company");
+  });
+});
+
 describe("a claim on a promise heard on a call", () => {
   const plan: LineItem = { id: "L1", label: "Fiber 500 Internet", amount_cents: 7000, kind: "plan", page: 1, box: { x0: 80, y0: 400, x1: 920, y1: 420 }, quote: "Fiber 500 Internet $70.00", prorated: false };
   const heard: PromiseTerm = { id: "P1", kind: "monthly_price", description: "", amount_cents: 5500, per_line: false, conditions: [], applies_from: null, applies_until: null, quote: "Fiber 500 is $55 a month", said_at_seconds: 14, covers_line_ids: ["L1"] };

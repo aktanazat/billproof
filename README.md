@@ -30,7 +30,7 @@ With several bills, each is checked on its own, four at a time, and its result s
 
 Screenshots dropped together are treated as one pile. Muse Ember first sorts each picture into bill, promise (a chat with the company, an offer, an email) or neither; the bill pages are read as the bill, and the promise pictures join whatever the person wrote as the offer. Promises read off screenshots always wait for the person to confirm.
 
-Every message comes in four forms: a chat message, an email, a call script, and a complaint ready for the FCC (phone, internet, TV) or a state utility commission (electric, gas, water), with a blank for what the company said when asked. The company is asked to explain a fee, a repeated charge or a rise; the complaint states them as facts ("The bill charges the Network Enhancement Fee ($3.99) and Regulatory Recovery Fee ($0.99), which were not part of the plan I agreed to."), since a regulator can't remove a fee.
+Every message comes in four forms: a chat message, an email, a call script, and a complaint ready for the FCC (phone, internet, TV) or a state utility commission (electric, gas, water), with a blank for what the company said when asked. The company is asked to credit a claim or explain a fee, a repeated charge or a rise; the complaint states them as facts ("The bill charges the Network Enhancement Fee ($3.99) and Regulatory Recovery Fee ($0.99), which were not part of the plan I agreed to."), since a regulator can't remove a fee, and names the problem by what the claims are (a price above a promise, a charge for something included, a missing credit). When the bill doesn't name the company, the email is addressed to the billing team and the complaint leaves the company's name to fill in.
 
 ## Spend
 
