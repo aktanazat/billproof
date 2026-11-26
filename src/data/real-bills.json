@@ -16457,33 +16457,8 @@
         "https://preview.redd.it/987onquzm7ph1.png?width=517&format=png&auto=webp&s=010d0053f926d6764d18e191bca0706fcda000bf"
       ],
       "ms": 9666,
-      "outcome": "checked",
-      "provider": "AT&T",
-      "period": [
-        null,
-        null
-      ],
-      "lines": 5,
-      "lineSum": "not_printed",
-      "billPages": [
-        0
-      ],
-      "claims": [],
-      "dropped": [],
-      "questions": [
-        {
-          "kind": "unagreed_fee",
-          "lines": [
-            "AT&T Administrative/Regulatory Cost Recovery Fee"
-          ],
-          "cents": 499
-        }
-      ],
-      "explained": 0,
-      "hadOffer": true,
-      "matchedPromises": 0,
       "spentMicros": 2092,
-      "change": null
+      "outcome": "not_a_bill"
     },
     {
       "id": "1wfltt0",
