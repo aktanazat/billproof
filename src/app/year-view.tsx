@@ -83,6 +83,19 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
   const total = checked.reduce((t, month) => t + asked(month), 0);
   const provider = checked.find((month) => month.result.reading.provider)?.result.reading.provider ?? null;
   const hadOffer = checked.some((month) => month.result.hadOffer);
+  // With nothing owed, the heading says what the offer was compared with, as a single bill's does: an offer from
+  // another company, one with no price or promise, or promises that fit no line is not a match.
+  const otherCompany = checked.find((month) => month.result.providerMismatch)?.result.offerProvider ?? null;
+  const compared = (month: (typeof read)[number]) => month.result.matchedPromiseIds.length > 0;
+  const verdict = !hadOffer
+    ? `Read ${checked.length} statements; there was no offer to check them against`
+    : otherCompany
+      ? `The offer is from ${otherCompany}, not ${provider ?? "this company"}`
+      : !checked.some((month) => month.result.promises.length > 0)
+        ? "No price or promise found to check the statements against"
+        : !checked.some(compared)
+          ? "Couldn't match your offer to these statements"
+          : `All ${checked.length} statements match the offer`;
   const callUrl = state.inputs.offer.kind === "call" && state.inputs.offer.call.status === "ready" ? state.inputs.offer.call.url : null;
 
   if (open !== null) {
@@ -110,11 +123,7 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
         <div>
           {firstBad >= 0 && <p className="text-[40px] font-semibold leading-none tracking-[-0.02em] tabular-nums">{usd(total)}</p>}
           <h1 className={firstBad >= 0 ? "mt-2 max-w-[44rem] text-[17px] text-text-2" : "text-[28px] font-semibold tracking-[-0.02em]"}>
-            {firstBad >= 0
-              ? `to ask back${provider ? ` from ${provider}` : ""} across ${checked.length} statements${waiting ? ", once you confirm the marked lines" : ""}`
-              : hadOffer
-                ? `All ${checked.length} statements match the offer`
-                : `Read ${checked.length} statements; there was no offer to check them against`}
+            {firstBad >= 0 ? `to ask back${provider ? ` from ${provider}` : ""} across ${checked.length} statements${waiting ? ", once you confirm the marked lines" : ""}` : verdict}
           </h1>
           {skipped.length > 0 && <p className="mt-1 text-[13px] text-text-2">Not counted: {skipped.join(", ")}</p>}
         </div>
@@ -131,7 +140,7 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
             const unconfirmed = month.result.claims.some((claim) => markOf(month.bill, claim.id) === "needs_confirmation");
             return (
               <li key={month.bill}>
-                <button type="button" onClick={() => setOpen(month.bill)} className="group flex w-full flex-col gap-2 rounded-lg text-left" aria-label={`${monthOf(month.result, true)}: ${amount > 0 ? `${usd(amount)} overcharged` : hadOffer ? "matches the offer" : "no offer to compare"}${unconfirmed ? ", to confirm" : ""}`}>
+                <button type="button" onClick={() => setOpen(month.bill)} className="group flex w-full flex-col gap-2 rounded-lg text-left" aria-label={`${monthOf(month.result, true)}: ${amount > 0 ? `${usd(amount)} overcharged` : !hadOffer ? "no offer to compare" : compared(month) ? "matches the offer" : "not compared with the offer"}${unconfirmed ? ", to confirm" : ""}`}>
                   <div className="flex h-28 items-end rounded-t-md border-b border-line px-1.5 group-hover:bg-fill">
                     {amount > 0 && <div className="w-full rounded-t-[3px] bg-red" style={{ height: `${Math.max(8, (amount / largest) * 100)}%` }} />}
                   </div>

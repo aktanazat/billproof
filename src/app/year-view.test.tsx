@@ -107,6 +107,28 @@ test("a year with nothing owed shows no $0.00, and says plainly when there was n
   expect(noOffer).toContain("August 2026: no offer to compare");
 });
 
+test("a year whose offer couldn't be compared says why, never that every statement matches", () => {
+  if (!year) throw new Error("the saved run has no year result");
+  const variant = (change: (result: Extract<YearResult["months"][number]["result"], { outcome: "checked" }>) => object): YearResult => ({ ...year, months: year.months.map((month) => (month.result.outcome === "checked" ? { ...month, result: { ...month.result, claims: [], ...change(month.result) } } : month)) });
+  const render = (result: YearResult) => {
+    const running = { s: "running", inputs: initialState.inputs, attempts: 1, attempt: 1, stage: null, spentMicros: 0, live: {} } as unknown as CheckState;
+    const done = reduce(running, { type: "finished", attempt: 1, result });
+    if (done.s !== "done") throw new Error("the finished year did not become a done state");
+    return renderToStaticMarkup(createElement(YearView, { state: done, result, dispatch: () => {} }));
+  };
+  const otherCompany = render(variant(() => ({ providerMismatch: true, offerProvider: "Westline Cable", matchedPromiseIds: [] })));
+  expect(otherCompany).toContain(">The offer is from Westline Cable, not Bayline Fiber</h1>");
+  const noPromise = render(variant(() => ({ promises: [], matchedPromiseIds: [] })));
+  expect(noPromise).toContain(">No price or promise found to check the statements against</h1>");
+  const unmatched = render(variant(() => ({ matchedPromiseIds: [] })));
+  expect(unmatched).toContain(">Couldn&#x27;t match your offer to these statements</h1>");
+  for (const html of [otherCompany, noPromise, unmatched]) {
+    expect(html).not.toContain("match the offer");
+    expect(html).not.toContain("matches the offer");
+    expect(html).toContain("August 2026: not compared with the offer");
+  }
+});
+
 test("a year of statements is headed with its total and the month the overcharge began", () => {
   const html = yearPage();
   expect(html).toContain("$70.00");
