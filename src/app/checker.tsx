@@ -698,7 +698,8 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
         </p>
       </div>
 
-      <div className="mt-10 grid gap-3 lg:grid-cols-2">
+      {/* One column on a phone may not grow to a long file name, or the page scrolls sideways instead of the name truncating. */}
+      <div className="mt-10 grid grid-cols-[minmax(0,1fr)] gap-3 lg:grid-cols-2">
         <div className="flex min-h-[180px] flex-col rounded-xl bg-fill p-4">
           <p className="text-[15px] font-semibold">Bill</p>
           {bills.length > 0 ? (
