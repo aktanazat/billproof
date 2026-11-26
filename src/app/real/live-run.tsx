@@ -148,7 +148,8 @@ export function LiveRun({ paused }: { paused: boolean }) {
               ["Seconds", seconds.toFixed(1)],
               ["Spent", formatMicros(spent)],
             ].map(([label, value]) => (
-              <div key={label} className="flex flex-col gap-1 p-4">
+              // Only the count is announced, label and all ("Bills done 5 of 24"); the other figures change many times a second.
+              <div key={label} aria-live={label === "Bills done" ? "polite" : undefined} aria-atomic={label === "Bills done" || undefined} className="flex flex-col gap-1 p-4">
                 <dt className="text-[13px] text-text-2">{label}</dt>
                 <dd className="text-[24px] font-semibold tracking-[-0.01em] tabular-nums">{value}</dd>
               </div>
