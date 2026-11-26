@@ -138,6 +138,14 @@ describe("the result page's wording", () => {
     expect(after).toContain("Fiber 500 Internet comes to $70.00, but my plan was confirmed at $55.00 a month");
   });
 
+  test("the page shows the picture the check sorted as the bill, not the first one in the pile", () => {
+    const picture = (name: string) => ({ image: `data:image/png;base64,${name}`, text: null, rows: null });
+    const result: Checked = { ...checked([line("L1", "Internet 1000", 8000, "plan")], []), billPages: [1] };
+    const html = renderToStaticMarkup(createElement(ResultView, { result, bill: 0, pages: [picture("Q0hBVA=="), picture("QklMTA==")], callUrl: null, selection: { claims: {}, questions: {} }, dispatch: () => {}, backLabel: "Check another bill", onBack: () => {} }));
+    expect(html).toContain("data:image/png;base64,QklMTA==");
+    expect(html).not.toContain("data:image/png;base64,Q0hBVA==");
+  });
+
   test("a claim waiting on one marked line asks to confirm the marked line", () => {
     const result: Checked = {
       ...checked([line("L1", "Number share plan", 1500, "plan")], []),
