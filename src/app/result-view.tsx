@@ -10,7 +10,7 @@ import { MAX_OFFER_PAGES, type ShownPage } from "@/lib/prepare";
 import type { CallRecord, Checked, SingleResult } from "@/lib/result";
 import type { LineItem, PromiseTerm, TranscriptTurn } from "@/lib/schemas";
 import { BillPage, snapBox, type Mark } from "./bill-page";
-import { formatClock, PlayButton } from "./evidence";
+import { formatClock, inPlainWords, PlayButton } from "./evidence";
 
 // A provider mismatch is said once, in the heading.
 export const SHOWN_QUESTIONS = new Set<Question["kind"]>(["unagreed_fee", "repeated_charge", "partial_period", "conditions_unproven", "price_gap", "end_date_unread"]);
@@ -336,7 +336,7 @@ export function ResultView({
     return (
       <section className="mx-auto flex w-full max-w-[1120px] flex-col items-start gap-3 px-6 pt-10">
         <h1 ref={focusOnShow} tabIndex={-1} className="text-[28px] font-semibold tracking-[-0.02em] outline-none">{result.outcome === "not_a_bill" ? "This isn't a bill" : "Couldn't check this bill"}</h1>
-        {result.outcome === "could_not_check" && <p className="text-[17px] text-text-2">{result.reason}</p>}
+        {result.outcome === "could_not_check" && <p className="text-[17px] text-text-2">{inPlainWords(result.reason)}</p>}
         <p className="max-w-[40rem] text-[15px]">
           {result.outcome === "not_a_bill"
             ? "Add the statement itself: the PDF, or screenshots of the page that shows the billing period and each charge."

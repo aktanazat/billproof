@@ -8,7 +8,7 @@ import { usd } from "@/lib/letter";
 import { isPicture, isRecording, MAX_BILL_PAGES, MAX_OFFER_PAGES, prepareCall, prepareFile, PrepareError } from "@/lib/prepare";
 import { MAX_BILLS, MAX_CALL_SECONDS, type CheckEvent, type CheckInput, type PageKind, type Stage } from "@/lib/result";
 import { BillPage, snapBox, Thumbnail, type Mark } from "./bill-page";
-import { formatClock, Waveform } from "./evidence";
+import { formatClock, inPlainWords, Waveform } from "./evidence";
 import { focusOnShow, ResultView } from "./result-view";
 import { YearView } from "./year-view";
 
@@ -318,13 +318,6 @@ function WorkingYear({ state, onCancel, dispatch }: { state: Exclude<CheckState,
   );
 }
 
-// Muse Ember's thinking summary sometimes names a field of the reading format ("applies_from"); the page shows plain
-// words instead: the two date fields by what they mean, any other by its words.
-const FIELD_WORDS: Record<string, string> = { applies_from: "start date", applies_until: "end date", covers_line_ids: "covered lines", said_at_seconds: "time said", start_seconds: "start time" };
-export function readableThought(text: string): string {
-  return text.replace(/\b[a-z]+(?:_[a-z]+)+\b/g, (field) => FIELD_WORDS[field] ?? field.replaceAll("_", " "));
-}
-
 function Working({ state, onCancel, dispatch }: { state: Exclude<CheckState, { s: "composing" } | { s: "done" }>; onCancel: () => void; dispatch: (action: CheckAction) => void }) {
   if (state.inputs.bills.length > 1) return <WorkingYear state={state} onCancel={onCancel} dispatch={dispatch} />;
   const bill = state.inputs.bills[0];
@@ -352,7 +345,7 @@ function Working({ state, onCancel, dispatch }: { state: Exclude<CheckState, { s
   ];
   const current = steps.find((step) => stepStatus(step, stage, running) === "now");
   const latest = current ? (live?.thoughts ?? []).filter((t) => current.stages.includes(t.stage)).at(-1)?.text.split("\n\n").at(-1) : undefined;
-  const latestThought = latest && readableThought(latest);
+  const latestThought = latest && inPlainWords(latest);
 
   return (
     <section className="mx-auto grid w-full max-w-[1120px] gap-10 px-6 pb-20 pt-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">

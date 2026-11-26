@@ -4,6 +4,7 @@ import { useState } from "react";
 import { offerOmitted, type CheckAction, type CheckState } from "@/lib/check-machine";
 import { buildYearMessage, usd } from "@/lib/letter";
 import type { CallRecord, Checked, YearResult } from "@/lib/result";
+import { inPlainWords } from "./evidence";
 import { focusOnShow, MessageBox, ResultView, SHOWN_QUESTIONS, Trace } from "./result-view";
 
 type Done = Extract<CheckState, { s: "done" }>;
@@ -164,7 +165,7 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
           {skipped.length > 0 && <p className="mt-1 text-[13px] text-text-2">Not counted: {skipped.join(", ")}</p>}
           {unreadable.map(({ bill, name, reason }) => (
             <p key={bill} className="mt-1 text-[13px] text-text-2">
-              {name}: {reason}
+              {name}: {inPlainWords(reason)}
             </p>
           ))}
         </div>
