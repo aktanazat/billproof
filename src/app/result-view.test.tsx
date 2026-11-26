@@ -66,6 +66,13 @@ describe("the result page's wording", () => {
     expect(html).toContain("$14.00");
   });
 
+  test("a charge listed twice shows what one copy costs, since only the extra copy is in question", () => {
+    const lines = [line("L1", "Boost Protect", 1800, "other"), line("L2", "Boost Protect", 1800, "other")];
+    const t = page(checked(lines, [{ id: "Q1", kind: "repeated_charge", lineIds: ["L1", "L2"], promiseId: null }])).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
+    expect(t).toContain("Boost Protect is charged 2 times $18.00 each");
+    expect(t).not.toContain("$36.00");
+  });
+
   test("a claim waiting on one marked line asks to confirm the marked line", () => {
     const result: Checked = {
       ...checked([line("L1", "Number share plan", 1500, "plan")], []),

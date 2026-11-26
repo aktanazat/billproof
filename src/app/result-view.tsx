@@ -449,7 +449,14 @@ export function ResultView({
                     <li key={question.id} tabIndex={0} onMouseEnter={() => setFocus(question.lineIds)} onMouseLeave={() => setFocus(null)} onFocus={() => setFocus(question.lineIds)} onBlur={() => setFocus(null)} className="flex flex-col gap-2 border-b border-line py-3 outline-none">
                       <div className="flex items-baseline justify-between gap-4 text-[15px]">
                         <p>{questionTitle(question, questionLines, result)}</p>
-                        {questionLines[0] && <p className="text-text-2 tabular-nums">{usd(questionLines.reduce((t, l) => t + l.amount_cents, 0))}</p>}
+                        {questionLines[0] && (
+                          <p className="text-text-2 tabular-nums">
+                            {/* A repeat puts one copy at stake, not their sum. */}
+                            {question.kind === "repeated_charge" && questionLines.every((l) => l.amount_cents === questionLines[0].amount_cents)
+                              ? `${usd(questionLines[0].amount_cents)} each`
+                              : usd(questionLines.reduce((t, l) => t + l.amount_cents, 0))}
+                          </p>
+                        )}
                       </div>
                       {canInclude && (
                         <label className="inline-flex cursor-pointer items-center gap-2 text-[13px] text-text-2 select-none">
