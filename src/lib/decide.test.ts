@@ -597,5 +597,6 @@ describe("a checkout cart's monthly total", () => {
     expect(cart.claims).toEqual([]);
     expect(cart.unused.map((u) => u.reason)).toEqual(["device_or_cart_total"]);
     expect(priced("Unlimited Premium plan for $32.22 a month").claims.map((c) => c.amountCents)).toEqual([1257]);
+    expect(priced("I was expecting $32.22 a month, and the page prior to checkout said so").claims.map((c) => c.amountCents)).toEqual([1257]);
   });
 });

@@ -305,8 +305,9 @@ const MAX_PLAUSIBLE_SHARE = 0.5;
 const TIME_LIMIT = /\b(through|thru|until|ends?|ending|expires?|for (\d+|a|one|two|three) (months?|mos?|years?|yrs?)|\d+[- ](months?|mos?|years?)|promo(tional)?|\d{1,2}\/\d{1,2}\/\d{2,4}|(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.? \d{1,2},? \d{4})\b/i;
 
 // A checkout cart's monthly total or a device's financing ("Due monthly $32.22", "for 36 mos. at 0% APR") is what a
-// new order or phone costs, not the price promised for a plan already on the bill.
-const DEVICE_OR_CART = /\b(due monthly|due today|check ?out|add to cart|installments?|financ(ed|ing)|device payment)\b|\d% apr\b/i;
+// new order or phone costs, not the price promised for a plan already on the bill. "Checkout" alone is left out:
+// posters write it about plan prices too ("the page prior to checkout said $70 a month").
+const DEVICE_OR_CART = /\b(due monthly|due today|add to cart|installments?|financ(ed|ing)|device payment)\b|\d% apr\b/i;
 
 // Charges a government sets and the company only collects, whatever kind the reading gave them, including combined
 // "Taxes & fees" lines. "Tax Recovery" and "Regulatory Cost Recovery" fees are the company's own and don't match.
