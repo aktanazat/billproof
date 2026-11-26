@@ -248,6 +248,11 @@ export function MessageBox({ message }: { message: Message }) {
         <textarea ref={box} readOnly value={text} aria-label="Message to send" className="block h-[280px] w-full resize-none rounded-xl bg-fill p-4 text-[15px] leading-[22px] focus:outline-none focus-visible:shadow-[inset_0_0_0_2px_var(--text)]" />
       </div>
       {format === "complaint" && <p className="text-[13px] text-text-2">{COMPLAINT_WHERE}</p>}
+      {/* The button's own "Copied" isn't spoken while it has focus; a status line is. A refused copy needs none: the
+          message is selected and takes focus. */}
+      <p role="status" className="sr-only">
+        {copied === "yes" ? "Message copied" : ""}
+      </p>
     </section>
   );
 }
