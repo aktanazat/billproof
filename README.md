@@ -36,6 +36,8 @@ Every message comes in four forms: a chat message, an email, a call script, and 
 
 Before each model call the server counts the exact input tokens with `POST /v1/responses/input_tokens` and reserves the worst case (all input uncached, every allowed output token) in a SQLite ledger. Reservations are checked against a per-check cap of 3¢ per bill and an event cap, then settled to the billed usage. A call lost mid-flight stays counted at its full reservation. When one bill of a year fails, no other bill starts a new paid call, and the failure is reported only after the calls already running have settled. The cost of each check, and the tokens of each model call, are shown under the result.
 
+The whole project, local runs and the live site together, is held under $10 of Meta spend. Local runs used $8.33, so the live server's event cap is $1.60 (`deploy/compose.yml`), a combined worst case of $9.93. Once the cap can't cover one more check, the start screen and the real-bills page say live checks are paused and the live-run button turns off; every saved result stays on the real-bills page. The site's robots.txt keeps crawlers off the "Check it live" links, which start a paid check when their page runs, and each address gets 30 checks an hour.
+
 ## Run it
 
 ```bash
