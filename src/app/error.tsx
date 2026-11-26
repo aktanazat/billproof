@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
+import { focusOnShow } from "./result-view";
 import { SiteHeader } from "./site-header";
 
 // Anything that breaks while a page shows (an unusual bill, a lost connection mid-render) lands here instead of the
@@ -22,7 +23,8 @@ export default function PageError({ error, reset }: { error: Error & { digest?: 
     <main className="flex min-h-full flex-col">
       <SiteHeader current={null} />
       <section className="mx-auto flex w-full max-w-[1120px] flex-col items-start gap-3 px-6 pt-16">
-        <h1 className="text-[28px] font-semibold tracking-[-0.02em]">Something went wrong showing this page</h1>
+        {/* What broke took focus with it; the heading takes it, so a screen reader says what happened. */}
+        <h1 ref={focusOnShow} tabIndex={-1} className="text-[28px] font-semibold tracking-[-0.02em] outline-none">Something went wrong showing this page</h1>
         <p className="text-[17px] text-text-2">Try again, or start a new check.</p>
         <div className="mt-2 flex gap-2">
           <button type="button" onClick={reset} className="inline-flex h-9 items-center rounded-lg bg-text px-4 text-[15px] font-medium text-white hover:bg-black">
