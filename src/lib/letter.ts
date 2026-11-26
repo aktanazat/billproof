@@ -36,6 +36,8 @@ function names(lines: LineItem[]): string {
   return labels.length <= 1 ? (labels[0] ?? "this charge") : `${labels.slice(0, -1).join(", ")} and ${labels.at(-1)}`;
 }
 
+const capitalized = (text: string) => `${text[0].toUpperCase()}${text.slice(1)}`;
+
 // A promise heard on a recorded call is cited as what the representative said, with the moment it was said; who
 // "the representative" is depends on who reads it ("your representative" to the company, its name to a regulator).
 function citation(promise: PromiseTerm, onCall: boolean, speaker: string): string {
@@ -45,30 +47,47 @@ function citation(promise: PromiseTerm, onCall: boolean, speaker: string): strin
 }
 
 // A claim as what happened, for a regulator, and what the company is asked to do about it. A missing credit mentions
-// autopay only when the promise depends on it; many promised credits (a line discount, a promotion) do not.
-function claimParts(claim: Claim, lines: LineItem[], promise: PromiseTerm, quoted: string, period: string): { fact: string; request: string } {
+// autopay only when the promise depends on it; many promised credits (a line discount, a promotion) do not. `period`
+// names the bill the claim is on ("this bill" where the message already named it); null continues a bill named by an
+// earlier claim.
+function claimParts(claim: Claim, lines: LineItem[], promise: PromiseTerm, quoted: string, period: string | null): { fact: string; request: string } {
   const charged = lines.filter((line) => line.amount_cents > 0);
   const several = new Set(charged.map((line) => line.label)).size > 1;
+  const dated = period !== null && period !== "this bill";
   switch (claim.kind) {
     case "price_above_promise": {
       const discounted = lines.some((line) => line.amount_cents < 0) ? " after discounts" : "";
       return {
-        fact: `For ${period}, ${names(charged)} ${several ? "come" : "comes"} to ${usd(claim.actualCents)}${discounted}, but my plan was confirmed at ${usd(claim.expectedCents)} a month (${quoted}).`,
+        fact: `${period ? `For ${period}, ` : ""}${names(charged)} ${several ? "come" : "comes"} to ${usd(claim.actualCents)}${discounted}, but my plan was confirmed at ${usd(claim.expectedCents)} a month (${quoted}).`,
         request: `Please credit the ${usd(claim.amountCents)} difference and correct the rate.`,
       };
     }
     case "included_charged":
       return {
-        fact: `I was charged ${usd(claim.amountCents)} for ${names(charged)}, which ${several ? "were" : "was"} included at no extra cost (${quoted}).`,
+        fact: `${dated ? `For ${period}, ` : ""}I was charged ${usd(claim.amountCents)} for ${names(charged)}, which ${several ? "were" : "was"} included at no extra cost (${quoted}).`,
         request: `Please remove ${several ? "them" : "it"} and credit ${usd(claim.amountCents)}.`,
       };
     case "credit_missing": {
+      const bill = dated ? (period.startsWith("the ") ? period : `the bill for ${period}`) : "this bill";
       const missing = `${claim.actualCents === 0 ? "no" : `only ${usd(claim.actualCents)} of the`} ${usd(claim.expectedCents)} monthly credit I was promised (${quoted})`;
       return {
-        fact: promise.conditions.includes("autopay") ? `My account is on autopay, but this bill has ${missing}.` : `This bill has ${missing}.`,
+        fact: promise.conditions.includes("autopay") ? `My account is on autopay, but ${bill} has ${missing}.` : `${capitalized(bill)} has ${missing}.`,
         request: `Please apply the missing ${usd(claim.amountCents)}.`,
       };
     }
+  }
+}
+
+// The same claim in a few words, for a complaint that must be shortened to fit the regulator's form.
+function shortClaim(claim: Claim, lines: LineItem[]): string {
+  const charged = names(lines.filter((line) => line.amount_cents > 0));
+  switch (claim.kind) {
+    case "price_above_promise":
+      return `${charged} billed ${usd(claim.actualCents)}, promised ${usd(claim.expectedCents)} a month`;
+    case "included_charged":
+      return `${charged} charged ${usd(claim.amountCents)}, promised included`;
+    case "credit_missing":
+      return claim.actualCents === 0 ? `promised ${usd(claim.expectedCents)} monthly credit missing` : `only ${usd(claim.actualCents)} of a promised ${usd(claim.expectedCents)} monthly credit`;
   }
 }
 
@@ -120,25 +139,34 @@ function feeFact(fees: LineItem[][], offerCovers: boolean): string {
 
 export type Message = { totalCents: number; chat: string; email: string; call: string; complaint: string };
 
+// Where to file it, for the person: shown beside the complaint, not part of what the regulator receives.
+export const COMPLAINT_WHERE = "File phone, internet and TV complaints at consumercomplaints.fcc.gov; electric, gas and water complaints go to your state utility commission.";
+
+// The FCC's complaint forms take 2,000 characters of description and cut off a longer paste; 300 of them are left for
+// what the person writes in place of the company's answer.
+const COMPLAINT_ROOM = 1_700;
+
 // The written complaint a regulator takes when the company won't fix it: the FCC for phone, internet and TV,
 // the state utility commission for electric, gas and water. The person fills in what the company already said, and
-// any company name or account number the bill didn't show: "my account" means nothing to a regulator.
-function complaintText(provider: string | null, last4: string | null, problem: string, facts: string[], claims: Claim[]): string {
+// any company name or account number the bill didn't show: "my account" means nothing to a regulator. `factVersions`
+// runs from the fullest account of what happened to the shortest; the first that fits the form is used.
+function complaintText(provider: string | null, last4: string | null, problem: string, factVersions: string[][], claims: Claim[]): string {
   const totalCents = claims.reduce((total, claim) => total + claim.amountCents, 0);
-  return [
-    `Company: ${provider ?? "[company name]"}`,
-    `Account: ${last4 ? `account ending ${last4}` : "[account number]"}`,
-    `Problem: ${problem}`,
-    "",
-    "What happened:",
-    ...facts.map((fact) => `- ${fact}`),
-    "",
-    `What the company said when I asked it to correct this: [date you contacted ${provider ?? "the company"} and their answer]`,
-    "",
-    totalCents > 0 ? `Resolution I'm asking for: a credit of ${usd(totalCents)} and ${claimRemedy(claims)}.` : "Resolution I'm asking for: the charges above corrected or explained in writing.",
-    "",
-    "File phone, internet and TV complaints at consumercomplaints.fcc.gov; electric, gas and water complaints go to your state utility commission.",
-  ].join("\n");
+  const write = (facts: string[]) =>
+    [
+      `Company: ${provider ?? "[company name]"}`,
+      `Account: ${last4 ? `account ending ${last4}` : "[account number]"}`,
+      `Problem: ${problem}`,
+      "",
+      "What happened:",
+      ...facts.map((fact) => `- ${fact}`),
+      "",
+      `What the company said when I asked it to correct this: [date you contacted ${provider ?? "the company"} and their answer]`,
+      "",
+      totalCents > 0 ? `Resolution I'm asking for: a credit of ${usd(totalCents)} and ${claimRemedy(claims)}.` : "Resolution I'm asking for: the charges above corrected or explained in writing.",
+    ].join("\n");
+  const texts = factVersions.map(write);
+  return texts.find((text) => text.length <= COMPLAINT_ROOM) ?? texts[texts.length - 1];
 }
 
 // When the pictures held an earlier statement and this bill is higher: the rise, naming what rose most, as a fact.
@@ -220,7 +248,8 @@ export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<stri
     .filter(Boolean)
     .join("\n\n");
   const problem = claims.length > 0 ? claimProblem(claims) : fees.length > 0 && offerCovers ? "fees on my bill I never agreed to." : "charges on my bill the company hasn't explained.";
-  return { totalCents, chat, email, call, complaint: complaintText(provider, result.reading.account_last4, problem, regulatorBody, claims) };
+  const shortFacts = [...(claims.length > 0 ? [`For ${periodText(result)}: ${claims.map((claim) => shortClaim(claim, linesOf(claim.lineIds))).join("; ")}.`] : []), ...(risen ? [risen] : []), ...questionFacts];
+  return { totalCents, chat, email, call, complaint: complaintText(provider, result.reading.account_last4, problem, [regulatorBody, shortFacts], claims) };
 }
 
 // One message for a year of statements: each month's claims under its statement, then the total.
@@ -231,19 +260,22 @@ export function buildYearMessage(months: Checked[]): Message {
   // value doesn't hide it.
   const last4 = months.find((month) => month.reading.account_last4)?.reading.account_last4 ?? null;
   const account = last4 ? `account ending ${last4}` : "my account";
-  // A promise already quoted for an earlier month is referred back to, not quoted again in full.
+  // A promise already quoted for an earlier month is referred back to, not quoted again in full; a month names its
+  // statement once, on its first claim.
   const sectionsFor = (speaker: string, asking: boolean) => {
     const quoted = new Set<string>();
     return withClaims.map((month) => {
       const lines = new Map(month.reading.line_items.map((line) => [line.id, line]));
       const promises = new Map(month.promises.map((promise) => [promise.id, promise]));
+      let named = false;
       const sentences = month.claims.flatMap((claim) => {
         const promise = promises.get(claim.promiseId);
         if (!promise) return [];
         const key = promise.quote.trim();
         const cite = quoted.has(key) ? "as quoted above" : citation(promise, month.transcript !== null, speaker);
         quoted.add(key);
-        const { fact, request } = claimParts(claim, claim.lineIds.flatMap((id) => lines.get(id) ?? []), promise, cite, periodText(month));
+        const { fact, request } = claimParts(claim, claim.lineIds.flatMap((id) => lines.get(id) ?? []), promise, cite, named ? null : periodText(month));
+        named = true;
         return [asking ? `${fact} ${request}` : fact];
       });
       return sentences.join(" ");
@@ -256,5 +288,26 @@ export function buildYearMessage(months: Checked[]): Message {
   const chat = [`Hi, ${opening}`, ...sections, ask].filter(Boolean).join("\n\n");
   const email = [`Subject: Billing correction for ${account}`, "", provider ? `Hello ${provider} billing team,` : "Hello billing team,", "", opening, "", ...sections.flatMap((s) => [s, ""]), ...(ask ? [ask, ""] : []), "Please reply with the corrected amount and the date the credit will post.", "", "Thank you,", "[Your name]"].join("\n");
   const call = [`I'm calling about ${account}.`, ...sections.map((s, i) => `${i + 1}. ${s}`), ask, "Before ending the call, ask for a reference number and the date the credit will post."].filter(Boolean).join("\n\n");
-  return { totalCents, chat, email, call, complaint: complaintText(provider, last4, claimProblem(withClaims.flatMap((month) => month.claims)), sectionsFor(`${provider ?? "the company"}'s representative`, false), withClaims.flatMap((month) => month.claims)) };
+  // Shorter accounts for a complaint too long for the regulator's form: each month in a line, then each month's amount
+  // with every promise quoted once, then the amounts alone.
+  const regulator = `${provider ?? "the company"}'s representative`;
+  const claims = withClaims.flatMap((month) => month.claims);
+  const promised = [
+    ...new Map(
+      withClaims.flatMap((month) =>
+        month.claims.flatMap((claim) => {
+          const promise = month.promises.find((p) => p.id === claim.promiseId);
+          return promise ? [[promise.quote.trim(), citation(promise, month.transcript !== null, regulator)] as const] : [];
+        }),
+      ),
+    ).values(),
+  ];
+  const promisedLine = `What I was promised: ${promised.join("; ")}.`;
+  const byMonth = withClaims.map((month) => {
+    const lines = new Map(month.reading.line_items.map((line) => [line.id, line]));
+    return `For ${periodText(month)}: ${month.claims.map((claim) => shortClaim(claim, claim.lineIds.flatMap((id) => lines.get(id) ?? []))).join("; ")}.`;
+  });
+  const amounts = withClaims.map((month) => `${capitalized(periodText(month))}: ${usd(month.claims.reduce((t, claim) => t + claim.amountCents, 0))} more than I was promised.`);
+  const complaint = complaintText(provider, last4, claimProblem(claims), [sectionsFor(regulator, false), [promisedLine, ...byMonth], [promisedLine, ...amounts], amounts], claims);
+  return { totalCents, chat, email, call, complaint };
 }

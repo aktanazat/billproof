@@ -4,7 +4,7 @@ import { useRef, useState, type ReactNode } from "react";
 import type { CheckAction, Selection } from "@/lib/check-machine";
 import { formatMicros } from "@/lib/cost";
 import type { Claim, Question, TestedClaim, UnusedReason } from "@/lib/decide";
-import { buildMessage, increaseSentence, shortDate, usd, type Message } from "@/lib/letter";
+import { buildMessage, COMPLAINT_WHERE, increaseSentence, shortDate, usd, type Message } from "@/lib/letter";
 import { MAX_OFFER_PAGES, type ShownPage } from "@/lib/prepare";
 import type { CallRecord, Checked, SingleResult } from "@/lib/result";
 import type { LineItem, PromiseTerm, TranscriptTurn } from "@/lib/schemas";
@@ -235,6 +235,7 @@ export function MessageBox({ message }: { message: Message }) {
         </div>
       </div>
       <textarea ref={box} readOnly value={text} aria-label="Message to send" className="h-[280px] w-full resize-none rounded-xl bg-fill p-4 text-[15px] leading-[22px] focus:outline-none focus-visible:shadow-[inset_0_0_0_2px_var(--text)]" />
+      {format === "complaint" && <p className="text-[13px] text-text-2">{COMPLAINT_WHERE}</p>}
     </section>
   );
 }

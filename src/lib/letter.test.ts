@@ -245,3 +245,41 @@ describe("a claim on a promise heard on a call", () => {
     expect(email).not.toContain("For this bill");
   });
 });
+
+describe("the complaint a regulator receives", () => {
+  const plan: LineItem = { id: "L1", label: "Fiber 500 Internet", amount_cents: 7000, kind: "plan", page: 1, box: { x0: 80, y0: 400, x1: 920, y1: 420 }, quote: "Fiber 500 Internet $70.00", prorated: false };
+  const gateway: LineItem = { id: "L2", label: "Wi-Fi Gateway Rental", amount_cents: 1500, kind: "equipment", page: 1, box: { x0: 80, y0: 440, x1: 920, y1: 460 }, quote: "Wi-Fi Gateway Rental $15.00", prorated: false };
+  const price: PromiseTerm = { id: "P1", kind: "monthly_price", description: "", amount_cents: 5500, per_line: false, conditions: [], applies_from: null, applies_until: null, quote: "Monthly price: $55.00/mo with Autopay & Paperless (2-year price guarantee through 10/31/2027)", said_at_seconds: null, covers_line_ids: ["L1"] };
+  const included: PromiseTerm = { id: "P2", kind: "included", description: "", amount_cents: null, per_line: false, conditions: [], applies_from: null, applies_until: null, quote: "Wi-Fi Gateway: included at no extra cost for as long as you keep Fiber 500", said_at_seconds: null, covers_line_ids: ["L2"] };
+  const priceClaim: Checked["claims"][number] = { id: "C1", kind: "price_above_promise", lineIds: ["L1"], promiseId: "P1", actualCents: 7000, expectedCents: 5500, amountCents: 1500, needsConfirmation: false, lookedFor: null };
+  const gatewayClaim: Checked["claims"][number] = { id: "C2", kind: "included_charged", lineIds: ["L2"], promiseId: "P2", actualCents: 1500, expectedCents: 0, amountCents: 1500, needsConfirmation: false, lookedFor: null };
+  // Month m runs from the 12th to the 11th of the next month.
+  const month = (m: number, claims: Checked["claims"]): Checked => {
+    const base = billWith([plan, gateway]);
+    const on = (mm: number, day: number) => `2026-${String(((mm - 1) % 12) + 1).padStart(2, "0")}-${day}`;
+    return { ...base, reading: { ...base.reading, provider: "Bayline Fiber", account_last4: "4415", period_start: on(m, 12), period_end: on(m + 1, 11) }, promises: [price, included], questions: [], claims };
+  };
+
+  // The FCC's description box takes 2,000 characters and cuts off anything pasted past that, so a complaint leaves room
+  // within it for what the person writes in place of the company's answer.
+  test("a year with two claims every month still fits the FCC's description box, naming each month and the total", () => {
+    const year = Array.from({ length: 12 }, (_, i) => month(i + 1, [priceClaim, gatewayClaim]));
+    const { complaint } = buildYearMessage(year);
+    expect(complaint.length).toBeLessThanOrEqual(1_700);
+    for (const m of ["Jan 12, 2026", "Jun 12, 2026", "Dec 12, 2026"]) expect(complaint).toContain(m);
+    expect(complaint).toContain("a credit of $360.00");
+  });
+
+  test("a month whose only claim is an included charge says which statement it is", () => {
+    const { chat, complaint } = buildYearMessage([month(10, [priceClaim]), month(11, [gatewayClaim])]);
+    expect(chat).toContain("For Nov 12, 2026 to Dec 11, 2026, I was charged $15.00 for Wi-Fi Gateway Rental");
+    expect(complaint).toContain("For Nov 12, 2026 to Dec 11, 2026, I was charged $15.00 for Wi-Fi Gateway Rental");
+  });
+
+  test("a single bill's complaint names the bill for any claim, and holds only what goes to the regulator", () => {
+    const { complaint } = buildMessage(month(11, [gatewayClaim]), new Set(["C2"]), new Set());
+    expect(complaint).toContain("- For Nov 12, 2026 to Dec 11, 2026, I was charged $15.00 for Wi-Fi Gateway Rental");
+    // Where to file is advice for the person, shown beside the complaint, not text the regulator receives.
+    expect(complaint).not.toContain("consumercomplaints.fcc.gov");
+  });
+});
