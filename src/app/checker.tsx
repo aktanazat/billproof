@@ -31,15 +31,15 @@ function isCheckEvent(value: unknown): value is CheckEvent {
 }
 
 async function streamCheck(input: CheckInput, attempt: number, signal: AbortSignal, dispatch: (action: CheckAction) => void) {
-  const fail = (message: string) => dispatch({ type: "errored", attempt, failure: "network", message, spentMicros: 0, retryable: true });
+  const fail = (message: string, spentMicros: number | null) => dispatch({ type: "errored", attempt, failure: "network", message, spentMicros, retryable: true });
   let response: Response;
   try {
     response = await fetch("/api/check", { method: "POST", body: JSON.stringify(input), headers: { "Content-Type": "application/json" }, signal });
   } catch {
-    if (!signal.aborted) fail("The connection dropped before the check started.");
+    if (!signal.aborted) fail("The connection dropped before the check started.", 0);
     return;
   }
-  if (!response.body) return fail("The server sent no response.");
+  if (!response.body) return fail("The server sent no response.", 0);
   const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
   let buffer = "";
   let terminal = false;
@@ -99,7 +99,7 @@ async function streamCheck(input: CheckInput, attempt: number, signal: AbortSign
   } catch {
     if (signal.aborted) return;
   }
-  if (!terminal && !signal.aborted) fail("The connection dropped before the check finished.");
+  if (!terminal && !signal.aborted) fail("The connection dropped before the check finished.", null);
 }
 
 function FileTarget({ label, accept, multiple, onFiles, children, className }: { label: string; accept: string; multiple?: boolean; onFiles: (files: File[]) => void; children: ReactNode; className?: string }) {
@@ -228,7 +228,7 @@ function Footer({ state, onCancel, dispatch }: { state: Exclude<CheckState, { s:
       <p className="text-[15px]" role={state.s === "failed" ? "alert" : undefined}>
         {state.s === "failed" ? state.message : "Check stopped."}
       </p>
-      {state.spentMicros > 0 && <p className="text-[13px] text-text-2 tabular-nums">{state.s === "cancelled" ? `At least ${formatMicros(state.spentMicros)} spent` : `${formatMicros(state.spentMicros)} spent`}</p>}
+      {state.spentMicros > 0 && <p className="text-[13px] text-text-2 tabular-nums">{state.s === "cancelled" || !state.spentFinal ? `At least ${formatMicros(state.spentMicros)} spent` : `${formatMicros(state.spentMicros)} spent`}</p>}
       <div className="flex gap-2">
         {(state.s === "cancelled" || state.retryable) && (
           <button type="button" onClick={() => dispatch({ type: "retry" })} className={primary}>

@@ -45,6 +45,14 @@ describe("check machine", () => {
     expect(play([failed(false), { type: "retry" }], retried).s).toBe("failed");
   });
 
+  test("a connection lost mid-check keeps the spend reported so far as a lower bound; the server's own figure is exact", () => {
+    const spending = play([...readyBill, { type: "start" }, { type: "spent", attempt: 1, micros: 4200 }]);
+    const dropped = play([{ type: "errored", attempt: 1, failure: "network", message: "The connection dropped before the check finished.", spentMicros: null, retryable: true }], spending);
+    expect(dropped).toMatchObject({ s: "failed", spentMicros: 4200, spentFinal: false });
+    const reported = play([{ type: "errored", attempt: 1, failure: "upstream", message: "Muse Ember had a problem on Meta's side. Try again.", spentMicros: 5100, retryable: true }], spending);
+    expect(reported).toMatchObject({ s: "failed", spentMicros: 5100, spentFinal: true });
+  });
+
   test("going back from a finished check keeps the files, so the person can change one and check again", () => {
     const back = play([...readyBill, { type: "start" }, { type: "finished", attempt: 1, result: notABill }, { type: "edit" }]);
     expect(back).toMatchObject({ s: "composing", inputs: { bills: [{ id: "b", status: "ready" }] } });
