@@ -45,8 +45,8 @@ function checked(lines: LineItem[], questions: Checked["questions"]): Checked {
   };
 }
 
-const page = (result: Checked) =>
-  renderToStaticMarkup(createElement(ResultView, { result, bill: 0, pages: [], callUrl: null, selection: { claims: {}, questions: {} }, dispatch: () => {}, backLabel: "Check another bill", onBack: () => {} })).replace(/&#x27;/g, "'").replace(/&amp;/g, "&");
+const page = (result: Checked, selection: Parameters<typeof ResultView>[0]["selection"] = { claims: {}, questions: {} }) =>
+  renderToStaticMarkup(createElement(ResultView, { result, bill: 0, pages: [], callUrl: null, selection, dispatch: () => {}, backLabel: "Check another bill", onBack: () => {} })).replace(/&#x27;/g, "'").replace(/&amp;/g, "&");
 
 describe("the result page's wording", () => {
   test("a bill with one charge says it compared 1 charge", () => {
@@ -57,5 +57,20 @@ describe("the result page's wording", () => {
     const lines = [line("L1", "Internet 1000", 8000, "plan"), line("L2", "Discount for switching to AT&T", -1000, "discount")];
     const html = page(checked(lines, [{ id: "Q1", kind: "end_date_unread", lineIds: ["L2"], promiseId: "P1" }]));
     expect(html).toContain("The end date of your offer for Discount for switching to AT&T couldn't be read");
+  });
+
+  test("a fee printed twice is one question that says so, with both copies' total", () => {
+    const lines = [line("L1", "Entertainment", 12200, "plan"), line("F1", "TV Access Fee", 700, "company_fee"), line("F2", "TV Access Fee", 700, "company_fee")];
+    const html = page(checked(lines, [{ id: "Q1", kind: "unagreed_fee", lineIds: ["F1", "F2"], promiseId: null }]));
+    expect(html).toContain("TV Access Fee isn't in your offer, charged 2 times");
+    expect(html).toContain("$14.00");
+  });
+
+  test("a claim waiting on one marked line asks to confirm the marked line", () => {
+    const result: Checked = {
+      ...checked([line("L1", "Number share plan", 1500, "plan")], []),
+      claims: [{ id: "C1", kind: "credit_missing", lineIds: ["L1"], promiseId: "P1", actualCents: 0, expectedCents: 750, amountCents: 750, needsConfirmation: true, lookedFor: null }],
+    };
+    expect(page(result, { claims: { C1: "needs_confirmation" }, questions: {} })).toContain("once you confirm the marked line<");
   });
 });
