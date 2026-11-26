@@ -445,6 +445,20 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
   const nextId = useRef(0);
   const id = () => `doc-${++nextId.current}`;
 
+  // A file dropped just outside a drop area would otherwise be opened by the browser, leaving the page and losing every
+  // file already added. Text drags (into the offer box) are left alone.
+  useEffect(() => {
+    const keep = (event: globalThis.DragEvent) => {
+      if (event.dataTransfer?.types.includes("Files")) event.preventDefault();
+    };
+    window.addEventListener("dragover", keep);
+    window.addEventListener("drop", keep);
+    return () => {
+      window.removeEventListener("dragover", keep);
+      window.removeEventListener("drop", keep);
+    };
+  }, []);
+
   const runningAttempt = state.s === "running" ? state.attempt : null;
   useEffect(() => {
     if (runningAttempt === null || controllers.current.has(runningAttempt)) return;
