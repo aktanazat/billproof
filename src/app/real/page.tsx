@@ -70,13 +70,21 @@ function Finding({ bill }: { bill: Checked }) {
       <p className="text-[13px] leading-[18px] text-text-2">
         Company fees the poster never mentions agreeing to:{" "}
         <span className="text-text">
-          {fees.flatMap((fee) => fee.lines).join(", ")} ({usd(fees.reduce((t, fee) => t + fee.cents, 0))})
+          {namedOnce(fees.flatMap((fee) => fee.lines))} ({usd(fees.reduce((t, fee) => t + fee.cents, 0))})
         </span>
       </p>
     );
   }
   const asked = [...new Set(bill.questions.flatMap((question) => question.lines))];
   return <p className="text-[13px] leading-[18px] text-text-2">{asked.length > 0 ? <>Worth asking about: <span className="text-text">{asked.join(", ")}</span></> : "Nothing above what the poster describes"}</p>;
+}
+
+// A fee printed several times (once per phone line or TV box) is named once: "Company fees & surcharges, charged 8 times".
+function namedOnce(labels: string[]): string {
+  const counts = new Map<string, number>();
+  for (const label of labels) counts.set(label, (counts.get(label) ?? 0) + 1);
+  const repeats = [...counts.values()].some((n) => n > 1);
+  return [...counts].map(([label, n]) => (n > 1 ? `${label}, charged ${n} times` : label)).join(repeats ? "; " : ", ");
 }
 
 export default function RealBills() {
