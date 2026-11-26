@@ -3,10 +3,9 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { z } from "zod";
 import { realRun } from "@/data/real-bills";
-import { CHECK_CAP_MICROS } from "@/lib/ledger";
 import { usd } from "@/lib/letter";
 import { postNotes, unagreedFees, type RealBill } from "@/lib/real-bills";
-import { serverLedger } from "@/lib/server-ledger";
+import { livePaused } from "@/lib/server-ledger";
 import data from "../../public/samples/index.json";
 import { Checker, type Sample } from "./checker";
 import { SiteHeader } from "./site-header";
@@ -59,7 +58,7 @@ async function CheckerFor({ searchParams }: { searchParams: PageProps<"/">["sear
 // Once the demo's budget can't cover one more check, the page says so before anyone tries; read on every visit.
 async function LivePaused() {
   await connection();
-  if (serverLedger().left() >= CHECK_CAP_MICROS) return null;
+  if (!livePaused()) return null;
   return (
     <p role="status" className="mx-auto mt-4 w-full max-w-[1120px] px-6 text-[15px]">
       Live checks are paused: this demo has used its budget. Every saved result is on the{" "}

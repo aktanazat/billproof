@@ -1,12 +1,21 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { connection } from "next/server";
+import { Suspense } from "react";
 import { realRun } from "@/data/real-bills";
 import { formatMicros } from "@/lib/cost";
 import { usd } from "@/lib/letter";
 import { claimedCents, unagreedFees, type RealBill } from "@/lib/real-bills";
+import { livePaused } from "@/lib/server-ledger";
 import { Thumbnail } from "../bill-page";
 import { SiteHeader } from "../site-header";
 import { LiveRun } from "./live-run";
+
+// The live run's button is read on every visit, so it is off once the demo's budget can't cover a check.
+async function LiveRunNow() {
+  await connection();
+  return <LiveRun paused={livePaused()} />;
+}
 
 export const metadata: Metadata = {
   title: "Real bills — Billproof",
@@ -212,7 +221,9 @@ export default function RealBills() {
           {notBills} posts showed chats, app screens or ads rather than a bill{unread > 0 ? `, ${unread} showed a bill whose charges couldn't be read reliably, so ${unread === 1 ? "it wasn't" : "they weren't"} checked` : ""}, and {gone} more had their pictures deleted. On {addsUp} of the {withTotal.length} bills that print a total, an amount due or subtotals for every part, the charges Muse Ember read add up to them to the cent{misread.length > 0 ? `, not counting ${misread.map((bill) => MISREAD.find((m) => m.id === bill.id)?.what).join(" and ")}` : ""}{addsUpToSubtotal > 0 ? `, and on ${addsUpToSubtotal} more the first charges add up to a subtotal the bill prints before the rest` : ""}. {withEarlier} posts also showed an earlier bill; Billproof read only the newest one and lists what moved since. {claimSummary}
         </p>
 
-        <LiveRun />
+        <Suspense fallback={<LiveRun paused={false} />}>
+          <LiveRunNow />
+        </Suspense>
 
         {paidBack.length > 0 && (
           <section className="mt-14 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">

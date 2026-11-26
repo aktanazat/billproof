@@ -1,6 +1,6 @@
 import "server-only";
 import path from "node:path";
-import { openLedger, type Ledger } from "./ledger";
+import { CHECK_CAP_MICROS, openLedger, type Ledger } from "./ledger";
 
 const globalLedger = globalThis as typeof globalThis & { billproofLedger?: Ledger };
 
@@ -11,6 +11,11 @@ export function serverLedger(): Ledger {
     Number(process.env.EVENT_BUDGET_MICROS ?? 6_000_000),
   );
   return globalLedger.billproofLedger;
+}
+
+// Live checks pause once the demo's cap can't cover one more check at its worst case.
+export function livePaused(): boolean {
+  return serverLedger().left() < CHECK_CAP_MICROS;
 }
 
 export function clientKey(request: Request): string {

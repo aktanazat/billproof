@@ -20,7 +20,7 @@ function finish(tile: Tile, result: SingleResult): Tile {
   return { ...tile, stage: "done", provider: result.reading.provider ?? tile.provider, feeCents, claimCents, note: claimCents > 0 ? `${usd(claimCents)} ${claimNote}` : feeCents > 0 ? `${usd(feeCents)} in fees` : "No fees or claims" };
 }
 
-export function LiveRun() {
+export function LiveRun({ paused }: { paused: boolean }) {
   const [tiles, setTiles] = useState<Tile[]>([]);
   const [state, setState] = useState<"idle" | "running" | "done" | "refused">("idle");
   const [message, setMessage] = useState("");
@@ -118,10 +118,11 @@ export function LiveRun() {
           <h2 className="text-[17px] font-semibold">Watch it check 24 real bills at once</h2>
           <p className="mt-1 text-[13px] text-text-2">Each one is read live by Muse Ember, eight at a time, while you watch.</p>
         </div>
-        <button type="button" onClick={() => void run()} disabled={state === "running"} className="h-9 rounded-lg bg-text px-4 text-[15px] font-medium text-white hover:bg-black disabled:bg-fill-2 disabled:text-text-2">
+        <button type="button" onClick={() => void run()} disabled={paused || state === "running"} className="h-9 rounded-lg bg-text px-4 text-[15px] font-medium text-white hover:bg-black disabled:bg-fill-2 disabled:text-text-2">
           {state === "running" ? "Running" : state === "done" ? "Run again" : "Run it live"}
         </button>
       </div>
+      {paused && <p className="mt-3 text-[13px] text-text-2">Live checks are paused: this demo has used its budget. Every saved result is below.</p>}
       {state === "refused" && (
         <p className="mt-3 text-[13px] text-red" role="alert">
           {message}
