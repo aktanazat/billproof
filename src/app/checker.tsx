@@ -428,10 +428,10 @@ function Working({ state, onCancel, dispatch }: { state: Exclude<CheckState, { s
 function SampleButton({ sample, busy, loading, onRun }: { sample: Sample; busy: boolean; loading: boolean; onRun: () => void }) {
   return (
     <button type="button" disabled={busy} onClick={onRun} className="flex items-center gap-4 rounded-xl p-3 text-left hover:bg-fill disabled:cursor-wait">
-      <div className="h-[72px] w-14 shrink-0 overflow-hidden rounded-[4px] bg-white shadow-[inset_0_0_0_1px_var(--line)]">
+      <span className="block h-[72px] w-14 shrink-0 overflow-hidden rounded-[4px] bg-white shadow-[inset_0_0_0_1px_var(--line)]">
         {/* A made-up sample is zoomed onto its header; a real post's picture can be any shape, so it is fitted. */}
         {sample.pictures ? <Thumbnail src={sample.image} /> : <img src={sample.image} alt="" className="w-[230%] max-w-none -translate-x-[9%] -translate-y-[4%]" />}
-      </div>
+      </span>
       <span className="min-w-0">
         <span className="block text-[15px] font-medium">{loading ? "Opening" : sample.title}</span>
         <span className="block text-[13px] text-text-2">{sample.outcome}</span>
