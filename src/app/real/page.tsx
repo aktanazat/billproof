@@ -133,6 +133,7 @@ export default function RealBills() {
   const gone = (realRun.results.length - results.length).toLocaleString("en-US");
   const bills = results.filter((bill): bill is Checked => bill.outcome === "checked");
   const notBills = results.filter((bill) => bill.outcome === "not_a_bill").length.toLocaleString("en-US");
+  const unread = results.filter((bill) => bill.outcome === "could_not_check").length;
   const claimed = bills.filter((bill) => claimedCents(bill) > 0);
   // The summary names what the claims are: a missing credit is not a charge above a promise.
   const onlyCredits = claimed.every((bill) => bill.claims.every((claim) => claim.kind === "credit_missing"));
@@ -207,7 +208,7 @@ export default function RealBills() {
           ))}
         </dl>
         <p className="mt-3 text-[13px] text-text-2">
-          {notBills} posts showed chats, app screens or ads rather than a bill, and {gone} more had their pictures deleted. On {addsUp} of the {withTotal.length} bills that print a total, an amount due or subtotals for every part, the charges Muse Ember read add up to them to the cent{misread.length > 0 ? `, not counting ${misread.map((bill) => MISREAD.find((m) => m.id === bill.id)?.what).join(" and ")}` : ""}{addsUpToSubtotal > 0 ? `, and on ${addsUpToSubtotal} more the first charges add up to a subtotal the bill prints before the rest` : ""}. {withEarlier} posts also showed an earlier bill; Billproof read only the newest one and lists what moved since. {claimSummary}
+          {notBills} posts showed chats, app screens or ads rather than a bill{unread > 0 ? `, ${unread} showed a bill whose charges couldn't be read reliably, so ${unread === 1 ? "it wasn't" : "they weren't"} checked` : ""}, and {gone} more had their pictures deleted. On {addsUp} of the {withTotal.length} bills that print a total, an amount due or subtotals for every part, the charges Muse Ember read add up to them to the cent{misread.length > 0 ? `, not counting ${misread.map((bill) => MISREAD.find((m) => m.id === bill.id)?.what).join(" and ")}` : ""}{addsUpToSubtotal > 0 ? `, and on ${addsUpToSubtotal} more the first charges add up to a subtotal the bill prints before the rest` : ""}. {withEarlier} posts also showed an earlier bill; Billproof read only the newest one and lists what moved since. {claimSummary}
         </p>
 
         <LiveRun />

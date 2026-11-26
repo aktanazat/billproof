@@ -34,3 +34,12 @@ test("a missing credit is described as missing, never as a charge above a promis
   for (const claim of credits) expect(text.join(" ")).toContain(`credit missing: credited $${(claim.actualCents / 100).toFixed(2)} on ${claim.lines.join(", ")}`);
   expect(text.filter((part) => /above the promise: billed \$0\.00|1 post had a charge above a promise/.test(part))).toEqual([]);
 });
+
+test("every post read is accounted for: real bills, not bills, and bills that couldn't be read", () => {
+  const count = (outcome: string) => realRun.results.filter((bill) => bill.outcome === outcome).length;
+  const read = count("checked") + count("not_a_bill") + count("could_not_check");
+  const page = text.join(" ");
+  expect(page).toContain(`Posts read ${read.toLocaleString("en-US")}`);
+  expect(page).toContain(`Real bills among them ${count("checked")}`);
+  expect(page).toContain(`${count("not_a_bill").toLocaleString("en-US")} posts showed chats, app screens or ads rather than a bill, ${count("could_not_check")} showed a bill whose charges couldn't be read reliably, so they weren't checked, and`);
+});
