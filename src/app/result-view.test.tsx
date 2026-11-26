@@ -1,6 +1,7 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, test } from "vitest";
+import { initialState, reduce, type CheckState } from "@/lib/check-machine";
 import { checkTotals } from "@/lib/decide";
 import type { Checked } from "@/lib/result";
 import type { LineItem, Reading } from "@/lib/schemas";
@@ -71,6 +72,24 @@ describe("the result page's wording", () => {
     const t = page(checked(lines, [{ id: "Q1", kind: "repeated_charge", lineIds: ["L1", "L2"], promiseId: null }])).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
     expect(t).toContain("Boost Protect is charged 2 times $18.00 each");
     expect(t).not.toContain("$36.00");
+  });
+
+  test("unticking a question takes it out of the message, and unticking every one removes the message", () => {
+    const lines = [line("L1", "Entertainment", 12200, "plan"), line("F1", "Broadcast TV Fee", 2150, "company_fee"), line("F2", "Regional Sports Fee", 1986, "company_fee")];
+    const result = checked(lines, [
+      { id: "Q1", kind: "unagreed_fee", lineIds: ["F1"], promiseId: null },
+      { id: "Q2", kind: "unagreed_fee", lineIds: ["F2"], promiseId: null },
+    ]);
+    const after = (...ids: string[]) => {
+      const running = { s: "running", inputs: initialState.inputs, attempts: 1, attempt: 1, stage: null, spentMicros: 0, live: {} } as unknown as CheckState;
+      const done = ids.reduce((state, id) => reduce(state, { type: "toggle_question", bill: 0, id }), reduce(running, { type: "finished", attempt: 1, result }));
+      if (done.s !== "done") throw new Error("the finished check did not become a done state");
+      return page(result, done.selections[0]);
+    };
+    expect(after()).toContain("Please explain the Broadcast TV Fee ($21.50) and Regional Sports Fee ($19.86).");
+    expect(after("Q2")).toContain("Please explain the Broadcast TV Fee ($21.50). It was not part of the plan I agreed to");
+    expect(after("Q2")).not.toContain("Regional Sports Fee ($19.86)");
+    expect(after("Q1", "Q2")).not.toContain("Message to send");
   });
 
   test("a claim waiting on one marked line asks to confirm the marked line", () => {
