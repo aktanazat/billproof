@@ -22,8 +22,10 @@ export type Prepared = { pages: ShownPage[]; omitted: number };
 // A long bill keeps its charges at the front, so a PDF past the limit is read from its first pages and the rest are
 // counted as left out, rather than refused: few people can cut pages out of a PDF.
 async function preparePdf(file: File, maxPages: number): Promise<Prepared> {
-  // pdf.js is browser-only and large; it loads when the first PDF is opened, never during server rendering.
-  const { getDocument, GlobalWorkerOptions } = await import("pdfjs-dist");
+  // pdf.js is browser-only and large; it loads when the first PDF is opened, never during server rendering. pdf.js
+  // supports Safari only through its legacy build (Safari 18+, per its FAQ); the standard build targets the latest
+  // Firefox and Chrome and calls features older Safari lacks.
+  const { getDocument, GlobalWorkerOptions } = await import("pdfjs-dist/legacy/build/pdf.mjs");
   GlobalWorkerOptions.workerSrc = "/pdfjs/pdf.worker.min.mjs";
   const task = getDocument({ data: new Uint8Array(await file.arrayBuffer()), standardFontDataUrl: "/pdfjs/standard_fonts/" });
   try {
@@ -79,8 +81,11 @@ export async function prepareFile(file: File, maxPages: number): Promise<Prepare
   if (!isPdf && !file.type.startsWith("image/")) throw new PrepareError("Add a PDF or a photo of the bill.");
 
   const work = isPdf ? preparePdf(file, maxPages) : prepareImage(file);
-  const { promise: deadline, reject } = Promise.withResolvers<never>();
-  const timer = setTimeout(() => reject(new PrepareError("This file took too long to open.")), DEADLINE_MS);
+  // A plain promise rather than Promise.withResolvers, which Safari lacks before 17.4.
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const deadline = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new PrepareError("This file took too long to open.")), DEADLINE_MS);
+  });
   try {
     return await Promise.race([work, deadline]);
   } finally {
