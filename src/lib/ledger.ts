@@ -65,7 +65,10 @@ export function openLedger(file: string, eventCapMicros: number): Ledger {
   const committed = `COALESCE(SUM(CASE state WHEN 'settled' THEN actual ELSE reserved END), 0)`;
   const eventSpent = db.prepare(`SELECT ${committed} AS micros FROM attempts`);
   const checkSpent = db.prepare(`SELECT ${committed} AS micros FROM attempts WHERE check_id = ?`);
-  const recentChecks = db.prepare(`SELECT COUNT(*) AS n, MIN(created_at) AS oldest FROM checks WHERE client = ? AND created_at > ?`);
+  // A check counts toward its client's hour once it cost something: a charge, a call still open, or one lost in flight.
+  const recentChecks = db.prepare(
+    `SELECT COUNT(*) AS n, MIN(created_at) AS oldest FROM checks WHERE client = ? AND created_at > ? AND EXISTS (SELECT 1 FROM attempts WHERE attempts.check_id = checks.id AND (state != 'settled' OR actual > 0))`,
+  );
   const insertCheck = db.prepare(`INSERT INTO checks (id, client, created_at) VALUES (?, ?, ?)`);
   const insertAttempt = db.prepare(`INSERT INTO attempts (id, check_id, reserved, state, created_at) VALUES (?, ?, ?, 'reserved', ?)`);
   const settleAttempt = db.prepare(`UPDATE attempts SET state = 'settled', actual = ? WHERE id = ? AND state = 'reserved'`);

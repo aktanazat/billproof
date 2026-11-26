@@ -53,10 +53,27 @@ describe("ledger", () => {
   test("a client gets a fixed number of checks an hour", () => {
     const ledger = openLedger(":memory:", 1_000_000);
     const start = 1_800_000_000_000;
-    for (let i = 0; i < CHECKS_PER_CLIENT_PER_HOUR; i++) ledger.admitCheck("a", start + i);
+    for (let i = 0; i < CHECKS_PER_CLIENT_PER_HOUR; i++) {
+      const attempt = ledger.reserve(ledger.admitCheck("a", start + i), 1_000, CHECK_CAP_MICROS);
+      // A charge, a call still open and a call lost in flight all count.
+      if (i % 3 === 0) ledger.settle(attempt, 100);
+      if (i % 3 === 1) ledger.lose(attempt);
+    }
     expect(() => ledger.admitCheck("a", start + 20 * 60_000)).toThrow(new LedgerRefusal("too_many_checks", `Your network has run ${CHECKS_PER_CLIENT_PER_HOUR} checks in the last hour, the most allowed. Another can start in 40 minutes.`));
     expect(() => ledger.admitCheck("a", start + 3_570_000)).toThrow(new LedgerRefusal("too_many_checks", `Your network has run ${CHECKS_PER_CLIENT_PER_HOUR} checks in the last hour, the most allowed. Another can start in 1 minute.`));
     expect(ledger.admitCheck("b", start + CHECKS_PER_CLIENT_PER_HOUR)).toEqual(expect.any(String));
     expect(ledger.admitCheck("a", start + 3_600_001)).toEqual(expect.any(String));
+  });
+
+  // The hourly limit bounds spending. A check that cost nothing, a sample answered from the last 15 minutes' results or
+  // one Meta turned away before charging, doesn't use it, so people sharing a network or retrying an outage aren't shut out.
+  test("a check that cost nothing doesn't count toward a client's hour", () => {
+    const ledger = openLedger(":memory:", 1_000_000);
+    const start = 1_800_000_000_000;
+    for (let i = 0; i < CHECKS_PER_CLIENT_PER_HOUR; i++) {
+      const check = ledger.admitCheck("a", start + i);
+      if (i % 2 === 0) ledger.settle(ledger.reserve(check, 1_000, CHECK_CAP_MICROS), 0);
+    }
+    expect(ledger.admitCheck("a", start + 60_000)).toEqual(expect.any(String));
   });
 });
