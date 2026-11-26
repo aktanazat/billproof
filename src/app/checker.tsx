@@ -6,7 +6,7 @@ import { useEffect, useLayoutEffect, useReducer, useRef, useState, type ChangeEv
 import { checkInput, initialState, offerOmitted, reduce, startBlocker, type Call, type CheckAction, type CheckState, type Doc, type Inputs } from "@/lib/check-machine";
 import { formatMicros } from "@/lib/cost";
 import { usd } from "@/lib/letter";
-import { isPicture, isRecording, prepareCall, prepareFile, PrepareError } from "@/lib/prepare";
+import { isPdf, isPicture, isRecording, prepareCall, prepareFile, PrepareError } from "@/lib/prepare";
 import { MAX_BILL_PAGES, MAX_BILLS, MAX_CALL_SECONDS, MAX_OFFER_PAGES, type CheckEvent, type CheckInput, type PageKind, type Stage } from "@/lib/result";
 import { BillPage, snapBox, Thumbnail, type Mark } from "./bill-page";
 import { formatClock, inPlainWords, Waveform } from "./evidence";
@@ -26,7 +26,6 @@ export type Sample = {
 
 const BILL_ACCEPT = "application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif";
 const OFFER_ACCEPT = "application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif,audio/*,video/*,.m4a,.mp3,.wav,.3gp";
-const isPdf = (file: File) => file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
 const LEAVE_QUESTION = "Leave this page? The files you added, and any check or result, will be lost.";
 
 function isCheckEvent(value: unknown): value is CheckEvent {
