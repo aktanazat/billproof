@@ -879,7 +879,7 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
         <section className="mt-16">
           <div className="flex items-baseline justify-between gap-4">
             <h2 className="text-[17px] font-semibold">Real bills people posted</h2>
-            <Link href="/real" className="text-[13px] text-text-2 hover:text-text">
+            <Link href="/real" className="inline-flex min-h-6 items-center text-[13px] text-text-2 hover:text-text">
               See all of them
             </Link>
           </div>

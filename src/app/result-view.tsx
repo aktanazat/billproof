@@ -172,7 +172,7 @@ function ClaimRow({ claim, index, result, callUrl, mark, onToggle, onConfirm, on
             {confirmLabel}
           </button>
         ) : (
-          <label className="inline-flex cursor-pointer items-center gap-2 text-[13px] text-text-2 select-none sm:ml-auto">
+          <label className="inline-flex min-h-6 cursor-pointer items-center gap-2 text-[13px] text-text-2 select-none sm:ml-auto">
             <input type="checkbox" checked={mark === "selected"} onChange={onToggle} aria-label={`In message: ${title}`} className="size-4 accent-[var(--text)]" />
             In message
           </label>
@@ -548,7 +548,7 @@ export function ResultView({
                         </p>
                       )}
                       {canInclude && (
-                        <label className="inline-flex cursor-pointer items-center gap-2 text-[13px] text-text-2 select-none">
+                        <label className="inline-flex min-h-6 cursor-pointer items-center gap-2 text-[13px] text-text-2 select-none">
                           <input type="checkbox" checked={selection.questions[question.id] === true} onChange={() => dispatch({ type: "toggle_question", bill, id: question.id })} aria-label={`Ask in message: ${questionTitle(question, questionLines, result)}`} className="size-4 accent-[var(--text)]" />
                           Ask in message
                         </label>
