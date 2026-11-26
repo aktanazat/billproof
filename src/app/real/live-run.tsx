@@ -84,7 +84,8 @@ export function LiveRun() {
                   case "result":
                     return inner.result.outcome === "year" ? tile : { ...finish(tile, inner.result), spent: inner.result.spentMicros };
                   case "error":
-                    return { ...tile, stage: "failed", note: inner.message, spent: inner.spentMicros };
+                    // A tile can't be retried on its own, so only a reason about the post itself is shown; the check screen's "try again" advice is not.
+                    return { ...tile, stage: "failed", note: inner.failure === "bad_input" ? inner.message : "Couldn't finish", spent: inner.spentMicros };
                   default:
                     return tile;
                 }
