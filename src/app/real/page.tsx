@@ -93,7 +93,7 @@ export default function RealBills() {
   const perBill = realRun.spentMicros / Math.max(1, results.length);
   // The bill's own arithmetic is the accuracy check on real data: the charges read must add up to its printed total.
   const withTotal = bills.filter((bill) => bill.lineSum !== "not_printed");
-  const addsUp = withTotal.filter((bill) => bill.lineSum === "ok" || bill.lineSum === "due").length;
+  const addsUp = withTotal.filter((bill) => bill.lineSum === "ok" || bill.lineSum === "due" || bill.lineSum === "sections").length;
   const addsUpToSubtotal = withTotal.filter((bill) => bill.lineSum === "subtotal").length;
   const withEarlier = bills.filter((bill) => bill.change).length;
   const paidBack = PAID_BACK.flatMap((post) => {
@@ -149,7 +149,7 @@ export default function RealBills() {
           ))}
         </dl>
         <p className="mt-3 text-[13px] text-text-2">
-          {notBills} posts showed chats, app screens or ads rather than a bill, and {gone} more had their pictures deleted. On {addsUp} of the {withTotal.length} bills that print a total or an amount due, the charges Muse Ember read add up to it to the cent{addsUpToSubtotal > 0 ? `, and on ${addsUpToSubtotal} more the first charges add up to a subtotal the bill prints before the rest` : ""}. {withEarlier} posts also showed an earlier bill; Billproof read only the newest one and lists what moved since. {claimed.length === 0 ? "No dollar claim was made on any post, because no poster quoted a promise the bill could be held to; Billproof asks instead of guessing." : `${claimed.length} ${claimed.length === 1 ? "post had a charge" : "posts had charges"} above a promise the poster quoted, ${usd(claimed.reduce((t, bill) => t + claimedCents(bill), 0))} in all, each waiting for the poster to confirm the marked line.`}
+          {notBills} posts showed chats, app screens or ads rather than a bill, and {gone} more had their pictures deleted. On {addsUp} of the {withTotal.length} bills that print a total, an amount due or subtotals for every part, the charges Muse Ember read add up to them to the cent{addsUpToSubtotal > 0 ? `, and on ${addsUpToSubtotal} more the first charges add up to a subtotal the bill prints before the rest` : ""}. {withEarlier} posts also showed an earlier bill; Billproof read only the newest one and lists what moved since. {claimed.length === 0 ? "No dollar claim was made on any post, because no poster quoted a promise the bill could be held to; Billproof asks instead of guessing." : `${claimed.length} ${claimed.length === 1 ? "post had a charge" : "posts had charges"} above a promise the poster quoted, ${usd(claimed.reduce((t, bill) => t + claimedCents(bill), 0))} in all, each waiting for the poster to confirm the marked line.`}
         </p>
 
         <LiveRun />

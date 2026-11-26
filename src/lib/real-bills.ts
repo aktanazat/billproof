@@ -32,7 +32,7 @@ export const realBillSchema = z.discriminatedUnion("outcome", [
     period: z.tuple([z.string().nullable(), z.string().nullable()]),
     lines: z.number(),
     // Whether the charges read off the bill add up to its printed current charges: the accuracy check a bill carries.
-    lineSum: z.enum(["ok", "subtotal", "due", "mismatch", "not_printed"]),
+    lineSum: z.enum(["ok", "subtotal", "due", "sections", "mismatch", "not_printed"]),
     billPages: z.array(z.number()),
     // Present when the post also showed an earlier statement: the two totals of the charges Billproof read.
     change: z.object({ earlierCents: z.number(), currentCents: z.number() }).nullable().default(null),

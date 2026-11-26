@@ -1,7 +1,7 @@
 {
   "ranAt": "2026-11-26T01:23:28.124Z",
   "seconds": 1331.95443675,
-  "spentMicros": 1488824,
+  "spentMicros": 1512330,
   "posts": 1517,
   "results": [
     {
@@ -8191,27 +8191,27 @@
         "https://preview.redd.it/ost3y6lil0cg1.jpg?width=1440&format=pjpg&auto=webp&s=8366ec705f9012e0eeddbd598aa79d63ce2a03f5",
         "https://preview.redd.it/ptvur3nil0cg1.jpg?width=5760&format=pjpg&auto=webp&s=962e97bbeef92e3be37edcdded478094d9c5cc07"
       ],
-      "ms": 14131,
+      "ms": 12180,
       "outcome": "checked",
       "provider": "Spectrum",
       "period": [
         null,
         null
       ],
-      "lines": 12,
-      "lineSum": "not_printed",
+      "lines": 11,
+      "lineSum": "sections",
       "billPages": [
         0,
         1
       ],
+      "change": null,
       "claims": [],
       "dropped": [],
       "questions": [],
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 2309,
-      "change": null
+      "spentMicros": 2407
     },
     {
       "id": "1qbbt9e",
@@ -9071,7 +9071,7 @@
       "images": [
         "https://i.redd.it/nddg9qs9jwng1.jpeg"
       ],
-      "ms": 8398,
+      "ms": 8167,
       "outcome": "checked",
       "provider": "Spectrum",
       "period": [
@@ -9079,18 +9079,18 @@
         null
       ],
       "lines": 3,
-      "lineSum": "not_printed",
+      "lineSum": "sections",
       "billPages": [
         0
       ],
+      "change": null,
       "claims": [],
       "dropped": [],
       "questions": [],
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 1829,
-      "change": null
+      "spentMicros": 1526
     },
     {
       "id": "1rtn1wq",
@@ -10495,7 +10495,7 @@
       "images": [
         "https://i.redd.it/h8x5bamrk01h1.jpeg"
       ],
-      "ms": 11491,
+      "ms": 12444,
       "outcome": "checked",
       "provider": null,
       "period": [
@@ -10503,10 +10503,11 @@
         null
       ],
       "lines": 5,
-      "lineSum": "not_printed",
+      "lineSum": "ok",
       "billPages": [
         0
       ],
+      "change": null,
       "claims": [],
       "dropped": [],
       "questions": [
@@ -10522,8 +10523,7 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 1,
-      "spentMicros": 2780,
-      "change": null
+      "spentMicros": 3225
     },
     {
       "id": "1tc8l60",
@@ -11745,7 +11745,7 @@
       "images": [
         "https://i.redd.it/yk3ih54me29h1.jpeg"
       ],
-      "ms": 14221,
+      "ms": 12533,
       "outcome": "checked",
       "provider": "AT&T",
       "period": [
@@ -11753,18 +11753,18 @@
         null
       ],
       "lines": 7,
-      "lineSum": "not_printed",
+      "lineSum": "ok",
       "billPages": [
         0
       ],
+      "change": null,
       "claims": [],
       "dropped": [],
       "questions": [],
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 3331,
-      "change": null
+      "spentMicros": 2732
     },
     {
       "id": "1uhae9w",
@@ -15978,7 +15978,7 @@
       "images": [
         "https://preview.redd.it/vqj7852yrqoh1.png?width=512&format=png&auto=webp&s=a4953a50d2b40b54ca1e70af9ec07a333b5944ce"
       ],
-      "ms": 10582,
+      "ms": 11046,
       "outcome": "checked",
       "provider": "Verizon",
       "period": [
@@ -15986,18 +15986,18 @@
         null
       ],
       "lines": 7,
-      "lineSum": "not_printed",
+      "lineSum": "sections",
       "billPages": [
         0
       ],
+      "change": null,
       "claims": [],
       "dropped": [],
       "questions": [],
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 2145,
-      "change": null
+      "spentMicros": 2529
     },
     {
       "id": "1wdxh1b",
@@ -16370,26 +16370,26 @@
       "images": [
         "https://external-preview.redd.it/OIObHdLDOJ9L7WU3y2ApfeK__z4v8S0c9pNhd6d7kPw.png?auto=webp&s=40e4c3fcf05c2cab7c3f85b71b6052ebf079d2fa"
       ],
-      "ms": 10489,
+      "ms": 12231,
       "outcome": "checked",
       "provider": null,
       "period": [
         null,
         null
       ],
-      "lines": 10,
-      "lineSum": "not_printed",
+      "lines": 1,
+      "lineSum": "ok",
       "billPages": [
         0
       ],
+      "change": null,
       "claims": [],
       "dropped": [],
       "questions": [],
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 2354,
-      "change": null
+      "spentMicros": 2604
     },
     {
       "id": "1wfgfrp",
@@ -16660,26 +16660,26 @@
       "images": [
         "https://i.redd.it/fl0j5rocjeph1.png"
       ],
-      "ms": 18233,
+      "ms": 8848,
       "outcome": "checked",
       "provider": null,
       "period": [
         null,
         null
       ],
-      "lines": 5,
-      "lineSum": "not_printed",
+      "lines": 4,
+      "lineSum": "ok",
       "billPages": [
         0
       ],
+      "change": null,
       "claims": [],
       "dropped": [],
       "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 1,
-      "spentMicros": 3476,
-      "change": null
+      "matchedPromises": 0,
+      "spentMicros": 1827
     },
     {
       "id": "1whhwd2",
@@ -21501,7 +21501,7 @@
       "images": [
         "https://i.redd.it/a04v4y55uayh1.jpeg"
       ],
-      "ms": 11583,
+      "ms": 13034,
       "outcome": "checked",
       "provider": "Xfinity",
       "period": [
@@ -21509,18 +21509,18 @@
         null
       ],
       "lines": 6,
-      "lineSum": "not_printed",
+      "lineSum": "ok",
       "billPages": [
         0
       ],
+      "change": null,
       "claims": [],
       "dropped": [],
       "questions": [],
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 2588,
-      "change": null
+      "spentMicros": 2868
     },
     {
       "id": "1xnskpo",
@@ -21821,18 +21821,19 @@
       "images": [
         "https://i.redd.it/fjesqrtzuozh1.jpeg"
       ],
-      "ms": 9551,
+      "ms": 9310,
       "outcome": "checked",
       "provider": null,
       "period": [
         null,
         null
       ],
-      "lines": 8,
-      "lineSum": "not_printed",
+      "lines": 6,
+      "lineSum": "ok",
       "billPages": [
         0
       ],
+      "change": null,
       "claims": [],
       "dropped": [],
       "questions": [
@@ -21848,8 +21849,7 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 2195,
-      "change": null
+      "spentMicros": 2032
     },
     {
       "id": "1xsb6ah",
@@ -24762,7 +24762,7 @@
       "images": [
         "https://external-preview.redd.it/Z-HW7uUPpVqe6ahUSjld6GXzdYLgZ-iZCdQnSQH5Ano.jpg?auto=webp&s=a11ba23b4a160ddada71dc8a93511d8e47fd71fb"
       ],
-      "ms": 9158,
+      "ms": 11778,
       "outcome": "checked",
       "provider": "KINETIC BY WINDSTREAM",
       "period": [
@@ -24770,18 +24770,18 @@
         null
       ],
       "lines": 2,
-      "lineSum": "not_printed",
+      "lineSum": "ok",
       "billPages": [
         0
       ],
+      "change": null,
       "claims": [],
       "dropped": [],
       "questions": [],
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 1557,
-      "change": null
+      "spentMicros": 1756
     },
     {
       "id": "1jcvarj",

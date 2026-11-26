@@ -114,7 +114,9 @@ export type Equation = "ok" | "mismatch" | "not_printed";
 // (taxes, a later section). Those lines are confirmed; the ones after it are not checked by the bill.
 // "due": no printed current charges match, but the charges plus the unpaid balance carried over (`carriedCents`)
 // come to the printed amount due.
-export type LineSum = Equation | "subtotal" | "due";
+// "sections": the charges, in order, add up to each total the bill prints for a part of them (a section, a person),
+// every charge in one part.
+export type LineSum = Equation | "subtotal" | "due" | "sections";
 export type Totals = { lineSum: LineSum; balance: Equation; lineSumCents: number; subtotalLines: number | null; carriedCents: number };
 
 // A printed summary value counts only when its quote carries the amount and, on a PDF, appears on the bill.
@@ -137,6 +139,24 @@ function subtotalLength(lines: LineItem[], printed: number): number | null {
 
 const near = (a: number, b: number) => Math.abs(a - b) <= 1;
 
+// Whether the lines, in printed order, split into runs that add up to each part total in turn, using every line;
+// $0 lines after the last part belong to it.
+function splitsIntoParts(lines: LineItem[], parts: number[]): boolean {
+  if (parts.length === 0 || lines.length === 0) return false;
+  let at = 0;
+  for (const part of parts) {
+    let running = 0;
+    let taken = 0;
+    while (at < lines.length && (taken === 0 || !near(running, part))) {
+      running += lines[at].amount_cents;
+      at += 1;
+      taken += 1;
+    }
+    if (!near(running, part)) return false;
+  }
+  return lines.slice(at).every((line) => line.amount_cents === 0);
+}
+
 // E1: the lines add up to the printed current charges, a printed subtotal, or, with what was carried over, the
 // amount due. E2: previous balance − payments + current charges = total due.
 export function checkTotals(reading: Reading, bill: Source): Totals {
@@ -150,12 +170,15 @@ export function checkTotals(reading: Reading, bill: Source): Totals {
   const carriedCents = previous === null ? 0 : previous - Math.abs(payments ?? 0);
   const currentMatches = current !== null && near(current, lineSumCents);
   const subtotalLines = current === null || currentMatches || lines.length === 0 ? null : subtotalLength(lines, current);
-  // A bill that shows only its totals has no charges for them to check.
+  const parts = (reading.printed.section_totals ?? []).map((part) => printedValue(part, bill));
+  const partsMatch = parts.every((part) => part !== null) && splitsIntoParts(lines, parts.filter((part) => part !== null));
+  // A bill that shows only its totals has no charges for them to check. Checks that cover every charge come first.
   const lineSum: LineSum =
     lines.length === 0 ? "not_printed"
     : currentMatches ? "ok"
-    : subtotalLines !== null ? "subtotal"
     : due !== null && near(carriedCents + lineSumCents, due) ? "due"
+    : partsMatch ? "sections"
+    : subtotalLines !== null ? "subtotal"
     : current === null ? "not_printed"
     : "mismatch";
   const newCharges = lineSum === "subtotal" ? lineSumCents : current;

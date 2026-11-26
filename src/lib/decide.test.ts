@@ -50,6 +50,7 @@ function readingOf(spec: BillSpec): Reading {
       payments: { cents: spec.paymentCents, quote: `Payment received - thank you ${usd(-spec.paymentCents)}` },
       current_charges: { cents: current, quote: `Current charges ${usd(current)}` },
       total_due: { cents: current, quote: `Total amount due ${usd(current)}` },
+      section_totals: [],
     },
     line_items: lines,
     autopay: autopayNotice ? { enrolled: true, quote: "Autopay is on." } : { enrolled: null, quote: null },
@@ -391,13 +392,25 @@ describe("decide refuses claims the evidence does not carry", () => {
     const reading = readingOf(internetGuaranteed);
     const lines = reading.line_items.reduce((t, line) => t + line.amount_cents, 0);
     const amount = (cents: number) => ({ cents, quote: `Amount ${usd(cents)}` });
-    const bill = (printed: Partial<Reading["printed"]>): Reading => ({ ...reading, printed: { previous_balance: null, payments: null, current_charges: null, total_due: null, ...printed } });
+    const bill = (printed: Partial<Reading["printed"]>): Reading => ({ ...reading, printed: { previous_balance: null, payments: null, current_charges: null, total_due: null, section_totals: [], ...printed } });
     expect(checkTotals(bill({ total_due: amount(lines) }), { kind: "image" })).toMatchObject({ lineSum: "due", carriedCents: 0 });
     expect(checkTotals(bill({ previous_balance: amount(4000), total_due: amount(4000 + lines) }), { kind: "image" })).toMatchObject({ lineSum: "due", carriedCents: 4000 });
     expect(checkTotals(bill({ previous_balance: amount(4000), payments: amount(4000), total_due: amount(lines) }), { kind: "image" }).lineSum).toBe("due");
     // A balance printed with no payment, and a due that matches the lines alone, is ambiguous: nothing is confirmed.
     expect(checkTotals(bill({ previous_balance: amount(4000), total_due: amount(lines) }), { kind: "image" }).lineSum).toBe("not_printed");
     expect(checkTotals(bill({ current_charges: amount(lines + 500), total_due: amount(lines + 500) }), { kind: "image" }).lineSum).toBe("mismatch");
+  });
+
+  test("charges that split, in order, into each printed part total are checked against them", () => {
+    const reading = readingOf(internetGuaranteed);
+    const amounts = reading.line_items.map((line) => line.amount_cents);
+    const first = amounts.slice(0, 2).reduce((t, a) => t + a, 0);
+    const rest = amounts.slice(2).reduce((t, a) => t + a, 0);
+    const part = (cents: number) => ({ cents, quote: `Subtotal ${usd(cents)}` });
+    const onlyParts = (section_totals: Reading["printed"]["section_totals"]): Reading => ({ ...reading, printed: { previous_balance: null, payments: null, current_charges: null, total_due: null, section_totals } });
+    expect(checkTotals(onlyParts([part(first), part(rest)]), { kind: "image" }).lineSum).toBe("sections");
+    expect(checkTotals(onlyParts([part(first), part(rest + 100)]), { kind: "image" }).lineSum).toBe("not_printed");
+    expect(checkTotals(onlyParts([part(rest), part(first)]), { kind: "image" }).lineSum).toBe("not_printed");
   });
 
   test("a heading read as a charge is dropped when that makes the bill add up, and a real double charge stays", () => {

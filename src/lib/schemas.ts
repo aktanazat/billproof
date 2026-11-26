@@ -38,6 +38,7 @@ export const billReadingSchema = z.object({
     payments: printedAmount.describe("Payments received, as a positive number"),
     current_charges: printedAmount,
     total_due: printedAmount,
+    section_totals: z.array(z.object({ cents, quote })).describe("Totals printed for parts of this statement's charges (a section, a person, a phone line), in printed order"),
   }),
   line_items: z.array(
     z.object({
