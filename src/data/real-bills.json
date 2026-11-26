@@ -6701,19 +6701,7 @@
         0
       ],
       "change": null,
-      "claims": [
-        {
-          "kind": "included_charged",
-          "amountCents": 500,
-          "actualCents": 500,
-          "expectedCents": 0,
-          "lines": [
-            "Xumo Stream Box Service"
-          ],
-          "promise": "However, I have signed up for Spectrum 500mbps and was charged 70$ and was told \"xumo\" tv  would be included for free.",
-          "needsConfirmation": true
-        }
-      ],
+      "claims": [],
       "dropped": [],
       "questions": [
         {

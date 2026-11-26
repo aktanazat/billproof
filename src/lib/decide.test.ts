@@ -461,4 +461,13 @@ describe("promises read from a person's own words", () => {
     const credit = promise({ kind: "recurring_credit", amount_cents: 500, per_line: true, quote: "$5 off every line", covers_line_ids: [first.id, second.id] });
     expect(decide(withFreeLine, [credit], photo, photo).claims.map((c) => c.amountCents)).toEqual([500]);
   });
+
+  test("an included item with a matching discount printed right under it is not claimed", () => {
+    const gateway = internet.line_items.findIndex((line) => line.label === "Wi-Fi Gateway Rental");
+    const discount = { ...internet.line_items[gateway], id: "D", label: "Promotional Discount", kind: "discount" as const, amount_cents: -1500, quote: "Promotional Discount -$15.00" };
+    const lines = [...internet.line_items.slice(0, gateway + 1), discount, ...internet.line_items.slice(gateway + 1)].map((line, i) => ({ ...line, id: `L${i + 1}` }));
+    const free = promise({ kind: "included", quote: "Wi-Fi Gateway: included at no extra cost", covers_line_ids: [`L${gateway + 1}`] });
+    expect(decide({ ...internet, line_items: lines }, [free], photo, photo).claims).toEqual([]);
+    expect(decide(internet, [{ ...free, covers_line_ids: idOf(internet, "Wi-Fi Gateway Rental") }], photo, photo).claims.map((c) => c.amountCents)).toEqual([1500]);
+  });
 });

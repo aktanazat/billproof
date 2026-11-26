@@ -334,7 +334,9 @@ export function decide(reading: Reading, promises: PromiseTerm[], bill: Source, 
 
     if (promise.kind === "included") {
       const named = covered.filter((line) => line.amount_cents > 0 && quoteNamesLine(promise.quote, line.label, reading.provider));
-      const credits = covered.filter((line) => line.amount_cents < 0);
+      // A discount printed right under the item for exactly its amount pays it back, even when it wasn't linked.
+      const offsets = reading.line_items.filter((line, i) => CREDIT_KINDS[line.kind] && i > 0 && !covered.includes(line) && named.some((item) => item.id === reading.line_items[i - 1].id && near(item.amount_cents, -line.amount_cents)));
+      const credits = [...covered.filter((line) => line.amount_cents < 0), ...offsets];
       const actual = sum([...named, ...credits]);
       if (named.length === 0 && covered.some((line) => line.amount_cents > 0)) unused.push({ promiseId: promise.id, reason: "item_not_named" });
       else if (actual > 0) {
