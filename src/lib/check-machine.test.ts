@@ -172,4 +172,13 @@ describe("check machine", () => {
     const failed = play([...readyBill, { type: "start" }, { type: "errored", attempt: 1, failure: "network", message: "The connection dropped.", spentMicros: 0, retryable: true }, { type: "edit" }]);
     expect(failed).toMatchObject({ s: "composing", inputs: { bills: [{ id: "b", status: "ready" }] } });
   });
+
+  // The start screen trims what it adds to the room it saw, but two drops made before the screen catches up both see
+  // the same room; the list itself never holds more bills than a check takes.
+  test("bills added in two batches never pass the twelve a check takes", () => {
+    const batch = (from: number) => ({ type: "bills_added" as const, docs: Array.from({ length: 8 }, (_, i) => ({ id: `b${from + i}`, name: `month-${from + i}.pdf` })) });
+    const state = play([batch(1), batch(9)]);
+    if (state.s !== "composing") throw new Error("adding bills left the start screen");
+    expect(state.inputs.bills.map((doc) => doc.id)).toEqual(Array.from({ length: 12 }, (_, i) => `b${i + 1}`));
+  });
 });

@@ -1,6 +1,6 @@
 import type { PreparedCall, ShownPage } from "./prepare";
 import type { TranscriptTurn } from "./schemas";
-import { MAX_OFFER_TEXT, type CheckFailure, type CheckInput, type CheckResult, type PageKind, type PreparedPage, type SeenChallenge, type SeenLine, type SeenPromise, type SingleResult, type Stage } from "./result";
+import { MAX_BILLS, MAX_OFFER_TEXT, type CheckFailure, type CheckInput, type CheckResult, type PageKind, type PreparedPage, type SeenChallenge, type SeenLine, type SeenPromise, type SingleResult, type Stage } from "./result";
 
 export type Doc =
   | { id: string; name: string; status: "preparing" }
@@ -143,7 +143,8 @@ function compose(state: Extract<CheckState, { s: "composing" }>, action: CheckAc
   const withInputs = (next: Inputs): CheckState => ({ ...state, inputs: next });
   switch (action.type) {
     case "bills_added":
-      return withInputs({ ...inputs, bills: [...inputs.bills, ...action.docs.map((doc): Doc => ({ ...doc, status: "preparing" }))] });
+      // The screen trims a drop to the room it saw, which two quick drops can both see; the list never passes a check's limit.
+      return withInputs({ ...inputs, bills: [...inputs.bills, ...action.docs.map((doc): Doc => ({ ...doc, status: "preparing" }))].slice(0, MAX_BILLS) });
     case "offer_file_added":
       return withInputs({ ...inputs, offer: { kind: "file", doc: { id: action.id, name: action.name, status: "preparing" } } });
     case "call_added":
