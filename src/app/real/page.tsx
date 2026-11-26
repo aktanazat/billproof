@@ -8,6 +8,7 @@ import { usd } from "@/lib/letter";
 import { claimedCents, unagreedFees, type RealBill } from "@/lib/real-bills";
 import { livePaused } from "@/lib/server-ledger";
 import { Thumbnail } from "../bill-page";
+import { alt as cardAlt, size as cardSize } from "../opengraph-image";
 import { SiteHeader } from "../site-header";
 import { LiveRun } from "./live-run";
 
@@ -22,8 +23,9 @@ const realDescription = "Bills people posted publicly about Xfinity, Spectrum, A
 export const metadata: Metadata = {
   title: "Real bills — Billproof",
   description: realDescription,
-  // Setting this page's own card text replaces the inherited one, image included, so the image is named again.
-  openGraph: { siteName: "Billproof", type: "website", title: "Real bills — Billproof", description: realDescription, images: "/opengraph-image" },
+  // Setting this page's own card text replaces the inherited one, image included, so the image is named again, with
+  // its size and description as the site's own card gives them.
+  openGraph: { siteName: "Billproof", type: "website", title: "Real bills — Billproof", description: realDescription, images: { url: "/opengraph-image", ...cardSize, alt: cardAlt } },
 };
 
 type Checked = Extract<RealBill, { outcome: "checked" }>;
