@@ -172,4 +172,9 @@ describe("a claim on a promise heard on a call", () => {
     expect(chat).toContain("confirmed at $55.00 a month (as quoted above)");
     expect(chat).toMatch(/In total, please credit \$\d+\.\d{2} to /);
   });
+
+  test("a year email opens by saying which account and what was checked, as its chat does", () => {
+    const { email } = buildYearMessage([month("2026-10-12", "2026-11-11"), month("2026-11-12", "2026-12-11")]);
+    expect(email).toMatch(/billing team,\n\nI'm writing about .+\. I checked my statements against the plan I signed up for\.\n\nFor /);
+  });
 });
