@@ -225,7 +225,7 @@ function Footer({ state, onCancel, dispatch }: { state: Exclude<CheckState, { s:
       <p className="text-[15px]" role={state.s === "failed" ? "alert" : undefined}>
         {state.s === "failed" ? state.message : "Check stopped."}
       </p>
-      {(state.s === "cancelled" || state.spentMicros > 0) && <p className="text-[13px] text-text-2 tabular-nums">{state.s === "cancelled" ? `At least ${formatMicros(state.spentMicros)} spent` : `${formatMicros(state.spentMicros)} spent`}</p>}
+      {state.spentMicros > 0 && <p className="text-[13px] text-text-2 tabular-nums">{state.s === "cancelled" ? `At least ${formatMicros(state.spentMicros)} spent` : `${formatMicros(state.spentMicros)} spent`}</p>}
       <div className="flex gap-2">
         {(state.s === "cancelled" || state.retryable) && (
           <button type="button" onClick={() => dispatch({ type: "retry" })} className={primary}>
@@ -296,12 +296,14 @@ function Working({ state, onCancel, dispatch }: { state: Exclude<CheckState, { s
   });
   const offer = state.inputs.offer;
   const isCall = offer.kind === "call";
+  // Offer pictures found among the bill's screenshots are read as the offer, as one the person added would be.
+  const promised = offer.kind !== "none" || (kinds?.includes("promise") ?? false);
   const steps: Step[] = [
     ...(kinds || stage === "sorting" ? [{ key: "sort" as const, stages: ["sorting"] as Stage[], label: "Sorting your pictures" }] : []),
     { key: "bill", stages: ["reading_bill", "rereading_bill"], label: stage === "rereading_bill" ? "Reading the bill again" : "Reading the bill" },
-    ...(offer.kind === "none" ? [] : [{ key: "offer" as const, stages: ["reading_offer"] as Stage[], label: isCall ? "Listening to the call" : "Reading the offer" }]),
-    { key: "compare", stages: ["comparing"], label: "Comparing charges with the promise" },
-    ...(offer.kind === "none" ? [] : [{ key: "challenge" as const, stages: ["challenging"] as Stage[], label: "Checking the company's side" }]),
+    ...(promised ? [{ key: "offer" as const, stages: ["reading_offer"] as Stage[], label: isCall ? "Listening to the call" : "Reading the offer" }] : []),
+    { key: "compare", stages: ["comparing"], label: promised ? "Comparing charges with the promise" : "Checking the charges" },
+    ...(promised ? [{ key: "challenge" as const, stages: ["challenging"] as Stage[], label: "Checking the company's side" }] : []),
   ];
   const current = steps.find((step) => stepStatus(step, stage, running) === "now");
   const latestThought = current ? (live?.thoughts ?? []).filter((t) => current.stages.includes(t.stage)).at(-1)?.text.split("\n\n").at(-1) : undefined;
