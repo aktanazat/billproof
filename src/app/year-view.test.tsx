@@ -123,6 +123,22 @@ test("a year where no file could be checked says so, never 'Read 0 statements'",
   expect(html).not.toContain("Overcharge by month");
 });
 
+test("a year with one statement checked says 'statement', never '1 statements'", () => {
+  if (!year) throw new Error("the saved run has no year result");
+  const render = (keep: string, change: (result: Extract<YearResult["months"][number]["result"], { outcome: "checked" }>) => object = () => ({})) => {
+    const months = year.months.map((month) => (month.result.outcome === "checked" && month.result.reading.period_start?.startsWith(keep) ? { ...month, result: { ...month.result, ...change(month.result) } } : { ...month, result: { outcome: "not_a_bill" as const, spentMicros: 0 } }));
+    const result: YearResult = { ...year, months };
+    const running = { s: "running", inputs: initialState.inputs, attempts: 1, attempt: 1, stage: null, spentMicros: 0, live: {} } as unknown as CheckState;
+    const done = reduce(running, { type: "finished", attempt: 1, result });
+    if (done.s !== "done") throw new Error("the finished year did not become a done state");
+    return renderToStaticMarkup(createElement(YearView, { state: done, result, dispatch: () => {} }));
+  };
+  expect(render("2026-08")).toContain("to ask back from Bayline Fiber across 1 statement<");
+  expect(render("2026-07")).toContain(">The 1 statement matches the offer</h1>");
+  expect(render("2026-07", () => ({ hadOffer: false, promises: [], matchedPromiseIds: [] }))).toContain(">Read 1 statement; there was no offer to check it against</h1>");
+  for (const html of [render("2026-08"), render("2026-07")]) expect(html).not.toContain("1 statements");
+});
+
 test("a year whose offer couldn't be compared says why, never that every statement matches", () => {
   if (!year) throw new Error("the saved run has no year result");
   const variant = (change: (result: Extract<YearResult["months"][number]["result"], { outcome: "checked" }>) => object): YearResult => ({ ...year, months: year.months.map((month) => (month.result.outcome === "checked" ? { ...month, result: { ...month.result, claims: [], ...change(month.result) } } : month)) });
