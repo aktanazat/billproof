@@ -344,7 +344,7 @@ export function ResultView({
               ? `Only the first ${pages.length} of ${pages.length + omittedPages.bill} pages were read. Add the pages with the charges as their own PDF, or as screenshots.`
               : "Try the PDF from the company's website, or screenshots that show every charge and the total, uncropped."}
         </p>
-        <p className="text-[13px] text-text-2 tabular-nums">Checked for {formatMicros(result.spentMicros)}</p>
+        <p className="text-[13px] text-text-2 tabular-nums">Cost {formatMicros(result.spentMicros)}</p>
         {back}
       </section>
     );

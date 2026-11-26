@@ -534,8 +534,11 @@ describe("the result page's other sections", () => {
     const unread = render({ outcome: "could_not_check", reason: "The page image is entirely black.", spentMicros: 0 });
     expect(unread).toContain("Couldn't check this bill The page image is entirely black. Try the PDF from the company's website, or screenshots that show every charge and the total, uncropped.");
     // The reason is Muse Ember's own words, which can name a field of the reading format (1 of 19 in the Reddit run).
-    const named = render({ outcome: "could_not_check", reason: "The tax amount is hidden by a chat icon, so it is omitted from line_items.", spentMicros: 0 });
+    const named = render({ outcome: "could_not_check", reason: "The tax amount is hidden by a chat icon, so it is omitted from line_items.", spentMicros: 2500 });
     expect(named).toContain("so it is omitted from line items.");
+    // Under "Couldn't check this bill", the cost line doesn't say the bill was checked.
+    expect(named).toContain("Cost 0.25¢");
+    expect(named).not.toContain("Checked for");
   });
 
   test("a long PDF that couldn't be checked says only its first pages were read and how to add the rest", () => {
