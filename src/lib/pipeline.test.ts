@@ -1,3 +1,4 @@
+import { DatabaseSync } from "node:sqlite";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { openLedger } from "./ledger";
 import { heardWithin, runCheck } from "./pipeline";
@@ -44,6 +45,27 @@ test("a refusal from the ledger keeps its reason when the ledger comes from anot
   const pixel = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
   await runCheck({ bills: [{ pages: [{ image: pixel, text: null }] }], offer: { kind: "text", text: "$55 a month" } }, { ledger: otherCopy.openLedger(":memory:", 1_000), client: "test", signal: new AbortController().signal, emit: (event) => events.push(event) });
   expect(events).toEqual([{ type: "error", failure: "budget_spent", message: "This demo has used its budget for live checks. Every saved result is still on the Real bills page.", spentMicros: 0, retryable: false }]);
+});
+
+// The ledger is a file on the server's disk; when it can't be written (a full disk), the check stops before anything
+// is sent, and the person hears that, not that Muse Ember's connection dropped, which it never reached.
+test("a check the ledger can't record says so, not that the connection to Muse Ember dropped", async () => {
+  const ledger = openLedger(":memory:", 1_000_000);
+  const diskError = (() => {
+    try {
+      new DatabaseSync(":memory:").exec("INSERT INTO missing VALUES (1)");
+    } catch (error) {
+      return error;
+    }
+  })();
+  vi.spyOn(ledger, "admitCheck").mockImplementation(() => {
+    throw diskError;
+  });
+  const events: CheckEvent[] = [];
+  const pixel = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+  await runCheck({ bills: [{ pages: [{ image: pixel, text: null }] }], offer: { kind: "text", text: "$55 a month" } }, { ledger, client: "test", signal: new AbortController().signal, emit: (event) => events.push(event) });
+  expect(events).toEqual([{ type: "error", failure: "network", message: "Billproof couldn't record this check, so it stopped. Try again in a few minutes.", spentMicros: 0, retryable: true }]);
+  expect(console.error).toHaveBeenCalledWith("check failed:", diskError);
 });
 
 test("a promise keeps its moment on the call only when that moment is inside the recording", () => {

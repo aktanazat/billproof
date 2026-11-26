@@ -543,6 +543,8 @@ function failureOf(error: unknown): [CheckFailure, string, number | undefined] {
   if (error instanceof CheckStop) return [error.failure, error.message, error.bill];
   if (isLedgerRefusal(error)) return [error.kind, error.message, undefined];
   console.error("check failed:", error);
+  // The ledger's file couldn't be written (a full disk): the check stops at its next booking, whatever it had reached.
+  if (error instanceof Error && "code" in error && error.code === "ERR_SQLITE_ERROR") return ["network", "Billproof couldn't record this check, so it stopped. Try again in a few minutes.", undefined];
   if (error instanceof EmberError) {
     const wait = error.kind === "rate_limited" && error.retryAfterSeconds ? ` Try again in ${Math.ceil(error.retryAfterSeconds)} seconds.` : "";
     return [error.kind, PLAIN[error.kind] + wait, undefined];
