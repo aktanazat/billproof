@@ -601,7 +601,7 @@ describe("promises read from a person's own words", () => {
       const said = promise({ kind: "monthly_price", amount_cents: 5500, quote, covers_line_ids: plan });
       expect(decide(internet, [said], photo, photo).claims.map((c) => c.kind), quote).toEqual(["price_above_promise"]);
     }
-    for (const quote of ["$55 a month through 10/31/2027", "$55 a month until next year", "$55 a month, discount ends 6/30", "$55 a month; it expires in 3 months", "$55 a month until May 14th", "$55/mo through the end of the year", "my $55 promo expires this month"]) {
+    for (const quote of ["$55 a month through 10/31/2027", "$55 a month until next year", "$55 a month, discount ends 6/30", "$55 a month; it expires in 3 months", "my $55 discount expires in about 3 months", "$55 a month until May 14th", "$55/mo through the end of the year", "my $55 promo expires this month"]) {
       const limited = promise({ kind: "monthly_price", amount_cents: 5500, quote, covers_line_ids: plan });
       expect(decide(internet, [limited], photo, photo).questions.filter((q) => q.promiseId).map((q) => q.kind), quote).toEqual(["end_date_unread"]);
     }
