@@ -150,14 +150,15 @@ function ClaimRow({ claim, index, result, callUrl, mark, onToggle, onConfirm, on
         </dd>
       </dl>
 
-      <div className="flex flex-wrap items-center justify-between gap-3 sm:ml-[30px]">
-        <p className="max-w-[34rem] text-[13px] leading-[18px] text-text-2">{claim.lookedFor ? "Checked against the company's side before claiming." : ""}</p>
+      {/* On a phone the note and the control stack, so the control sits at the left whether or not a note precedes it. */}
+      <div className="flex flex-col items-start gap-3 sm:ml-[30px] sm:flex-row sm:items-center">
+        {claim.lookedFor && <p className="max-w-[34rem] text-[13px] leading-[18px] text-text-2">{"Checked against the company's side before claiming."}</p>}
         {mark === "needs_confirmation" ? (
-          <button type="button" onClick={onConfirm} aria-label={`${confirmLabel}: ${title}`} className="h-8 rounded-lg bg-text px-3 text-[13px] font-medium text-white hover:bg-black">
+          <button type="button" onClick={onConfirm} aria-label={`${confirmLabel}: ${title}`} className="h-8 rounded-lg bg-text px-3 text-[13px] font-medium text-white hover:bg-black sm:ml-auto">
             {confirmLabel}
           </button>
         ) : (
-          <label className="inline-flex cursor-pointer items-center gap-2 text-[13px] text-text-2 select-none">
+          <label className="inline-flex cursor-pointer items-center gap-2 text-[13px] text-text-2 select-none sm:ml-auto">
             <input type="checkbox" checked={mark === "selected"} onChange={onToggle} aria-label={`In message: ${title}`} className="size-4 accent-[var(--text)]" />
             In message
           </label>
