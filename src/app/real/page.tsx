@@ -224,8 +224,8 @@ export default function RealBills() {
                 <li key={id} className="flex flex-col gap-1 border-b border-line py-3">
                   <p className="text-[13px] text-text-2">{companyOf(bill.provider ?? bill.sub)}</p>
                   <p className="text-[15px] leading-snug">“{said}”</p>
-                  <Change bill={bill} />
                   <Finding bill={bill} />
+                  <Change bill={bill} />
                   <div className="mt-1 flex gap-2">
                     <Link href={`/?post=${id}`} className="inline-flex h-8 items-center rounded-lg bg-text px-3 text-[13px] font-medium text-white hover:bg-black">
                       Check it live
