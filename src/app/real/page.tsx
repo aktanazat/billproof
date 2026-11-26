@@ -125,9 +125,9 @@ function namedOnce(labels: string[]): string {
 export default function RealBills() {
   // Posts whose pictures were deleted before the run can't be read and aren't counted.
   const results = realRun.results.filter((bill) => !(bill.outcome === "error" && bill.error === "images unavailable"));
-  const gone = realRun.results.length - results.length;
+  const gone = (realRun.results.length - results.length).toLocaleString("en-US");
   const bills = results.filter((bill): bill is Checked => bill.outcome === "checked");
-  const notBills = results.filter((bill) => bill.outcome === "not_a_bill").length;
+  const notBills = results.filter((bill) => bill.outcome === "not_a_bill").length.toLocaleString("en-US");
   const claimed = bills.filter((bill) => claimedCents(bill) > 0);
   const fees = bills.flatMap(unagreedFees);
   const feeCents = fees.reduce((t, fee) => t + fee.cents, 0);
