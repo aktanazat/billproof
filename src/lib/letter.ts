@@ -135,9 +135,10 @@ function claimRemedy(claims: Claim[]): string {
   return kinds.size === 1 ? REMEDY[claims[0].kind] : "future bills charged as promised";
 }
 
-// A repeated charge as a fact, for a regulator, and as a request, for the company. `where` is the bill it is printed on.
-const repeatFact = (lines: LineItem[], where = "the bill") => `${names(lines)} appears ${lines.length} times on ${where} (${lines.map((line) => usd(line.amount_cents)).join(" and ")}).`;
-const repeatSentence = (lines: LineItem[], where?: string) => `${repeatFact(lines, where)} Please confirm whether this is a duplicate and credit it if so.`;
+// A repeated charge as a fact, for a regulator, and as a request, for the company. `where` is the bill it is printed on,
+// or null when the sentence already names it.
+const repeatFact = (lines: LineItem[], where: string | null = "the bill") => `${names(lines)} appears ${lines.length} times${where ? ` on ${where}` : ""} (${lines.map((line) => usd(line.amount_cents)).join(" and ")}).`;
+const repeatSentence = (lines: LineItem[], where?: string | null) => `${repeatFact(lines, where)} Please confirm whether this is a duplicate and credit it if so.`;
 
 // Every fee asked about goes in one sentence, each with its amount ("the Broadcast TV Fee ($47.23), Regional Sports
 // Fee ($19.86) and …"), rather than the same sentence once per fee: a request to the company, a fact to a regulator.
@@ -357,7 +358,7 @@ export function buildYearMessage(months: Checked[]): Message {
   const repeatOn = (month: Checked, lines: LineItem[], sentence: typeof repeatFact) => {
     const period = periodText(month);
     if (period === "this bill") return sentence(lines, "one bill");
-    return `${period.startsWith("the ") ? `On ${period}` : `On the bill for ${period}`}, ${sentence(lines)}`;
+    return `${period.startsWith("the ") ? `On ${period}` : `On the bill for ${period}`}, ${sentence(lines, null)}`;
   };
   const repeats = months.flatMap((month) =>
     month.questions.flatMap((question) => {
