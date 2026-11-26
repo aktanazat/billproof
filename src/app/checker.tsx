@@ -167,7 +167,7 @@ function DocRow({ doc, onRemove }: { doc: Doc; onRemove: () => void }) {
   const detail = doc.status === "preparing" ? "Opening" : doc.status === "failed" ? doc.message : pagesText(doc);
   return (
     <div className="flex items-center gap-3 py-1.5">
-      <div className="h-10 w-8 shrink-0 overflow-hidden rounded-[4px] bg-white shadow-[inset_0_0_0_1px_var(--line)]">{doc.status === "ready" && <Thumbnail src={doc.pages[0].image} />}</div>
+      <div className="h-10 w-8 shrink-0 overflow-hidden rounded-[4px] bg-white outline-1 -outline-offset-1 outline-line">{doc.status === "ready" && <Thumbnail src={doc.pages[0].image} />}</div>
       <div className="min-w-0 flex-1">
         <div className="truncate text-[15px]">{doc.name}</div>
         <div className={`text-[13px] ${doc.status === "failed" ? "text-red" : "text-text-2"}`} role={doc.status === "failed" ? "alert" : undefined}>
@@ -379,7 +379,7 @@ function Working({ state, onCancel, dispatch }: { state: Exclude<CheckState, { s
                   <ul className="ml-7 mt-2 grid grid-cols-4 gap-2 sm:grid-cols-6">
                     {pages.map((shown, i) => (
                       <li key={i} className="appear flex flex-col gap-1">
-                        <div className={`h-16 overflow-hidden rounded-[4px] bg-white shadow-[inset_0_0_0_1px_var(--line)] ${kinds[i] === "other" || kinds[i] === "older_bill" ? "opacity-40" : ""}`}>
+                        <div className={`h-16 overflow-hidden rounded-[4px] bg-white outline-1 -outline-offset-1 outline-line ${kinds[i] === "other" || kinds[i] === "older_bill" ? "opacity-40" : ""}`}>
                           <Thumbnail src={shown.image} />
                         </div>
                         <span className="text-[12px] text-text-2">{KIND_NAMES[kinds[i] ?? "bill"]}</span>
@@ -446,7 +446,7 @@ function Working({ state, onCancel, dispatch }: { state: Exclude<CheckState, { s
 function SampleButton({ sample, busy, loading, onRun }: { sample: Sample; busy: boolean; loading: boolean; onRun: () => void }) {
   return (
     <button type="button" disabled={busy} onClick={onRun} className="flex items-center gap-4 rounded-xl p-3 text-left hover:bg-fill disabled:cursor-wait">
-      <span className="block h-[72px] w-14 shrink-0 overflow-hidden rounded-[4px] bg-white shadow-[inset_0_0_0_1px_var(--line)]">
+      <span className="block h-[72px] w-14 shrink-0 overflow-hidden rounded-[4px] bg-white outline-1 -outline-offset-1 outline-line">
         {/* A made-up sample is zoomed onto its header; a real post's picture can be any shape, so it is fitted. */}
         {/* The previews sit below a phone's first screen, so they load as they scroll into view, at their shown size. */}
         {sample.pictures ? <Thumbnail src={sample.image} lazy /> : <Image src={sample.image} alt="" width={1200} height={1553} sizes="129px" className="h-auto w-[230%] max-w-none -translate-x-[9%] -translate-y-[4%]" />}

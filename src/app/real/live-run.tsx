@@ -189,7 +189,8 @@ export function LiveRun({ paused }: { paused: boolean }) {
               const found = tile.feeCents + tile.claimCents > 0;
               return (
                 <li key={tile.id} className={`flex flex-col gap-2 rounded-xl p-2 transition-colors ${live ? "bg-fill" : ""}`}>
-                  <div className={`h-28 overflow-hidden rounded-[4px] bg-white shadow-[inset_0_0_0_1px_var(--line)] ${found ? "shadow-[inset_0_0_0_2px_var(--red)]" : ""} ${tile.stage === "waiting" ? "opacity-40" : ""}`}>
+                  {/* Outlines, drawn over the picture: a bill that found money is framed red. */}
+                  <div className={`h-28 overflow-hidden rounded-[4px] bg-white ${found ? "outline-2 -outline-offset-2 outline-red" : "outline-1 -outline-offset-1 outline-line"} ${tile.stage === "waiting" ? "opacity-40" : ""}`}>
                     <Thumbnail src={tile.picture} />
                   </div>
                   <p className="truncate text-[12px] text-text-2">{tile.provider ?? "Bill"}</p>

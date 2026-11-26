@@ -54,7 +54,8 @@ const TONE_CLASS: Record<Mark["tone"], string> = { claim: "mark-claim", ask: "ma
 // Boxes are on the 0-1000 grid of the full page image; `visibleAspect` (width / height) crops the blank bottom of short bills.
 export function BillPage({ image, alt, marks = [], focus, visibleAspect, children }: { image: string; alt: string; marks?: Mark[]; focus?: ReadonlySet<string>; visibleAspect?: string; children?: ReactNode }) {
   return (
-    <div className="relative overflow-hidden rounded-lg bg-white shadow-[inset_0_0_0_1px_var(--line)]" style={visibleAspect ? { aspectRatio: visibleAspect } : undefined}>
+    // The edge is an outline: it is drawn over the picture, where an inset shadow is hidden beneath it.
+    <div className="relative overflow-hidden rounded-lg bg-white outline-1 -outline-offset-1 outline-line" style={visibleAspect ? { aspectRatio: visibleAspect } : undefined}>
       <img src={image} alt={alt} className="block w-full select-none" draggable={false} />
       {marks.map((mark) => {
         const dimmed = focus && focus.size > 0 && !focus.has(mark.id);

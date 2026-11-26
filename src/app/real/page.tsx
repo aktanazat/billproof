@@ -333,7 +333,7 @@ export default function RealBills() {
           <ol className="mt-3 flex flex-col">
             {ordered.map((bill) => (
               <li key={bill.id} className="grid grid-cols-[72px_minmax(0,1fr)] gap-4 border-b border-line py-4 sm:grid-cols-[72px_minmax(0,1fr)_auto]">
-                <div className="h-[88px] w-[72px] overflow-hidden rounded-[4px] bg-white shadow-[inset_0_0_0_1px_var(--line)]">
+                <div className="h-[88px] w-[72px] overflow-hidden rounded-[4px] bg-white outline-1 -outline-offset-1 outline-line">
                   <Thumbnail src={`/api/real-image/${bill.id}/${bill.billPages[0] ?? 0}`} lazy />
                 </div>
                 <div className="flex min-w-0 flex-col gap-1">
