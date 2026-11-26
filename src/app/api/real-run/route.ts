@@ -26,6 +26,11 @@ function refusal(message: string, status: number) {
   return new Response(JSON.stringify(event) + "\n", { status, headers: { "Content-Type": "application/x-ndjson" } });
 }
 
+const inMinutes = (ms: number) => {
+  const minutes = Math.max(1, Math.ceil(ms / 60_000));
+  return `in ${minutes} ${minutes === 1 ? "minute" : "minutes"}`;
+};
+
 export async function POST(request: Request) {
   // Only the site's own page may start a run; another site can't spend it from its visitors' browsers.
   if (request.headers.get("sec-fetch-site") !== "same-origin") return refusal("Start a live run from the Billproof page.", 403);
@@ -33,8 +38,9 @@ export async function POST(request: Request) {
   const client = clientKey(request);
   while (startedRuns.length > 0 && now - startedRuns[0] > HOUR_MS) startedRuns.shift();
   if (running) return refusal("A live run is already going. Try again in a minute.", 503);
-  if (startedRuns.length >= RUNS_PER_HOUR) return refusal("The live run has been used a lot this hour. Try again later.", 429);
-  if (now - (lastRunByClient.get(client) ?? 0) < HOUR_MS) return refusal("You can start one live run an hour.", 429);
+  if (startedRuns.length >= RUNS_PER_HOUR) return refusal(`The live run has been used a lot this hour. Try again ${inMinutes(startedRuns[0] + HOUR_MS - now)}.`, 429);
+  const last = lastRunByClient.get(client) ?? 0;
+  if (now - last < HOUR_MS) return refusal(`You can start one live run an hour. Try again ${inMinutes(last + HOUR_MS - now)}.`, 429);
   running = true;
   startedRuns.push(now);
   lastRunByClient.set(client, now);
