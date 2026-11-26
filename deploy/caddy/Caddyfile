@@ -34,5 +34,9 @@ billproof.aktan.us {
 	reverse_proxy app:3000 {
 		# The check streams Muse Ember's reading line by line; pass each line through as it arrives.
 		flush_interval -1
+		# A deploy replaces the app's container; a request arriving while it starts waits for it instead of failing.
+		# Only a refused connection is retried, so a check already sent is never sent twice.
+		lb_try_duration 15s
+		lb_try_interval 250ms
 	}
 }
