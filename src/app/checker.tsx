@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useReducer, useRef, useState, type ChangeEvent, type DragEvent, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useReducer, useRef, useState, type ChangeEvent, type DragEvent, type ReactNode } from "react";
 import { checkInput, initialState, offerOmitted, reduce, startBlocker, type Call, type CheckAction, type CheckState, type Doc, type Inputs } from "@/lib/check-machine";
 import { formatMicros } from "@/lib/cost";
 import { usd } from "@/lib/letter";
@@ -471,6 +471,11 @@ const listed = (names: string[]) => (names.length === 1 ? names[0] : `${names.sl
 
 export function Checker({ samples, realSamples, startWith }: { samples: Sample[]; realSamples: Sample[]; startWith: Sample | null }) {
   const [state, dispatch] = useReducer(reduce, initialState);
+  // The state as last shown, for work that resumes after an await (a pasted screenshot's bill is read again first).
+  const shown = useRef(state);
+  useLayoutEffect(() => {
+    shown.current = state;
+  });
   // Files dropped past the 12-bill limit, named, so the person knows which months are missing: PDFs are placed before
   // pictures, so the ones left out aren't simply the last chosen.
   const [leftOut, setLeftOut] = useState<string[]>([]);
@@ -478,6 +483,11 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
   // told apart by their contents, and a repeat is named instead of added.
   const [alreadyAdded, setAlreadyAdded] = useState<string[]>([]);
   const billHashes = useRef(new Map<string, string[]>());
+  // Each bill's own files, so a pasted screenshot can join the bill as if it had been dropped with them.
+  const billFiles = useRef(new Map<string, File[]>());
+  const pastedCount = useRef(0);
+  const pasteQueue = useRef(Promise.resolve());
+  const [pasteNote, setPasteNote] = useState<string | null>(null);
   // The offer takes one file; a drop of several keeps the first and says where the rest belong.
   const [offerExtra, setOfferExtra] = useState(0);
   const controllers = useRef(new Map<number, AbortController>());
@@ -609,10 +619,22 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
   // Screenshots dropped together are one pile about one bill, sorted by Muse Ember; each PDF is its own bill. One PDF
   // dropped with screenshots (a chat, the offer) is one bill with them, so the screenshots are sorted with the statement
   // and their promises apply to it, rather than becoming a second "month" that holds no bill.
-  const addBills = async (dropped: File[]) => {
+  // `replacing` names a bill these files rebuild (a pasted screenshot joining it): it is left out of the room and the
+  // repeats, since its own files come back in the drop, and is removed only once they have been read again; if they
+  // can't be (the file changed on disk since), it stays as it was.
+  const addBills = async (dropped: File[], replacing?: string) => {
     const digest = async (file: File) => Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", await file.arrayBuffer())), (byte) => byte.toString(16).padStart(2, "0")).join("");
-    const existing = state.s === "composing" ? state.inputs.bills : [];
-    const digests = new Map(await Promise.all(dropped.map(async (file) => [file, await digest(file)] as const)));
+    let digests: Map<File, string>;
+    try {
+      digests = new Map(await Promise.all(dropped.map(async (file) => [file, await digest(file)] as const)));
+    } catch (error) {
+      if (!replacing) throw error;
+      setPasteNote("The pasted screenshot wasn't added: the bill's own files can no longer be read. Add the screenshot and the bill's files again together.");
+      return;
+    }
+    if (replacing) dispatch({ type: "removed", id: replacing });
+    const current = shown.current;
+    const existing = (current.s === "composing" ? current.inputs.bills : []).filter((doc) => doc.id !== replacing);
     const seen = new Set(existing.flatMap((doc) => billHashes.current.get(doc.id) ?? []));
     // A statement added on its own and dropped again with new screenshots, as the offer box advises, means them to go
     // with it: its bill is replaced by one holding both, rather than the screenshots becoming a bill of their own.
@@ -648,12 +670,34 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
     const named = groups.map((group) => ({ name: nameOf(group), group }));
     const docs = named.slice(0, room).map(({ name, group }) => ({ id: id(), name, group }));
     setLeftOut(named.slice(room).map(({ name }) => name));
-    for (const doc of docs) billHashes.current.set(doc.id, doc.group.map((file) => hashes.get(file) ?? ""));
+    for (const doc of docs) {
+      billHashes.current.set(doc.id, doc.group.map((file) => hashes.get(file) ?? ""));
+      billFiles.current.set(doc.id, doc.group);
+    }
     dispatch({ type: "bills_added", docs: docs.map(({ id: docId, name }) => ({ id: docId, name })) });
     for (const doc of docs) {
       if (doc.group.length === 1) void prepareDoc(doc.id, doc.group[0], MAX_BILL_PAGES);
       else void preparePile(doc.id, doc.group);
     }
+  };
+
+  // Screenshots are pasted one at a time, and each is a page of the same bill: a pasted picture joins the bill added
+  // last, read again with its files as one bill (the owner's request, 2026-11-27). Pastes are taken in turn, each from
+  // the bills as shown once the one before it is on the page. A bill without its files at hand (a sample's), or one
+  // that failed, is left as it is and the picture starts a bill of its own; a full one keeps its pictures.
+  const pasteBills = async (pictures: File[]) => {
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    const current = shown.current;
+    if (current.s !== "composing") return;
+    const last = current.inputs.bills.at(-1);
+    const files = last ? billFiles.current.get(last.id) : undefined;
+    if (!last || !files || last.status === "failed" || files.some((file) => !isPdf(file) && !isPicture(file))) return addBills(pictures);
+    if (files.length + pictures.length > MAX_BILL_PAGES) {
+      setPasteNote(`The pasted screenshot wasn't added: a bill takes up to ${MAX_BILL_PAGES} pictures, and this one is full. For another month, use “Add another month”.`);
+      return;
+    }
+    setPasteNote(null);
+    return addBills([...files, ...pictures], last.id);
   };
 
   const preparePile = async (docId: string, group: File[]) => {
@@ -695,6 +739,27 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
       dispatch({ type: "prep_failed", id: docId, message: error instanceof PrepareError ? error.message : "This recording could not be opened." });
     }
   };
+
+  // A screenshot pasted (Cmd+V, or Paste on a phone) is added like a chosen file: into the offer box when the cursor is
+  // there and it's empty, otherwise to the bill. Pasted words are left to the page: a picture pasted into an offer
+  // already written is ignored, and so is one that comes with words (a document's copy can carry a picture of itself).
+  useEffect(() => {
+    if (state.s !== "composing") return;
+    const offerEmpty = state.inputs.offer.kind === "none";
+    const paste = (event: ClipboardEvent) => {
+      const files = [...(event.clipboardData?.files ?? [])].filter(isPicture);
+      if (files.length === 0) return;
+      const inOffer = event.target instanceof HTMLTextAreaElement && event.target.getAttribute("aria-label") === "What you were promised";
+      if (inOffer && (!offerEmpty || event.clipboardData?.getData("text/plain").trim())) return;
+      event.preventDefault();
+      // An untyped picture is known by its name (an iPhone's .heic), so the new name keeps its extension.
+      const pictures = files.map((file) => new File([file], `Pasted screenshot ${++pastedCount.current}.${file.type ? file.type.split("/")[1] : file.name.split(".").pop()}`, { type: file.type }));
+      if (inOffer) void addOffer(pictures);
+      else pasteQueue.current = pasteQueue.current.then(() => pasteBills(pictures)).catch(() => setPasteNote("The pasted screenshot couldn't be added. Try adding it as a file."));
+    };
+    document.addEventListener("paste", paste);
+    return () => document.removeEventListener("paste", paste);
+  });
 
   // A sample's bills and offer enter the check together; a later sample click wins over one still loading.
   const sampleToken = useRef(0);
@@ -799,7 +864,15 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
             // scrolling box, which would cut it off.
             <div className="-mx-1 -mb-1 mt-1 max-h-[208px] overflow-y-auto p-1">
               {bills.map((doc) => (
-                <DocRow key={doc.id} doc={doc} onRemove={() => dispatch({ type: "removed", id: doc.id })} />
+                <DocRow
+                  key={doc.id}
+                  doc={doc}
+                  onRemove={() => {
+                    billFiles.current.delete(doc.id);
+                    billHashes.current.delete(doc.id);
+                    dispatch({ type: "removed", id: doc.id });
+                  }}
+                />
               ))}
               {bills.length < MAX_BILLS && (
                 <FileTarget label="Add more bills" accept={BILL_ACCEPT} multiple onFiles={addBills} className="mt-1 h-8 rounded-lg px-2 text-[13px] text-text-2 hover:bg-fill-2 hover:text-text data-[over]:bg-fill-2 data-[over]:text-text">
@@ -816,6 +889,11 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
                   Already added, so not added again: {listed(alreadyAdded)}.
                 </p>
               )}
+              {pasteNote && (
+                <p role="status" className="mt-2 px-2 text-[13px] text-text-2 break-words">
+                  {pasteNote}
+                </p>
+              )}
             </div>
           ) : (
             <FileTarget label="Choose the bill" accept={BILL_ACCEPT} multiple onFiles={addBills} className="mt-3 flex h-[112px] w-full flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-text-2/40 text-center hover:bg-white data-[over]:bg-white">
@@ -823,7 +901,7 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
                 <span className="sm:hidden">Choose</span>
                 <span className="hidden sm:inline">Drop</span> the bill, or every screenshot you have
               </span>
-              <span className="text-[13px] text-text-2">PDFs, photos, chats with the company. Up to 12 months of bills at once.</span>
+              <span className="text-[13px] text-text-2">PDFs, photos, chats with the company, or paste a screenshot. Up to 12 months of bills at once.</span>
             </FileTarget>
           )}
         </div>
