@@ -166,7 +166,7 @@ function Transcript({ transcript, provider, callUrl }: { transcript: TranscriptT
     <details className="group border-b border-line">
       <summary className="flex h-11 cursor-pointer list-none items-center justify-between text-[15px]">
         <span>Call transcript</span>
-        <span className="text-[13px] text-text-2 tabular-nums">{formatClock(transcript.at(-1)?.start_seconds ?? 0)}</span>
+        <span className="text-[13px] text-text-2 tabular-nums">{transcript.length === 1 ? "1 line" : `${transcript.length} lines`}</span>
       </summary>
       <ol className="flex flex-col gap-2 pb-4">
         {transcript.map((turn, i) => (

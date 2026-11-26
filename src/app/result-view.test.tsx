@@ -200,4 +200,24 @@ describe("the result page's other sections", () => {
     expect(render(claim(["L1", "L2", "L3"], 9000, 7500))).toContain("Unlimited Basic - Line 1, Unlimited Basic - Line 2 and Unlimited Basic - Line 3 are billed above the promised price");
     expect(render(claim(["L1"], 3000, 2500))).toContain("Unlimited Basic - Line 1 is billed above the promised price");
   });
+
+  test("a call transcript counts its lines rather than showing when the last one starts, and names who spoke", () => {
+    const promise: Checked["promises"][number] = { id: "P1", kind: "monthly_price", description: "", amount_cents: 5500, per_line: false, conditions: [], applies_from: null, applies_until: null, quote: "Fiber 500 is $55 a month", said_at_seconds: 11, covers_line_ids: ["L1"] };
+    const result: Checked = {
+      ...checked([line("L1", "Fiber 500 Internet", 7000, "plan")], []),
+      promises: [promise],
+      matchedPromiseIds: ["P1"],
+      claims: [{ id: "C1", kind: "price_above_promise", lineIds: ["L1"], promiseId: "P1", actualCents: 7000, expectedCents: 5500, amountCents: 1500, needsConfirmation: false, lookedFor: null }],
+      transcript: [
+        { speaker: "company", start_seconds: 0, text: "Thanks for calling." },
+        { speaker: "customer", start_seconds: 6, text: "How much is Fiber 500?" },
+        { speaker: "company", start_seconds: 22, text: "Fiber 500 is $55 a month." },
+      ],
+    };
+    const t = text(page(result, { claims: { C1: "selected" }, questions: {} }));
+    expect(t).toContain("Call transcript 3 lines");
+    expect(t).not.toContain("Call transcript 0:22");
+    expect(t).toContain("AT&T: Thanks for calling.");
+    expect(t).toContain("You: How much is Fiber 500?");
+  });
 });
