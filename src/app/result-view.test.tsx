@@ -368,6 +368,9 @@ describe("the result page's wording", () => {
     expect(html).toContain("Said on the call “for the first 12 months, then the regular rate applies”");
     expect(html).toContain('aria-label="Play what was said at 0:26"');
     expect(html).not.toContain("The offer says");
+    // The quote and the transcript can write the same apostrophe or dash differently; the line is still found.
+    const typeset: Checked = { ...result, transcript: [{ speaker: "company", start_seconds: 31, text: "That’s for the first 12 months — then the regular rate applies." }], dropped: [{ ...result.dropped[0], counterQuote: "That's for the first 12 months - then the regular rate applies" }] };
+    expect(page(typeset)).toContain('aria-label="Play what was said at 0:31"');
   });
 });
 

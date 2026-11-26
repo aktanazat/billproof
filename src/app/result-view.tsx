@@ -4,6 +4,7 @@ import { useId, useRef, useState, type ReactNode } from "react";
 import type { CheckAction, Selection } from "@/lib/check-machine";
 import { formatMicros } from "@/lib/cost";
 import type { Claim, Question, TestedClaim, UnusedReason } from "@/lib/decide";
+import { quoteExactIn } from "@/lib/evidence";
 import { buildMessage, COMPLAINT_WHERE, increaseSentence, shortDate, usd, type Message } from "@/lib/letter";
 import { MAX_OFFER_PAGES, type ShownPage } from "@/lib/prepare";
 import type { CallRecord, Checked, SingleResult } from "@/lib/result";
@@ -110,10 +111,10 @@ function heardAt(result: Checked, promise: PromiseTerm | undefined): number | nu
   return result.transcript && promise?.said_at_seconds !== null && promise?.said_at_seconds !== undefined ? promise.said_at_seconds : null;
 }
 
-// Where words quoted from the call were said: the start of the line of the transcript that holds them, if one does.
+// Where words quoted from the call were said: the start of the line of the transcript that holds them, if one does,
+// matched as quotes are everywhere (case, curly quotes and dashes aside).
 function quotedAt(transcript: TranscriptTurn[] | null, quote: string): number | null {
-  const flat = (text: string) => text.toLowerCase().replace(/\s+/g, " ").trim();
-  return transcript?.find((turn) => flat(turn.text).includes(flat(quote)))?.start_seconds ?? null;
+  return transcript?.find((turn) => quoteExactIn(quote, turn.text))?.start_seconds ?? null;
 }
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
