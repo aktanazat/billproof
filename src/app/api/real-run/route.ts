@@ -2,7 +2,7 @@ import { realRun } from "@/data/real-bills";
 import { postPages } from "@/data/real-pages";
 import { runCheck } from "@/lib/pipeline";
 import { postNotes, unagreedFees, type LiveEvent } from "@/lib/real-bills";
-import { clientKey, serverLedger } from "@/lib/server-ledger";
+import { clientKey, fromOwnPage, serverLedger } from "@/lib/server-ledger";
 
 const BATCH = 24;
 const LANES = 8;
@@ -32,8 +32,7 @@ const inMinutes = (ms: number) => {
 };
 
 export async function POST(request: Request) {
-  // Only the site's own page may start a run; another site can't spend it from its visitors' browsers.
-  if (request.headers.get("sec-fetch-site") !== "same-origin") return refusal("Start a live run from the Billproof page.", 403);
+  if (!fromOwnPage(request)) return refusal("Start a live run from the Billproof page.", 403);
   const now = Date.now();
   const client = clientKey(request);
   while (startedRuns.length > 0 && now - startedRuns[0] > HOUR_MS) startedRuns.shift();

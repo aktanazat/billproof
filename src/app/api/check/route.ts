@@ -1,6 +1,6 @@
 import { runCheck } from "@/lib/pipeline";
 import { checkInputSchema, MAX_UPLOAD_BYTES, type CheckEvent, type CheckFailure } from "@/lib/result";
-import { clientKey, serverLedger } from "@/lib/server-ledger";
+import { clientKey, fromOwnPage, serverLedger } from "@/lib/server-ledger";
 
 function refuse(status: number, message: string, failure: CheckFailure = "bad_input", retryable = false) {
   const event: CheckEvent = { type: "error", failure, message, spentMicros: 0, retryable };
@@ -12,8 +12,7 @@ const MAX_IN_FLIGHT = 4;
 let inFlight = 0;
 
 export async function POST(request: Request) {
-  // Only the site's own page may start a check; another site can't spend it from its visitors' browsers.
-  if (request.headers.get("sec-fetch-site") !== "same-origin") return refuse(403, "Start a check from the Billproof page.");
+  if (!fromOwnPage(request)) return refuse(403, "Start a check from the Billproof page.");
   if (inFlight >= MAX_IN_FLIGHT) return refuse(503, "Billproof is busy with other checks. Try again in a minute.", "rate_limited", true);
   inFlight += 1;
   let streaming = false;

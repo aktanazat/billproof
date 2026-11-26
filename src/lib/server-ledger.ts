@@ -21,3 +21,17 @@ export function livePaused(): boolean {
 export function clientKey(request: Request): string {
   return request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || request.headers.get("x-real-ip") || "local";
 }
+
+// Only Billproof's own page may start paid work, so another site can't spend it from its visitors' browsers. Browsers
+// mark such a request same-origin; older ones (Safari before 16.4, on iOS 15 devices) send only its Origin.
+export function fromOwnPage(request: Request): boolean {
+  const site = request.headers.get("sec-fetch-site");
+  if (site !== null) return site === "same-origin";
+  const origin = request.headers.get("origin");
+  if (!origin) return false;
+  try {
+    return new URL(origin).host === new URL(request.url).host;
+  } catch {
+    return false;
+  }
+}
