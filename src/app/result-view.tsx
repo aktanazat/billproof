@@ -119,10 +119,10 @@ function ClaimRow({ claim, index, result, callUrl, mark, onToggle, onConfirm, on
         <p className="text-[15px] font-semibold text-red tabular-nums">{usd(claim.amountCents)}</p>
       </div>
 
-      <dl className="ml-[30px] grid grid-cols-[4.5rem_4.5rem_minmax(0,1fr)] gap-x-3 gap-y-2 text-[13px] leading-[18px]">
+      <dl className="grid grid-cols-[4.5rem_minmax(0,1fr)] gap-x-3 gap-y-1.5 text-[13px] leading-[18px] sm:ml-[30px] sm:grid-cols-[4.5rem_4.5rem_minmax(0,1fr)] sm:gap-y-2">
         <dt className="text-text-2">Billed</dt>
-        <dd className="text-right tabular-nums">{usd(claim.actualCents)}</dd>
-        <dd className="flex flex-col gap-0.5 text-text-2">
+        <dd className="tabular-nums sm:text-right">{usd(claim.actualCents)}</dd>
+        <dd className="col-span-2 mb-1.5 flex flex-col gap-0.5 text-text-2 sm:col-span-1 sm:mb-0">
           {lines.map((line) => (
             <span key={line.id} className="flex justify-between gap-3">
               <span>{line.label}</span>
@@ -131,14 +131,14 @@ function ClaimRow({ claim, index, result, callUrl, mark, onToggle, onConfirm, on
           ))}
         </dd>
         <dt className="text-text-2">{claim.kind === "credit_missing" ? "Credit" : "Promised"}</dt>
-        <dd className="text-right tabular-nums">{usd(claim.expectedCents)}</dd>
-        <dd className="flex items-start gap-2 text-text-2">
+        <dd className="tabular-nums sm:text-right">{usd(claim.expectedCents)}</dd>
+        <dd className="col-span-2 flex items-start gap-2 text-text-2 sm:col-span-1">
           {heardAt !== null && <PlayButton url={callUrl} from={heardAt} to={turnEnd(result.transcript, heardAt)} label={`Play what was said at ${formatClock(heardAt)}`} />}
           <span className={heardAt !== null ? "pt-[5px]" : ""}>“{promise?.quote}”</span>
         </dd>
       </dl>
 
-      <div className="ml-[30px] flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 sm:ml-[30px]">
         <p className="max-w-[34rem] text-[13px] leading-[18px] text-text-2">{claim.lookedFor ? "Checked against the company's side before claiming." : ""}</p>
         {mark === "needs_confirmation" ? (
           <button type="button" onClick={onConfirm} className="h-8 rounded-lg bg-text px-3 text-[13px] font-medium text-white hover:bg-black">
