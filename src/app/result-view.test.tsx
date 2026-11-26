@@ -1,11 +1,38 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, test } from "vitest";
 import { initialState, reduce, type CheckState } from "@/lib/check-machine";
 import { checkTotals } from "@/lib/decide";
-import type { Checked } from "@/lib/result";
+import type { CheckEvent, CheckResult, Checked, SingleResult } from "@/lib/result";
 import type { LineItem, Reading } from "@/lib/schemas";
 import { ResultView } from "./result-view";
+import { YearView } from "./year-view";
+
+// Every result of the 2026-11-26 test-set run, as its page shows it once the check finishes: no placeholder leaks into
+// the text, and one of something is never written with a plural.
+test("no result page from a saved result shows a placeholder or '1' before a plural", () => {
+  const run = JSON.parse(readFileSync(path.join(import.meta.dirname, "../../eval/run-2026-11-26.json"), "utf8")) as { raw: { id: string; events: CheckEvent[] }[] };
+  const done = (result: CheckResult) => {
+    const running = { s: "running", inputs: initialState.inputs, attempts: 1, attempt: 1, stage: null, spentMicros: 0, live: {} } as unknown as CheckState;
+    const state = reduce(running, { type: "finished", attempt: 1, result });
+    if (state.s !== "done") throw new Error("the finished check did not become a done state");
+    return state;
+  };
+  const single = (result: SingleResult) => renderToStaticMarkup(createElement(ResultView, { result, bill: 0, pages: [], omittedPages: { bill: 0, offer: 0 }, callUrl: null, selection: done(result).selections[0], dispatch: () => {}, backLabel: "Check another bill", onBack: () => {} }));
+  const pages = run.raw.flatMap((entry) => {
+    const event = entry.events.find((e) => e.type === "result");
+    if (event?.type !== "result") return [];
+    if (event.result.outcome !== "year") return [single(event.result)];
+    const year = renderToStaticMarkup(createElement(YearView, { state: done(event.result), result: event.result, dispatch: () => {} }));
+    return [year, ...event.result.months.map((month) => single(month.result))];
+  });
+  expect(pages.length).toBeGreaterThan(30);
+  const words = pages.map((html) => html.replace(/<!-- -->/g, "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " "));
+  const slips = words.flatMap((page) => [...page.matchAll(/\bundefined\b|\bNaN\b|\bnull\b|\[object|\b1 (?:charges|lines|months|statements|times|fees|credits|bills|pages|promises|pictures)\b/g)].map((m) => page.slice(Math.max(0, m.index - 40), m.index + 30)));
+  expect(slips).toEqual([]);
+});
 
 const line = (id: string, label: string, cents: number, kind: LineItem["kind"]): LineItem => ({ id, label, amount_cents: cents, kind, page: 1, box: null, quote: `${label} $${(cents / 100).toFixed(2)}`, prorated: false });
 
