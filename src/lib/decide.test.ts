@@ -470,4 +470,12 @@ describe("promises read from a person's own words", () => {
     expect(decide({ ...internet, line_items: lines }, [free], photo, photo).claims).toEqual([]);
     expect(decide(internet, [{ ...free, covers_line_ids: idOf(internet, "Wi-Fi Gateway Rental") }], photo, photo).claims.map((c) => c.amountCents)).toEqual([1500]);
   });
+
+  test("a pictured line quoted without its amount still counts; one quoted with another amount does not", () => {
+    const plan = internet.line_items.find((line) => line.label === "Fiber 500 Internet")!;
+    const withQuote = (quote: string): Reading => ({ ...internet, line_items: internet.line_items.map((line) => (line.id === plan.id ? { ...line, quote } : line)) });
+    const price = promise({ kind: "monthly_price", amount_cents: 5500, quote: "they said it would be $55/mo", covers_line_ids: [plan.id] });
+    expect(decide(withQuote("Fiber 500 Internet"), [price], photo, photo).claims.map((c) => c.kind)).toEqual(["price_above_promise"]);
+    expect(decide(withQuote("Fiber 500 Internet $65.00"), [price], photo, photo).unused).toEqual([{ promiseId: "P1", reason: "line_not_on_bill" }]);
+  });
 });

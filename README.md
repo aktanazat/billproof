@@ -85,10 +85,12 @@ What the real posts taught it, each fix checked against the synthetic set (still
 - Read from a poster's own words, complaints, wishes and their own arithmetic are left out of the promises, and so are offers shown by someone shopping for a plan or advertising one.
 - "About $20" is not a promise of $20, "for 12 mos." and "for a year" limit a promise in time, and a per-line credit isn't owed on a $0 line.
 - A discount printed right under an included item for exactly its amount pays it back, even when it wasn't linked to the promise.
+- A sales quote or order summary is not a bill, and a line's label is its name alone, without its rate or quantity.
+- On a picture, a line whose quote leaves out its amount still counts by its position on the page; a quote with a different amount still doesn't. Claims from pictures always wait for the person to confirm the marked line.
 
 The outcome check: the authors' own later comments on every real bill were read for whether the company paid them back. Four said it did for a charge Billproof checks. On the Xfinity bill the company credited, Billproof shows the $95.12 jump line by line; on the Verizon one it claims the missing $7.50 discount, the amount Verizon paid back; on a Spectrum and a Google Fi bill it found nothing, because the bill the poster pictured did not show the problem. The page lists all four.
 
-The reading check by eye: seven real bills, six of them drawn at random, were compared with their pictures after the fixes (AT&T, two DIRECTV, Xfinity, Spectrum side by side with its earlier month, Visible, Verizon). All 45 lines were read with the right label and amount, and from the newest statement.
+The reading check by eye: seven real bills, six of them drawn at random, were compared with their pictures after the fixes (AT&T, two DIRECTV, Xfinity, Spectrum side by side with its earlier month, Visible, Verizon). All 45 lines were read with the right label and amount, and from the newest statement. A second random draw of ten more (two Spectrum, Xfinity, Visible, Boost, Starlink, Google Fi, Optimum, AT&T and one with no company name shown) found all 45 of their lines right too; one of the ten was an AT&T sales quote rather than a bill, which led to the quote rule above.
 
 The real-bills page also runs live: one button checks 24 of these real bills at once, eight at a time, with every bill's reading, fees and cost streaming into a grid. Only the site's own page can start a run; one run goes at a time, six an hour across the site and one an hour per address.
 

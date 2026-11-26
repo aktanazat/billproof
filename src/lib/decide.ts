@@ -77,9 +77,11 @@ const COVERABLE: Record<Exclude<PromiseTerm["kind"], "other">, KindSet> = {
   recurring_credit: { plan: true, credit: true, discount: true },
 };
 
+// A line counts when its quote carries its amount and, on a PDF, appears in the text. A picture has no text to check
+// against, so a quote that leaves the amount out is taken on its box alone; one that quotes another amount is not.
 export function lineIsEvidenced(line: LineItem, bill: Source): boolean {
-  if (!quoteHasAmount(line.quote, line.amount_cents)) return false;
-  return bill.kind === "image" ? line.box !== null : quoteFoundIn(line.quote, bill.text);
+  if (bill.kind === "image") return line.box !== null && (quoteHasAmount(line.quote, line.amount_cents) || moneyIn(line.quote).length === 0);
+  return quoteHasAmount(line.quote, line.amount_cents) && quoteFoundIn(line.quote, bill.text);
 }
 
 // "About $20", "approximately $269": a guess at a price is not a promise of it.
