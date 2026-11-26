@@ -138,7 +138,7 @@ function ClaimRow({ claim, index, result, callUrl, mark, onToggle, onConfirm, on
   return (
     <li tabIndex={0} onMouseEnter={() => onFocus(focusIds)} onMouseLeave={() => onFocus(null)} onFocus={() => onFocus(focusIds)} onBlur={() => onFocus(null)} className="flex flex-col gap-3 border-b border-line py-4 outline-none focus-visible:bg-fill">
       <div className="flex items-start gap-3">
-        <span className="mt-0.5 grid size-[18px] shrink-0 place-items-center rounded-full bg-red text-[11px] font-semibold text-white tabular-nums">{index + 1}</span>
+        <span className="mt-0.5 grid size-[18px] shrink-0 place-items-center rounded-full bg-red text-[11px] font-semibold text-white tabular-nums [print-color-adjust:exact]">{index + 1}</span>
         <h3 className="flex-1 text-[15px] font-semibold leading-snug">{title}</h3>
         <p className="text-[15px] font-semibold text-red tabular-nums">{usd(claim.amountCents)}</p>
       </div>

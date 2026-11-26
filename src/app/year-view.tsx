@@ -192,7 +192,8 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
                 <li key={month.bill}>
                   <button type="button" ref={month.bill === cameBackFrom ? focusOnShow : undefined} onClick={() => setOpen(month.bill)} className="group flex w-full flex-col gap-2 rounded-lg text-left" aria-label={`${visible}${shown === full ? "" : `, ${full}`}: ${status}`}>
                     <span className="flex h-28 items-end rounded-t-md border-b border-line px-1.5 group-hover:bg-fill">
-                      {amount > 0 && <span className="w-full rounded-t-[3px] bg-red" style={{ height: `${Math.max(8, (amount / largest) * 100)}%` }} />}
+                      {/* Printed in colour: browsers drop backgrounds on paper, and the bar is the chart. */}
+                      {amount > 0 && <span className="w-full rounded-t-[3px] bg-red [print-color-adjust:exact]" style={{ height: `${Math.max(8, (amount / largest) * 100)}%` }} />}
                     </span>
                     {/* The spaces keep the words apart in the button's text; the column layout doesn't show them. */}
                     <span className="text-[13px] text-text-2">{shown}</span>{" "}

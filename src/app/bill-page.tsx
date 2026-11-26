@@ -70,7 +70,7 @@ export function BillPage({ image, alt, marks = [], focus, visibleAspect, childre
             className={`absolute transition-opacity duration-150 ${TONE_CLASS[mark.tone]} ${dimmed ? "opacity-30" : ""}`}
             style={{ left: `${left}%`, top: `${top}%`, width: `${width}%`, height: `${height}%` }}
           >
-            {mark.n !== undefined && <span className="absolute top-1/2 right-[calc(100%+4px)] grid size-[18px] -translate-y-1/2 place-items-center rounded-full bg-red text-[11px] font-semibold text-white tabular-nums">{mark.n}</span>}
+            {mark.n !== undefined && <span className="absolute top-1/2 right-[calc(100%+4px)] grid size-[18px] -translate-y-1/2 place-items-center rounded-full bg-red text-[11px] font-semibold text-white tabular-nums [print-color-adjust:exact]">{mark.n}</span>}
           </div>
         );
       })}
