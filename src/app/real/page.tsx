@@ -24,7 +24,11 @@ export const metadata: Metadata = {
 
 type Checked = Extract<RealBill, { outcome: "checked" }>;
 
-const monthName = (iso: string | null) => (iso ? new Date(`${iso}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", year: "numeric", timeZone: "UTC" }) : null);
+// A date the reading got wrong gives an invalid date; the label is then left out rather than read "Invalid Date".
+const monthName = (iso: string | null) => {
+  const date = iso ? new Date(`${iso}T12:00:00Z`) : null;
+  return date && !Number.isNaN(date.getTime()) ? date.toLocaleDateString("en-US", { month: "short", year: "numeric", timeZone: "UTC" }) : null;
+};
 
 // Fee names repeat with small differences across companies; the leaderboard groups them by their words.
 const feeKey = (label: string) => label.toLowerCase().replace(/[^a-z ]/g, "").replace(/\s+/g, " ").trim();

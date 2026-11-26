@@ -15,6 +15,8 @@ function monthOf(result: Checked, long = false): string {
   const iso = result.reading.period_start ?? result.reading.statement_date;
   if (!iso) return "Unknown";
   const [y, m] = iso.split("-").map(Number);
+  // A month the reading got wrong (13) is shown as written rather than as "undefined".
+  if (!MONTHS[m - 1]) return iso;
   return long ? `${LONG_MONTHS[m - 1]} ${y}` : `${MONTHS[m - 1]} ${String(y).slice(2)}`;
 }
 

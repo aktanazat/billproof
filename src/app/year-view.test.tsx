@@ -84,6 +84,17 @@ test("a year of statements is headed with its total and the month the overcharge
   expect(html).toContain("Overcharged from August 2026");
 });
 
+test("a month whose date was misread is labeled as written, never 'undefined'", () => {
+  if (!year) throw new Error("the saved run has no year result");
+  const misread: YearResult = { ...year, months: year.months.map((month, i) => (i === 0 && month.result.outcome === "checked" ? { ...month, result: { ...month.result, reading: { ...month.result.reading, period_start: "2026-13-12" } } } : month)) };
+  const running = { s: "running", inputs: initialState.inputs, attempts: 1, attempt: 1, stage: null, spentMicros: 0, live: {} } as unknown as CheckState;
+  const done = reduce(running, { type: "finished", attempt: 1, result: misread });
+  if (done.s !== "done") throw new Error("the finished year did not become a done state");
+  const html = renderToStaticMarkup(createElement(YearView, { state: done, result: misread, dispatch: () => {} }));
+  expect(html).toContain('aria-label="2026-13-12: ');
+  expect(html).not.toContain("undefined");
+});
+
 test("each month is listed in order with what it overcharged, adding up to the year's total", () => {
   const months = [...yearPage().matchAll(/aria-label="([^"]*(?:overcharged|matches the offer))"/g)].map((m) => m[1]);
   expect(months).toEqual([
