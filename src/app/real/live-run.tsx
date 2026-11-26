@@ -16,7 +16,7 @@ function finish(tile: Tile, result: SingleResult): Tile {
   const feeCents = result.questions.filter((q) => q.kind === "unagreed_fee").reduce((t, q) => t + q.lineIds.reduce((s, id) => s + line(id), 0), 0);
   const claimCents = result.claims.reduce((t, claim) => t + claim.amountCents, 0);
   const claimNote = result.claims.every((claim) => claim.kind === "credit_missing") ? "credit missing" : "above the promise";
-  return { ...tile, stage: "done", provider: result.reading.provider ?? tile.provider, feeCents, claimCents, note: claimCents > 0 ? `${usd(claimCents)} ${claimNote}` : feeCents > 0 ? `${usd(feeCents)} in fees` : "Nothing above the post" };
+  return { ...tile, stage: "done", provider: result.reading.provider ?? tile.provider, feeCents, claimCents, note: claimCents > 0 ? `${usd(claimCents)} ${claimNote}` : feeCents > 0 ? `${usd(feeCents)} in fees` : "No fees or claims" };
 }
 
 export function LiveRun() {
@@ -130,7 +130,7 @@ export function LiveRun() {
             {[
               ["Bills done", `${finished} of ${tiles.length}`],
               ["Fees found, per month", usd(fees)],
-              ["Above a promise", usd(claims)],
+              ["To ask back", usd(claims)],
               ["Seconds", seconds.toFixed(1)],
               ["Spent", formatMicros(spent)],
             ].map(([label, value]) => (
@@ -151,7 +151,7 @@ export function LiveRun() {
                   </div>
                   <p className="truncate text-[12px] text-text-2">{tile.provider ?? "Bill"}</p>
                   <p className={`text-[13px] leading-[17px] tabular-nums ${found ? "font-semibold text-red" : live ? "text-text" : "text-text-2"}`}>
-                    {tile.stage === "waiting" ? "Waiting" : live ? `${STAGE_TEXT[live]}${tile.lines > 0 ? `, ${tile.lines} lines` : ""}` : tile.note}
+                    {tile.stage === "waiting" ? "Waiting" : live ? `${STAGE_TEXT[live]}${tile.lines > 0 ? `, ${tile.lines} ${tile.lines === 1 ? "line" : "lines"}` : ""}` : tile.note}
                   </p>
                 </li>
               );
