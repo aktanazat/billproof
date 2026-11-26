@@ -110,8 +110,10 @@ function activity(promise: PromiseTerm, reading: Reading): Activity {
 export type Equation = "ok" | "mismatch" | "not_printed";
 // "subtotal": the first `subtotalLines` charges add up to the printed amount, a subtotal printed before the rest
 // (taxes, a later section). Those lines are confirmed; the ones after it are not checked by the bill.
-export type LineSum = Equation | "subtotal";
-export type Totals = { lineSum: LineSum; balance: Equation; lineSumCents: number; subtotalLines: number | null };
+// "due": no printed current charges match, but the charges plus the unpaid balance carried over (`carriedCents`)
+// come to the printed amount due.
+export type LineSum = Equation | "subtotal" | "due";
+export type Totals = { lineSum: LineSum; balance: Equation; lineSumCents: number; subtotalLines: number | null; carriedCents: number };
 
 // A printed summary value counts only when its quote carries the amount and, on a PDF, appears on the bill.
 function printedValue(value: Reading["printed"]["total_due"], bill: Source): number | null {
@@ -131,22 +133,59 @@ function subtotalLength(lines: LineItem[], printed: number): number | null {
   return longest;
 }
 
-// E1: the lines add up to the printed current charges. E2: previous balance − payments + current charges = total due.
+const near = (a: number, b: number) => Math.abs(a - b) <= 1;
+
+// E1: the lines add up to the printed current charges, a printed subtotal, or, with what was carried over, the
+// amount due. E2: previous balance − payments + current charges = total due.
 export function checkTotals(reading: Reading, bill: Source): Totals {
   const previous = printedValue(reading.printed.previous_balance, bill);
   const payments = printedValue(reading.printed.payments, bill);
   const current = printedValue(reading.printed.current_charges, bill);
   const due = printedValue(reading.printed.total_due, bill);
-  const lineSumCents = sum(reading.line_items);
+  const lines = reading.line_items;
+  const lineSumCents = sum(lines);
+  // A balance printed without its payment counts as unpaid; a bill with no balance printed carries nothing.
+  const carriedCents = previous === null ? 0 : previous - Math.abs(payments ?? 0);
+  const currentMatches = current !== null && near(current, lineSumCents);
+  const subtotalLines = current === null || currentMatches || lines.length === 0 ? null : subtotalLength(lines, current);
   // A bill that shows only its totals has no charges for them to check.
-  const subtotalLines = current === null || reading.line_items.length === 0 || Math.abs(current - lineSumCents) <= 1 ? null : subtotalLength(reading.line_items, current);
-  const lineSum: LineSum = current === null || reading.line_items.length === 0 ? "not_printed" : Math.abs(current - lineSumCents) <= 1 ? "ok" : subtotalLines !== null ? "subtotal" : "mismatch";
+  const lineSum: LineSum =
+    lines.length === 0 ? "not_printed"
+    : currentMatches ? "ok"
+    : subtotalLines !== null ? "subtotal"
+    : due !== null && near(carriedCents + lineSumCents, due) ? "due"
+    : current === null ? "not_printed"
+    : "mismatch";
   const newCharges = lineSum === "subtotal" ? lineSumCents : current;
   let balance: Equation = "not_printed";
   if (previous !== null && payments !== null && newCharges !== null && due !== null) {
-    balance = Math.abs(previous - Math.abs(payments) + newCharges - due) <= 1 ? "ok" : "mismatch";
+    balance = near(previous - Math.abs(payments) + newCharges, due) ? "ok" : "mismatch";
   }
-  return { lineSum, balance, lineSumCents, subtotalLines };
+  return { lineSum, balance, lineSumCents, subtotalLines, carriedCents };
+}
+
+// A heading read as a charge ("Apple TV $3.00" over "Apple TV $12.99" and "Apple TV Discount -$9.99") counts its
+// lines twice. A line whose amount equals the lines right after it, the first of which starts with the same word,
+// is such a heading; they are dropped only when that makes the lines add up to the printed total, so a charge
+// that really is billed twice stays.
+export function withoutHeadings(reading: Reading, bill: Source): Reading | null {
+  const lines = reading.line_items;
+  const firstWord = (label: string) => tokens(label)[0] ?? "";
+  const headings = new Set<string>();
+  lines.forEach((line, i) => {
+    if (i + 1 >= lines.length || firstWord(lines[i + 1].label) !== firstWord(line.label)) return;
+    let below = 0;
+    for (let j = i + 1; j < lines.length; j++) {
+      below += lines[j].amount_cents;
+      if (near(below, line.amount_cents)) {
+        headings.add(line.id);
+        return;
+      }
+    }
+  });
+  if (headings.size === 0) return null;
+  const kept: Reading = { ...reading, line_items: lines.filter((line) => !headings.has(line.id)).map((line, i) => ({ ...line, id: `L${i + 1}` })) };
+  return checkTotals(kept, bill).lineSum === "ok" ? kept : null;
 }
 
 const sum = (lines: LineItem[]) => lines.reduce((total, line) => total + line.amount_cents, 0);

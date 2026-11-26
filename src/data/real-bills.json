@@ -1,7 +1,7 @@
 {
   "ranAt": "2026-11-26T01:23:28.124Z",
-  "seconds": 1225.29443675,
-  "spentMicros": 1460579,
+  "seconds": 1331.95443675,
+  "spentMicros": 1482676,
   "posts": 1517,
   "results": [
     {
@@ -995,7 +995,7 @@
         "2023-12-04"
       ],
       "lines": 3,
-      "lineSum": "not_printed",
+      "lineSum": "due",
       "billPages": [
         0
       ],
@@ -2498,7 +2498,7 @@
       "images": [
         "https://i.redd.it/mdsa4p84042e1.jpeg"
       ],
-      "ms": 13383,
+      "ms": 22546,
       "outcome": "checked",
       "provider": "DIRECTV",
       "period": [
@@ -2506,13 +2506,22 @@
         null
       ],
       "lines": 8,
-      "lineSum": "ok",
+      "lineSum": "due",
       "billPages": [
         0
       ],
+      "change": null,
       "claims": [],
       "dropped": [],
       "questions": [
+        {
+          "kind": "conditions_unproven",
+          "lines": [
+            "ENTERTAINMENT (all included)",
+            "$25 off AT&T Unlimited Video Loyalty Ongoing"
+          ],
+          "cents": 9700
+        },
         {
           "kind": "partial_period",
           "lines": [
@@ -2547,9 +2556,8 @@
       ],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 1,
-      "spentMicros": 3076,
-      "change": null
+      "matchedPromises": 2,
+      "spentMicros": 5001
     },
     {
       "id": "1hgjh0s",
@@ -3716,7 +3724,7 @@
         "https://preview.redd.it/0gac8e9f82qe1.png?width=700&format=png&auto=webp&s=7f1a68cdd1d7fbb276ca5109cbd7f790453bbe64",
         "https://preview.redd.it/yl7c669f82qe1.png?width=810&format=png&auto=webp&s=35a9b3fe8e523ac47948eddbe01128faf0f34e3c"
       ],
-      "ms": 46781,
+      "ms": 27463,
       "outcome": "checked",
       "provider": "Xfinity",
       "period": [
@@ -3724,7 +3732,7 @@
         null
       ],
       "lines": 13,
-      "lineSum": "not_printed",
+      "lineSum": "subtotal",
       "billPages": [
         0
       ],
@@ -3760,7 +3768,7 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 10222
+      "spentMicros": 5706
     },
     {
       "id": "1ksgbep",
@@ -6740,7 +6748,7 @@
         null
       ],
       "lines": 1,
-      "lineSum": "not_printed",
+      "lineSum": "due",
       "billPages": [
         1
       ],
@@ -7064,7 +7072,7 @@
         null
       ],
       "lines": 3,
-      "lineSum": "not_printed",
+      "lineSum": "due",
       "billPages": [
         0
       ],
@@ -7784,7 +7792,7 @@
         "2025-12-19"
       ],
       "lines": 6,
-      "lineSum": "not_printed",
+      "lineSum": "due",
       "billPages": [
         0,
         1
@@ -8235,7 +8243,7 @@
         null
       ],
       "lines": 14,
-      "lineSum": "not_printed",
+      "lineSum": "due",
       "billPages": [
         0
       ],
@@ -8475,7 +8483,7 @@
         null
       ],
       "lines": 5,
-      "lineSum": "not_printed",
+      "lineSum": "due",
       "billPages": [
         2
       ],
@@ -9757,7 +9765,7 @@
         null
       ],
       "lines": 8,
-      "lineSum": "not_printed",
+      "lineSum": "due",
       "billPages": [
         0
       ],
@@ -10592,7 +10600,7 @@
         null
       ],
       "lines": 2,
-      "lineSum": "not_printed",
+      "lineSum": "due",
       "billPages": [
         0
       ],
@@ -11907,7 +11915,7 @@
         null
       ],
       "lines": 2,
-      "lineSum": "not_printed",
+      "lineSum": "due",
       "billPages": [
         1
       ],
@@ -12679,7 +12687,7 @@
         null
       ],
       "lines": 5,
-      "lineSum": "not_printed",
+      "lineSum": "due",
       "billPages": [
         0
       ],
@@ -13058,7 +13066,7 @@
         null
       ],
       "lines": 6,
-      "lineSum": "not_printed",
+      "lineSum": "due",
       "billPages": [
         2
       ],
@@ -13965,7 +13973,7 @@
         null
       ],
       "lines": 7,
-      "lineSum": "not_printed",
+      "lineSum": "due",
       "billPages": [
         0
       ],
@@ -15339,7 +15347,7 @@
         "https://preview.redd.it/5mskxlq3i5mh1.jpg?width=1440&format=pjpg&auto=webp&s=a0e3a76b3d99b6730aa8608464f443cd69941870",
         "https://preview.redd.it/qy0zhou3i5mh1.jpg?width=1440&format=pjpg&auto=webp&s=992b5d0d3a9bb9ab815276feee7e87ccd6a9576f"
       ],
-      "ms": 27087,
+      "ms": 17807,
       "outcome": "checked",
       "provider": null,
       "period": [
@@ -15347,19 +15355,19 @@
         "2026-09-05"
       ],
       "lines": 5,
-      "lineSum": "subtotal",
+      "lineSum": "ok",
       "billPages": [
         0,
         1
       ],
+      "change": null,
       "claims": [],
       "dropped": [],
       "questions": [],
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 1,
-      "spentMicros": 5756,
-      "change": null
+      "spentMicros": 3657
     },
     {
       "id": "1w7aukm",
@@ -16062,18 +16070,23 @@
         "https://preview.redd.it/8ylmt971n6oh1.png?width=1038&format=png&auto=webp&s=acaf48169b3aa96657b388fcbbc864dd5265fd24",
         "https://preview.redd.it/j5fczo51n6oh1.jpg?width=1232&format=pjpg&auto=webp&s=3ffcedae8a72faff16239da967ad40ba63a12dd3"
       ],
-      "ms": 44733,
+      "ms": 38844,
       "outcome": "checked",
       "provider": "T-Mobile",
       "period": [
         null,
         null
       ],
-      "lines": 14,
-      "lineSum": "mismatch",
+      "lines": 11,
+      "lineSum": "ok",
       "billPages": [
+        0,
         1
       ],
+      "change": {
+        "earlierCents": 17371,
+        "currentCents": 14952
+      },
       "claims": [],
       "dropped": [],
       "questions": [
@@ -16083,24 +16096,12 @@
             "T-Mobile fees & charges"
           ],
           "cents": 2889
-        },
-        {
-          "kind": "repeated_charge",
-          "lines": [
-            "T-Mobile Family Mode",
-            "T-Mobile Family Mode"
-          ],
-          "cents": 2000
         }
       ],
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 10116,
-      "change": {
-        "earlierCents": 17371,
-        "currentCents": 16252
-      }
+      "spentMicros": 7733
     },
     {
       "id": "1wd0dvz",
@@ -16120,7 +16121,7 @@
         null
       ],
       "lines": 3,
-      "lineSum": "not_printed",
+      "lineSum": "due",
       "billPages": [
         0
       ],
@@ -21704,7 +21705,7 @@
         null
       ],
       "lines": 2,
-      "lineSum": "not_printed",
+      "lineSum": "due",
       "billPages": [
         0
       ],
@@ -22495,7 +22496,7 @@
         null
       ],
       "lines": 4,
-      "lineSum": "not_printed",
+      "lineSum": "due",
       "billPages": [
         0
       ],
@@ -24886,7 +24887,7 @@
         "2025-01-23"
       ],
       "lines": 2,
-      "lineSum": "mismatch",
+      "lineSum": "due",
       "billPages": [
         0
       ],

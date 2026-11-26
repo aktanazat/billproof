@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, test } from "vitest";
 import { rasterize } from "../../scripts/samples/raster";
 import { renderBillPdf } from "../../scripts/samples/render";
 import { internetExpired, internetGuaranteed, mobile, type BillSpec } from "../../scripts/samples/specs";
-import { checkTotals, compareBills, decide, settleChallenges, type Source } from "./decide";
+import { checkTotals, compareBills, decide, settleChallenges, withoutHeadings, type Source } from "./decide";
 import type { LineItem, LineKind, PromiseTerm, Reading } from "./schemas";
 
 const KIND_BY_LABEL: Record<string, LineKind> = {
@@ -372,7 +372,7 @@ describe("decide refuses claims the evidence does not carry", () => {
 
   test("a printed total whose quote is not on the bill does not count as printed", () => {
     const reading = readingOf(internetGuaranteed);
-    const invented: Reading = { ...reading, printed: { ...reading.printed, current_charges: { cents: 9999, quote: "Current charges $99.99" } } };
+    const invented: Reading = { ...reading, printed: { ...reading.printed, current_charges: { cents: 9999, quote: "Current charges $99.99" }, total_due: { cents: 9999, quote: "Total amount due $99.99" } } };
     expect(checkTotals(invented, billText.get(internetGuaranteed.id)!).lineSum).toBe("not_printed");
     expect(checkTotals(reading, billText.get(internetGuaranteed.id)!).lineSum).toBe("ok");
   });
@@ -381,10 +381,37 @@ describe("decide refuses claims the evidence does not carry", () => {
     const reading = readingOf(internetGuaranteed);
     const lines = reading.line_items;
     const beforeLast = lines.slice(0, -1).reduce((t, line) => t + line.amount_cents, 0);
-    const printedAs = (cents: number): Reading => ({ ...reading, printed: { ...reading.printed, current_charges: { cents, quote: `Monthly charges ${usd(cents)}` } } });
+    const printedAs = (cents: number): Reading => ({ ...reading, printed: { ...reading.printed, current_charges: { cents, quote: `Monthly charges ${usd(cents)}` }, total_due: null } });
     expect(checkTotals(printedAs(beforeLast), { kind: "image" })).toMatchObject({ lineSum: "subtotal", subtotalLines: lines.length - 1 });
     expect(checkTotals(printedAs(beforeLast + 37), { kind: "image" })).toMatchObject({ lineSum: "mismatch", subtotalLines: null });
     expect(checkTotals({ ...printedAs(beforeLast), line_items: [] }, { kind: "image" }).lineSum).toBe("not_printed");
+  });
+
+  test("charges that, with any unpaid balance carried over, come to the printed amount due count as a match", () => {
+    const reading = readingOf(internetGuaranteed);
+    const lines = reading.line_items.reduce((t, line) => t + line.amount_cents, 0);
+    const amount = (cents: number) => ({ cents, quote: `Amount ${usd(cents)}` });
+    const bill = (printed: Partial<Reading["printed"]>): Reading => ({ ...reading, printed: { previous_balance: null, payments: null, current_charges: null, total_due: null, ...printed } });
+    expect(checkTotals(bill({ total_due: amount(lines) }), { kind: "image" })).toMatchObject({ lineSum: "due", carriedCents: 0 });
+    expect(checkTotals(bill({ previous_balance: amount(4000), total_due: amount(4000 + lines) }), { kind: "image" })).toMatchObject({ lineSum: "due", carriedCents: 4000 });
+    expect(checkTotals(bill({ previous_balance: amount(4000), payments: amount(4000), total_due: amount(lines) }), { kind: "image" }).lineSum).toBe("due");
+    // A balance printed with no payment, and a due that matches the lines alone, is ambiguous: nothing is confirmed.
+    expect(checkTotals(bill({ previous_balance: amount(4000), total_due: amount(lines) }), { kind: "image" }).lineSum).toBe("not_printed");
+    expect(checkTotals(bill({ current_charges: amount(lines + 500), total_due: amount(lines + 500) }), { kind: "image" }).lineSum).toBe("mismatch");
+  });
+
+  test("a heading read as a charge is dropped when that makes the bill add up, and a real double charge stays", () => {
+    const reading = readingOf(internetGuaranteed);
+    const gateway = reading.line_items.findIndex((line) => line.label === "Wi-Fi Gateway Rental");
+    const heading = { ...reading.line_items[gateway], id: "H", label: "Wi-Fi Gateway", quote: "Wi-Fi Gateway $15.00" };
+    const withHeading: Reading = { ...reading, line_items: [...reading.line_items.slice(0, gateway), heading, ...reading.line_items.slice(gateway)] };
+    const photo: Source = { kind: "image" };
+    expect(checkTotals(withHeading, photo).lineSum).toBe("mismatch");
+    expect(withoutHeadings(withHeading, photo)?.line_items.map((line) => line.label)).toEqual(reading.line_items.map((line) => line.label));
+    // The bill's own total counts the second $15.00: it is billed twice, not a heading.
+    const current = withHeading.line_items.reduce((t, line) => t + line.amount_cents, 0);
+    const billedTwice: Reading = { ...withHeading, printed: { ...withHeading.printed, current_charges: { cents: current, quote: `Current charges ${usd(current)}` } } };
+    expect(withoutHeadings(billedTwice, photo)).toBeNull();
   });
 });
 
