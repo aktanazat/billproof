@@ -1,8 +1,35 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { describe, expect, test } from "vitest";
 import { checkTotals } from "./decide";
 import { buildMessage, buildYearMessage } from "./letter";
-import type { Checked } from "./result";
+import type { CheckEvent, Checked } from "./result";
 import type { LineItem, PromiseTerm, Reading } from "./schemas";
+
+// Every message format for every result of the 2026-11-26 test-set run, with every claim and question selected, is
+// free of the slips that string assembly makes: doubled spaces or punctuation, empty quotes, leaked placeholders.
+test("no message built from a saved result has a doubled space, stray punctuation, an empty quote or a placeholder", () => {
+  const run = JSON.parse(readFileSync(path.join(import.meta.dirname, "../../eval/run-2026-11-26.json"), "utf8")) as { raw: { id: string; events: CheckEvent[] }[] };
+  const slips: [string, RegExp][] = [
+    ["doubled space", /[^\n ] {2,}[^ ]/],
+    ["space before punctuation", / [,.;:)]/],
+    ["doubled punctuation", /(?<!\.)\.\.(?!\.)|,,|;;|\.,|,\./],
+    ["empty quote or brackets", /""|“”|\(\s*\)|\[\s*\]/],
+    ["placeholder", /\bundefined\b|\bNaN\b|\bnull\b|\[object/],
+  ];
+  const messages = run.raw.flatMap((entry) => {
+    const event = entry.events.find((e) => e.type === "result");
+    if (event?.type !== "result") return [];
+    const all = (r: Checked) => buildMessage(r, new Set(r.claims.map((c) => c.id)), new Set(r.questions.map((q) => q.id)));
+    if (event.result.outcome === "checked") return [all(event.result)];
+    if (event.result.outcome !== "year") return [];
+    const months = event.result.months.flatMap((m) => (m.result.outcome === "checked" ? [m.result] : []));
+    return [buildYearMessage(months), ...months.map(all)];
+  });
+  expect(messages.length).toBeGreaterThan(30);
+  const found = messages.flatMap((message) => [message.chat, message.email, message.call, message.complaint]).flatMap((body) => slips.filter(([, slip]) => slip.test(body)).map(([name]) => `${name}: ${body.slice(0, 80)}`));
+  expect(found).toEqual([]);
+});
 
 const fee = (id: string, label: string, cents: number): LineItem => ({ id, label, amount_cents: cents, kind: "company_fee", page: 1, box: { x0: 80, y0: 400, x1: 920, y1: 420 }, quote: `${label} $${(cents / 100).toFixed(2)}`, prorated: false });
 
