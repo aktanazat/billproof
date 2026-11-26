@@ -7311,14 +7311,6 @@
             "Promotional Discount"
           ],
           "cents": 2420
-        },
-        {
-          "kind": "end_date_unread",
-          "lines": [
-            "Spectrum Internet Advantage",
-            "Promotional Discount"
-          ],
-          "cents": 2420
         }
       ],
       "explained": 0,
@@ -9259,14 +9251,6 @@
       "claims": [],
       "dropped": [],
       "questions": [
-        {
-          "kind": "end_date_unread",
-          "lines": [
-            "Spectrum Internet Premier",
-            "Promotional Discount"
-          ],
-          "cents": 3000
-        },
         {
           "kind": "end_date_unread",
           "lines": [
@@ -11820,13 +11804,6 @@
       "questions": [
         {
           "kind": "price_gap",
-          "lines": [
-            "Internet 300 (Fiber 300) Stand-alone"
-          ],
-          "cents": 7500
-        },
-        {
-          "kind": "end_date_unread",
           "lines": [
             "Internet 300 (Fiber 300) Stand-alone"
           ],
@@ -18996,23 +18973,6 @@
             "Discount for Signature on AT&T Unlimited 6+ phones (Sep 22 - Oct 01)"
           ],
           "cents": -1533
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Unlimited Premium PL - 5 Lines (Sep 22 - Oct 01)",
-            "Discount for Signature on AT&T Unlimited 6+ phones (Sep 22 - Oct 01)"
-          ],
-          "cents": -1533
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Unlimited Premium PL - 6+ Lines (Sep 22 - Oct 01)",
-            "Unlimited Premium PL - 6+ Lines AutoPay & paperless disc ($10 off w/ bank acct)",
-            "Discount for Signature on AT&T Unlimited 6+ phones"
-          ],
-          "cents": 5965
         },
         {
           "kind": "partial_period",

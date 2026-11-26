@@ -478,9 +478,19 @@ export function decide(reading: Reading, promises: PromiseTerm[], bill: Source, 
     }
   }
 
+  // Two promises on the same lines (a price and its discount) raise the same question once, not twice in the same words.
+  const asked = new Set<string>();
+  const distinct = questions.filter((q) => {
+    if (q.promiseId === null) return true;
+    const key = `${q.kind}|${[...q.lineIds].sort().join(",")}`;
+    if (asked.has(key)) return false;
+    asked.add(key);
+    return true;
+  });
+
   return {
     claims,
-    questions: questions.map((q, i) => ({ ...q, id: `Q${i + 1}` })),
+    questions: distinct.map((q, i) => ({ ...q, id: `Q${i + 1}` })),
     explained: explained.map((e, i) => ({ ...e, id: `E${i + 1}` })),
     unused,
     matchedPromiseIds,

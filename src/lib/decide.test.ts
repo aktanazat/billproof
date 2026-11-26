@@ -145,6 +145,15 @@ describe("decide on the internet bill with an active price guarantee", () => {
     expect(settled.claims[0].needsConfirmation).toBe(true);
   });
 
+  test("a price and its discount on the same line, both with an unread end date, raise the question once", () => {
+    const line = idOf(reading, "Fiber 500 Internet");
+    const price = promise({ id: "P1", kind: "monthly_price", amount_cents: 5500, quote: "Fiber 500 for $55.00 a month for 24 months", covers_line_ids: line });
+    const discount = promise({ id: "P2", kind: "recurring_credit", amount_cents: 2000, quote: "Discount of $20.00 for 24 months", covers_line_ids: line });
+    const photo: Source = { kind: "image" };
+    const asked = decide(reading, [price, discount], billText.get(internetGuaranteed.id)!, photo).questions.filter((q) => q.kind === "end_date_unread");
+    expect(asked.map((q) => q.lineIds)).toEqual([line]);
+  });
+
   test("on a pictured offer, a fee the offer lists for exactly the amount over the price drops the claim, a discount does not", () => {
     const photo: Source = { kind: "image" };
     const bill = billText.get(internetGuaranteed.id)!;
