@@ -446,11 +446,18 @@ async function fetchFile(url: string, name: string, type: string): Promise<File>
   return new File([await response.blob()], name, { type });
 }
 
+// File names as a sentence lists them: "a", "a and b", "a, b and c".
+const listed = (names: string[]) => (names.length === 1 ? names[0] : `${names.slice(0, -1).join(", ")} and ${names.at(-1)}`);
+
 export function Checker({ samples, realSamples, startWith }: { samples: Sample[]; realSamples: Sample[]; startWith: Sample | null }) {
   const [state, dispatch] = useReducer(reduce, initialState);
   // Files dropped past the 12-bill limit, named, so the person knows which months are missing: PDFs are placed before
   // pictures, so the ones left out aren't simply the last chosen.
   const [leftOut, setLeftOut] = useState<string[]>([]);
+  // The same statement added twice (a download kept under a second name) would be read, and paid for, twice; files are
+  // told apart by their contents, and a repeat is named instead of added.
+  const [alreadyAdded, setAlreadyAdded] = useState<string[]>([]);
+  const billHashes = useRef(new Map<string, string[]>());
   // The offer takes one file; a drop of several keeps the first and says where the rest belong.
   const [offerExtra, setOfferExtra] = useState(0);
   const controllers = useRef(new Map<number, AbortController>());
@@ -520,7 +527,21 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
   };
 
   // Screenshots dropped together are one pile about one bill, sorted by Muse Ember; each PDF is its own bill.
-  const addBills = (files: File[]) => {
+  const addBills = async (dropped: File[]) => {
+    const digest = async (file: File) => Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", await file.arrayBuffer())), (byte) => byte.toString(16).padStart(2, "0")).join("");
+    const seen = new Set(state.s === "composing" ? state.inputs.bills.flatMap((doc) => billHashes.current.get(doc.id) ?? []) : []);
+    const hashes = new Map<File, string>();
+    const repeated: string[] = [];
+    for (const file of dropped) {
+      const hash = await digest(file);
+      if (seen.has(hash)) repeated.push(file.name);
+      else {
+        seen.add(hash);
+        hashes.set(file, hash);
+      }
+    }
+    setAlreadyAdded(repeated);
+    const files = dropped.filter((file) => hashes.has(file));
     const isPdf = (file: File) => file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
     const pictures = files.filter((file) => !isPdf(file));
     const groups = [...files.filter(isPdf).map((file) => [file]), ...(pictures.length > 1 ? [pictures] : pictures.map((file) => [file]))];
@@ -528,6 +549,7 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
     const named = groups.map((group) => ({ name: group.length > 1 ? `${group.length} pictures` : group[0].name, group }));
     const docs = named.slice(0, room).map(({ name, group }) => ({ id: id(), name, group }));
     setLeftOut(named.slice(room).map(({ name }) => name));
+    for (const doc of docs) billHashes.current.set(doc.id, doc.group.map((file) => hashes.get(file) ?? ""));
     dispatch({ type: "bills_added", docs: docs.map(({ id: docId, name }) => ({ id: docId, name })) });
     for (const doc of docs) {
       if (doc.group.length === 1) void prepareDoc(doc.id, doc.group[0], MAX_BILL_PAGES);
@@ -673,7 +695,12 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
               )}
               {leftOut.length > 0 && (
                 <p role="status" className="mt-2 px-2 text-[13px] text-text-2 break-words">
-                  Left out, as a check reads up to {MAX_BILLS} bills: {leftOut.length === 1 ? leftOut[0] : `${leftOut.slice(0, -1).join(", ")} and ${leftOut.at(-1)}`}.
+                  Left out, as a check reads up to {MAX_BILLS} bills: {listed(leftOut)}.
+                </p>
+              )}
+              {alreadyAdded.length > 0 && (
+                <p role="status" className="mt-2 px-2 text-[13px] text-text-2 break-words">
+                  Already added, so not added again: {listed(alreadyAdded)}.
                 </p>
               )}
             </div>
