@@ -261,7 +261,10 @@ function WorkingYear({ state, onCancel, dispatch }: { state: Exclude<CheckState,
       <div className="flex items-baseline justify-between gap-6 pb-6">
         <h1 className="text-[28px] font-semibold tracking-[-0.02em]">Reading {bills.length} bills</h1>
         <p className="text-[13px] text-text-2 tabular-nums">
-          {done} of {bills.length} done{state.spentMicros > 0 ? `, ${formatMicros(state.spentMicros)}` : ""}
+          <span aria-live="polite">
+            {done} of {bills.length} done
+          </span>
+          {state.spentMicros > 0 ? `, ${formatMicros(state.spentMicros)}` : ""}
         </p>
       </div>
       <ol className="grid grid-cols-3 gap-4 sm:grid-cols-4 lg:grid-cols-6">
@@ -336,9 +339,10 @@ function Working({ state, onCancel, dispatch }: { state: Exclude<CheckState, { s
     <section className="mx-auto grid w-full max-w-[1120px] gap-10 px-6 pb-20 pt-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
       <div className="lg:sticky lg:top-6 lg:self-start">{page && <BillPage image={page.image} alt="Your bill, first page" marks={marks} />}</div>
 
-      <div className="flex flex-col gap-6" aria-live="polite">
+      <div className="flex flex-col gap-6">
         <div className="flex items-baseline justify-between gap-4">
-          <h1 className="text-[28px] font-semibold tracking-[-0.02em]">{current?.label ?? (running ? "Starting" : "Stopped")}</h1>
+          {/* Only the step is announced: the thinking text and the spend change many times a second. */}
+          <h1 aria-live="polite" className="text-[28px] font-semibold tracking-[-0.02em]">{current?.label ?? (running ? "Starting" : "Stopped")}</h1>
           {state.spentMicros > 0 && <p className="text-[13px] text-text-2 tabular-nums">{formatMicros(state.spentMicros)}</p>}
         </div>
         <p className="min-h-[44px] text-[15px] leading-[22px] text-text-2">{latestThought ?? (running ? "Muse Ember is starting on the bill." : "")}</p>

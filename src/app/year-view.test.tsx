@@ -23,12 +23,15 @@ function yearPage(actions: CheckAction[] = []): string {
   return renderToStaticMarkup(createElement(YearView, { state: done, result: year, dispatch: () => {} }));
 }
 
+// The page's main heading as a screen reader reads it: the amount and the words after it.
+const heading = (html: string) => html.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/)?.[1].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+
 test("unticking a month's claim takes it out of the total and the message, but not out of the month list", () => {
   if (!year) throw new Error("the saved run has no year result");
   const august = year.months.find((month) => month.result.outcome === "checked" && month.result.reading.period_start?.startsWith("2026-08"));
   if (!august || august.result.outcome !== "checked") throw new Error("the sample has no August statement");
   const html = yearPage(august.result.claims.map((claim) => ({ type: "toggle_claim", bill: august.bill, id: claim.id })));
-  expect(html).toMatch(/>\$65\.00<\/p><h1[^>]*>to ask back from Bayline Fiber across 12 statements/);
+  expect(heading(html)).toMatch(/^\$65\.00 to ask back from Bayline Fiber across 12 statements/);
   expect(html).not.toContain("In total, please credit $70.00");
   expect(html).not.toContain("For Aug 12, 2026 to Sep 11, 2026");
   expect(html).toContain("In total, please credit $65.00");
@@ -54,7 +57,7 @@ test("a duplicate, another account's bill and an unreadable one are named as not
   if (done.s !== "done") throw new Error("the finished year did not become a done state");
   const html = renderToStaticMarkup(createElement(YearView, { state: done, result: extra, dispatch: () => {} }));
   expect(html).toContain("Not counted: december.jpg couldn&#x27;t be read, 1 duplicate statement, 1 from another account");
-  expect(html).toMatch(/>\$70\.00<\/p><h1[^>]*>to ask back from Bayline Fiber across 12 statements/);
+  expect(heading(html)).toMatch(/^\$70\.00 to ask back from Bayline Fiber across 12 statements/);
   expect([...html.matchAll(/aria-label="Aug 26 \$5\.00, August 2026: /g)]).toHaveLength(1);
 });
 
@@ -68,7 +71,7 @@ test("a statement whose account number couldn't be read counts with the year's a
   const done = reduce(running, { type: "finished", attempt: 1, result: blurred });
   if (done.s !== "done") throw new Error("the finished year did not become a done state");
   const html = renderToStaticMarkup(createElement(YearView, { state: done, result: blurred, dispatch: () => {} }));
-  expect(html).toMatch(/>\$70\.00<\/p><h1[^>]*>to ask back from Bayline Fiber across 12 statements/);
+  expect(heading(html)).toMatch(/^\$70\.00 to ask back from Bayline Fiber across 12 statements/);
   expect(html).not.toContain("another account");
   expect(html).toContain("In total, please credit $70.00 to account ending 4415.");
 });
@@ -84,7 +87,7 @@ test("two statements whose dates couldn't be read are both counted, not taken fo
   const done = reduce(running, { type: "finished", attempt: 1, result: blurred });
   if (done.s !== "done") throw new Error("the finished year did not become a done state");
   const html = renderToStaticMarkup(createElement(YearView, { state: done, result: blurred, dispatch: () => {} }));
-  expect(html).toMatch(/>\$70\.00<\/p><h1[^>]*>to ask back from Bayline Fiber across 12 statements/);
+  expect(heading(html)).toMatch(/^\$70\.00 to ask back from Bayline Fiber across 12 statements/);
   expect(html).not.toContain("duplicate");
 });
 

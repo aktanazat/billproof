@@ -60,6 +60,28 @@ test("every result's heading, and the year's, sits in an element that can take f
   }
 });
 
+// Screen reader users move through a page by its headings, so the main heading of a result with money to ask back
+// says the amount itself, not only the words beside it.
+test("the main heading of a result with money to ask back, single or year, names the amount", () => {
+  const run = JSON.parse(readFileSync(path.join(import.meta.dirname, "../../eval/run-2026-11-26.json"), "utf8")) as { raw: { id: string; variant?: string; events: CheckEvent[] }[] };
+  const resultOf = (id: string, variant?: string) => run.raw.find((r) => r.id === id && (!variant || r.variant === variant))?.events.find((e) => e.type === "result");
+  const done = (result: CheckResult) => {
+    const running = { s: "running", inputs: initialState.inputs, attempts: 1, attempt: 1, stage: null, spentMicros: 0, live: {} } as unknown as CheckState;
+    const state = reduce(running, { type: "finished", attempt: 1, result });
+    if (state.s !== "done") throw new Error("the finished check did not become a done state");
+    return state;
+  };
+  const claims = resultOf("internet-guaranteed", "pdf");
+  const year = resultOf("year-12");
+  if (claims?.type !== "result" || claims.result.outcome !== "checked" || year?.type !== "result" || year.result.outcome !== "year") throw new Error("missing saved results");
+  const pages = [
+    renderToStaticMarkup(createElement(ResultView, { result: claims.result, bill: 0, pages: [], omittedPages: { bill: 0, offer: 0 }, callUrl: null, selection: done(claims.result).selections[0], dispatch: () => {}, backLabel: "Check another bill", onBack: () => {} })),
+    renderToStaticMarkup(createElement(YearView, { state: done(year.result), result: year.result, dispatch: () => {} })),
+  ];
+  const headings = pages.map((html) => html.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/)?.[1].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim());
+  expect(headings).toEqual([expect.stringMatching(/^\$\d[\d,]*\.\d\d to ask back from \S/), expect.stringMatching(/^\$\d[\d,]*\.\d\d to ask back from \S/)]);
+});
+
 const line = (id: string, label: string, cents: number, kind: LineItem["kind"]): LineItem => ({ id, label, amount_cents: cents, kind, page: 1, box: null, quote: `${label} $${(cents / 100).toFixed(2)}`, prorated: false });
 
 function checked(lines: LineItem[], questions: Checked["questions"]): Checked {
@@ -191,10 +213,10 @@ describe("the result page's wording", () => {
     const one = reduce(both, { type: "toggle_claim", bill: 0, id: "C2" });
     if (both.s !== "done" || one.s !== "done") throw new Error("the finished check did not become a done state");
     const before = page(result, both.selections[0]);
-    expect(before).toMatch(/>\$30\.00<\/p><h1[^>]*>to ask back from AT&T</);
+    expect(before.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/)?.[1].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim()).toBe("$30.00 to ask back from AT&T");
     expect(before).toContain("In total, please credit $30.00 to my account.");
     const after = page(result, one.selections[0]);
-    expect(after).toMatch(/>\$15\.00<\/p><h1[^>]*>to ask back from AT&T</);
+    expect(after.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/)?.[1].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim()).toBe("$15.00 to ask back from AT&T");
     expect(after).not.toContain("I was charged $15.00 for Wi-Fi Gateway Rental");
     expect(after).not.toContain("In total");
     expect(after).toContain("Fiber 500 Internet comes to $70.00, but my plan was confirmed at $55.00 a month");
@@ -254,10 +276,9 @@ describe("the result page's wording", () => {
 describe("the result page's heading", () => {
   const plan = line("L1", "Internet 1000", 8000, "plan");
   const promise: Checked["promises"][number] = { id: "P1", kind: "monthly_price", description: "", amount_cents: 7000, per_line: false, conditions: [], applies_from: null, applies_until: null, quote: "$70 a month", said_at_seconds: null, covers_line_ids: ["L1"] };
-  const heading = (result: Checked, selection?: Parameters<typeof ResultView>[0]["selection"]) => {
-    const html = page(result, selection);
-    return [...html.matchAll(/<(h1|p)[^>]*>([^<]*(?:<[^h/][^>]*>[^<]*)*)<\/\1>/g)].slice(0, 2).map((m) => m[2].replace(/<[^>]+>/g, "")).join(" ");
-  };
+  // The result's header as read: its heading (with the amount, when there is one) and the lines under it.
+  const heading = (result: Checked, selection?: Parameters<typeof ResultView>[0]["selection"]) =>
+    page(result, selection).match(/<header\b[\s\S]*?<\/header>/)?.[0].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim() ?? "";
 
   test.each([
     ["no offer was given", { ...checked([plan], []), hadOffer: false }, "Nothing to flag on this bill"],

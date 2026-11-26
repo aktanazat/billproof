@@ -132,9 +132,18 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
     <section className="mx-auto w-full max-w-[1120px] px-6 pb-24 pt-6">
       <header className="flex flex-wrap items-end justify-between gap-4 pb-8">
         <div ref={focusOnShow} tabIndex={-1} className="outline-none">
-          {firstBad >= 0 && <p className="text-[40px] font-semibold leading-none tracking-[-0.02em] tabular-nums">{usd(total)}</p>}
-          <h1 className={firstBad >= 0 ? "mt-2 max-w-[44rem] text-[17px] text-text-2" : "text-[28px] font-semibold tracking-[-0.02em]"}>
-            {firstBad >= 0 ? `to ask back${provider ? ` from ${provider}` : ""} across ${statements}${waiting ? ", once you confirm the marked lines" : ""}` : verdict}
+          <h1 className={firstBad >= 0 ? undefined : "text-[28px] font-semibold tracking-[-0.02em]"}>
+            {firstBad >= 0 ? (
+              <>
+                <span className="block text-[40px] font-semibold leading-none tracking-[-0.02em] tabular-nums">{usd(total)}</span>{" "}
+                <span className="mt-2 block max-w-[44rem] text-[17px] text-text-2">
+                  to ask back{provider ? ` from ${provider}` : ""} across {statements}
+                  {waiting ? ", once you confirm the marked lines" : ""}
+                </span>
+              </>
+            ) : (
+              verdict
+            )}
           </h1>
           {skipped.length > 0 && <p className="mt-1 text-[13px] text-text-2">Not counted: {skipped.join(", ")}</p>}
         </div>

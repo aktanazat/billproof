@@ -384,13 +384,13 @@ export function ResultView({
           {verdict ? (
             <h1 className="text-[28px] font-semibold tracking-[-0.02em]">{verdict}</h1>
           ) : (
-            <>
-              <p className="text-[40px] font-semibold leading-none tracking-[-0.02em] tabular-nums">{usd(askTotal)}</p>
-              <h1 className="mt-2 text-[17px] text-text-2">
+            <h1>
+              <span className="block text-[40px] font-semibold leading-none tracking-[-0.02em] tabular-nums">{usd(askTotal)}</span>{" "}
+              <span className="mt-2 block text-[17px] text-text-2">
                 to ask back{provider ? ` from ${provider}` : ""}
                 {waiting ? (result.transcript ? ", once you confirm what you heard" : `, once you confirm the marked ${markedLines === 1 ? "line" : "lines"}`) : ""}
-              </h1>
-            </>
+              </span>
+            </h1>
           )}
           {printed && result.totals.lineSum === "ok" && (
             <p className="mt-2 text-[13px] text-text-2">
