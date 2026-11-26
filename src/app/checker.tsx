@@ -149,9 +149,11 @@ function FileTarget({ label, accept, multiple, onFiles, children, className }: {
   );
 }
 
-function RemoveButton({ onRemove }: { onRemove: () => void }) {
+// The spoken name starts with the word shown, so voice control finds it, then names the file, so a list of twelve
+// statements doesn't read as twelve identical "Remove" buttons.
+function RemoveButton({ name, onRemove }: { name: string; onRemove: () => void }) {
   return (
-    <button type="button" onClick={onRemove} className="h-8 rounded-lg px-2 text-[13px] text-text-2 hover:bg-fill-2 hover:text-text">
+    <button type="button" onClick={onRemove} aria-label={`Remove ${name}`} className="h-8 rounded-lg px-2 text-[13px] text-text-2 hover:bg-fill-2 hover:text-text">
       Remove
     </button>
   );
@@ -169,7 +171,7 @@ function DocRow({ doc, onRemove }: { doc: Doc; onRemove: () => void }) {
           {detail}
         </div>
       </div>
-      <RemoveButton onRemove={onRemove} />
+      <RemoveButton name={doc.name} onRemove={onRemove} />
     </div>
   );
 }
@@ -190,7 +192,7 @@ function CallRow({ call, onRemove }: { call: Call; onRemove: () => void }) {
           </div>
         )}
       </div>
-      <RemoveButton onRemove={onRemove} />
+      <RemoveButton name={call.name} onRemove={onRemove} />
     </div>
   );
 }
