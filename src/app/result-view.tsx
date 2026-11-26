@@ -311,6 +311,9 @@ export function ResultView({
   const selectedIds = new Set(Object.entries(selection.claims).filter(([, mark]) => mark === "selected").map(([id]) => id));
   const includedIds = new Set(Object.entries(selection.questions).filter(([, on]) => on).map(([id]) => id));
   const message = selectedIds.size + includedIds.size > 0 || increaseSentence(result.change) ? buildMessage(result, selectedIds, includedIds) : null;
+  const read = result.reading.line_items.length;
+  const chargesThat = read === 1 ? "1 charge that" : `${read} charges that`;
+  const addUp = read === 1 ? "adds up" : "add up";
 
   const verdict =
     result.claims.length > 0
@@ -354,22 +357,22 @@ export function ResultView({
           )}
           {printed && result.totals.lineSum === "ok" && (
             <p className="mt-2 text-[13px] text-text-2">
-              Read {result.reading.line_items.length} charges that add up to the {usd(printed.cents)} printed on the bill.
+              Read {chargesThat} {addUp} to the {usd(printed.cents)} printed on the bill.
             </p>
           )}
           {printed && result.totals.lineSum === "subtotal" && result.totals.subtotalLines !== null && (
             <p className="mt-2 text-[13px] text-text-2">
-              The first {result.totals.subtotalLines} of {result.reading.line_items.length} charges add up to the {usd(printed.cents)} subtotal printed on the bill.
+              The first {result.totals.subtotalLines} of {result.reading.line_items.length} charges {result.totals.subtotalLines === 1 ? "adds" : "add"} up to the {usd(printed.cents)} subtotal printed on the bill.
             </p>
           )}
           {result.totals.lineSum === "due" && result.reading.printed.total_due && (
             <p className="mt-2 text-[13px] text-text-2">
-              Read {result.reading.line_items.length} charges that{result.totals.carriedCents !== 0 ? `, with the ${usd(result.totals.carriedCents)} carried over,` : ""} add up to the {usd(result.reading.printed.total_due.cents)} due on the bill.
+              Read {chargesThat}{result.totals.carriedCents !== 0 ? `, with the ${usd(result.totals.carriedCents)} carried over,` : ""} {addUp} to the {usd(result.reading.printed.total_due.cents)} due on the bill.
             </p>
           )}
           {result.totals.lineSum === "sections" && (
             <p className="mt-2 text-[13px] text-text-2">
-              Read {result.reading.line_items.length} charges that add up to the subtotals printed on the bill.
+              Read {chargesThat} {addUp} to the subtotals printed on the bill.
             </p>
           )}
         </div>
