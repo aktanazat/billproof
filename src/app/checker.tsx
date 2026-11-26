@@ -7,7 +7,8 @@ import { checkInput, initialState, offerOmitted, reduce, startBlocker, type Call
 import { formatMicros } from "@/lib/cost";
 import { usd } from "@/lib/letter";
 import { isPdf, isPicture, isRecording, prepareCall, prepareFile, PrepareError } from "@/lib/prepare";
-import { MAX_BILL_PAGES, MAX_BILLS, MAX_CALL_SECONDS, MAX_OFFER_PAGES, type CheckEvent, type CheckInput, type PageKind, type Stage } from "@/lib/result";
+import { MAX_BILL_PAGES, MAX_BILLS, MAX_CALL_SECONDS, MAX_OFFER_PAGES } from "@/lib/limits";
+import type { CheckEvent, CheckInput, PageKind, Stage } from "@/lib/result";
 import { BillPage, snapBox, Thumbnail, type Mark } from "./bill-page";
 import { formatClock, inPlainWords, Waveform } from "./evidence";
 import { focusOnShow, ResultView } from "./result-view";

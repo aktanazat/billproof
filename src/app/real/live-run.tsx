@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { formatMicros } from "@/lib/cost";
 import { usd } from "@/lib/letter";
-import { LIVE_PAUSED, type LiveEvent } from "@/lib/real-bills";
+import { LIVE_PAUSED } from "@/lib/limits";
+import type { LiveEvent } from "@/lib/real-bills";
 import type { SingleResult, Stage } from "@/lib/result";
 import { Thumbnail } from "../bill-page";
 

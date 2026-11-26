@@ -1,5 +1,6 @@
 import { pageRows, pageText, type TextRow } from "./pdf-text";
-import { CALL_SAMPLE_RATE, PAGE_LONG_SIDE, type PreparedPage } from "./result";
+import { CALL_SAMPLE_RATE, PAGE_LONG_SIDE } from "./limits";
+import type { PreparedPage } from "./result";
 
 // A page as the browser keeps it: what is sent to the check, plus the printed rows used to place marks exactly.
 export type ShownPage = PreparedPage & { rows: TextRow[] | null };

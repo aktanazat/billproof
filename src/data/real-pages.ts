@@ -1,6 +1,7 @@
 import "server-only";
 import sharp from "sharp";
-import { MAX_BILL_PAGES, PAGE_LONG_SIDE, type PreparedPage } from "@/lib/result";
+import { MAX_BILL_PAGES, PAGE_LONG_SIDE } from "@/lib/limits";
+import type { PreparedPage } from "@/lib/result";
 
 // A post's pictures as the check reads them: fetched from Reddit, turned upright, scaled like an upload. A picture
 // that is gone or unreadable is skipped; `positions` holds each loaded page's place among the post's pictures, so a

@@ -8,9 +8,6 @@ export type LiveEvent =
   | { type: "done"; seconds: number; spentMicros: number }
   | { type: "refused"; message: string };
 
-// Shown on the demo when its budget is used, and sent back to a run asked for from a page loaded before that.
-export const LIVE_PAUSED = "Live checks are paused: this demo has used its budget. Every saved result is below.";
-
 const base = {
   id: z.string(),
   sub: z.string(),

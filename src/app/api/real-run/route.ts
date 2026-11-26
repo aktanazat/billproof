@@ -1,7 +1,8 @@
 import { realRun } from "@/data/real-bills";
 import { postPages } from "@/data/real-pages";
 import { runCheck } from "@/lib/pipeline";
-import { LIVE_PAUSED, postNotes, unagreedCents, type LiveEvent } from "@/lib/real-bills";
+import { LIVE_PAUSED } from "@/lib/limits";
+import { postNotes, unagreedCents, type LiveEvent } from "@/lib/real-bills";
 import { clientKey, fromOwnPage, livePaused, serverLedger } from "@/lib/server-ledger";
 
 const BATCH = 24;

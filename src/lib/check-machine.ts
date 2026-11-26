@@ -1,6 +1,7 @@
 import type { PreparedCall, ShownPage } from "./prepare";
 import type { TranscriptTurn } from "./schemas";
-import { MAX_BILLS, MAX_OFFER_TEXT, type CheckFailure, type CheckInput, type CheckResult, type PageKind, type PreparedPage, type SeenChallenge, type SeenLine, type SeenPromise, type SingleResult, type Stage } from "./result";
+import { MAX_BILLS, MAX_OFFER_TEXT } from "./limits";
+import type { CheckFailure, CheckInput, CheckResult, PageKind, PreparedPage, SeenChallenge, SeenLine, SeenPromise, SingleResult, Stage } from "./result";
 
 export type Doc =
   | { id: string; name: string; status: "preparing" }

@@ -9,7 +9,8 @@ import { formatMicros } from "../src/lib/cost";
 import { openLedger } from "../src/lib/ledger";
 import { runCheck } from "../src/lib/pipeline";
 import { claimedCents, postNotes, type RealBill, type RealRun } from "../src/lib/real-bills";
-import { MAX_BILL_PAGES, type CheckEvent, type CheckInput, type CheckResult } from "../src/lib/result";
+import { MAX_BILL_PAGES } from "../src/lib/limits";
+import type { CheckEvent, CheckInput, CheckResult } from "../src/lib/result";
 
 type Post = { id: string; sub: string; title: string; text: string; images: string[]; permalink: string; created: number };
 

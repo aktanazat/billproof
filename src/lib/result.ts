@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { BillChange, DroppedClaim, Explained, Question, TestedClaim, Totals, Unused } from "./decide";
+import { CALL_SAMPLE_RATE, MAX_BILL_PAGES, MAX_BILLS, MAX_CALL_SECONDS, MAX_OFFER_PAGES, MAX_OFFER_TEXT } from "./limits";
 import type { PromiseTerm, Reading, TranscriptTurn } from "./schemas";
 
 const page = z.object({
@@ -10,16 +11,6 @@ const page = z.object({
   text: z.string().max(60_000).nullable(),
 });
 export type PreparedPage = z.infer<typeof page>;
-
-export const MAX_BILLS = 12;
-export const MAX_BILL_PAGES = 6;
-export const MAX_OFFER_PAGES = 4;
-// Characters of written offer a check reads; a page past this is held back on the start screen with the reason.
-export const MAX_OFFER_TEXT = 20_000;
-export const MAX_CALL_SECONDS = 240;
-export const CALL_SAMPLE_RATE = 16_000;
-// The long side pages are scaled to: by the browser for uploads, and by the server for a real post's pictures.
-export const PAGE_LONG_SIDE = 1600;
 
 // Seconds of audio in a base64 16 kHz mono 16-bit PCM WAV with the plain 44-byte header, or null for anything else,
 // including text that isn't valid base64. The length comes from the bytes themselves, so a recording cannot claim to be
