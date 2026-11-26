@@ -472,8 +472,13 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
   };
 
   const preparePile = async (docId: string, group: File[]) => {
+    // Trimming the pile could drop the screenshot with the offer, so the person picks which to keep.
+    if (group.length > MAX_BILL_PAGES) {
+      dispatch({ type: "prep_failed", id: docId, message: `${group.length} pictures were added together. Use up to ${MAX_BILL_PAGES}: the ones with the charges and the offer.` });
+      return;
+    }
     try {
-      const pages = (await Promise.all(group.slice(0, MAX_BILL_PAGES).map((file) => prepareFile(file, 1)))).flat();
+      const pages = (await Promise.all(group.map((file) => prepareFile(file, 1)))).flat();
       dispatch({ type: "doc_prepared", id: docId, pages });
     } catch (error) {
       dispatch({ type: "prep_failed", id: docId, message: error instanceof PrepareError ? error.message : "One of these pictures could not be opened." });
