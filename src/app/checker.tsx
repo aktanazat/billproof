@@ -487,6 +487,8 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
   const billFiles = useRef(new Map<string, File[]>());
   const pastedCount = useRef(0);
   const pasteQueue = useRef(Promise.resolve());
+  // Which bills have their files kept, for showing "Add a screenshot to this bill" (the files themselves stay off-render).
+  const [withFiles, setWithFiles] = useState<ReadonlySet<string>>(() => new Set());
   const [pasteNote, setPasteNote] = useState<string | null>(null);
   // The offer takes one file; a drop of several keeps the first and says where the rest belong.
   const [offerExtra, setOfferExtra] = useState(0);
@@ -629,7 +631,7 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
       digests = new Map(await Promise.all(dropped.map(async (file) => [file, await digest(file)] as const)));
     } catch (error) {
       if (!replacing) throw error;
-      setPasteNote("The pasted screenshot wasn't added: the bill's own files can no longer be read. Add the screenshot and the bill's files again together.");
+      setPasteNote("The screenshot wasn't added: the bill's own files can no longer be read. Add the screenshot and the bill's files again together.");
       return;
     }
     if (replacing) dispatch({ type: "removed", id: replacing });
@@ -674,6 +676,7 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
       billHashes.current.set(doc.id, doc.group.map((file) => hashes.get(file) ?? ""));
       billFiles.current.set(doc.id, doc.group);
     }
+    setWithFiles((ids) => new Set([...ids, ...docs.map((doc) => doc.id)].filter((docId) => docId !== replacing)));
     dispatch({ type: "bills_added", docs: docs.map(({ id: docId, name }) => ({ id: docId, name })) });
     for (const doc of docs) {
       if (doc.group.length === 1) void prepareDoc(doc.id, doc.group[0], MAX_BILL_PAGES);
@@ -693,11 +696,15 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
     const files = last ? billFiles.current.get(last.id) : undefined;
     if (!last || !files || last.status === "failed" || files.some((file) => !isPdf(file) && !isPicture(file))) return addBills(pictures);
     if (files.length + pictures.length > MAX_BILL_PAGES) {
-      setPasteNote(`The pasted screenshot wasn't added: a bill takes up to ${MAX_BILL_PAGES} pictures, and this one is full. For another month, use “Add another month”.`);
+      setPasteNote(`The screenshot wasn't added: a bill takes up to ${MAX_BILL_PAGES} pictures, and this one is full. For another month, use “Add another month”.`);
       return;
     }
     setPasteNote(null);
     return addBills([...files, ...pictures], last.id);
+  };
+  // Pasted and chosen screenshots join in turn, each from the bill as the one before left it.
+  const joinPictures = (pictures: File[]) => {
+    pasteQueue.current = pasteQueue.current.then(() => pasteBills(pictures)).catch(() => setPasteNote("The screenshot couldn't be added. Try adding it again."));
   };
 
   const preparePile = async (docId: string, group: File[]) => {
@@ -755,7 +762,7 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
       // An untyped picture is known by its name (an iPhone's .heic), so the new name keeps its extension.
       const pictures = files.map((file) => new File([file], `Pasted screenshot ${++pastedCount.current}.${file.type ? file.type.split("/")[1] : file.name.split(".").pop()}`, { type: file.type }));
       if (inOffer) void addOffer(pictures);
-      else pasteQueue.current = pasteQueue.current.then(() => pasteBills(pictures)).catch(() => setPasteNote("The pasted screenshot couldn't be added. Try adding it as a file."));
+      else joinPictures(pictures);
     };
     document.addEventListener("paste", paste);
     return () => document.removeEventListener("paste", paste);
@@ -839,6 +846,10 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
   if (state.s !== "composing") return <Working state={state} onCancel={cancel} dispatch={dispatch} />;
 
   const { bills, offer } = state.inputs;
+  // The bill added last takes more screenshots while it is a working bill of pictures (or a statement and its
+  // pictures) with room: a phone can't paste onto the page, so this is its way to add a page instead of a month.
+  const lastBill = bills.at(-1);
+  const takesPicture = lastBill !== undefined && lastBill.status === "ready" && withFiles.has(lastBill.id) && lastBill.pages.length < MAX_BILL_PAGES;
   const ready = checkInput(state.inputs) !== null;
   const blocker = startBlocker(state.inputs);
 
@@ -869,16 +880,24 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
                   doc={doc}
                   onRemove={() => {
                     billFiles.current.delete(doc.id);
+                    setWithFiles((ids) => new Set([...ids].filter((docId) => docId !== doc.id)));
                     billHashes.current.delete(doc.id);
                     dispatch({ type: "removed", id: doc.id });
                   }}
                 />
               ))}
-              {bills.length < MAX_BILLS && (
-                <FileTarget label="Add more bills" accept={BILL_ACCEPT} multiple onFiles={addBills} className="mt-1 h-8 rounded-lg px-2 text-[13px] text-text-2 hover:bg-fill-2 hover:text-text data-[over]:bg-fill-2 data-[over]:text-text">
-                  Add another month
-                </FileTarget>
-              )}
+              <div className="flex flex-wrap gap-x-1">
+                {takesPicture && (
+                  <FileTarget label="Add a screenshot to this bill" accept="image/*,.heic,.heif" multiple onFiles={(files) => joinPictures(files.filter(isPicture))} className="mt-1 h-8 rounded-lg px-2 text-[13px] text-text-2 hover:bg-fill-2 hover:text-text data-[over]:bg-fill-2 data-[over]:text-text">
+                    Add a screenshot to this bill
+                  </FileTarget>
+                )}
+                {bills.length < MAX_BILLS && (
+                  <FileTarget label="Add more bills" accept={BILL_ACCEPT} multiple onFiles={addBills} className="mt-1 h-8 rounded-lg px-2 text-[13px] text-text-2 hover:bg-fill-2 hover:text-text data-[over]:bg-fill-2 data-[over]:text-text">
+                    Add another month
+                  </FileTarget>
+                )}
+              </div>
               {leftOut.length > 0 && (
                 <p role="status" className="mt-2 px-2 text-[13px] text-text-2 break-words">
                   Left out, as a check reads up to {MAX_BILLS} bills: {listed(leftOut)}.
