@@ -25,6 +25,7 @@ export type Sample = {
 
 const BILL_ACCEPT = "application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif";
 const OFFER_ACCEPT = "application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif,audio/*,video/*,.m4a,.mp3,.wav,.3gp";
+const isPdf = (file: File) => file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
 
 function isCheckEvent(value: unknown): value is CheckEvent {
   return typeof value === "object" && value !== null && "type" in value && typeof value.type === "string";
@@ -551,7 +552,9 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
     }
   };
 
-  // Screenshots dropped together are one pile about one bill, sorted by Muse Ember; each PDF is its own bill.
+  // Screenshots dropped together are one pile about one bill, sorted by Muse Ember; each PDF is its own bill. One PDF
+  // dropped with screenshots (a chat, the offer) is one bill with them, so the screenshots are sorted with the statement
+  // and their promises apply to it, rather than becoming a second "month" that holds no bill.
   const addBills = async (dropped: File[]) => {
     const digest = async (file: File) => Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", await file.arrayBuffer())), (byte) => byte.toString(16).padStart(2, "0")).join("");
     const seen = new Set(state.s === "composing" ? state.inputs.bills.flatMap((doc) => billHashes.current.get(doc.id) ?? []) : []);
@@ -567,11 +570,12 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
     }
     setAlreadyAdded(repeated);
     const files = dropped.filter((file) => hashes.has(file));
-    const isPdf = (file: File) => file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+    const pdfs = files.filter(isPdf);
     const pictures = files.filter((file) => !isPdf(file));
-    const groups = [...files.filter(isPdf).map((file) => [file]), ...(pictures.length > 1 ? [pictures] : pictures.map((file) => [file]))];
+    const groups = pdfs.length === 1 && pictures.length > 0 ? [[pdfs[0], ...pictures]] : [...pdfs.map((file) => [file]), ...(pictures.length > 1 ? [pictures] : pictures.map((file) => [file]))];
     const room = MAX_BILLS - (state.s === "composing" ? state.inputs.bills.length : 0);
-    const named = groups.map((group) => ({ name: group.length > 1 ? `${group.length} pictures` : group[0].name, group }));
+    const nameOf = (group: File[]) => (group.length === 1 ? group[0].name : isPdf(group[0]) ? `${group[0].name} and ${group.length - 1} ${group.length === 2 ? "picture" : "pictures"}` : `${group.length} pictures`);
+    const named = groups.map((group) => ({ name: nameOf(group), group }));
     const docs = named.slice(0, room).map(({ name, group }) => ({ id: id(), name, group }));
     setLeftOut(named.slice(room).map(({ name }) => name));
     for (const doc of docs) billHashes.current.set(doc.id, doc.group.map((file) => hashes.get(file) ?? ""));
@@ -583,17 +587,24 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
   };
 
   const preparePile = async (docId: string, group: File[]) => {
+    const pdf = group.find(isPdf);
+    const pictures = group.filter((file) => file !== pdf);
     // Trimming the pile could drop the screenshot with the offer, so the person picks which to keep. Pictures added
-    // together are one bill, so someone adding a picture per month is told to add each month on its own.
-    if (group.length > MAX_BILL_PAGES) {
-      dispatch({ type: "prep_failed", id: docId, message: `${group.length} pictures added together are read as one bill, which takes up to ${MAX_BILL_PAGES}: keep the ones with the charges and the offer. For more than one month, add each month's pictures separately.` });
+    // together are one bill, so someone adding a picture per month is told to add each month on its own. A statement
+    // keeps at least its first page beside them.
+    const room = MAX_BILL_PAGES - (pdf ? 1 : 0);
+    if (pictures.length > room) {
+      const message = pdf
+        ? `${pictures.length} pictures added with ${pdf.name} are read as one bill with it, which takes up to ${room} besides its first page: keep the ones with the offer or the charges.`
+        : `${pictures.length} pictures added together are read as one bill, which takes up to ${MAX_BILL_PAGES}: keep the ones with the charges and the offer. For more than one month, add each month's pictures separately.`;
+      dispatch({ type: "prep_failed", id: docId, message });
       return;
     }
     try {
-      const pages = (await Promise.all(group.map((file) => prepareFile(file, 1)))).flatMap((prepared) => prepared.pages);
-      dispatch({ type: "doc_prepared", id: docId, pages, omitted: 0 });
+      const [statement, shots] = await Promise.all([pdf ? prepareFile(pdf, MAX_BILL_PAGES - pictures.length) : null, Promise.all(pictures.map((file) => prepareFile(file, 1)))]);
+      dispatch({ type: "doc_prepared", id: docId, pages: [...(statement?.pages ?? []), ...shots.flatMap((prepared) => prepared.pages)], omitted: statement?.omitted ?? 0 });
     } catch (error) {
-      dispatch({ type: "prep_failed", id: docId, message: error instanceof PrepareError ? error.message : "One of these pictures could not be opened." });
+      dispatch({ type: "prep_failed", id: docId, message: error instanceof PrepareError ? error.message : "One of these files could not be opened." });
     }
   };
 
