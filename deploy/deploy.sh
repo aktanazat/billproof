@@ -21,7 +21,9 @@ main() {
   fi
   git pull -q
   cd deploy
-  docker compose -p billproof up -d --build 2>&1 | tail -1
+  # Not piped: a pipe takes tail's status, so a failed build carried on and the deploy reported success.
+  built=$(docker compose -p billproof up -d --build 2>&1) || { printf '%s\n' "$built" | tail -20; exit 1; }
+  printf '%s\n' "$built" | tail -1
   # Caddy's folder is mounted, so a pulled Caddyfile is seen; a reload applies it and keeps connections open.
   docker compose -p billproof exec -T caddy caddy reload --config /etc/caddy/Caddyfile
   docker builder prune -f >/dev/null
