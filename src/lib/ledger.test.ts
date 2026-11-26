@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync } from "node:fs";
+import { chmodSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
@@ -94,6 +94,23 @@ describe("ledger", () => {
       const stored = new DatabaseSync(file, { readOnly: true }).prepare("SELECT client FROM checks ORDER BY created_at").all();
       expect(stored.map((row) => row.client)).toEqual(["", "198.51.100.4", "192.0.2.1"]);
     } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  // The home and Real bills pages open the ledger to ask whether checks are paused. A restarted server that can't
+  // write the file (a full disk) still reads it, and clearing old addresses on open must not take those pages down.
+  test("a ledger the server can read but no longer write still opens, with its spending intact", () => {
+    const dir = mkdtempSync(path.join(tmpdir(), "billproof-ledger-"));
+    const file = path.join(dir, "ledger.db");
+    try {
+      const before = openLedger(file, 1_000_000);
+      const check = before.admitCheck("203.0.113.7", Date.now() - 2 * 60 * 60_000);
+      before.settle(before.reserve(check, 20_000, CHECK_CAP_MICROS), 700);
+      chmodSync(file, 0o444);
+      expect(openLedger(file, 1_000_000).spentTotal()).toBe(700);
+    } finally {
+      chmodSync(file, 0o644);
       rmSync(dir, { recursive: true, force: true });
     }
   });

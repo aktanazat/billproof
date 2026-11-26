@@ -92,8 +92,13 @@ export function openLedger(file: string, eventCapMicros: number): Ledger {
     }
   }
 
-  // On open too, so a restart clears what aged out while no check was admitted.
-  forgetClients.run(Date.now() - HOUR_MS);
+  // On open too, so a restart clears what aged out while no check was admitted. A file that can't be written (a full
+  // disk) still opens for the pages that only read; every admission clears again, and fails, until writing works.
+  try {
+    forgetClients.run(Date.now() - HOUR_MS);
+  } catch (error) {
+    console.error("ledger: couldn't clear old addresses on open:", error);
+  }
 
   return {
     admitCheck(client: string, now = Date.now()): string {
