@@ -110,7 +110,7 @@ function Finding({ bill }: { bill: Checked }) {
       </p>
     );
   }
-  const asked = [...new Set(bill.questions.map((question) => (question.kind === "repeated_charge" ? namedOnce(question.lines) : question.lines.join(", "))))];
+  const asked = [...new Set(bill.questions.map((question) => (question.kind === "repeated_charge" ? namedOnce(question.lines) : [...new Set(question.lines)].join(", "))))];
   return <p className="text-[13px] leading-[18px] text-text-2">{asked.length > 0 ? <>Worth asking about: <span className="text-text">{asked.join(", ")}</span></> : "Nothing above what the poster describes"}</p>;
 }
 
