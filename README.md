@@ -55,7 +55,7 @@ Checks: `pnpm typecheck`, `pnpm lint`, `pnpm test`.
 
 `pnpm eval` renders every synthetic bill in `scripts/samples/eval-specs.ts` as a PDF and as a phone photo, runs each through the real pipeline and Muse Ember, and scores claims, false claims, questions and explanations against the planted ground truth. The set includes clean lookalikes (promises honored, credits posted), an expired promotion, a promotion ending mid-cycle, an unproven autopay condition, an offer from another company, and an unsupported electricity rate plan. It also runs the same internet bill against two recorded calls (one promising two years, one only the first year) and a year of twelve statements where the price rises in month nine and a gateway fee appears in month eleven.
 
-Run on 2026-11-26 on the code that is live, after every rule change below (`eval/results/2026-11-26T08-08-40.185Z.json` holds every event, reading and model call; the first full run, on 2026-11-25, scored the same and is in `eval/run-2026-11-25b.json`):
+Run on 2026-11-26 on the code that is live, after every rule change below (`eval/run-2026-11-26.json` holds every event, reading and model call; the first full run, on 2026-11-25, scored the same and is in `eval/run-2026-11-25b.json`):
 
 | Input | Checks completed | Claims found | False claims | Questions found | Explained |
 | --- | --- | --- | --- | --- | --- |
