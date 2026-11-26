@@ -114,6 +114,22 @@ test("a year of statements is headed with its total and the month the overcharge
   expect(html).toContain("Overcharged from August 2026");
 });
 
+test("a month missing its statement date stays in its place by billing period, so the overcharge still begins in August", () => {
+  if (!year) throw new Error("the saved run has no year result");
+  const november = year.months.find((month) => month.result.outcome === "checked" && month.result.reading.period_start?.startsWith("2026-11"));
+  if (!november || november.result.outcome !== "checked") throw new Error("the sample has no November statement");
+  const undated = { ...november.result, reading: { ...november.result.reading, statement_date: null } };
+  const blurred: YearResult = { ...year, months: year.months.map((month) => (month.bill === november.bill ? { ...month, result: undated } : month)) };
+  const running = { s: "running", inputs: initialState.inputs, attempts: 1, attempt: 1, stage: null, spentMicros: 0, live: {} } as unknown as CheckState;
+  const done = reduce(running, { type: "finished", attempt: 1, result: blurred });
+  if (done.s !== "done") throw new Error("the finished year did not become a done state");
+  const html = renderToStaticMarkup(createElement(YearView, { state: done, result: blurred, dispatch: () => {} }));
+  expect(html).toContain("Overcharged from August 2026");
+  const months = [...html.matchAll(/aria-label="([A-Z][a-z]+ \d{4}): /g)].map((m) => m[1]);
+  expect(months.at(0)).toBe("December 2025");
+  expect(months.at(-1)).toBe("November 2026");
+});
+
 test("a month whose date was misread is labeled as written, never 'undefined'", () => {
   if (!year) throw new Error("the saved run has no year result");
   const misread: YearResult = { ...year, months: year.months.map((month, i) => (i === 0 && month.result.outcome === "checked" ? { ...month, result: { ...month.result, reading: { ...month.result.reading, period_start: "2026-13-12" } } } : month)) };

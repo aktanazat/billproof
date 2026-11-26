@@ -11,8 +11,11 @@ type Done = Extract<CheckState, { s: "done" }>;
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const LONG_MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
+// A statement is placed and named by when its billing starts, or its statement date when the period wasn't read.
+const dateOf = (result: Checked) => result.reading.period_start ?? result.reading.statement_date;
+
 function monthOf(result: Checked, long = false): string {
-  const iso = result.reading.period_start ?? result.reading.statement_date;
+  const iso = dateOf(result);
   if (!iso) return "Unknown";
   const [y, m] = iso.split("-").map(Number);
   // A month the reading got wrong (13) is shown as written rather than as "undefined".
@@ -38,7 +41,7 @@ function summarize(calls: CallRecord[]): CallRecord[] {
 
 export function YearView({ state, result, dispatch }: { state: Done; result: YearResult; dispatch: (action: CheckAction) => void }) {
   const [open, setOpen] = useState<number | null>(null);
-  const read = result.months.flatMap((month) => (month.result.outcome === "checked" ? [{ bill: month.bill, result: month.result }] : [])).sort((a, b) => (a.result.reading.statement_date ?? "").localeCompare(b.result.reading.statement_date ?? ""));
+  const read = result.months.flatMap((month) => (month.result.outcome === "checked" ? [{ bill: month.bill, result: month.result }] : [])).sort((a, b) => (dateOf(a.result) ?? "").localeCompare(dateOf(b.result) ?? ""));
   // A bill left out is named by its file, so the person knows which one to replace; a count stands in when a name is missing.
   const leftOut = (outcome: "not_a_bill" | "could_not_check", one: string, many: string) => {
     const months = result.months.filter((month) => month.result.outcome === outcome);
