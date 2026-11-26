@@ -20,7 +20,7 @@ The "Internet, price guaranteed" sample, a made-up bill, as the site shows it af
    - a promise counts only if its quote is in the offer (or the transcript) and its amount is in the quote;
    - a bill line counts only if its quote is on the bill's text layer and carries its amount;
    - a promise that ended before the bill period is shown as explained, not claimed;
-   - conditions like autopay need proof on the bill; paperless or bundle conditions can't be proven from a bill, so they become questions, unless the bill already posts the discount that depends on them, which shows the company counts them as met;
+   - conditions like autopay need proof on the bill; paperless or bundle conditions can't be proven from a bill, so they become questions, unless the bill posts a discount named for that condition (an autopay, paperless or bundle discount), which shows the company counts it as met; a promotional credit proves none of them;
    - an offer from a different company, a promise that starts or ends mid-period, or an amount that looks misread becomes a question;
    - each bill line backs at most one claim;
    - a promise that something is included covers only a charge whose label it names, so a gateway promise linked to the internet plan by mistake claims nothing;
