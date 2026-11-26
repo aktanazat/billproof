@@ -14,6 +14,8 @@ export async function postPages(images: string[]): Promise<{ pages: PreparedPage
         const jpeg = await sharp(Buffer.from(await response.arrayBuffer()))
           .rotate()
           .resize({ width: PAGE_LONG_SIDE, height: PAGE_LONG_SIDE, fit: "inside", withoutEnlargement: true })
+          // JPEG has no transparency; without a background, transparent areas come out black.
+          .flatten({ background: "#ffffff" })
           .jpeg({ quality: 85 })
           .toBuffer();
         return { image: `data:image/jpeg;base64,${jpeg.toString("base64")}`, text: null };
