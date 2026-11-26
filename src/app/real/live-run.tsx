@@ -5,6 +5,7 @@ import { formatMicros } from "@/lib/cost";
 import { usd } from "@/lib/letter";
 import type { LiveEvent } from "@/lib/real-bills";
 import type { SingleResult, Stage } from "@/lib/result";
+import { Thumbnail } from "../bill-page";
 
 type Tile = { id: string; title: string; provider: string | null; picture: string; stage: Stage | "waiting" | "done" | "failed"; lines: number; spent: number; feeCents: number; claimCents: number; note: string };
 
@@ -150,7 +151,7 @@ export function LiveRun() {
               return (
                 <li key={tile.id} className={`flex flex-col gap-2 rounded-xl p-2 transition-colors ${live ? "bg-fill" : ""}`}>
                   <div className={`h-28 overflow-hidden rounded-[4px] bg-white shadow-[inset_0_0_0_1px_var(--line)] ${found ? "shadow-[inset_0_0_0_2px_var(--red)]" : ""} ${tile.stage === "waiting" ? "opacity-40" : ""}`}>
-                    <img src={tile.picture} alt="" className="h-full w-full object-cover object-top" />
+                    <Thumbnail src={tile.picture} />
                   </div>
                   <p className="truncate text-[12px] text-text-2">{tile.provider ?? "Bill"}</p>
                   <p className={`text-[13px] leading-[17px] tabular-nums ${found ? "font-semibold text-red" : live ? "text-text" : "text-text-2"}`}>

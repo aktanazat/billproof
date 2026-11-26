@@ -1,8 +1,23 @@
-import type { ReactNode } from "react";
+"use client";
+
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { TextRow } from "@/lib/pdf-text";
 
 export type Box = { x0: number; y0: number; x1: number; y1: number };
 export type Mark = { id: string; box: Box; tone: "claim" | "ask" | "read"; n?: number };
+
+// A bill picture in a small box: a page or a phone screenshot shows its top, where the company and the total are; a
+// wide strip (a cropped screenshot of a few lines) is shown whole, since its top corner alone is blank.
+export function Thumbnail({ src, lazy = false }: { src: string; lazy?: boolean }) {
+  const ref = useRef<HTMLImageElement>(null);
+  const [wide, setWide] = useState(false);
+  const measure = (img: HTMLImageElement) => setWide(img.naturalWidth > img.naturalHeight * 1.5);
+  // A picture the server page already loaded before this code ran gets no load event, so it is measured here once.
+  useEffect(() => {
+    if (ref.current?.complete && ref.current.naturalWidth > 0) measure(ref.current);
+  }, []);
+  return <img ref={ref} src={src} alt="" loading={lazy ? "lazy" : undefined} onLoad={(event) => measure(event.currentTarget)} className={`h-full w-full ${wide ? "object-contain" : "object-cover object-top"}`} />;
+}
 
 const norm = (text: string) => text.toLowerCase().replace(/\s+/g, " ").trim();
 

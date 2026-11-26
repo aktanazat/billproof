@@ -7,7 +7,7 @@ import { formatMicros } from "@/lib/cost";
 import { usd } from "@/lib/letter";
 import { isAudio, MAX_BILL_PAGES, MAX_OFFER_PAGES, prepareCall, prepareFile, PrepareError } from "@/lib/prepare";
 import { MAX_BILLS, MAX_CALL_SECONDS, type CheckEvent, type CheckInput, type PageKind, type Stage } from "@/lib/result";
-import { BillPage, snapBox, type Mark } from "./bill-page";
+import { BillPage, snapBox, Thumbnail, type Mark } from "./bill-page";
 import { formatClock, Waveform } from "./evidence";
 import { ResultView } from "./result-view";
 import { YearView } from "./year-view";
@@ -153,7 +153,7 @@ function DocRow({ doc, onRemove }: { doc: Doc; onRemove: () => void }) {
   const detail = doc.status === "preparing" ? "Opening" : doc.status === "failed" ? doc.message : doc.pages.length === 1 ? "1 page" : `${doc.pages.length} pages`;
   return (
     <div className="flex items-center gap-3 py-1.5">
-      <div className="h-10 w-8 shrink-0 overflow-hidden rounded-[4px] bg-white shadow-[inset_0_0_0_1px_var(--line)]">{doc.status === "ready" && <img src={doc.pages[0].image} alt="" className="h-full w-full object-cover object-top" />}</div>
+      <div className="h-10 w-8 shrink-0 overflow-hidden rounded-[4px] bg-white shadow-[inset_0_0_0_1px_var(--line)]">{doc.status === "ready" && <Thumbnail src={doc.pages[0].image} />}</div>
       <div className="min-w-0 flex-1">
         <div className="truncate text-[15px]">{doc.name}</div>
         <div className={`text-[13px] ${doc.status === "failed" ? "text-red" : "text-text-2"}`} role={doc.status === "failed" ? "alert" : undefined}>
@@ -349,7 +349,7 @@ function Working({ state, onCancel, dispatch }: { state: Exclude<CheckState, { s
                     {pages.map((shown, i) => (
                       <li key={i} className="appear flex flex-col gap-1">
                         <div className={`h-16 overflow-hidden rounded-[4px] bg-white shadow-[inset_0_0_0_1px_var(--line)] ${kinds[i] === "other" || kinds[i] === "older_bill" ? "opacity-40" : ""}`}>
-                          <img src={shown.image} alt="" className="h-full w-full object-cover object-top" />
+                          <Thumbnail src={shown.image} />
                         </div>
                         <span className="text-[12px] text-text-2">{KIND_NAMES[kinds[i] ?? "bill"]}</span>
                       </li>

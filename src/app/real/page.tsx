@@ -4,6 +4,7 @@ import { realRun } from "@/data/real-bills";
 import { formatMicros } from "@/lib/cost";
 import { usd } from "@/lib/letter";
 import { claimedCents, unagreedFees, type RealBill } from "@/lib/real-bills";
+import { Thumbnail } from "../bill-page";
 import { SiteHeader } from "../site-header";
 import { LiveRun } from "./live-run";
 
@@ -292,7 +293,7 @@ export default function RealBills() {
             {ordered.map((bill) => (
               <li key={bill.id} className="grid grid-cols-[72px_minmax(0,1fr)] gap-4 border-b border-line py-4 sm:grid-cols-[72px_minmax(0,1fr)_auto]">
                 <div className="h-[88px] w-[72px] overflow-hidden rounded-[4px] bg-white shadow-[inset_0_0_0_1px_var(--line)]">
-                  <img src={`/api/real-image/${bill.id}/${bill.billPages[0] ?? 0}`} alt="" loading="lazy" className="h-full w-full object-cover object-top" />
+                  <Thumbnail src={`/api/real-image/${bill.id}/${bill.billPages[0] ?? 0}`} lazy />
                 </div>
                 <div className="flex min-w-0 flex-col gap-1">
                   <p className="text-[13px] text-text-2">
