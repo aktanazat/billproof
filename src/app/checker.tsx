@@ -269,7 +269,8 @@ function WorkingYear({ state, onCancel, dispatch }: { state: Exclude<CheckState,
           {state.s === "running" ? `Reading ${bills.length} bills` : "Stopped"}
         </h1>
         <p className="text-[13px] text-text-2 tabular-nums">
-          <span aria-live="polite">
+          {/* Read whole ("8 of 12 done"); otherwise only the changed number is spoken. */}
+          <span aria-live="polite" aria-atomic>
             {done} of {bills.length} done
           </span>
           {state.spentMicros > 0 ? `, ${formatMicros(state.spentMicros)}` : ""}
