@@ -4,4 +4,6 @@ node_modules
 data
 eval/results
 public/pdfjs
-.env*
+# In any folder: the server's key is deploy/.env, which a root-only pattern let into the build.
+**/.env*
+logs
