@@ -55,7 +55,7 @@ export function openLedger(file: string, eventCapMicros: number): Ledger {
   const committed = `COALESCE(SUM(CASE state WHEN 'settled' THEN actual ELSE reserved END), 0)`;
   const eventSpent = db.prepare(`SELECT ${committed} AS micros FROM attempts`);
   const checkSpent = db.prepare(`SELECT ${committed} AS micros FROM attempts WHERE check_id = ?`);
-  const recentChecks = db.prepare(`SELECT COUNT(*) AS n FROM checks WHERE client = ? AND created_at > ?`);
+  const recentChecks = db.prepare(`SELECT COUNT(*) AS n, MIN(created_at) AS oldest FROM checks WHERE client = ? AND created_at > ?`);
   const insertCheck = db.prepare(`INSERT INTO checks (id, client, created_at) VALUES (?, ?, ?)`);
   const insertAttempt = db.prepare(`INSERT INTO attempts (id, check_id, reserved, state, created_at) VALUES (?, ?, ?, 'reserved', ?)`);
   const settleAttempt = db.prepare(`UPDATE attempts SET state = 'settled', actual = ? WHERE id = ? AND state = 'reserved'`);
@@ -80,9 +80,12 @@ export function openLedger(file: string, eventCapMicros: number): Ledger {
   return {
     admitCheck(client: string, now = Date.now()): string {
       return writeTransaction(() => {
-        const n = numberColumn(recentChecks.get(client, now - HOUR_MS), "n");
+        const recent = recentChecks.get(client, now - HOUR_MS);
+        const n = numberColumn(recent, "n");
         if (n >= CHECKS_PER_CLIENT_PER_HOUR) {
-          throw new LedgerRefusal("too_many_checks", `This address has run ${n} checks in the last hour`);
+          // The next check opens when the oldest one in the hour ages out.
+          const minutes = Math.max(1, Math.ceil((numberColumn(recent, "oldest") + HOUR_MS - now) / 60_000));
+          throw new LedgerRefusal("too_many_checks", `Your network has run ${n} checks in the last hour, the most allowed. Another can start in ${minutes} ${minutes === 1 ? "minute" : "minutes"}.`);
         }
         const id = randomUUID();
         insertCheck.run(id, client, now);

@@ -36,7 +36,8 @@ describe("ledger", () => {
     const ledger = openLedger(":memory:", 1_000_000);
     const start = 1_800_000_000_000;
     for (let i = 0; i < CHECKS_PER_CLIENT_PER_HOUR; i++) ledger.admitCheck("a", start + i);
-    expect(() => ledger.admitCheck("a", start + CHECKS_PER_CLIENT_PER_HOUR)).toThrow(LedgerRefusal);
+    expect(() => ledger.admitCheck("a", start + 20 * 60_000)).toThrow(new LedgerRefusal("too_many_checks", `Your network has run ${CHECKS_PER_CLIENT_PER_HOUR} checks in the last hour, the most allowed. Another can start in 40 minutes.`));
+    expect(() => ledger.admitCheck("a", start + 3_570_000)).toThrow(new LedgerRefusal("too_many_checks", `Your network has run ${CHECKS_PER_CLIENT_PER_HOUR} checks in the last hour, the most allowed. Another can start in 1 minute.`));
     expect(ledger.admitCheck("b", start + CHECKS_PER_CLIENT_PER_HOUR)).toEqual(expect.any(String));
     expect(ledger.admitCheck("a", start + 3_600_001)).toEqual(expect.any(String));
   });
