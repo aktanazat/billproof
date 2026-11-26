@@ -32,7 +32,7 @@ test("unticking a month's claim takes it out of the total and the message, but n
   expect(html).not.toContain("In total, please credit $70.00");
   expect(html).not.toContain("For Aug 12, 2026 to Sep 11, 2026");
   expect(html).toContain("In total, please credit $65.00");
-  expect(html).toContain("August 2026: $5.00 overcharged");
+  expect(html).toContain("Aug 26 $5.00, August 2026: overcharged");
 });
 
 test("a duplicate, another account's bill and an unreadable one are named as not counted and left out of the total", () => {
@@ -55,7 +55,7 @@ test("a duplicate, another account's bill and an unreadable one are named as not
   const html = renderToStaticMarkup(createElement(YearView, { state: done, result: extra, dispatch: () => {} }));
   expect(html).toContain("Not counted: december.jpg couldn&#x27;t be read, 1 duplicate statement, 1 from another account");
   expect(html).toMatch(/>\$70\.00<\/p><h1[^>]*>to ask back from Bayline Fiber across 12 statements/);
-  expect([...html.matchAll(/aria-label="August 2026: /g)]).toHaveLength(1);
+  expect([...html.matchAll(/aria-label="Aug 26 \$5\.00, August 2026: /g)]).toHaveLength(1);
 });
 
 test("a statement whose account number couldn't be read counts with the year's account, and the message keeps the number", () => {
@@ -198,7 +198,7 @@ test("a month missing its statement date stays in its place by billing period, s
   if (done.s !== "done") throw new Error("the finished year did not become a done state");
   const html = renderToStaticMarkup(createElement(YearView, { state: done, result: blurred, dispatch: () => {} }));
   expect(html).toContain("Overcharged from August 2026");
-  const months = [...html.matchAll(/aria-label="([A-Z][a-z]+ \d{4}): /g)].map((m) => m[1]);
+  const months = [...html.matchAll(/aria-label="[^,"]+, ([A-Z][a-z]+ \d{4}): /g)].map((m) => m[1]);
   expect(months.at(0)).toBe("December 2025");
   expect(months.at(-1)).toBe("November 2026");
 });
@@ -227,8 +227,8 @@ test("months whose claims wait for confirmation are marked, so the person knows 
   const done = reduce(running, { type: "finished", attempt: 1, result: waiting });
   if (done.s !== "done") throw new Error("the finished year did not become a done state");
   const html = renderToStaticMarkup(createElement(YearView, { state: done, result: waiting, dispatch: () => {} }));
-  expect(html).toContain('aria-label="August 2026: $5.00 overcharged, to confirm"');
-  expect(html).toContain('aria-label="September 2026: $5.00 overcharged"');
+  expect(html).toContain('aria-label="Aug 26 $5.00 To confirm, August 2026: overcharged"');
+  expect(html).toContain('aria-label="Sep 26 $5.00, September 2026: overcharged"');
   expect([...html.matchAll(/>To confirm</g)]).toHaveLength(1);
   expect(html).toContain("Open a month marked “To confirm” and confirm its marked lines to add them to the message.");
 });
@@ -247,17 +247,35 @@ test("a month whose date was misread is labeled as written, never 'undefined'", 
 test("each month is listed in order with what it overcharged, adding up to the year's total", () => {
   const months = [...yearPage().matchAll(/aria-label="([^"]*(?:overcharged|matches the offer))"/g)].map((m) => m[1]);
   expect(months).toEqual([
-    "December 2025: matches the offer",
-    "January 2026: matches the offer",
-    "February 2026: matches the offer",
-    "March 2026: matches the offer",
-    "April 2026: matches the offer",
-    "May 2026: matches the offer",
-    "June 2026: matches the offer",
-    "July 2026: matches the offer",
-    "August 2026: $5.00 overcharged",
-    "September 2026: $5.00 overcharged",
-    "October 2026: $30.00 overcharged",
-    "November 2026: $30.00 overcharged",
+    "Dec 25, December 2025: matches the offer",
+    "Jan 26, January 2026: matches the offer",
+    "Feb 26, February 2026: matches the offer",
+    "Mar 26, March 2026: matches the offer",
+    "Apr 26, April 2026: matches the offer",
+    "May 26, May 2026: matches the offer",
+    "Jun 26, June 2026: matches the offer",
+    "Jul 26, July 2026: matches the offer",
+    "Aug 26 $5.00, August 2026: overcharged",
+    "Sep 26 $5.00, September 2026: overcharged",
+    "Oct 26 $30.00, October 2026: overcharged",
+    "Nov 26 $30.00, November 2026: overcharged",
   ]);
+});
+
+test("each month button's spoken name starts with the words shown on it, so voice control can reach it", () => {
+  if (!year) throw new Error("the saved run has no year result");
+  const august = year.months.find((month) => month.result.outcome === "checked" && month.result.reading.period_start?.startsWith("2026-08"));
+  if (!august || august.result.outcome !== "checked") throw new Error("the sample has no August statement");
+  const photo = { ...august.result, claims: august.result.claims.map((claim) => ({ ...claim, needsConfirmation: true })) };
+  const waiting: YearResult = { ...year, months: year.months.map((month) => (month.bill === august.bill ? { ...month, result: photo } : month)) };
+  const running = { s: "running", inputs: initialState.inputs, attempts: 1, attempt: 1, stage: null, spentMicros: 0, live: {} } as unknown as CheckState;
+  const done = reduce(running, { type: "finished", attempt: 1, result: waiting });
+  if (done.s !== "done") throw new Error("the finished year did not become a done state");
+  const html = renderToStaticMarkup(createElement(YearView, { state: done, result: waiting, dispatch: () => {} }));
+  // The button's text as a browser has it: the spans' words with only the spaces the markup holds.
+  const buttons = [...html.matchAll(/<button[^>]*aria-label="([^"]*)"[^>]*>(.*?)<\/button>/g)].map((m) => ({ name: m[1], shown: m[2].replace(/<[^>]+>/g, "").split(/\s+/).filter((word) => word && word !== "—").join(" ") }));
+  expect(buttons).toHaveLength(12);
+  for (const { name, shown } of buttons) expect(name.startsWith(shown), `${name} / ${shown}`).toBe(true);
+  expect(html).toContain('aria-label="Aug 26 $5.00 To confirm, August 2026: overcharged"');
+  expect(html).toContain('aria-label="Jul 26, July 2026: matches the offer"');
 });

@@ -150,15 +150,22 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
             {checked.map((month) => {
               const amount = claimed(month.result);
               const unconfirmed = month.result.claims.some((claim) => markOf(month.bill, claim.id) === "needs_confirmation");
+              // The spoken name starts with the words shown on the button ("Aug 26 $5.00 to confirm"), so voice control
+              // can reach it, then says the month in full and what it found.
+              const shown = monthOf(month.result);
+              const full = monthOf(month.result, true);
+              const visible = [shown, ...(amount > 0 ? [usd(amount)] : []), ...(unconfirmed ? ["To confirm"] : [])].join(" ");
+              const status = amount > 0 ? "overcharged" : asks(month) ? "charges worth asking about" : !hadOffer ? "no offer to compare" : compared(month) ? "matches the offer" : "not compared with the offer";
               return (
                 <li key={month.bill}>
-                  <button type="button" onClick={() => setOpen(month.bill)} className="group flex w-full flex-col gap-2 rounded-lg text-left" aria-label={`${monthOf(month.result, true)}: ${amount > 0 ? `${usd(amount)} overcharged` : asks(month) ? "charges worth asking about" : !hadOffer ? "no offer to compare" : compared(month) ? "matches the offer" : "not compared with the offer"}${unconfirmed ? ", to confirm" : ""}`}>
+                  <button type="button" onClick={() => setOpen(month.bill)} className="group flex w-full flex-col gap-2 rounded-lg text-left" aria-label={`${visible}${shown === full ? "" : `, ${full}`}: ${status}`}>
                     <div className="flex h-28 items-end rounded-t-md border-b border-line px-1.5 group-hover:bg-fill">
                       {amount > 0 && <div className="w-full rounded-t-[3px] bg-red" style={{ height: `${Math.max(8, (amount / largest) * 100)}%` }} />}
                     </div>
-                    <span className="text-[13px] text-text-2">{monthOf(month.result)}</span>
+                    {/* The spaces keep the words apart in the button's text; the column layout doesn't show them. */}
+                    <span className="text-[13px] text-text-2">{shown}</span>{" "}
                     <span className={`text-[13px] tabular-nums ${amount > 0 ? "font-semibold text-red" : "text-text-2"}`}>{amount > 0 ? usd(amount) : "—"}</span>
-                    {unconfirmed && <span className="text-[12px] text-text-2">To confirm</span>}
+                    {unconfirmed && <> <span className="text-[12px] text-text-2">To confirm</span></>}
                   </button>
                 </li>
               );
