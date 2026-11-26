@@ -94,7 +94,12 @@ function Finding({ bill }: { bill: Checked }) {
       <ul className="flex flex-col gap-1">
         {bill.claims.map((claim, i) => (
           <li key={i} className="text-[13px] leading-[18px]">
-            <span className="font-semibold text-red tabular-nums">{usd(claim.amountCents)}</span> above the promise: billed {usd(claim.actualCents)} for {claim.lines.join(", ")}, promised {usd(claim.expectedCents)}
+            <span className="font-semibold text-red tabular-nums">{usd(claim.amountCents)}</span>{" "}
+            {claim.kind === "credit_missing"
+              ? `credit missing: credited ${usd(claim.actualCents)} on ${claim.lines.join(", ")}, promised ${usd(claim.expectedCents)}`
+              : claim.kind === "included_charged"
+                ? `charged for ${claim.lines.join(", ")}, promised as included`
+                : `above the promise: billed ${usd(claim.actualCents)} for ${claim.lines.join(", ")}, promised ${usd(claim.expectedCents)}`}
           </li>
         ))}
       </ul>
@@ -129,6 +134,15 @@ export default function RealBills() {
   const bills = results.filter((bill): bill is Checked => bill.outcome === "checked");
   const notBills = results.filter((bill) => bill.outcome === "not_a_bill").length.toLocaleString("en-US");
   const claimed = bills.filter((bill) => claimedCents(bill) > 0);
+  // The summary names what the claims are: a missing credit is not a charge above a promise.
+  const onlyCredits = claimed.every((bill) => bill.claims.every((claim) => claim.kind === "credit_missing"));
+  const claimedTotal = usd(claimed.reduce((t, bill) => t + claimedCents(bill), 0));
+  const claimSummary =
+    claimed.length === 0
+      ? "No dollar claim was made on any post, because no poster quoted a promise the bill could be held to; Billproof asks instead of guessing."
+      : claimed.length === 1
+        ? `1 post ${onlyCredits ? "was missing a credit" : "had a charge above a promise"} the poster quoted, ${claimedTotal}, waiting for the poster to confirm the marked line.`
+        : `${claimed.length} posts ${onlyCredits ? "were missing credits" : "were billed against a promise"} the posters quoted, ${claimedTotal} in all, each waiting for the poster to confirm the marked line.`;
   const fees = bills.flatMap(unagreedFees);
   const feeCents = fees.reduce((t, fee) => t + fee.cents, 0);
   const billsWithFees = bills.filter((bill) => unagreedFees(bill).length > 0).length;
@@ -193,7 +207,7 @@ export default function RealBills() {
           ))}
         </dl>
         <p className="mt-3 text-[13px] text-text-2">
-          {notBills} posts showed chats, app screens or ads rather than a bill, and {gone} more had their pictures deleted. On {addsUp} of the {withTotal.length} bills that print a total, an amount due or subtotals for every part, the charges Muse Ember read add up to them to the cent{misread.length > 0 ? `, not counting ${misread.map((bill) => MISREAD.find((m) => m.id === bill.id)?.what).join(" and ")}` : ""}{addsUpToSubtotal > 0 ? `, and on ${addsUpToSubtotal} more the first charges add up to a subtotal the bill prints before the rest` : ""}. {withEarlier} posts also showed an earlier bill; Billproof read only the newest one and lists what moved since. {claimed.length === 0 ? "No dollar claim was made on any post, because no poster quoted a promise the bill could be held to; Billproof asks instead of guessing." : claimed.length === 1 ? `1 post had a charge above a promise the poster quoted, ${usd(claimedCents(claimed[0]))}, waiting for the poster to confirm the marked line.` : `${claimed.length} posts had charges above a promise the poster quoted, ${usd(claimed.reduce((t, bill) => t + claimedCents(bill), 0))} in all, each waiting for the poster to confirm the marked line.`}
+          {notBills} posts showed chats, app screens or ads rather than a bill, and {gone} more had their pictures deleted. On {addsUp} of the {withTotal.length} bills that print a total, an amount due or subtotals for every part, the charges Muse Ember read add up to them to the cent{misread.length > 0 ? `, not counting ${misread.map((bill) => MISREAD.find((m) => m.id === bill.id)?.what).join(" and ")}` : ""}{addsUpToSubtotal > 0 ? `, and on ${addsUpToSubtotal} more the first charges add up to a subtotal the bill prints before the rest` : ""}. {withEarlier} posts also showed an earlier bill; Billproof read only the newest one and lists what moved since. {claimSummary}
         </p>
 
         <LiveRun />

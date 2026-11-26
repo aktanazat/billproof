@@ -1,6 +1,7 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { expect, test } from "vitest";
+import { realRun } from "@/data/real-bills";
 import RealBills from "./page";
 
 // The real-bills page as built from the saved run, reduced to its text.
@@ -25,4 +26,11 @@ test("no question on a bill names the same line twice in a row", () => {
 
 test("one of something is never written with a plural", () => {
   expect(text.filter((part) => /\b1 (bills|charges|posts|times|lines)\b/.test(part))).toEqual([]);
+});
+
+test("a missing credit is described as missing, never as a charge above a promise", () => {
+  const credits = realRun.results.flatMap((bill) => (bill.outcome === "checked" ? bill.claims.filter((claim) => claim.kind === "credit_missing") : []));
+  expect(credits.length).toBeGreaterThan(0);
+  for (const claim of credits) expect(text.join(" ")).toContain(`credit missing: credited $${(claim.actualCents / 100).toFixed(2)} on ${claim.lines.join(", ")}`);
+  expect(text.filter((part) => /above the promise: billed \$0\.00|1 post had a charge above a promise/.test(part))).toEqual([]);
 });
