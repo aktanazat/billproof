@@ -563,7 +563,7 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
             </div>
           ) : (
             <FileTarget label="Choose the bill" accept={BILL_ACCEPT} multiple onFiles={addBills} className="mt-3 flex h-[112px] w-full flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-text-2/40 text-center hover:bg-fill-2">
-              <span className="text-[15px]">
+              <span className="px-2 text-[15px] text-balance">
                 <span className="sm:hidden">Choose</span>
                 <span className="hidden sm:inline">Drop</span> the bill, or every screenshot you have
               </span>
