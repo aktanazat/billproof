@@ -120,6 +120,13 @@ export function checkInput(inputs: Inputs): CheckInput | null {
   }
 }
 
+// Why a check can't start, for beside the disabled button. A file that failed to open holds it back until removed, and
+// its row says only what went wrong with it; a file still opening says so on its row, and an empty screen is plain.
+export function startBlocker(inputs: Inputs): string | null {
+  const offerFailed = (inputs.offer.kind === "file" && inputs.offer.doc.status === "failed") || (inputs.offer.kind === "call" && inputs.offer.call.status === "failed");
+  return offerFailed || inputs.bills.some((doc) => doc.status === "failed") ? "Remove the file that couldn't be opened to continue." : null;
+}
+
 function run(state: CheckState): CheckState {
   const attempt = state.attempts + 1;
   return { s: "running", inputs: state.inputs, attempts: attempt, attempt, stage: null, spentMicros: 0, live: EMPTY_LIVE };

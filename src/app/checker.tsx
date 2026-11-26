@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useReducer, useRef, useState, type ChangeEvent, type DragEvent, type ReactNode } from "react";
-import { checkInput, initialState, offerOmitted, reduce, type Call, type CheckAction, type CheckState, type Doc, type Inputs } from "@/lib/check-machine";
+import { checkInput, initialState, offerOmitted, reduce, startBlocker, type Call, type CheckAction, type CheckState, type Doc, type Inputs } from "@/lib/check-machine";
 import { formatMicros } from "@/lib/cost";
 import { usd } from "@/lib/letter";
 import { isAudio, MAX_BILL_PAGES, MAX_OFFER_PAGES, prepareCall, prepareFile, PrepareError } from "@/lib/prepare";
@@ -635,6 +635,7 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
 
   const { bills, offer } = state.inputs;
   const ready = checkInput(state.inputs) !== null;
+  const blocker = startBlocker(state.inputs);
 
   return (
     <section className="mx-auto w-full max-w-[1120px] px-6 pb-24">
@@ -709,9 +710,14 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
 
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
         <p className="text-[13px] text-text-2">Read by Meta&apos;s Muse Ember. Files aren&apos;t stored.</p>
-        <button type="button" disabled={!ready} onClick={() => dispatch({ type: "start" })} className="h-11 rounded-lg bg-text px-6 text-[15px] font-medium text-white hover:bg-black disabled:bg-fill-2 disabled:text-text-2">
-          {bills.length > 1 ? `Check ${bills.length} bills` : "Check bill"}
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          <p role="status" className="text-[13px] text-text-2">
+            {blocker}
+          </p>
+          <button type="button" disabled={!ready} onClick={() => dispatch({ type: "start" })} className="h-11 rounded-lg bg-text px-6 text-[15px] font-medium text-white hover:bg-black disabled:bg-fill-2 disabled:text-text-2">
+            {bills.length > 1 ? `Check ${bills.length} bills` : "Check bill"}
+          </button>
+        </div>
       </div>
 
       {realSamples.length > 0 && (
