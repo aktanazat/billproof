@@ -8,11 +8,15 @@ export function formatClock(seconds: number): string {
 }
 
 // Muse Ember's own words (a thinking summary, why a bill couldn't be read) sometimes name a field of the reading format
-// ("applies_from", "line_items"); the page shows plain words: the two date fields by what they mean, a few others by
-// meaning, any other with its underscores as spaces.
+// ("applies_from", "line_items"), or the format itself ("the required JSON schema"); the page shows plain words: the two
+// date fields by what they mean, a few others by meaning, any other with its underscores as spaces, and the format as
+// "the reading format".
 const FIELD_WORDS: Record<string, string> = { applies_from: "start date", applies_until: "end date", covers_line_ids: "covered lines", said_at_seconds: "time said", start_seconds: "start time" };
 export function inPlainWords(text: string): string {
-  return text.replace(/\b[a-z]+(?:_[a-z]+)+\b/g, (field) => FIELD_WORDS[field] ?? field.replaceAll("_", " "));
+  return text
+    .replace(/ per (?:JSON )?schema\b/gi, ", as the format asks")
+    .replace(/\b(?:(?:the|a) )?(?:required )?(?:JSON schema|JSON|schema)(?: (?:fields|structure|output|keys|object))?\b/gi, "the reading format")
+    .replace(/\b[a-z]+(?:_[a-z]+)+\b/g, (field) => FIELD_WORDS[field] ?? field.replaceAll("_", " "));
 }
 
 export function Waveform({ peaks, className }: { peaks: number[]; className?: string }) {

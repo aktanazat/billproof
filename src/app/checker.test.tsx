@@ -22,3 +22,11 @@ test("a thinking summary shows plain words for the reading format's field names"
   expect(inPlainWords("Checking section_totals against total_due.")).toBe("Checking section totals against total due.");
   expect(inPlainWords("Reading the bill's charges.")).toBe("Reading the bill's charges.");
 });
+
+// 111 of the 470 saved summaries call the reading format by its technical name ("JSON schema"), which means nothing
+// to most people watching a check.
+test("a thinking summary calls the reading format by a plain name, not 'JSON schema'", () => {
+  expect(inPlainWords("Extracting billing fields from printed text and mapping them to JSON schema with quoted exact values.")).toBe("Extracting billing fields from printed text and mapping them to the reading format with quoted exact values.");
+  expect(inPlainWords("Extracting concrete pricing and service promises from the bill and order document to populate the required JSON schema fields.")).toBe("Extracting concrete pricing and service promises from the bill and order document to populate the reading format.");
+  expect(inPlainWords("Extracting bill fields to JSON and mapping payments as a positive integer in cents per schema.")).toBe("Extracting bill fields to the reading format and mapping payments as a positive integer in cents, as the format asks.");
+});
