@@ -448,8 +448,9 @@ async function fetchFile(url: string, name: string, type: string): Promise<File>
 
 export function Checker({ samples, realSamples, startWith }: { samples: Sample[]; realSamples: Sample[]; startWith: Sample | null }) {
   const [state, dispatch] = useReducer(reduce, initialState);
-  // Files dropped past the 12-bill limit, so the person knows some were left out rather than finding months missing.
-  const [leftOut, setLeftOut] = useState(0);
+  // Files dropped past the 12-bill limit, named, so the person knows which months are missing: PDFs are placed before
+  // pictures, so the ones left out aren't simply the last chosen.
+  const [leftOut, setLeftOut] = useState<string[]>([]);
   // The offer takes one file; a drop of several keeps the first and says where the rest belong.
   const [offerExtra, setOfferExtra] = useState(0);
   const controllers = useRef(new Map<number, AbortController>());
@@ -524,8 +525,9 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
     const pictures = files.filter((file) => !isPdf(file));
     const groups = [...files.filter(isPdf).map((file) => [file]), ...(pictures.length > 1 ? [pictures] : pictures.map((file) => [file]))];
     const room = MAX_BILLS - (state.s === "composing" ? state.inputs.bills.length : 0);
-    const docs = groups.slice(0, room).map((group) => ({ id: id(), name: group.length > 1 ? `${group.length} pictures` : group[0].name, group }));
-    setLeftOut(groups.length - docs.length);
+    const named = groups.map((group) => ({ name: group.length > 1 ? `${group.length} pictures` : group[0].name, group }));
+    const docs = named.slice(0, room).map(({ name, group }) => ({ id: id(), name, group }));
+    setLeftOut(named.slice(room).map(({ name }) => name));
     dispatch({ type: "bills_added", docs: docs.map(({ id: docId, name }) => ({ id: docId, name })) });
     for (const doc of docs) {
       if (doc.group.length === 1) void prepareDoc(doc.id, doc.group[0], MAX_BILL_PAGES);
@@ -669,9 +671,9 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
                   Add another month
                 </FileTarget>
               )}
-              {leftOut > 0 && (
-                <p role="status" className="mt-2 px-2 text-[13px] text-text-2">
-                  {leftOut === 1 ? "1 file was" : `${leftOut} files were`} left out: a check reads up to {MAX_BILLS} bills.
+              {leftOut.length > 0 && (
+                <p role="status" className="mt-2 px-2 text-[13px] text-text-2 break-words">
+                  Left out, as a check reads up to {MAX_BILLS} bills: {leftOut.length === 1 ? leftOut[0] : `${leftOut.slice(0, -1).join(", ")} and ${leftOut.at(-1)}`}.
                 </p>
               )}
             </div>
