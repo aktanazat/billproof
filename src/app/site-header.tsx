@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export function SiteHeader({ current }: { current: "check" | "real" }) {
+export function SiteHeader({ current }: { current: "check" | "real" | null }) {
   const link = (active: boolean) => `text-[15px] ${active ? "text-text" : "text-text-2 hover:text-text"}`;
   return (
     <header className="mx-auto flex h-14 w-full max-w-[1120px] items-center justify-between px-6">
