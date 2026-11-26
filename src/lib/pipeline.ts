@@ -291,7 +291,13 @@ async function paid<T>(call: EmberCall<T>, run: Run, live: Live): Promise<T> {
     });
     deps.ledger.settle(attempt, result.costMicros);
     if (outputCache.size >= CACHE_MAX) outputCache.delete(outputCache.keys().next().value ?? "");
-    outputCache.set(key, { output: result.output, at: Date.now() });
+    const at = Date.now();
+    outputCache.set(key, { output: result.output, at });
+    // A reading holds the customer's name, address and account; it is dropped when its reuse window ends rather than
+    // left in memory until 200 newer ones push it out. The timer doesn't keep the server running.
+    setTimeout(() => {
+      if (outputCache.get(key)?.at === at) outputCache.delete(key);
+    }, CACHE_TTL_MS).unref();
     (run.calls[live.bill] ??= []).push({ name: call.name, effort: call.effort, ...result.usage, costMicros: result.costMicros, reused: false });
     // What finished calls cost, not the ledger's total: that holds other bills' calls still open at their worst case,
     // so with bills read side by side it overstated the cost and fell back as they settled.
