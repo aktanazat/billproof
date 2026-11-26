@@ -491,8 +491,8 @@ export function ResultView({
                 {questions.map((question) => {
                   const questionLines = linesOf(question.lineIds);
                   const canInclude = question.kind === "unagreed_fee" || question.kind === "repeated_charge";
-                  // A price too far from the promise is judged against it, so the promise is shown with it.
-                  const judgedAgainst = question.kind === "price_gap" && question.promiseId ? promises.get(question.promiseId) : undefined;
+                  // A note judged against a promise (its dates, its conditions, its price) shows the promise with it.
+                  const judgedAgainst = question.promiseId ? promises.get(question.promiseId) : undefined;
                   return (
                     <li key={question.id} tabIndex={0} onMouseEnter={() => setFocus(question.lineIds)} onMouseLeave={() => setFocus(null)} onFocus={() => setFocus(question.lineIds)} onBlur={() => setFocus(null)} className="flex flex-col gap-2 border-b border-line py-3 outline-none focus-visible:bg-fill">
                       <div className="flex items-baseline justify-between gap-4 text-[15px]">

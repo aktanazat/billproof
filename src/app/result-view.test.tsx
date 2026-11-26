@@ -325,6 +325,18 @@ describe("the result page's wording", () => {
     expect(html).toContain("Fiber 1 Gig is too far from the promised amount to claim");
     expect(html).toContain("Promised: “Fiber 300 for $30 a month”");
   });
+
+  // Every note judged against a promise shows it: its dates for one starting, ending or of unread end, its conditions
+  // for one the bill doesn't show are met. A fee or a repeat has no promise and shows none.
+  test("each note tied to a promise shows the promise, and a fee note shows none", () => {
+    const promise = { id: "P1", kind: "monthly_price" as const, description: "", amount_cents: 3000, per_line: false, conditions: ["autopay" as const], applies_from: null, applies_until: null, quote: "$30 a month with autopay for 12 months", said_at_seconds: null, covers_line_ids: ["L1"] };
+    for (const kind of ["end_date_unread", "partial_period", "conditions_unproven"] as const) {
+      const result: Checked = { ...checked([line("L1", "Fiber 300", 3000, "plan")], [{ id: "Q1", kind, lineIds: ["L1"], promiseId: "P1" }]), promises: [promise] };
+      expect(page(result), kind).toContain("Promised: “$30 a month with autopay for 12 months”");
+    }
+    const fee: Checked = { ...checked([line("L1", "Fiber 300", 3000, "plan"), line("F1", "Network Fee", 399, "company_fee")], [{ id: "Q1", kind: "unagreed_fee", lineIds: ["F1"], promiseId: null }]), promises: [promise] };
+    expect(page(fee)).not.toContain("Promised:");
+  });
 });
 
 describe("the result page's heading", () => {
