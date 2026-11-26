@@ -46,3 +46,11 @@ test("an amount written as dollars or bucks is read as money", () => {
   expect(moneyIn("he said 40 bucks a month, locked in")).toEqual([4000]);
   expect(moneyIn("Fiber 500 for 24 months")).toEqual([]);
 });
+
+// Utility and phone bills print a credit or debit with its marker run into the amount ("15.00CR"); read as no amount,
+// such a line couldn't be confirmed on a PDF bill, and a promise covering it was set aside.
+test("an amount with CR or DR run into it is read as money, and data sizes are not", () => {
+  expect(moneyIn("Budget Billing Credit 15.00CR")).toEqual([1500]);
+  expect(moneyIn("Adjustment 15.00DR")).toEqual([1500]);
+  expect(moneyIn("Data 2.50GB")).toEqual([]);
+});

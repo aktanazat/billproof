@@ -1,9 +1,10 @@
 // Money amounts written with a dollar sign ("$55", "-$5.00", "$1,299.99", "$55.5", "$.99"), in words ("70 dollars",
-// "40 bucks"), with cents ("75.00"), or in cents ("99 cents", "75¢"). Bare integers ("Fiber 500") are not money.
+// "40 bucks"), with cents ("75.00", or "15.00CR" as bills mark a credit), or in cents ("99 cents", "75¢"). Bare
+// integers ("Fiber 500") are not money.
 // Groups: dollars and cents after "$", cents alone after "$.", dollars and cents before the word, dollars and cents
 // written without "$", and a count of cents.
 const MONEY =
-  /\$\s?(?:(\d{1,3}(?:,\d{3})+|\d+)(?:\.(\d{1,2})(?!\d))?|\.(\d{2})(?!\d))|\b(\d{1,3}(?:,\d{3})+|\d+)(?:\.(\d{2}))?\s?(?:dollars?|bucks)\b|\b(\d{1,3}(?:,\d{3})+|\d+)\.(\d{2})\b|\b(\d+)\s?(?:¢|cents?\b)/gi;
+  /\$\s?(?:(\d{1,3}(?:,\d{3})+|\d+)(?:\.(\d{1,2})(?!\d))?|\.(\d{2})(?!\d))|\b(\d{1,3}(?:,\d{3})+|\d+)(?:\.(\d{2}))?\s?(?:dollars?|bucks)\b|\b(\d{1,3}(?:,\d{3})+|\d+)\.(\d{2})(?=\b|[CD]R\b)|\b(\d+)\s?(?:¢|cents?\b)/gi;
 
 export function moneyIn(text: string): number[] {
   const found: number[] = [];
