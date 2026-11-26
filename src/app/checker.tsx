@@ -23,8 +23,8 @@ export type Sample = {
   offer: { kind: "text"; text: string } | { kind: "call"; url: string };
 };
 
-const BILL_ACCEPT = "application/pdf,image/jpeg,image/png,image/webp";
-const OFFER_ACCEPT = "application/pdf,image/jpeg,image/png,image/webp,audio/*,.m4a,.mp3,.wav";
+const BILL_ACCEPT = "application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif";
+const OFFER_ACCEPT = "application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif,audio/*,.m4a,.mp3,.wav";
 
 function isCheckEvent(value: unknown): value is CheckEvent {
   return typeof value === "object" && value !== null && "type" in value && typeof value.type === "string";
