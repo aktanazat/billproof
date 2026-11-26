@@ -20,6 +20,12 @@ function periodText(result: Checked): string {
   return statement_date ? `the statement dated ${shortDate(statement_date)}` : "this bill";
 }
 
+function aboutText(result: Checked, account: string): string {
+  const { period_start, period_end, statement_date } = result.reading;
+  if (period_start && period_end) return `${account}, bill for ${shortDate(period_start)} to ${shortDate(period_end)}`;
+  return statement_date ? `${account}, statement dated ${shortDate(statement_date)}` : `${account} and my latest bill`;
+}
+
 function names(lines: LineItem[]): string {
   const labels = [...new Set(lines.map((line) => line.label))];
   return labels.length <= 1 ? (labels[0] ?? "this charge") : `${labels.slice(0, -1).join(", ")} and ${labels.at(-1)}`;
@@ -93,13 +99,14 @@ export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<stri
   const ask = totalCents > 0 ? `In total, please credit ${usd(totalCents)} to ${account}.` : "";
   const body = [...claimText, ...questionText];
 
-  const chat = [`Hi, I'm writing about ${account}, bill for ${period}.`, ...body, ask].filter(Boolean).join("\n\n");
+  const about = aboutText(result, account);
+  const chat = [`Hi, I'm writing about ${about}.`, ...body, ask].filter(Boolean).join("\n\n");
   const email = [
     `Subject: Billing correction for ${account}`,
     "",
     `Hello ${provider} billing team,`,
     "",
-    `I'm writing about ${account}, bill for ${period}.`,
+    `I'm writing about ${about}.`,
     "",
     ...body.flatMap((sentence) => [sentence, ""]),
     ...(ask ? [ask, ""] : []),
@@ -109,7 +116,7 @@ export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<stri
     "[Your name]",
   ].join("\n");
   const call = [
-    `I'm calling about ${account}, bill for ${period}.`,
+    `I'm calling about ${about}.`,
     ...body.map((sentence, i) => `${i + 1}. ${sentence}`),
     ask,
     "Before ending the call, ask for a reference number and the date the credit will post.",

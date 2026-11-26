@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { DroppedClaim, Explained, Question, TestedClaim, Totals, Unused } from "./decide";
+import type { BillChange, DroppedClaim, Explained, Question, TestedClaim, Totals, Unused } from "./decide";
 import type { PromiseTerm, Reading, TranscriptTurn } from "./schemas";
 
 const page = z.object({
@@ -57,7 +57,7 @@ export const MAX_UPLOAD_BYTES = 40_000_000;
 export type Stage = "sorting" | "reading_bill" | "rereading_bill" | "reading_offer" | "comparing" | "challenging";
 
 // What each uploaded picture turned out to be: part of the bill, proof of a promise (a chat, an offer, an email), or neither.
-export type PageKind = "bill" | "promise" | "other";
+export type PageKind = "bill" | "older_bill" | "promise" | "other";
 
 // What the person sees while a check runs: Muse Ember's reasoning summary and each item as soon as it is read.
 export type SeenLine = { label: string; amount_cents: number; kind: string; page: number; box: { x0: number; y0: number; x1: number; y1: number } | null };
@@ -103,6 +103,8 @@ export type Checked = {
   billIsImage: boolean;
   // Indices of the uploaded pages that make up the bill, in reading order; line items' page numbers count within these.
   billPages: number[];
+  // When the pictures also hold an earlier statement: what moved between it and this bill.
+  change: BillChange | null;
   hadOffer: boolean;
   spentMicros: number;
   calls: CallRecord[];

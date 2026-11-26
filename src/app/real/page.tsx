@@ -32,6 +32,26 @@ const BRANDS: [RegExp, string][] = [
 ];
 const companyOf = (provider: string | null) => (provider ? (BRANDS.find(([pattern]) => pattern.test(provider))?.[1] ?? provider) : "Unknown");
 
+// Every real post whose author later wrote in the thread that the company paid them back for a charge Billproof
+// checks, in their own words. Found by reading the posters' own comments on every bill in the run; a roaming fee,
+// a charge after cancelling, and one that never says what was wrong are left out.
+const PAID_BACK: { id: string; said: string }[] = [
+  { id: "1jgjds8", said: "Already confirmed with them it was an error on their end and they credited my account the difference." },
+  { id: "1tg9m9y", said: "The rep ended up giving me the 7.50 discount for 2 months per line." },
+  { id: "1p6xawo", said: "This was eventually corrected by the retention team." },
+  { id: "1kqr1p8", said: "Problem is resolved already, they fixed the promo issue, took 2 business days." },
+];
+
+function Change({ bill }: { bill: Checked }) {
+  if (!bill.change || bill.change.currentCents === bill.change.earlierCents) return null;
+  const moved = bill.change.currentCents - bill.change.earlierCents;
+  return (
+    <p className="text-[13px] leading-[18px] text-text-2">
+      {moved > 0 ? "Up" : "Down"} <span className="text-text tabular-nums">{usd(Math.abs(moved))}</span> from the earlier bill in the same post
+    </p>
+  );
+}
+
 function Finding({ bill }: { bill: Checked }) {
   const fees = unagreedFees(bill);
   if (bill.claims.length > 0) {
@@ -55,7 +75,8 @@ function Finding({ bill }: { bill: Checked }) {
       </p>
     );
   }
-  return <p className="text-[13px] leading-[18px] text-text-2">{bill.questions.length > 0 ? `${bill.questions.length} ${bill.questions.length === 1 ? "charge" : "charges"} worth asking about` : "Nothing above what the poster describes"}</p>;
+  const asked = [...new Set(bill.questions.flatMap((question) => question.lines))];
+  return <p className="text-[13px] leading-[18px] text-text-2">{asked.length > 0 ? <>Worth asking about: <span className="text-text">{asked.join(", ")}</span></> : "Nothing above what the poster describes"}</p>;
 }
 
 export default function RealBills() {
@@ -73,6 +94,11 @@ export default function RealBills() {
   // The bill's own arithmetic is the accuracy check on real data: the charges read must add up to its printed total.
   const withTotal = bills.filter((bill) => bill.lineSum !== "not_printed");
   const addsUp = withTotal.filter((bill) => bill.lineSum === "ok").length;
+  const withEarlier = bills.filter((bill) => bill.change).length;
+  const paidBack = PAID_BACK.flatMap((post) => {
+    const bill = bills.find((b) => b.id === post.id);
+    return bill ? [{ ...post, bill }] : [];
+  });
 
   const leaderboard = [...fees.flatMap((fee) => fee.lines).reduce((map, label) => map.set(feeKey(label), { label, count: (map.get(feeKey(label))?.count ?? 0) + 1 }), new Map<string, { label: string; count: number }>()).values()]
     .sort((a, b) => b.count - a.count)
@@ -122,10 +148,37 @@ export default function RealBills() {
           ))}
         </dl>
         <p className="mt-3 text-[13px] text-text-2">
-          {notBills} posts showed chats, app screens or ads rather than a bill, and {gone} more had their pictures deleted. On {addsUp} of the {withTotal.length} bills that print a total, the charges Muse Ember read add up to it to the cent. {claimed.length === 0 ? "No dollar claim was made on any post, because no poster quoted a promise the bill could be held to; Billproof asks instead of guessing." : `${claimed.length} ${claimed.length === 1 ? "post had a charge" : "posts had charges"} above a promise the poster quoted, ${usd(claimed.reduce((t, bill) => t + claimedCents(bill), 0))} in all, each waiting for the poster to confirm the marked line.`}
+          {notBills} posts showed chats, app screens or ads rather than a bill, and {gone} more had their pictures deleted. On {addsUp} of the {withTotal.length} bills that print a total, the charges Muse Ember read add up to it to the cent. {withEarlier} posts also showed an earlier bill; Billproof read only the newest one and lists what moved since. {claimed.length === 0 ? "No dollar claim was made on any post, because no poster quoted a promise the bill could be held to; Billproof asks instead of guessing." : `${claimed.length} ${claimed.length === 1 ? "post had a charge" : "posts had charges"} above a promise the poster quoted, ${usd(claimed.reduce((t, bill) => t + claimedCents(bill), 0))} in all, each waiting for the poster to confirm the marked line.`}
         </p>
 
         <LiveRun />
+
+        {paidBack.length > 0 && (
+          <section className="mt-14 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+            <div>
+              <h2 className="text-[17px] font-semibold">When the company paid back</h2>
+              <p className="mt-1 text-[13px] leading-[18px] text-text-2">Posters who later wrote that the company fixed their bill, and what Billproof found on the bill they posted, before anyone knew the outcome.</p>
+            </div>
+            <ol className="flex flex-col">
+              {paidBack.map(({ id, said, bill }) => (
+                <li key={id} className="flex flex-col gap-1 border-b border-line py-3">
+                  <p className="text-[13px] text-text-2">{companyOf(bill.provider ?? bill.sub)}</p>
+                  <p className="text-[15px] leading-snug">“{said}”</p>
+                  <Change bill={bill} />
+                  <Finding bill={bill} />
+                  <div className="mt-1 flex gap-2">
+                    <Link href={`/?post=${id}`} className="inline-flex h-8 items-center rounded-lg bg-text px-3 text-[13px] font-medium text-white hover:bg-black">
+                      Check it live
+                    </Link>
+                    <a href={bill.permalink} className="inline-flex h-8 items-center rounded-lg px-2 text-[13px] text-text-2 hover:bg-fill hover:text-text">
+                      Original post
+                    </a>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </section>
+        )}
 
         {leaderboard.length > 0 && (
           <section className="mt-14 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
@@ -187,6 +240,7 @@ export default function RealBills() {
                   </p>
                   <p className="text-[15px] font-medium leading-snug">“{bill.title}”</p>
                   <Finding bill={bill} />
+                  <Change bill={bill} />
                 </div>
                 <div className="col-start-2 flex items-center gap-2 sm:col-start-3 sm:flex-col sm:items-end">
                   <Link href={`/?post=${bill.id}`} className="inline-flex h-8 items-center rounded-lg bg-text px-3 text-[13px] font-medium text-white hover:bg-black">

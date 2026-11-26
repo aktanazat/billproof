@@ -107,7 +107,7 @@ export const sortSchema = z.object({
   pages: z.array(
     z.object({
       page: z.number().int().describe("Page number as given, starting at 1"),
-      kind: z.enum(["bill", "promise", "other"]),
+      kind: z.enum(["bill", "older_bill", "promise", "other"]),
     }),
   ),
 });

@@ -1,7 +1,7 @@
 {
   "ranAt": "2026-11-26T01:23:28.124Z",
-  "seconds": 852.374103333,
-  "spentMicros": 928704,
+  "seconds": 1178.30447525,
+  "spentMicros": 1429146,
   "posts": 1517,
   "results": [
     {
@@ -476,7 +476,7 @@
         "https://preview.redd.it/npsdban7ehpa1.jpg?width=1080&format=pjpg&auto=webp&v=enabled&s=ad692a6c8e503f8e4041fe7deac0d12f3074ca7a",
         "https://preview.redd.it/q0i65dj7ehpa1.jpg?width=1080&format=pjpg&auto=webp&v=enabled&s=049c87a35b327d8d40484b1e7fe4e1460e82cd26"
       ],
-      "ms": 20595,
+      "ms": 15712,
       "outcome": "checked",
       "provider": "xfinity mobile",
       "period": [
@@ -496,7 +496,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 2576
+      "spentMicros": 1610,
+      "change": null
     },
     {
       "id": "17bj1ij",
@@ -523,7 +524,7 @@
         "https://preview.redd.it/a36lv2zq7b9a1.jpg?width=1170&format=pjpg&auto=webp&s=9c18856e1aebe488839c10923daa24d3813ff099",
         "https://preview.redd.it/pwgqx0zq7b9a1.jpg?width=371&format=pjpg&auto=webp&s=d34e0d6a9b97c02ab49ddaa7c5b05cff3873efa8"
       ],
-      "ms": 21605,
+      "ms": 22445,
       "outcome": "checked",
       "provider": "Xfinity",
       "period": [
@@ -531,7 +532,7 @@
         null
       ],
       "lines": 8,
-      "lineSum": "not_printed",
+      "lineSum": "mismatch",
       "billPages": [
         0
       ],
@@ -563,7 +564,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 4867
+      "spentMicros": 3949,
+      "change": null
     },
     {
       "id": "17je5uz",
@@ -648,7 +650,7 @@
         "https://preview.redd.it/az86u0hiom6b1.jpg?width=872&format=pjpg&auto=webp&s=6b30f5d70bf9f50cee7b9e2f1357d49c18ae40a9",
         "https://preview.redd.it/ki7znheiom6b1.jpg?width=1080&format=pjpg&auto=webp&s=7da10f314f383978e03c3d3304327a7d38187366"
       ],
-      "ms": 16959,
+      "ms": 18481,
       "outcome": "checked",
       "provider": null,
       "period": [
@@ -666,7 +668,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 2660
+      "spentMicros": 2762,
+      "change": null
     },
     {
       "id": "1879317",
@@ -892,15 +895,15 @@
       "images": [
         "https://preview.redd.it/51g25cjok9bc1.png?width=2327&format=png&auto=webp&s=a72b233606d97e1f5d5c3f322a85efa210f8a85c"
       ],
-      "ms": 10144,
+      "ms": 23363,
       "outcome": "checked",
-      "provider": "xfinity",
+      "provider": "Xfinity",
       "period": [
         "2023-12-24",
         "2024-01-23"
       ],
       "lines": 2,
-      "lineSum": "not_printed",
+      "lineSum": "ok",
       "billPages": [
         0
       ],
@@ -910,7 +913,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 2065
+      "spentMicros": 4679,
+      "change": null
     },
     {
       "id": "1atzoge",
@@ -983,7 +987,7 @@
       "images": [
         "https://preview.redd.it/71zfrwa3huic1.jpg?width=1152&format=pjpg&auto=webp&s=9f3cc93479429852d4cd9d123a0dd66e999bbf58"
       ],
-      "ms": 8275,
+      "ms": 11257,
       "outcome": "checked",
       "provider": "Xfinity Mobile",
       "period": [
@@ -1001,7 +1005,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 1844
+      "spentMicros": 1915,
+      "change": null
     },
     {
       "id": "1bjqn6i",
@@ -1370,7 +1375,7 @@
       "images": [
         "https://preview.redd.it/6f7mg18xoszc1.jpg?width=1007&format=pjpg&auto=webp&s=3191b7ac3446414b453294e5fd3244bc3bbe620b"
       ],
-      "ms": 11219,
+      "ms": 10919,
       "outcome": "checked",
       "provider": "Xfinity",
       "period": [
@@ -1378,27 +1383,18 @@
         null
       ],
       "lines": 3,
-      "lineSum": "not_printed",
+      "lineSum": "ok",
       "billPages": [
         0
       ],
       "claims": [],
       "dropped": [],
-      "questions": [
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Internet: Connect More",
-            "Promotional Discount",
-            "Automatic Payments Discount"
-          ],
-          "cents": 2500
-        }
-      ],
+      "questions": [],
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 1,
-      "spentMicros": 2487
+      "spentMicros": 2600,
+      "change": null
     },
     {
       "id": "1d95w7u",
@@ -1496,36 +1492,9 @@
       "images": [
         "https://i.redd.it/34zdfhfkgqtc1.jpeg"
       ],
-      "ms": 16811,
-      "outcome": "checked",
-      "provider": "Verizon",
-      "period": [
-        null,
-        null
-      ],
-      "lines": 4,
-      "lineSum": "not_printed",
-      "billPages": [
-        0
-      ],
-      "claims": [],
-      "dropped": [],
-      "questions": [
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Fios Gigabit Connection",
-            "Custom TV Lifestyle & Reality",
-            "Fios Digital Voice Unlimited",
-            "Auto Pay and Paper Free Discount"
-          ],
-          "cents": 11599
-        }
-      ],
-      "explained": 0,
-      "hadOffer": true,
-      "matchedPromises": 1,
-      "spentMicros": 3720
+      "ms": 8913,
+      "outcome": "not_a_bill",
+      "spentMicros": 1403
     },
     {
       "id": "1dja12x",
@@ -1551,25 +1520,9 @@
       "images": [
         "https://preview.redd.it/2rpmpe8o25vc1.png?width=2067&format=png&auto=webp&s=25c462b9274bb7bb9032d0f129d393c66fe8a4fc"
       ],
-      "ms": 14431,
-      "outcome": "checked",
-      "provider": "Verizon",
-      "period": [
-        null,
-        null
-      ],
-      "lines": 4,
-      "lineSum": "not_printed",
-      "billPages": [
-        0
-      ],
-      "claims": [],
-      "dropped": [],
-      "questions": [],
-      "explained": 0,
-      "hadOffer": true,
-      "matchedPromises": 0,
-      "spentMicros": 3189
+      "ms": 30223,
+      "outcome": "could_not_check",
+      "spentMicros": 7046
     },
     {
       "id": "1dmsqp1",
@@ -2125,7 +2078,7 @@
       "images": [
         "https://i.redd.it/m67h61c2xnmd1.jpeg"
       ],
-      "ms": 10973,
+      "ms": 10067,
       "outcome": "checked",
       "provider": "Verizon Fios",
       "period": [
@@ -2141,7 +2094,7 @@
       "dropped": [],
       "questions": [
         {
-          "kind": "partial_period",
+          "kind": "conditions_unproven",
           "lines": [
             "Services",
             "Mobile + Home Level 2"
@@ -2152,7 +2105,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 1,
-      "spentMicros": 2325
+      "spentMicros": 2298,
+      "change": null
     },
     {
       "id": "1gf9prs",
@@ -2326,7 +2280,7 @@
       "images": [
         "https://preview.redd.it/0s7wqdmzfnwd1.png?width=983&format=png&auto=webp&s=51a61cd0b5ff688543d9915e21774b2c85d01522"
       ],
-      "ms": 9440,
+      "ms": 11103,
       "outcome": "checked",
       "provider": "Fios",
       "period": [
@@ -2344,7 +2298,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 1923
+      "spentMicros": 2254,
+      "change": null
     },
     {
       "id": "1gpydui",
@@ -2543,7 +2498,7 @@
       "images": [
         "https://i.redd.it/mdsa4p84042e1.jpeg"
       ],
-      "ms": 11677,
+      "ms": 13383,
       "outcome": "checked",
       "provider": "DIRECTV",
       "period": [
@@ -2551,21 +2506,13 @@
         null
       ],
       "lines": 8,
-      "lineSum": "not_printed",
+      "lineSum": "ok",
       "billPages": [
         0
       ],
       "claims": [],
       "dropped": [],
       "questions": [
-        {
-          "kind": "partial_period",
-          "lines": [
-            "ENTERTAINMENT (all included)",
-            "$25 off AT&T Unlimited Video Loyalty Ongoing"
-          ],
-          "cents": 9700
-        },
         {
           "kind": "partial_period",
           "lines": [
@@ -2600,8 +2547,9 @@
       ],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 2,
-      "spentMicros": 2897
+      "matchedPromises": 1,
+      "spentMicros": 3076,
+      "change": null
     },
     {
       "id": "1hgjh0s",
@@ -2766,7 +2714,7 @@
         "https://preview.redd.it/pi0d783u4a0e1.jpg?width=1080&format=pjpg&auto=webp&s=b69f27d08093d693591e9abf7895672ad6e5a37a",
         "https://preview.redd.it/rlm21x8u4a0e1.jpg?width=1080&format=pjpg&auto=webp&s=f66608679661900b4d862e859762c63ab6cc95d5"
       ],
-      "ms": 17955,
+      "ms": 25775,
       "outcome": "checked",
       "provider": null,
       "period": [
@@ -2776,11 +2724,8 @@
       "lines": 13,
       "lineSum": "not_printed",
       "billPages": [
-        0,
         1,
-        2,
         3,
-        4,
         5
       ],
       "claims": [],
@@ -2842,7 +2787,11 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 4322
+      "spentMicros": 5285,
+      "change": {
+        "earlierCents": 11204,
+        "currentCents": 10979
+      }
     },
     {
       "id": "1i8yls5",
@@ -2868,14 +2817,14 @@
       "images": [
         "https://preview.redd.it/krtm19hvkh3e1.png?width=941&format=png&auto=webp&s=296b22795182d2df7e29266673f3f9815fd9946c"
       ],
-      "ms": 13355,
+      "ms": 20245,
       "outcome": "checked",
       "provider": "Xfinity",
       "period": [
         null,
         null
       ],
-      "lines": 9,
+      "lines": 10,
       "lineSum": "not_printed",
       "billPages": [
         0
@@ -2884,12 +2833,11 @@
       "dropped": [],
       "questions": [
         {
-          "kind": "partial_period",
+          "kind": "conditions_unproven",
           "lines": [
-            "Fast",
-            "2 Product Discount (-$20.00)"
+            "Fast"
           ],
-          "cents": 7100
+          "cents": 9600
         },
         {
           "kind": "unagreed_fee",
@@ -2909,7 +2857,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 1,
-      "spentMicros": 3131
+      "spentMicros": 4879,
+      "change": null
     },
     {
       "id": "1ioi06i",
@@ -3304,7 +3253,7 @@
       "images": [
         "https://preview.redd.it/rwr3d46dmkhe1.png?width=928&format=png&auto=webp&s=e08c03013f89106aa63469019866f447c612dde2"
       ],
-      "ms": 12561,
+      "ms": 20112,
       "outcome": "checked",
       "provider": "Fios",
       "period": [
@@ -3322,7 +3271,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 2603
+      "spentMicros": 3990,
+      "change": null
     },
     {
       "id": "1jw2vz2",
@@ -3766,18 +3716,17 @@
         "https://preview.redd.it/0gac8e9f82qe1.png?width=700&format=png&auto=webp&s=7f1a68cdd1d7fbb276ca5109cbd7f790453bbe64",
         "https://preview.redd.it/yl7c669f82qe1.png?width=810&format=png&auto=webp&s=35a9b3fe8e523ac47948eddbe01128faf0f34e3c"
       ],
-      "ms": 17819,
+      "ms": 44535,
       "outcome": "checked",
       "provider": "Xfinity",
       "period": [
         null,
         null
       ],
-      "lines": 26,
-      "lineSum": "not_printed",
+      "lines": 13,
+      "lineSum": "mismatch",
       "billPages": [
-        0,
-        1
+        0
       ],
       "claims": [],
       "dropped": [],
@@ -3802,41 +3751,16 @@
             "Regulatory Cost Recovery"
           ],
           "cents": 12
-        },
-        {
-          "kind": "unagreed_fee",
-          "lines": [
-            "Broadcast TV Fee"
-          ],
-          "cents": 3115
-        },
-        {
-          "kind": "unagreed_fee",
-          "lines": [
-            "Regional Sports Fee"
-          ],
-          "cents": 1310
-        },
-        {
-          "kind": "unagreed_fee",
-          "lines": [
-            "Regulatory Cost Recovery"
-          ],
-          "cents": 12
-        },
-        {
-          "kind": "repeated_charge",
-          "lines": [
-            "Regulatory Cost Recovery",
-            "Regulatory Cost Recovery"
-          ],
-          "cents": 24
         }
       ],
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 3917
+      "spentMicros": 9883,
+      "change": {
+        "earlierCents": 18802,
+        "currentCents": 28314
+      }
     },
     {
       "id": "1ksgbep",
@@ -4038,7 +3962,7 @@
       "images": [
         "https://i.redd.it/7p0j3z1t4d1f1.jpeg"
       ],
-      "ms": 8776,
+      "ms": 9971,
       "outcome": "checked",
       "provider": null,
       "period": [
@@ -4052,19 +3976,12 @@
       ],
       "claims": [],
       "dropped": [],
-      "questions": [
-        {
-          "kind": "partial_period",
-          "lines": [
-            "YouTube Premium subscription"
-          ],
-          "cents": 1399
-        }
-      ],
+      "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 1,
-      "spentMicros": 1777
+      "matchedPromises": 0,
+      "spentMicros": 1864,
+      "change": null
     },
     {
       "id": "1l262l9",
@@ -4269,7 +4186,7 @@
       "images": [
         "https://preview.redd.it/qi3gdsgcir4f1.jpg?width=1179&format=pjpg&auto=webp&s=ee1fc74bbf7e76a36293c0dad4b143562f97af6e"
       ],
-      "ms": 6597,
+      "ms": 7306,
       "outcome": "checked",
       "provider": null,
       "period": [
@@ -4277,7 +4194,7 @@
         null
       ],
       "lines": 1,
-      "lineSum": "not_printed",
+      "lineSum": "ok",
       "billPages": [
         0
       ],
@@ -4287,7 +4204,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 1359
+      "spentMicros": 1183,
+      "change": null
     },
     {
       "id": "14hxmcg",
@@ -4358,7 +4276,7 @@
         "https://preview.redd.it/6fq8ma5qut1f1.png?width=1920&format=png&auto=webp&s=747f6f74d105245e0b36a664f964a1595a37e75d",
         "https://preview.redd.it/mgj4fa5qut1f1.png?width=1920&format=png&auto=webp&s=e804bb2b8d5db5399874849380cbdc6b045479dc"
       ],
-      "ms": 13759,
+      "ms": 19338,
       "outcome": "checked",
       "provider": "Google Fi",
       "period": [
@@ -4366,7 +4284,7 @@
         null
       ],
       "lines": 3,
-      "lineSum": "not_printed",
+      "lineSum": "ok",
       "billPages": [
         0,
         1
@@ -4377,7 +4295,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 2573
+      "spentMicros": 3736,
+      "change": null
     },
     {
       "id": "1le1arn",
@@ -4539,7 +4458,7 @@
       "images": [
         "https://i.redd.it/m03vp7dngc6f1.jpeg"
       ],
-      "ms": 7922,
+      "ms": 12785,
       "outcome": "checked",
       "provider": "Metro",
       "period": [
@@ -4557,7 +4476,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 1783
+      "spentMicros": 2416,
+      "change": null
     },
     {
       "id": "1lilzlr",
@@ -4659,7 +4579,7 @@
       "images": [
         "https://i.redd.it/uu4sg4a6cn7f1.jpeg"
       ],
-      "ms": 7561,
+      "ms": 8202,
       "outcome": "checked",
       "provider": null,
       "period": [
@@ -4685,7 +4605,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 1523
+      "spentMicros": 1675,
+      "change": null
     },
     {
       "id": "1lv2h82",
@@ -5518,7 +5439,7 @@
         "https://preview.redd.it/h8w3s1stfwef1.png?width=960&format=png&auto=webp&s=a0721e787d16af240844e3fe81465ed2a8112ea3",
         "https://preview.redd.it/qda5i7utfwef1.png?width=960&format=png&auto=webp&s=60aa0ae93c31767814aaabb4fbb44afff2e983a0"
       ],
-      "ms": 14596,
+      "ms": 12829,
       "outcome": "checked",
       "provider": "Google Fi",
       "period": [
@@ -5526,18 +5447,27 @@
         null
       ],
       "lines": 3,
-      "lineSum": "not_printed",
+      "lineSum": "ok",
       "billPages": [
         0,
         2
       ],
       "claims": [],
       "dropped": [],
-      "questions": [],
+      "questions": [
+        {
+          "kind": "unagreed_fee",
+          "lines": [
+            "Taxes & regulatory fees"
+          ],
+          "cents": 892
+        }
+      ],
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 2951
+      "spentMicros": 2264,
+      "change": null
     },
     {
       "id": "1n2xt1s",
@@ -5924,7 +5854,7 @@
       "images": [
         "https://i.redd.it/0dwbmon23bpf1.png"
       ],
-      "ms": 8795,
+      "ms": 10993,
       "outcome": "checked",
       "provider": null,
       "period": [
@@ -5950,7 +5880,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 1656
+      "spentMicros": 2080,
+      "change": null
     },
     {
       "id": "1nwr0ao",
@@ -6170,7 +6101,7 @@
       "images": [
         "https://i.redd.it/uwkcg7vwtytf1.jpeg"
       ],
-      "ms": 11003,
+      "ms": 15236,
       "outcome": "checked",
       "provider": "Google",
       "period": [
@@ -6178,7 +6109,7 @@
         null
       ],
       "lines": 5,
-      "lineSum": "not_printed",
+      "lineSum": "ok",
       "billPages": [
         0
       ],
@@ -6188,7 +6119,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 2422
+      "spentMicros": 3415,
+      "change": null
     },
     {
       "id": "1ob9rpk",
@@ -6219,7 +6151,7 @@
         "https://preview.redd.it/dybgtl9tddsf1.png?width=619&format=png&auto=webp&s=0a3d4789673161e28c0f452dcd0314151a29d960",
         "https://preview.redd.it/sx810qaoddsf1.png?width=733&format=png&auto=webp&s=9160f45a2516956d0925fe7306f64abed09cfc12"
       ],
-      "ms": 16531,
+      "ms": 15608,
       "outcome": "checked",
       "provider": "Optimum",
       "period": [
@@ -6235,46 +6167,6 @@
       "dropped": [],
       "questions": [
         {
-          "kind": "partial_period",
-          "lines": [
-            "Optimum Internet",
-            "1 Gig"
-          ],
-          "cents": 14499
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Optimum Internet",
-            "1 Gig"
-          ],
-          "cents": 14499
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Optimum Internet",
-            "1 Gig"
-          ],
-          "cents": 14499
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Optimum Internet",
-            "1 Gig"
-          ],
-          "cents": 14499
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Optimum Internet",
-            "1 Gig"
-          ],
-          "cents": 14499
-        },
-        {
           "kind": "unagreed_fee",
           "lines": [
             "Network Enhancement Fee"
@@ -6284,8 +6176,9 @@
       ],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 5,
-      "spentMicros": 3239
+      "matchedPromises": 0,
+      "spentMicros": 3139,
+      "change": null
     },
     {
       "id": "1oa6zb6",
@@ -6398,7 +6291,7 @@
       "images": [
         "https://i.redd.it/auiz9v5e8buf1.png"
       ],
-      "ms": 15690,
+      "ms": 16085,
       "outcome": "checked",
       "provider": null,
       "period": [
@@ -6406,7 +6299,7 @@
         null
       ],
       "lines": 9,
-      "lineSum": "not_printed",
+      "lineSum": "ok",
       "billPages": [
         0
       ],
@@ -6424,7 +6317,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 3629
+      "spentMicros": 3749,
+      "change": null
     },
     {
       "id": "1o7p8b0",
@@ -6436,7 +6330,7 @@
       "images": [
         "https://preview.redd.it/kfd7zohxpcvf1.png?width=504&format=png&auto=webp&s=20c0e388c606afac06edfc2d1088096d1069d28e"
       ],
-      "ms": 11317,
+      "ms": 14230,
       "outcome": "checked",
       "provider": "AT&T",
       "period": [
@@ -6452,25 +6346,19 @@
       "dropped": [],
       "questions": [
         {
-          "kind": "partial_period",
+          "kind": "end_date_unread",
           "lines": [
             "AT&T FIBER — INTERNET 1000",
             "$20 off for 12 months"
           ],
           "cents": 5999
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Max subscription included"
-          ],
-          "cents": 0
         }
       ],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 2,
-      "spentMicros": 2535
+      "matchedPromises": 1,
+      "spentMicros": 3114,
+      "change": null
     },
     {
       "id": "1ohqie2",
@@ -6546,7 +6434,7 @@
         "https://preview.redd.it/os229p9acprf1.jpg?width=1080&format=pjpg&auto=webp&s=f459a2f9044ff54fb8d652e989df326e9131e44c",
         "https://preview.redd.it/xnnr0wx9cprf1.jpg?width=1080&format=pjpg&auto=webp&s=57249580bfe7f5c0fb1988f958c96b130233fd0b"
       ],
-      "ms": 27407,
+      "ms": 20831,
       "outcome": "checked",
       "provider": null,
       "period": [
@@ -6554,7 +6442,7 @@
         null
       ],
       "lines": 3,
-      "lineSum": "not_printed",
+      "lineSum": "ok",
       "billPages": [
         0,
         2
@@ -6564,8 +6452,9 @@
       "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 1,
-      "spentMicros": 5675
+      "matchedPromises": 0,
+      "spentMicros": 3459,
+      "change": null
     },
     {
       "id": "1oq49d6",
@@ -6686,17 +6575,16 @@
         "https://preview.redd.it/f6w2ftmnt3sf1.jpg?width=1282&format=pjpg&auto=webp&s=32999987461236d23caebcd0c7536ad8e3156cdb",
         "https://preview.redd.it/mbpm6tmnt3sf1.jpg?width=1290&format=pjpg&auto=webp&s=44a364b497c999ea1606ab79186428300b45d677"
       ],
-      "ms": 33512,
+      "ms": 21710,
       "outcome": "checked",
       "provider": "Optimum",
       "period": [
-        "2025-07-01",
-        "2025-07-31"
+        "2025-10-01",
+        "2025-10-31"
       ],
       "lines": 0,
       "lineSum": "mismatch",
       "billPages": [
-        0,
         1
       ],
       "claims": [],
@@ -6705,7 +6593,11 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 4817
+      "spentMicros": 3012,
+      "change": {
+        "earlierCents": 0,
+        "currentCents": 0
+      }
     },
     {
       "id": "1ovo10q",
@@ -6805,7 +6697,7 @@
       "images": [
         "https://preview.redd.it/yors7rftkyzf1.png?width=537&format=png&auto=webp&s=afdc5077ba0ce990ceae22e0b0090a44d040bf61"
       ],
-      "ms": 17140,
+      "ms": 22018,
       "outcome": "checked",
       "provider": "Spectrum",
       "period": [
@@ -6817,18 +6709,21 @@
       "billPages": [
         0
       ],
-      "claims": [],
+      "claims": [
+        {
+          "kind": "included_charged",
+          "amountCents": 500,
+          "actualCents": 500,
+          "expectedCents": 0,
+          "lines": [
+            "Xumo Stream Box Service"
+          ],
+          "promise": "However, I have signed up for Spectrum 500mbps and was charged 70$ and was told \"xumo\" tv  would be included for free.",
+          "needsConfirmation": true
+        }
+      ],
       "dropped": [],
       "questions": [
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Spectrum TV Stream",
-            "Xumo Stream Box Service",
-            "Promotional Discount"
-          ],
-          "cents": 4000
-        },
         {
           "kind": "unagreed_fee",
           "lines": [
@@ -6840,7 +6735,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 1,
-      "spentMicros": 3406
+      "spentMicros": 4725,
+      "change": null
     },
     {
       "id": "1oto0l0",
@@ -6853,14 +6749,14 @@
         "https://preview.redd.it/mez0cradih0g1.jpg?width=2388&format=pjpg&auto=webp&s=409de5c6d54f50f8ad6313abdabcadfdb627f118",
         "https://preview.redd.it/yaeepqadih0g1.jpg?width=1915&format=pjpg&auto=webp&s=78a5ace70862902f6934faea7f3e8a7809c24344"
       ],
-      "ms": 15070,
+      "ms": 17850,
       "outcome": "checked",
       "provider": "Spectrum",
       "period": [
         null,
         null
       ],
-      "lines": 0,
+      "lines": 1,
       "lineSum": "not_printed",
       "billPages": [
         1
@@ -6871,7 +6767,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 2813
+      "spentMicros": 3291,
+      "change": null
     },
     {
       "id": "1p28yu9",
@@ -6912,7 +6809,7 @@
       "images": [
         "https://i.redd.it/ukefz8dnwczf1.jpeg"
       ],
-      "ms": 20876,
+      "ms": 19291,
       "outcome": "checked",
       "provider": "Fios",
       "period": [
@@ -6930,7 +6827,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 4263
+      "spentMicros": 3769,
+      "change": null
     },
     {
       "id": "1olr47s",
@@ -6944,7 +6842,7 @@
         "https://preview.redd.it/7g7hg3r01oyf1.png?width=1316&format=png&auto=webp&s=8b18c214bcf51f73317651199741aa3942f26af0",
         "https://preview.redd.it/wyrlx2r01oyf1.png?width=1314&format=png&auto=webp&s=eff0e3cb153a0025aae1c469ea26fbe8ab70e19f"
       ],
-      "ms": 22421,
+      "ms": 21959,
       "outcome": "checked",
       "provider": "Optimum",
       "period": [
@@ -6964,7 +6862,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 5352
+      "spentMicros": 3742,
+      "change": null
     },
     {
       "id": "1p5ol6b",
@@ -7005,7 +6904,7 @@
       "images": [
         "https://i.redd.it/zvi2mlfjrt1g1.jpeg"
       ],
-      "ms": 7155,
+      "ms": 8135,
       "outcome": "checked",
       "provider": "Spectrum",
       "period": [
@@ -7031,7 +6930,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 1331
+      "spentMicros": 1608,
+      "change": null
     },
     {
       "id": "1p3fdqt",
@@ -7173,7 +7073,7 @@
       "images": [
         "https://i.redd.it/2nbt81tgit1g1.png"
       ],
-      "ms": 14940,
+      "ms": 8295,
       "outcome": "checked",
       "provider": "Spectrum",
       "period": [
@@ -7191,7 +7091,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 2973
+      "spentMicros": 1809,
+      "change": null
     },
     {
       "id": "1out58k",
@@ -7319,7 +7220,7 @@
       "images": [
         "https://i.redd.it/28587myqu24g1.jpeg"
       ],
-      "ms": 9258,
+      "ms": 8567,
       "outcome": "checked",
       "provider": "Fios",
       "period": [
@@ -7333,19 +7234,12 @@
       ],
       "claims": [],
       "dropped": [],
-      "questions": [
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Fios Gigabit Connection"
-          ],
-          "cents": 4000
-        }
-      ],
+      "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 1,
-      "spentMicros": 1916
+      "matchedPromises": 0,
+      "spentMicros": 1917,
+      "change": null
     },
     {
       "id": "1pgb2r7",
@@ -7456,43 +7350,42 @@
         "https://preview.redd.it/3ekwbeqhff5g1.jpg?width=1080&format=pjpg&auto=webp&s=b76968fa4184a6a4bef7db974a2bc20e90e5131e",
         "https://preview.redd.it/wop1qirhff5g1.jpg?width=1080&format=pjpg&auto=webp&s=b6a9eadc589c9054912c6542df2b1016c074d102"
       ],
-      "ms": 11262,
+      "ms": 27339,
       "outcome": "checked",
       "provider": "Spectrum",
       "period": [
         null,
         null
       ],
-      "lines": 4,
+      "lines": 2,
       "lineSum": "not_printed",
       "billPages": [
-        0,
         1
       ],
-      "claims": [],
-      "dropped": [],
-      "questions": [
+      "claims": [
         {
-          "kind": "partial_period",
+          "kind": "credit_missing",
+          "amountCents": 388,
+          "actualCents": 1612,
+          "expectedCents": 2000,
           "lines": [
             "Spectrum Internet Advantage",
             "Promotional Discount"
           ],
-          "cents": 3000
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Spectrum Internet Advantage",
-            "Promotional Discount"
-          ],
-          "cents": 3000
+          "promise": "$50-$20=$20 discount for a year.",
+          "needsConfirmation": true
         }
       ],
+      "dropped": [],
+      "questions": [],
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 2,
-      "spentMicros": 2343
+      "spentMicros": 5342,
+      "change": {
+        "earlierCents": 3000,
+        "currentCents": 2420
+      }
     },
     {
       "id": "1pm4jv6",
@@ -7555,50 +7448,9 @@
         "https://preview.redd.it/j34p0pnzfv2g1.png?width=864&format=png&auto=webp&s=e7330b4fddcc34a06ba71c666abe27d28c9a1bbf",
         "https://preview.redd.it/wy2cbpnzfv2g1.png?width=864&format=png&auto=webp&s=833e255d58f8409ed39eb663eb564c28041c740e"
       ],
-      "ms": 25296,
-      "outcome": "checked",
-      "provider": null,
-      "period": [
-        null,
-        null
-      ],
-      "lines": 2,
-      "lineSum": "not_printed",
-      "billPages": [
-        2
-      ],
-      "claims": [],
-      "dropped": [],
-      "questions": [
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Payment Amount",
-            "12 month med family discount"
-          ],
-          "cents": 6000
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Payment Amount",
-            "12 month med family discount"
-          ],
-          "cents": 6000
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Payment Amount",
-            "12 month med family discount"
-          ],
-          "cents": 6000
-        }
-      ],
-      "explained": 0,
-      "hadOffer": true,
-      "matchedPromises": 3,
-      "spentMicros": 5954
+      "ms": 10977,
+      "outcome": "not_a_bill",
+      "spentMicros": 1568
     },
     {
       "id": "1ppdsv6",
@@ -7625,7 +7477,7 @@
       "images": [
         "https://i.redd.it/adlpq0bsqh4g1.jpeg"
       ],
-      "ms": 19290,
+      "ms": 19187,
       "outcome": "checked",
       "provider": "Optimum",
       "period": [
@@ -7651,7 +7503,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 3808
+      "spentMicros": 4174,
+      "change": null
     },
     {
       "id": "1pp0023",
@@ -7736,92 +7589,35 @@
         "https://preview.redd.it/08kn57lnri3g1.jpg?width=519&format=pjpg&auto=webp&s=dab5fc8ac63b0ba10ccc391b2530d3630c36aa3c",
         "https://preview.redd.it/lc7u5u8mti3g1.jpg?width=719&format=pjpg&auto=webp&s=6504ba34bb38e78c623fffaea64a0917d77c1786"
       ],
-      "ms": 27399,
+      "ms": 27394,
       "outcome": "checked",
       "provider": "Spectrum",
       "period": [
         "2025-11-20",
         "2025-12-19"
       ],
-      "lines": 6,
-      "lineSum": "not_printed",
+      "lines": 16,
+      "lineSum": "ok",
       "billPages": [
+        0,
         1
       ],
-      "claims": [
-        {
-          "kind": "included_charged",
-          "amountCents": 4125,
-          "actualCents": 4125,
-          "expectedCents": 0,
-          "lines": [
-            "Spectrum Internet"
-          ],
-          "promise": "Spectrum Modem Included",
-          "needsConfirmation": true
-        },
-        {
-          "kind": "price_above_promise",
-          "amountCents": 500,
-          "actualCents": 1500,
-          "expectedCents": 1000,
-          "lines": [
-            "Spectrum Voice"
-          ],
-          "promise": "Spectrum Voice $10.00",
-          "needsConfirmation": true
-        }
-      ],
+      "claims": [],
       "dropped": [],
       "questions": [
         {
-          "kind": "end_date_unread",
+          "kind": "unagreed_fee",
           "lines": [
-            "Spectrum Internet"
+            "California Cost Recovery Charge"
           ],
-          "cents": 4125
-        },
-        {
-          "kind": "end_date_unread",
-          "lines": [
-            "Spectrum TV"
-          ],
-          "cents": 11000
-        },
-        {
-          "kind": "price_gap",
-          "lines": [
-            "Spectrum Internet"
-          ],
-          "cents": 4125
-        },
-        {
-          "kind": "end_date_unread",
-          "lines": [
-            "Spectrum TV"
-          ],
-          "cents": 11000
-        },
-        {
-          "kind": "end_date_unread",
-          "lines": [
-            "Spectrum Voice",
-            "Credits & Charges"
-          ],
-          "cents": -1000
-        },
-        {
-          "kind": "overlapping_claim",
-          "lines": [
-            "Spectrum Internet"
-          ],
-          "cents": 4125
+          "cents": 125
         }
       ],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 20,
-      "spentMicros": 5698
+      "matchedPromises": 2,
+      "spentMicros": 6430,
+      "change": null
     },
     {
       "id": "1pwjj78",
@@ -7876,7 +7672,7 @@
       "images": [
         "https://preview.redd.it/6xw8z2m2a27g1.png?width=340&format=png&auto=webp&s=49c35e7a2be66ba095853ac2a42b5a59881364e7"
       ],
-      "ms": 10289,
+      "ms": 19391,
       "outcome": "checked",
       "provider": "AT&T",
       "period": [
@@ -7884,36 +7680,32 @@
         null
       ],
       "lines": 6,
-      "lineSum": "not_printed",
+      "lineSum": "ok",
       "billPages": [
         0
       ],
-      "claims": [],
-      "dropped": [],
-      "questions": [
+      "claims": [
         {
-          "kind": "partial_period",
+          "kind": "price_above_promise",
+          "amountCents": 1800,
+          "actualCents": 5500,
+          "expectedCents": 3700,
           "lines": [
             "Internet 1000 (Fiber 1 GIG)",
             "$25 Off Ongoing",
             "AutoPay/Paperless Billing Discount"
           ],
-          "cents": 5500
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Internet 1000 (Fiber 1 GIG)",
-            "$25 Off Ongoing",
-            "AutoPay/Paperless Billing Discount"
-          ],
-          "cents": 5500
+          "promise": "$55/mo for a gig or $37 if you have AT&T cell phones",
+          "needsConfirmation": true
         }
       ],
+      "dropped": [],
+      "questions": [],
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 2,
-      "spentMicros": 2301
+      "spentMicros": 4274,
+      "change": null
     },
     {
       "id": "1pw9gdi",
@@ -8011,7 +7803,7 @@
         "https://preview.redd.it/81kgsnp2ui3g1.jpg?width=519&format=pjpg&auto=webp&s=4f64ed3f06226c74be4843eca237bf7202cc5392",
         "https://preview.redd.it/qtcxlf33ui3g1.jpg?width=719&format=pjpg&auto=webp&s=711f546827a2636138def91e14c454da43bb782e"
       ],
-      "ms": 35627,
+      "ms": 28573,
       "outcome": "checked",
       "provider": "Spectrum",
       "period": [
@@ -8021,68 +7813,17 @@
       "lines": 6,
       "lineSum": "not_printed",
       "billPages": [
+        0,
         1
       ],
-      "claims": [
-        {
-          "kind": "included_charged",
-          "amountCents": 4125,
-          "actualCents": 4125,
-          "expectedCents": 0,
-          "lines": [
-            "Spectrum Internet"
-          ],
-          "promise": "Spectrum Modem Included",
-          "needsConfirmation": true
-        },
-        {
-          "kind": "price_above_promise",
-          "amountCents": 500,
-          "actualCents": 1500,
-          "expectedCents": 1000,
-          "lines": [
-            "Spectrum Voice"
-          ],
-          "promise": "Spectrum Voice $10.00",
-          "needsConfirmation": true
-        }
-      ],
+      "claims": [],
       "dropped": [],
-      "questions": [
-        {
-          "kind": "end_date_unread",
-          "lines": [
-            "Spectrum Internet"
-          ],
-          "cents": 4125
-        },
-        {
-          "kind": "end_date_unread",
-          "lines": [
-            "Spectrum TV"
-          ],
-          "cents": 11000
-        },
-        {
-          "kind": "end_date_unread",
-          "lines": [
-            "Spectrum Voice",
-            "Credits & Charges"
-          ],
-          "cents": -1000
-        },
-        {
-          "kind": "overlapping_claim",
-          "lines": [
-            "Spectrum Internet"
-          ],
-          "cents": 4125
-        }
-      ],
+      "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 18,
-      "spentMicros": 7466
+      "matchedPromises": 0,
+      "spentMicros": 5993,
+      "change": null
     },
     {
       "id": "1q6nps5",
@@ -8181,17 +7922,16 @@
         "https://preview.redd.it/2c2zxjedg39g1.jpg?width=1440&format=pjpg&auto=webp&s=441c37fbb9560da8922831b50ac71f8e4121cc87",
         "https://preview.redd.it/klt9lpidg39g1.jpg?width=1440&format=pjpg&auto=webp&s=43295db7c8bc856d322292995802c775c8644943"
       ],
-      "ms": 13019,
+      "ms": 16510,
       "outcome": "checked",
       "provider": "Spectrum",
       "period": [
         null,
         null
       ],
-      "lines": 6,
+      "lines": 3,
       "lineSum": "not_printed",
       "billPages": [
-        0,
         1
       ],
       "claims": [],
@@ -8203,35 +7943,16 @@
             "CA Cost Recovery Charge"
           ],
           "cents": 125
-        },
-        {
-          "kind": "unagreed_fee",
-          "lines": [
-            "CA Cost Recovery Charge"
-          ],
-          "cents": 125
-        },
-        {
-          "kind": "repeated_charge",
-          "lines": [
-            "Spectrum Internet Premier",
-            "Spectrum Internet Premier"
-          ],
-          "cents": 16000
-        },
-        {
-          "kind": "repeated_charge",
-          "lines": [
-            "CA Cost Recovery Charge",
-            "CA Cost Recovery Charge"
-          ],
-          "cents": 250
         }
       ],
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 2747
+      "spentMicros": 2707,
+      "change": {
+        "earlierCents": 5125,
+        "currentCents": 6625
+      }
     },
     {
       "id": "1q71n1t",
@@ -8374,17 +8095,16 @@
         "https://preview.redd.it/gxf1x4v49dag1.png?width=849&format=png&auto=webp&s=ceb83ddf016e579ed426fa7adcd52fc9a6220f3c",
         "https://preview.redd.it/prt400gk9dag1.png?width=791&format=png&auto=webp&s=fafc08c6bfd3e11f5d28bd43de3eec50e9fdba8a"
       ],
-      "ms": 18296,
+      "ms": 29170,
       "outcome": "checked",
       "provider": null,
       "period": [
         null,
         null
       ],
-      "lines": 4,
+      "lines": 2,
       "lineSum": "not_printed",
       "billPages": [
-        0,
         1
       ],
       "claims": [],
@@ -8393,7 +8113,11 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 3361
+      "spentMicros": 6220,
+      "change": {
+        "earlierCents": 8956,
+        "currentCents": 9045
+      }
     },
     {
       "id": "1qc6sxi",
@@ -8498,14 +8222,14 @@
         "https://preview.redd.it/ost3y6lil0cg1.jpg?width=1440&format=pjpg&auto=webp&s=8366ec705f9012e0eeddbd598aa79d63ce2a03f5",
         "https://preview.redd.it/ptvur3nil0cg1.jpg?width=5760&format=pjpg&auto=webp&s=962e97bbeef92e3be37edcdded478094d9c5cc07"
       ],
-      "ms": 14262,
+      "ms": 14131,
       "outcome": "checked",
       "provider": "Spectrum",
       "period": [
         null,
         null
       ],
-      "lines": 11,
+      "lines": 12,
       "lineSum": "not_printed",
       "billPages": [
         0,
@@ -8517,7 +8241,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 2852
+      "spentMicros": 2309,
+      "change": null
     },
     {
       "id": "1qbbt9e",
@@ -8529,7 +8254,7 @@
       "images": [
         "https://i.redd.it/8wdt92jfc0dg1.jpeg"
       ],
-      "ms": 10591,
+      "ms": 12901,
       "outcome": "checked",
       "provider": "Spectrum",
       "period": [
@@ -8550,12 +8275,20 @@
             "Broadcast TV Surcharge"
           ],
           "cents": 2800
+        },
+        {
+          "kind": "unagreed_fee",
+          "lines": [
+            "WiFi Service"
+          ],
+          "cents": 1000
         }
       ],
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 2469
+      "spentMicros": 2897,
+      "change": null
     },
     {
       "id": "1qwac03",
@@ -8708,7 +8441,7 @@
         "https://preview.redd.it/jl5k0q8mef6g1.jpg?width=3060&format=pjpg&auto=webp&s=84032f5d868ef42e2c94a8974dcc6b0d92197ed3",
         "https://preview.redd.it/svdo4k8mef6g1.jpg?width=2456&format=pjpg&auto=webp&s=5e0b8fe81dcee13957a8a08be71ff3dbb2cb5592"
       ],
-      "ms": 43069,
+      "ms": 17792,
       "outcome": "checked",
       "provider": "DISH",
       "period": [
@@ -8746,7 +8479,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 11175
+      "spentMicros": 3545,
+      "change": null
     },
     {
       "id": "1q5oitp",
@@ -8760,17 +8494,16 @@
         "https://preview.redd.it/k30j7ctyhrbg1.jpg?width=1206&format=pjpg&auto=webp&s=9f4c152386354dcb5d80a6066f2a5e9f6da25ccf",
         "https://preview.redd.it/y5zbl8tyhrbg1.jpg?width=1206&format=pjpg&auto=webp&s=19fef08a73842c6f2f575fd3d8ff219e88bc0219"
       ],
-      "ms": 22729,
+      "ms": 21425,
       "outcome": "checked",
       "provider": null,
       "period": [
         null,
         null
       ],
-      "lines": 8,
+      "lines": 5,
       "lineSum": "not_printed",
       "billPages": [
-        0,
         2
       ],
       "claims": [],
@@ -8780,18 +8513,20 @@
           "kind": "partial_period",
           "lines": [
             "Unlimited Standard plan",
-            "Half off new lines for 12 months for you",
-            "Unlimited Standard plan",
             "Prorated service",
             "Half off new lines for 12 months"
           ],
-          "cents": 14982
+          "cents": 12720
         }
       ],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 2,
-      "spentMicros": 5049
+      "matchedPromises": 1,
+      "spentMicros": 4577,
+      "change": {
+        "earlierCents": 2737,
+        "currentCents": 12502
+      }
     },
     {
       "id": "1r86l5a",
@@ -9023,25 +8758,9 @@
         "https://preview.redd.it/1vlutyasrbjg1.jpg?width=1320&format=pjpg&auto=webp&s=ccb35b45d90e4a3d2c632ebbcbda64929fdaa45c",
         "https://preview.redd.it/fmawzyasrbjg1.jpg?width=1320&format=pjpg&auto=webp&s=6eddad5dc3ef46cc3537844537f08213dff96f40"
       ],
-      "ms": 10677,
-      "outcome": "checked",
-      "provider": null,
-      "period": [
-        null,
-        null
-      ],
-      "lines": 0,
-      "lineSum": "not_printed",
-      "billPages": [
-        1
-      ],
-      "claims": [],
-      "dropped": [],
-      "questions": [],
-      "explained": 0,
-      "hadOffer": true,
-      "matchedPromises": 0,
-      "spentMicros": 1780
+      "ms": 6242,
+      "outcome": "not_a_bill",
+      "spentMicros": 779
     },
     {
       "id": "1rgfbsc",
@@ -9144,7 +8863,7 @@
         "https://preview.redd.it/44d8106ywpjg1.jpg?width=1206&format=pjpg&auto=webp&s=f315afd86361e6c6e93cbaf035bb5815c3820868",
         "https://preview.redd.it/wfyhi06ywpjg1.jpg?width=1206&format=pjpg&auto=webp&s=f5b2b7ff662877784d5489237943cb46d9bea994"
       ],
-      "ms": 12320,
+      "ms": 13269,
       "outcome": "checked",
       "provider": "Visible",
       "period": [
@@ -9162,7 +8881,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 2300
+      "spentMicros": 2100,
+      "change": null
     },
     {
       "id": "1rhxxs9",
@@ -9329,7 +9049,7 @@
       "images": [
         "https://i.redd.it/g63jfxvc7slg1.png"
       ],
-      "ms": 14523,
+      "ms": 20841,
       "outcome": "checked",
       "provider": "Spectrum",
       "period": [
@@ -9345,14 +9065,6 @@
       "dropped": [],
       "questions": [
         {
-          "kind": "partial_period",
-          "lines": [
-            "Spectrum Internet Premier",
-            "Promotional Discount"
-          ],
-          "cents": 3000
-        },
-        {
           "kind": "unagreed_fee",
           "lines": [
             "CA Cost Recovery Charge"
@@ -9363,7 +9075,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 1,
-      "spentMicros": 2820
+      "spentMicros": 4755,
+      "change": null
     },
     {
       "id": "1rtmacq",
@@ -9389,7 +9102,7 @@
       "images": [
         "https://i.redd.it/nddg9qs9jwng1.jpeg"
       ],
-      "ms": 10303,
+      "ms": 8398,
       "outcome": "checked",
       "provider": "Spectrum",
       "period": [
@@ -9407,7 +9120,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 2003
+      "spentMicros": 1829,
+      "change": null
     },
     {
       "id": "1rtn1wq",
@@ -9434,9 +9148,9 @@
       "images": [
         "https://preview.redd.it/wmt269n28ung1.png?width=492&format=png&auto=webp&s=914fa4177bb7685e444a185b8abb276f3e389875"
       ],
-      "ms": 12753,
+      "ms": 15288,
       "outcome": "checked",
-      "provider": "Optimum Fiber",
+      "provider": null,
       "period": [
         null,
         null
@@ -9448,19 +9162,12 @@
       ],
       "claims": [],
       "dropped": [],
-      "questions": [
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Modem/Gateway"
-          ],
-          "cents": 0
-        }
-      ],
+      "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 1,
-      "spentMicros": 2663
+      "matchedPromises": 0,
+      "spentMicros": 3305,
+      "change": null
     },
     {
       "id": "1ry9qi4",
@@ -9515,7 +9222,7 @@
       "images": [
         "https://i.redd.it/juyh950lwwpg1.png"
       ],
-      "ms": 8002,
+      "ms": 9262,
       "outcome": "checked",
       "provider": "Spectrum",
       "period": [
@@ -9529,20 +9236,12 @@
       ],
       "claims": [],
       "dropped": [],
-      "questions": [
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Spectrum Internet Gig",
-            "Promotional Discount"
-          ],
-          "cents": 3000
-        }
-      ],
+      "questions": [],
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 1,
-      "spentMicros": 1494
+      "spentMicros": 1747,
+      "change": null
     },
     {
       "id": "1rxgumb",
@@ -9554,7 +9253,7 @@
       "images": [
         "https://i.redd.it/3cxwqcfkfvpg1.jpeg"
       ],
-      "ms": 9667,
+      "ms": 12016,
       "outcome": "checked",
       "provider": "Spectrum",
       "period": [
@@ -9570,14 +9269,6 @@
       "dropped": [],
       "questions": [
         {
-          "kind": "partial_period",
-          "lines": [
-            "Spectrum Internet Gig",
-            "Promotional Discount"
-          ],
-          "cents": 4000
-        },
-        {
           "kind": "unagreed_fee",
           "lines": [
             "CA Cost Recovery Charge"
@@ -9587,8 +9278,9 @@
       ],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 1,
-      "spentMicros": 2087
+      "matchedPromises": 2,
+      "spentMicros": 2079,
+      "change": null
     },
     {
       "id": "1s4nl7k",
@@ -9660,7 +9352,7 @@
       "images": [
         "https://i.redd.it/lmy8eke7boog1.jpeg"
       ],
-      "ms": 16889,
+      "ms": 12954,
       "outcome": "checked",
       "provider": "Spectrum",
       "period": [
@@ -9676,7 +9368,7 @@
       "dropped": [],
       "questions": [
         {
-          "kind": "partial_period",
+          "kind": "end_date_unread",
           "lines": [
             "Spectrum Internet Premier",
             "Promotional Discount"
@@ -9684,7 +9376,7 @@
           "cents": 3000
         },
         {
-          "kind": "partial_period",
+          "kind": "end_date_unread",
           "lines": [
             "Spectrum Internet Premier",
             "Promotional Discount"
@@ -9692,7 +9384,7 @@
           "cents": 3000
         },
         {
-          "kind": "partial_period",
+          "kind": "conditions_unproven",
           "lines": [
             "Spectrum Internet Premier",
             "Promotional Discount"
@@ -9703,7 +9395,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 3,
-      "spentMicros": 3479
+      "spentMicros": 2855,
+      "change": null
     },
     {
       "id": "1s8wj1e",
@@ -9818,7 +9511,7 @@
       "images": [
         "https://i.redd.it/jou734cvs9qg1.png"
       ],
-      "ms": 11099,
+      "ms": 11324,
       "outcome": "checked",
       "provider": "Spectrum",
       "period": [
@@ -9844,7 +9537,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 2070
+      "spentMicros": 1961,
+      "change": null
     },
     {
       "id": "1sbekzr",
@@ -10022,7 +9716,7 @@
       "images": [
         "https://i.redd.it/wpjkwix567tg1.png"
       ],
-      "ms": 9447,
+      "ms": 13019,
       "outcome": "checked",
       "provider": "Spectrum",
       "period": [
@@ -10030,7 +9724,7 @@
         null
       ],
       "lines": 3,
-      "lineSum": "not_printed",
+      "lineSum": "ok",
       "billPages": [
         0
       ],
@@ -10040,7 +9734,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 1975
+      "spentMicros": 2629,
+      "change": null
     },
     {
       "id": "1skhho7",
@@ -10066,14 +9761,14 @@
       "images": [
         "https://i.redd.it/y2ac6l0qwltg1.jpeg"
       ],
-      "ms": 9276,
+      "ms": 11061,
       "outcome": "checked",
       "provider": "Spectrum",
       "period": [
         null,
         null
       ],
-      "lines": 6,
+      "lines": 8,
       "lineSum": "not_printed",
       "billPages": [
         0
@@ -10084,7 +9779,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 1699
+      "spentMicros": 2604,
+      "change": null
     },
     {
       "id": "1sfqao9",
@@ -10169,7 +9865,7 @@
       "images": [
         "https://i.redd.it/vdr4bqlzwsug1.png"
       ],
-      "ms": 9884,
+      "ms": 10435,
       "outcome": "checked",
       "provider": "Google Fi",
       "period": [
@@ -10177,7 +9873,7 @@
         null
       ],
       "lines": 3,
-      "lineSum": "not_printed",
+      "lineSum": "ok",
       "billPages": [
         0
       ],
@@ -10187,7 +9883,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 2121
+      "spentMicros": 2180,
+      "change": null
     },
     {
       "id": "1sptvbs",
@@ -10229,15 +9926,15 @@
       "images": [
         "https://i.redd.it/1bk0ls0t21vg1.png"
       ],
-      "ms": 10781,
+      "ms": 35266,
       "outcome": "checked",
       "provider": "Spectrum",
       "period": [
-        null,
-        null
+        "2026-03-27",
+        "2026-04-26"
       ],
-      "lines": 3,
-      "lineSum": "ok",
+      "lines": 5,
+      "lineSum": "mismatch",
       "billPages": [
         0
       ],
@@ -10255,7 +9952,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 2188
+      "spentMicros": 7829,
+      "change": null
     },
     {
       "id": "1srse4h",
@@ -10297,7 +9995,7 @@
       "images": [
         "https://i.redd.it/ln5zpaku2evg1.jpeg"
       ],
-      "ms": 9138,
+      "ms": 13258,
       "outcome": "checked",
       "provider": null,
       "period": [
@@ -10305,7 +10003,7 @@
         null
       ],
       "lines": 6,
-      "lineSum": "not_printed",
+      "lineSum": "ok",
       "billPages": [
         0
       ],
@@ -10315,7 +10013,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 1871
+      "spentMicros": 2902,
+      "change": null
     },
     {
       "id": "1sn5nml",
@@ -10327,9 +10026,9 @@
       "images": [
         "https://preview.redd.it/luw7lkkvekvg1.png?width=1072&format=png&auto=webp&s=491666e0aef92b496f8e8339f002f143b7e01a4c"
       ],
-      "ms": 9298,
+      "ms": 8904,
       "outcome": "checked",
-      "provider": "Spectrum",
+      "provider": "SPECTRUM",
       "period": [
         null,
         null
@@ -10341,20 +10040,12 @@
       ],
       "claims": [],
       "dropped": [],
-      "questions": [
-        {
-          "kind": "partial_period",
-          "lines": [
-            "SPECTRUM INTERNET 1 GIG",
-            "SPECTRUM INTERNET PREM"
-          ],
-          "cents": 4000
-        }
-      ],
+      "questions": [],
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 1,
-      "spentMicros": 1789
+      "spentMicros": 1719,
+      "change": null
     },
     {
       "id": "1sry82f",
@@ -10820,7 +10511,7 @@
       "images": [
         "https://i.redd.it/h8x5bamrk01h1.jpeg"
       ],
-      "ms": 10914,
+      "ms": 11491,
       "outcome": "checked",
       "provider": null,
       "period": [
@@ -10847,7 +10538,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 1,
-      "spentMicros": 2368
+      "spentMicros": 2780,
+      "change": null
     },
     {
       "id": "1tc8l60",
@@ -10859,25 +10551,9 @@
       "images": [
         "https://i.redd.it/4g0jbbae8y0h1.png"
       ],
-      "ms": 12312,
-      "outcome": "checked",
-      "provider": null,
-      "period": [
-        "2026-05-29",
-        null
-      ],
-      "lines": 3,
-      "lineSum": "not_printed",
-      "billPages": [
-        0
-      ],
-      "claims": [],
-      "dropped": [],
-      "questions": [],
-      "explained": 0,
-      "hadOffer": true,
-      "matchedPromises": 0,
-      "spentMicros": 2403
+      "ms": 4930,
+      "outcome": "not_a_bill",
+      "spentMicros": 744
     },
     {
       "id": "1tozcid",
@@ -10920,7 +10596,7 @@
       "images": [
         "https://i.redd.it/9143kqp7bb2h1.jpeg"
       ],
-      "ms": 8490,
+      "ms": 7740,
       "outcome": "checked",
       "provider": "Spectrum",
       "period": [
@@ -10934,19 +10610,12 @@
       ],
       "claims": [],
       "dropped": [],
-      "questions": [
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Spectrum Internet"
-          ],
-          "cents": 10625
-        }
-      ],
+      "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 1,
-      "spentMicros": 1538
+      "matchedPromises": 0,
+      "spentMicros": 1407,
+      "change": null
     },
     {
       "id": "1tmip5q",
@@ -10989,7 +10658,7 @@
       "images": [
         "https://external-preview.redd.it/-ns4IzJHZ_vucmIuugJkdJ-_ni6iQQioaWoEy3893QE.png?auto=webp&s=a3b8de1a5e20ffec2d66fe01260a15a36290ad85"
       ],
-      "ms": 14647,
+      "ms": 12071,
       "outcome": "checked",
       "provider": null,
       "period": [
@@ -11005,14 +10674,14 @@
       "dropped": [],
       "questions": [
         {
-          "kind": "partial_period",
+          "kind": "conditions_unproven",
           "lines": [
             "Number share plan"
           ],
           "cents": 1500
         },
         {
-          "kind": "partial_period",
+          "kind": "end_date_unread",
           "lines": [
             "Number share plan"
           ],
@@ -11022,7 +10691,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 2,
-      "spentMicros": 2987
+      "spentMicros": 2566,
+      "change": null
     },
     {
       "id": "1tptj3u",
@@ -11080,7 +10750,7 @@
         "https://preview.redd.it/7blomr3cdc1h1.png?width=408&format=png&auto=webp&s=926d748c6f581a2252c1c4925b33debc3d8d8b9f",
         "https://preview.redd.it/t3vipohcdc1h1.png?width=350&format=png&auto=webp&s=0c454181c60732501c89d7beb7464313d20ee294"
       ],
-      "ms": 16147,
+      "ms": 17685,
       "outcome": "checked",
       "provider": "Spectrum",
       "period": [
@@ -11098,7 +10768,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 2572
+      "spentMicros": 3158,
+      "change": null
     },
     {
       "id": "1tuedgg",
@@ -11334,9 +11005,9 @@
         "https://preview.redd.it/q9mda2t1ee4h1.jpg?width=1080&format=pjpg&auto=webp&s=5c63bc28c24761bd3664c33312695a69a4f0b249",
         "https://preview.redd.it/z7gcysq1ee4h1.jpg?width=1080&format=pjpg&auto=webp&s=deccd4cb92a330e2193e646325f4fbb6e5d04ffc"
       ],
-      "ms": 12762,
+      "ms": 12900,
       "outcome": "checked",
-      "provider": "Metro by T-Mobile",
+      "provider": "metro by T Mobile",
       "period": [
         null,
         null
@@ -11352,7 +11023,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 2157
+      "spentMicros": 1898,
+      "change": null
     },
     {
       "id": "1u2iy49",
@@ -11398,12 +11070,12 @@
       "images": [
         "https://i.redd.it/levl9aesmc3h1.png"
       ],
-      "ms": 15873,
+      "ms": 10783,
       "outcome": "checked",
       "provider": "Spectrum",
       "period": [
-        "2026-05-03",
-        "2026-06-02"
+        null,
+        null
       ],
       "lines": 6,
       "lineSum": "ok",
@@ -11414,31 +11086,6 @@
       "dropped": [],
       "questions": [
         {
-          "kind": "end_date_unread",
-          "lines": [
-            "Spectrum Internet",
-            "Promotional Discount",
-            "Spectrum Internet Ultra",
-            "Promotional Discount"
-          ],
-          "cents": 6999
-        },
-        {
-          "kind": "end_date_unread",
-          "lines": [
-            "Spectrum Internet",
-            "Promotional Discount"
-          ],
-          "cents": 6999
-        },
-        {
-          "kind": "end_date_unread",
-          "lines": [
-            "Spectrum Internet"
-          ],
-          "cents": 9000
-        },
-        {
           "kind": "unagreed_fee",
           "lines": [
             "CA Cost Recovery Charge"
@@ -11448,8 +11095,9 @@
       ],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 3,
-      "spentMicros": 3590
+      "matchedPromises": 0,
+      "spentMicros": 2257,
+      "change": null
     },
     {
       "id": "1u4cymp",
@@ -11480,7 +11128,7 @@
       "images": [
         "https://i.redd.it/xux4m1361p4h1.jpeg"
       ],
-      "ms": 12815,
+      "ms": 9448,
       "outcome": "checked",
       "provider": "AT&T",
       "period": [
@@ -11494,24 +11142,12 @@
       ],
       "claims": [],
       "dropped": [],
-      "questions": [
-        {
-          "kind": "partial_period",
-          "lines": [
-            "AT&T FIBER — INTERNET 2000",
-            "$25 off ongoing",
-            "AutoPay & paperless ($5 off w/dc, $10 w/bank acct)",
-            "20% off ongoing (Wireless+Internet)",
-            "$20/mo. discount for 2G",
-            "20% off ongoing_SAVE ONLY"
-          ],
-          "cents": 3800
-        }
-      ],
+      "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 1,
-      "spentMicros": 3096
+      "matchedPromises": 0,
+      "spentMicros": 1992,
+      "change": null
     },
     {
       "id": "1u520sr",
@@ -11612,7 +11248,7 @@
         "https://preview.redd.it/s645nhe8ihpg1.jpg?width=996&format=pjpg&auto=webp&s=bf84505b489a48cca9025731a6ce471a9c3d605b",
         "https://preview.redd.it/uncumhe8ihpg1.jpg?width=949&format=pjpg&auto=webp&s=c57f5f1f5762af702e36984a5d6db8430341a093"
       ],
-      "ms": 75681,
+      "ms": 27158,
       "outcome": "checked",
       "provider": "Spectrum",
       "period": [
@@ -11623,10 +11259,7 @@
       "lineSum": "ok",
       "billPages": [
         0,
-        1,
-        2,
         3,
-        4,
         5
       ],
       "claims": [],
@@ -11643,7 +11276,11 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 4324
+      "spentMicros": 5820,
+      "change": {
+        "earlierCents": 19478,
+        "currentCents": 20439
+      }
     },
     {
       "id": "1u7bql1",
@@ -11669,7 +11306,7 @@
       "images": [
         "https://external-preview.redd.it/fRmjS75qjU69nZjgAp2GXIVIVrDJ_dBL2zKJErzachQ.png?auto=webp&s=53e70d782a995c0dc26a3a598a87d552c7605835"
       ],
-      "ms": 10590,
+      "ms": 7241,
       "outcome": "checked",
       "provider": "Mint",
       "period": [
@@ -11687,7 +11324,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 2025
+      "spentMicros": 1436,
+      "change": null
     },
     {
       "id": "1u9bum9",
@@ -11982,7 +11620,7 @@
         "https://preview.redd.it/s0vcok7dj97h1.jpg?width=1320&format=pjpg&auto=webp&s=7b8478e1622512d7789c82c3ffc13914bb568680",
         "https://preview.redd.it/unj3kn7dj97h1.jpg?width=1320&format=pjpg&auto=webp&s=93f6b93c8214518695df3b01b8e4ea3dc147cdfe"
       ],
-      "ms": 19435,
+      "ms": 22080,
       "outcome": "checked",
       "provider": null,
       "period": [
@@ -11999,8 +11637,9 @@
       "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 0,
-      "spentMicros": 3545
+      "matchedPromises": 1,
+      "spentMicros": 4418,
+      "change": null
     },
     {
       "id": "1uhosme",
@@ -12055,7 +11694,7 @@
       "images": [
         "https://i.redd.it/0dn4qw7d179h1.jpeg"
       ],
-      "ms": 11018,
+      "ms": 10052,
       "outcome": "checked",
       "provider": "Spectrum",
       "period": [
@@ -12063,7 +11702,7 @@
         null
       ],
       "lines": 3,
-      "lineSum": "not_printed",
+      "lineSum": "ok",
       "billPages": [
         0
       ],
@@ -12071,7 +11710,7 @@
       "dropped": [],
       "questions": [
         {
-          "kind": "partial_period",
+          "kind": "end_date_unread",
           "lines": [
             "Spectrum Internet Premier",
             "Promotional Discount"
@@ -12082,7 +11721,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 1,
-      "spentMicros": 2099
+      "spentMicros": 1994,
+      "change": null
     },
     {
       "id": "1uk8g4n",
@@ -12124,7 +11764,7 @@
       "images": [
         "https://i.redd.it/yk3ih54me29h1.jpeg"
       ],
-      "ms": 14326,
+      "ms": 14221,
       "outcome": "checked",
       "provider": "AT&T",
       "period": [
@@ -12132,33 +11772,18 @@
         null
       ],
       "lines": 7,
-      "lineSum": "ok",
+      "lineSum": "not_printed",
       "billPages": [
         0
       ],
       "claims": [],
       "dropped": [],
-      "questions": [
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Internet 1000 (Fiber 1 GIG) Stand-alone"
-          ],
-          "cents": 8000
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Internet 1000 (Fiber 1 GIG) Stand-alone",
-            "Internet 1000 (Fiber 1 GIG) Stand-alone $20/month off with All In One (Wireless+Internet)"
-          ],
-          "cents": 6000
-        }
-      ],
+      "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 2,
-      "spentMicros": 3278
+      "matchedPromises": 0,
+      "spentMicros": 3331,
+      "change": null
     },
     {
       "id": "1uhae9w",
@@ -12170,7 +11795,7 @@
       "images": [
         "https://i.redd.it/9j5xlf18ev9h1.jpeg"
       ],
-      "ms": 10028,
+      "ms": 8538,
       "outcome": "checked",
       "provider": "Spectrum",
       "period": [
@@ -12184,19 +11809,12 @@
       ],
       "claims": [],
       "dropped": [],
-      "questions": [
-        {
-          "kind": "unagreed_fee",
-          "lines": [
-            "WiFi Service"
-          ],
-          "cents": 1000
-        }
-      ],
+      "questions": [],
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 2263
+      "spentMicros": 1955,
+      "change": null
     },
     {
       "id": "1ulvn2x",
@@ -12296,37 +11914,42 @@
         "https://preview.redd.it/w85jh18iej8h1.png?width=307&format=png&auto=webp&s=064b94c703a1e7a1993cf052ed1acea324869626",
         "https://preview.redd.it/ygiixbgnej8h1.png?width=545&format=png&auto=webp&s=fe49c18f16520dff30013103f8c80e32f31a4948"
       ],
-      "ms": 17938,
+      "ms": 24674,
       "outcome": "checked",
       "provider": null,
       "period": [
         null,
         null
       ],
-      "lines": 1,
+      "lines": 2,
       "lineSum": "not_printed",
       "billPages": [
         1
       ],
-      "claims": [],
+      "claims": [
+        {
+          "kind": "credit_missing",
+          "amountCents": 1500,
+          "actualCents": 0,
+          "expectedCents": 1500,
+          "lines": [
+            "Internet 300 (Fiber 300) Stand-alone"
+          ],
+          "promise": "Price after discounts: $15/mo. for 12 mos. for new customers and $10/mo. with elig. Autopay and paperless bill. Ltd. avail./areas. See offer details",
+          "needsConfirmation": true
+        }
+      ],
       "dropped": [],
       "questions": [
         {
-          "kind": "partial_period",
+          "kind": "price_gap",
           "lines": [
             "Internet 300 (Fiber 300) Stand-alone"
           ],
           "cents": 7500
         },
         {
-          "kind": "partial_period",
-          "lines": [
-            "Internet 300 (Fiber 300) Stand-alone"
-          ],
-          "cents": 7500
-        },
-        {
-          "kind": "partial_period",
+          "kind": "conditions_unproven",
           "lines": [
             "Internet 300 (Fiber 300) Stand-alone"
           ],
@@ -12336,7 +11959,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 3,
-      "spentMicros": 3278
+      "spentMicros": 4827,
+      "change": null
     },
     {
       "id": "1up7avi",
@@ -12742,7 +12366,7 @@
       "images": [
         "https://i.redd.it/p1ih3g8zczbh1.jpeg"
       ],
-      "ms": 13231,
+      "ms": 9932,
       "outcome": "checked",
       "provider": "AT&T",
       "period": [
@@ -12760,7 +12384,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 3084
+      "spentMicros": 2438,
+      "change": null
     },
     {
       "id": "1v27owy",
@@ -13066,40 +12691,26 @@
       "images": [
         "https://i.redd.it/oomqh17iv3ah1.jpeg"
       ],
-      "ms": 30169,
+      "ms": 15689,
       "outcome": "checked",
       "provider": "Spectrum",
       "period": [
-        "2026-05-25",
-        "2026-06-24"
+        null,
+        null
       ],
       "lines": 5,
       "lineSum": "not_printed",
       "billPages": [
         0
       ],
-      "claims": [
-        {
-          "kind": "credit_missing",
-          "amountCents": 500,
-          "actualCents": 2500,
-          "expectedCents": 3000,
-          "lines": [
-            "Spectrum TV Choice",
-            "Promotional Discount",
-            "Spectrum Internet Premier",
-            "Promotional Discount"
-          ],
-          "promise": "Preciate the $30 reduction 😄",
-          "needsConfirmation": true
-        }
-      ],
+      "claims": [],
       "dropped": [],
       "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 1,
-      "spentMicros": 6170
+      "matchedPromises": 0,
+      "spentMicros": 3511,
+      "change": null
     },
     {
       "id": "1vbo3e0",
@@ -13140,52 +12751,9 @@
         "https://preview.redd.it/r7fdktjj2feh1.png?width=1258&format=png&auto=webp&s=1e19a8dc49fc95d071c62757ac5965f417176be7",
         "https://preview.redd.it/snt5vcqg2feh1.png?width=1720&format=png&auto=webp&s=aea02e0311c08bbad0c595f502cac1ca8aa24ad8"
       ],
-      "ms": 16000,
-      "outcome": "checked",
-      "provider": "AT&T",
-      "period": [
-        null,
-        null
-      ],
-      "lines": 6,
-      "lineSum": "not_printed",
-      "billPages": [
-        0
-      ],
-      "claims": [],
-      "dropped": [],
-      "questions": [
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Unlimited Extra EL - 3 Lines",
-            "Discount for eligible Unlimited Wireless with Internet"
-          ],
-          "cents": 4199
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Unlimited Starter SL - 3 Lines",
-            "Discount for eligible Unlimited Wireless with Internet",
-            "Unlimited Starter SL - 3 Lines",
-            "Discount for eligible Unlimited Wireless with Internet"
-          ],
-          "cents": 7648
-        },
-        {
-          "kind": "repeated_charge",
-          "lines": [
-            "Unlimited Starter SL - 3 Lines",
-            "Unlimited Starter SL - 3 Lines"
-          ],
-          "cents": 10198
-        }
-      ],
-      "explained": 0,
-      "hadOffer": true,
-      "matchedPromises": 2,
-      "spentMicros": 3096
+      "ms": 8456,
+      "outcome": "could_not_check",
+      "spentMicros": 1396
     },
     {
       "id": "1ves7ng",
@@ -13271,25 +12839,9 @@
       "images": [
         "https://r2.e-z.host/de768a78-35b9-4943-adf0-8ca20adf02bd/l2u51m31.jpeg"
       ],
-      "ms": 9812,
-      "outcome": "checked",
-      "provider": null,
-      "period": [
-        null,
-        null
-      ],
-      "lines": 1,
-      "lineSum": "not_printed",
-      "billPages": [
-        0
-      ],
-      "claims": [],
-      "dropped": [],
-      "questions": [],
-      "explained": 0,
-      "hadOffer": true,
-      "matchedPromises": 0,
-      "spentMicros": 1590
+      "ms": 3238,
+      "outcome": "not_a_bill",
+      "spentMicros": 608
     },
     {
       "id": "1vg565r",
@@ -13426,7 +12978,7 @@
         "https://preview.redd.it/eaecrklgd0gh1.jpg?width=1320&format=pjpg&auto=webp&s=32cfcb256349f94fc8111570443e92c3b559fa46",
         "https://preview.redd.it/eiiremlgd0gh1.jpg?width=1320&format=pjpg&auto=webp&s=0e12f20bf43656432c463fb2cd66597ff9058bf8"
       ],
-      "ms": 19149,
+      "ms": 18502,
       "outcome": "checked",
       "provider": null,
       "period": [
@@ -13440,26 +12992,12 @@
       ],
       "claims": [],
       "dropped": [],
-      "questions": [
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Non-returned device - Next (May 14)"
-          ],
-          "cents": 52999
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Non-returned device - Next (May 14)"
-          ],
-          "cents": 52999
-        }
-      ],
+      "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 2,
-      "spentMicros": 5154
+      "matchedPromises": 1,
+      "spentMicros": 4109,
+      "change": null
     },
     {
       "id": "1vh9wp2",
@@ -13499,7 +13037,7 @@
       "images": [
         "https://external-preview.redd.it/_2wQur6qvl1Hpde9qyGjYTOh4JiJtrvu36lDf4-YJyA.jpeg?auto=webp&s=ae909aeda668fd53918a6de8461737ef870b39ed"
       ],
-      "ms": 15123,
+      "ms": 15331,
       "outcome": "checked",
       "provider": "Fios",
       "period": [
@@ -13517,7 +13055,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 2744
+      "spentMicros": 3027,
+      "change": null
     },
     {
       "id": "1v9sq7l",
@@ -13531,55 +13070,42 @@
         "https://preview.redd.it/rcivp5j0g5gh1.jpg?width=828&format=pjpg&auto=webp&s=b1d0135c0b513d08e471e429760d4ebe56af668f",
         "https://preview.redd.it/tn3c54j0g5gh1.jpg?width=828&format=pjpg&auto=webp&s=a4d1d1dc00b98a9758ba5c4f33552030330fe38c"
       ],
-      "ms": 22032,
+      "ms": 38064,
       "outcome": "checked",
       "provider": "Spectrum",
       "period": [
         null,
         null
       ],
-      "lines": 11,
+      "lines": 6,
       "lineSum": "not_printed",
       "billPages": [
-        1,
         2
       ],
-      "claims": [],
-      "dropped": [],
-      "questions": [
+      "claims": [
         {
-          "kind": "partial_period",
+          "kind": "price_above_promise",
+          "amountCents": 3000,
+          "actualCents": 7000,
+          "expectedCents": 4000,
           "lines": [
-            "Spectrum Internet Gig",
-            "Promotional Discount",
             "Spectrum Internet Gig",
             "Promotional Discount"
           ],
-          "cents": 11000
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Spectrum Internet Gig",
-            "Promotional Discount",
-            "Spectrum Internet Gig",
-            "Promotional Discount"
-          ],
-          "cents": 11000
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Advanced WiFi",
-            "Advanced WiFi"
-          ],
-          "cents": 0
+          "promise": "The person on the phone offered me a discounted rate of $40 for two years for internet service if I added two spectrum mobile lines to my account.",
+          "needsConfirmation": true
         }
       ],
+      "dropped": [],
+      "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 3,
-      "spentMicros": 4333
+      "matchedPromises": 1,
+      "spentMicros": 7562,
+      "change": {
+        "earlierCents": 4000,
+        "currentCents": 9000
+      }
     },
     {
       "id": "1vi9crt",
@@ -13609,25 +13135,35 @@
         "https://preview.redd.it/2c7a66qkzhhh1.jpg?width=1178&format=pjpg&auto=webp&s=ff060b6859f924a769d8c76bf3baf85e4ad051a9",
         "https://preview.redd.it/fb0st5qkzhhh1.jpg?width=1179&format=pjpg&auto=webp&s=9d6cd7965e145de48d9a64d4a46d90222cce39e4"
       ],
-      "ms": 12160,
+      "ms": 15741,
       "outcome": "checked",
       "provider": "AT&T",
       "period": [
         null,
         null
       ],
-      "lines": 0,
-      "lineSum": "not_printed",
+      "lines": 1,
+      "lineSum": "ok",
       "billPages": [
+        0,
         1
       ],
       "claims": [],
       "dropped": [],
-      "questions": [],
+      "questions": [
+        {
+          "kind": "price_gap",
+          "lines": [
+            "AT&T Internet 5000"
+          ],
+          "cents": 13500
+        }
+      ],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 0,
-      "spentMicros": 2310
+      "matchedPromises": 1,
+      "spentMicros": 2912,
+      "change": null
     },
     {
       "id": "1viasxv",
@@ -14250,7 +13786,7 @@
         "https://preview.redd.it/w239d145v5ih1.jpg?width=1280&format=pjpg&auto=webp&s=4d6846d957bd859a575aeced104884473955acf7",
         "https://preview.redd.it/y2rk6jqzu5ih1.png?width=1280&format=png&auto=webp&s=92bec616b4981415646fd02bc7081449bc7d951f"
       ],
-      "ms": 17996,
+      "ms": 17964,
       "outcome": "checked",
       "provider": null,
       "period": [
@@ -14258,36 +13794,23 @@
         null
       ],
       "lines": 3,
-      "lineSum": "not_printed",
+      "lineSum": "ok",
       "billPages": [
-        0
+        0,
+        1
       ],
       "claims": [],
       "dropped": [],
       "questions": [
         {
-          "kind": "partial_period",
+          "kind": "conditions_unproven",
           "lines": [
             "Plans"
           ],
           "cents": 13396
         },
         {
-          "kind": "partial_period",
-          "lines": [
-            "Plans"
-          ],
-          "cents": 13396
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Plans"
-          ],
-          "cents": 13396
-        },
-        {
-          "kind": "partial_period",
+          "kind": "price_gap",
           "lines": [
             "Plans"
           ],
@@ -14296,8 +13819,9 @@
       ],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 4,
-      "spentMicros": 3786
+      "matchedPromises": 2,
+      "spentMicros": 3359,
+      "change": null
     },
     {
       "id": "1vr53rb",
@@ -14408,9 +13932,9 @@
       "images": [
         "https://i.redd.it/r2o7qs9xdfjh1.jpeg"
       ],
-      "ms": 8881,
+      "ms": 21926,
       "outcome": "checked",
-      "provider": "Verizon",
+      "provider": "Verizon Fios",
       "period": [
         null,
         null
@@ -14424,13 +13948,6 @@
       "dropped": [],
       "questions": [
         {
-          "kind": "partial_period",
-          "lines": [
-            "Services, Equipment & Discounts"
-          ],
-          "cents": 1999
-        },
-        {
           "kind": "unagreed_fee",
           "lines": [
             "Return Payment Fee"
@@ -14441,7 +13958,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 1,
-      "spentMicros": 1866
+      "spentMicros": 4577,
+      "change": null
     },
     {
       "id": "1vssi6e",
@@ -14470,7 +13988,7 @@
       "images": [
         "https://i.redd.it/6v0reg8dozih1.jpeg"
       ],
-      "ms": 15920,
+      "ms": 23361,
       "outcome": "checked",
       "provider": "T-Mobile",
       "period": [
@@ -14496,7 +14014,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 3582
+      "spentMicros": 5299,
+      "change": null
     },
     {
       "id": "1vssyzo",
@@ -14761,7 +14280,7 @@
       "images": [
         "https://i.redd.it/fpsku7dbuekh1.jpeg"
       ],
-      "ms": 11687,
+      "ms": 10753,
       "outcome": "checked",
       "provider": "T-Mobile",
       "period": [
@@ -14769,21 +14288,13 @@
         null
       ],
       "lines": 7,
-      "lineSum": "not_printed",
+      "lineSum": "ok",
       "billPages": [
         0
       ],
       "claims": [],
       "dropped": [],
       "questions": [
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Essentials",
-            "T-Mobile Essentials AAL"
-          ],
-          "cents": 9000
-        },
         {
           "kind": "unagreed_fee",
           "lines": [
@@ -14795,7 +14306,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 1,
-      "spentMicros": 2442
+      "spentMicros": 2336,
+      "change": null
     },
     {
       "id": "1vvhgls",
@@ -14878,25 +14390,9 @@
       "images": [
         "https://preview.redd.it/p0tb2nwkf8kh1.png?width=608&format=png&auto=webp&s=4c900fb53e692ce8c2684e9909778108decd2cde"
       ],
-      "ms": 20025,
-      "outcome": "checked",
-      "provider": null,
-      "period": [
-        null,
-        null
-      ],
-      "lines": 5,
-      "lineSum": "not_printed",
-      "billPages": [
-        0
-      ],
-      "claims": [],
-      "dropped": [],
-      "questions": [],
-      "explained": 0,
-      "hadOffer": true,
-      "matchedPromises": 0,
-      "spentMicros": 4079
+      "ms": 3120,
+      "outcome": "not_a_bill",
+      "spentMicros": 503
     },
     {
       "id": "1vxbk3z",
@@ -14923,7 +14419,7 @@
       "images": [
         "https://i.redd.it/qq9f5tjjyrkh1.jpeg"
       ],
-      "ms": 13822,
+      "ms": 22807,
       "outcome": "checked",
       "provider": "T-Mobile",
       "period": [
@@ -14931,7 +14427,7 @@
         null
       ],
       "lines": 7,
-      "lineSum": "not_printed",
+      "lineSum": "ok",
       "billPages": [
         0
       ],
@@ -14941,7 +14437,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 2122
+      "spentMicros": 4974,
+      "change": null
     },
     {
       "id": "1vxbsk5",
@@ -14968,7 +14465,7 @@
         "https://preview.redd.it/ep1bc56qbkkh1.jpg?width=1080&format=pjpg&auto=webp&s=a12f11909493579417a64edd9a2bbced5535134c",
         "https://preview.redd.it/sx5gps3qbkkh1.jpg?width=1080&format=pjpg&auto=webp&s=208fad6882ad11aef29fd68e19e8f7c15af4e6a6"
       ],
-      "ms": 19718,
+      "ms": 12912,
       "outcome": "checked",
       "provider": "AT&T",
       "period": [
@@ -14987,7 +14484,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 3130
+      "spentMicros": 2164,
+      "change": null
     },
     {
       "id": "1vxcqmn",
@@ -15014,7 +14512,7 @@
       "images": [
         "https://i.redd.it/z6lf47pd3dlh1.png"
       ],
-      "ms": 12113,
+      "ms": 8510,
       "outcome": "checked",
       "provider": "Spectrum",
       "period": [
@@ -15028,19 +14526,12 @@
       ],
       "claims": [],
       "dropped": [],
-      "questions": [
-        {
-          "kind": "unagreed_fee",
-          "lines": [
-            "WiFi Service"
-          ],
-          "cents": 1000
-        }
-      ],
+      "questions": [],
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 2114
+      "spentMicros": 1949,
+      "change": null
     },
     {
       "id": "1vvgk2w",
@@ -15052,7 +14543,7 @@
       "images": [
         "https://i.redd.it/xu8ztxdibykh1.jpeg"
       ],
-      "ms": 17700,
+      "ms": 15761,
       "outcome": "checked",
       "provider": "T-Mobile",
       "period": [
@@ -15060,7 +14551,7 @@
         null
       ],
       "lines": 10,
-      "lineSum": "not_printed",
+      "lineSum": "ok",
       "billPages": [
         0
       ],
@@ -15078,7 +14569,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 3642
+      "spentMicros": 3455,
+      "change": null
     },
     {
       "id": "1vxpiqv",
@@ -15250,18 +14742,17 @@
         "https://preview.redd.it/i1r11h7zr1lh1.jpg?width=1206&format=pjpg&auto=webp&s=3a5734e319dfff57cdff4ce470379d054e1baf3a",
         "https://preview.redd.it/vs6xfh7zr1lh1.jpg?width=1206&format=pjpg&auto=webp&s=39364b2ee243ade283e7086d1f9a73ec2e429456"
       ],
-      "ms": 22547,
+      "ms": 18229,
       "outcome": "checked",
       "provider": null,
       "period": [
-        "2026-07-20",
-        "2026-08-20"
+        null,
+        null
       ],
       "lines": 3,
       "lineSum": "not_printed",
       "billPages": [
-        0,
-        1
+        0
       ],
       "claims": [],
       "dropped": [],
@@ -15269,7 +14760,11 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 3599
+      "spentMicros": 3229,
+      "change": {
+        "earlierCents": 1411,
+        "currentCents": 125
+      }
     },
     {
       "id": "1w040mv",
@@ -15326,7 +14821,7 @@
         "https://preview.redd.it/2ejw69yt4glh1.jpg?width=1001&format=pjpg&auto=webp&s=41818fcdca728b20becf08f33cf411a2fe3d43eb",
         "https://preview.redd.it/s9xdm9yt4glh1.jpg?width=1179&format=pjpg&auto=webp&s=1937b24234dd520925035fd63cc72bc12937ac66"
       ],
-      "ms": 13132,
+      "ms": 23470,
       "outcome": "checked",
       "provider": null,
       "period": [
@@ -15334,7 +14829,7 @@
         null
       ],
       "lines": 8,
-      "lineSum": "not_printed",
+      "lineSum": "mismatch",
       "billPages": [
         1
       ],
@@ -15344,7 +14839,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 2686
+      "spentMicros": 4592,
+      "change": null
     },
     {
       "id": "1w0r3uf",
@@ -15670,7 +15166,7 @@
       "images": [
         "https://i.redd.it/vjzfvmf5v8mh1.png"
       ],
-      "ms": 12015,
+      "ms": 10618,
       "outcome": "checked",
       "provider": "Spectrum",
       "period": [
@@ -15686,7 +15182,7 @@
       "dropped": [],
       "questions": [
         {
-          "kind": "partial_period",
+          "kind": "end_date_unread",
           "lines": [
             "Spectrum Internet Premier",
             "Promotional Discount"
@@ -15697,7 +15193,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 1,
-      "spentMicros": 2640
+      "spentMicros": 2039,
+      "change": null
     },
     {
       "id": "1w68d0y",
@@ -15873,63 +15370,27 @@
         "https://preview.redd.it/5mskxlq3i5mh1.jpg?width=1440&format=pjpg&auto=webp&s=a0e3a76b3d99b6730aa8608464f443cd69941870",
         "https://preview.redd.it/qy0zhou3i5mh1.jpg?width=1440&format=pjpg&auto=webp&s=992b5d0d3a9bb9ab815276feee7e87ccd6a9576f"
       ],
-      "ms": 23068,
+      "ms": 27087,
       "outcome": "checked",
       "provider": null,
       "period": [
-        null,
-        null
+        "2026-08-06",
+        "2026-09-05"
       ],
       "lines": 5,
-      "lineSum": "ok",
+      "lineSum": "mismatch",
       "billPages": [
-        0
+        0,
+        1
       ],
       "claims": [],
       "dropped": [],
-      "questions": [
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Internet 5000 (Fiber 5 GIG) Stand-alone All-Fi Pro - Included AutoPay & paperless disc ($5 off w/debit card) $90 off ongoing",
-            "Internet 5000 (Fiber 5 GIG) Stand-alone Discount for Bundled Fiber with eligible wireless"
-          ],
-          "cents": 10900
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Internet 5000 (Fiber 5 GIG) Stand-alone All-Fi Pro - Included AutoPay & paperless disc ($5 off w/debit card) $90 off ongoing"
-          ],
-          "cents": 16000
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Internet 5000 (Fiber 5 GIG) Stand-alone All-Fi Pro - Included AutoPay & paperless disc ($5 off w/debit card) $90 off ongoing",
-            "Internet 5000 (Fiber 5 GIG) Stand-alone Discount for Bundled Fiber with eligible wireless"
-          ],
-          "cents": 10900
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Internet 5000 (Fiber 5 GIG) Stand-alone All-Fi Pro - Included AutoPay & paperless disc ($5 off w/debit card) $90 off ongoing"
-          ],
-          "cents": 16000
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Internet 5000 (Fiber 5 GIG) Stand-alone All-Fi Pro - Included AutoPay & paperless disc ($5 off w/debit card) $90 off ongoing"
-          ],
-          "cents": 16000
-        }
-      ],
+      "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 5,
-      "spentMicros": 3402
+      "matchedPromises": 1,
+      "spentMicros": 5756,
+      "change": null
     },
     {
       "id": "1w7aukm",
@@ -15958,7 +15419,7 @@
         "https://preview.redd.it/5uc9zwj8dzlh1.jpg?width=1320&format=pjpg&auto=webp&s=deeb34055ca132d70b0f6b4a8a7ab5cf9691f620",
         "https://preview.redd.it/6ed9wwj8dzlh1.jpg?width=1320&format=pjpg&auto=webp&s=671eeed7d31732dccecd7fb2ce4a6742a275dff2"
       ],
-      "ms": 26281,
+      "ms": 22586,
       "outcome": "checked",
       "provider": "AT&T",
       "period": [
@@ -15969,28 +15430,17 @@
       "lineSum": "ok",
       "billPages": [
         0,
+        1,
         2
       ],
       "claims": [],
       "dropped": [],
-      "questions": [
-        {
-          "kind": "partial_period",
-          "lines": [
-            "AT&T FIBER — INTERNET 1000",
-            "20% off plan for having AT&T Wireless",
-            "$12/month discount",
-            "$30 off for 24 months",
-            "Price includes $10/mo. discount when you sign up for paperless billing and AutoPay with a bank account or AT&T Points Plus® Card from Citi. Or $5/mo. with a debit card.",
-            "$12/month discount"
-          ],
-          "cents": 1200
-        }
-      ],
+      "questions": [],
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 1,
-      "spentMicros": 5712
+      "spentMicros": 4574,
+      "change": null
     },
     {
       "id": "1w6mwfy",
@@ -16072,7 +15522,7 @@
       "images": [
         "https://preview.redd.it/i4znhum7kenh1.png?width=3288&format=png&auto=webp&s=5d6410e7c2b5bbbeca9fd4891fef8f5f7dcf96f6"
       ],
-      "ms": 14675,
+      "ms": 15875,
       "outcome": "checked",
       "provider": "AT&T",
       "period": [
@@ -16090,7 +15540,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 3511
+      "spentMicros": 3541,
+      "change": null
     },
     {
       "id": "1w8zf6p",
@@ -16117,7 +15568,7 @@
         "https://preview.redd.it/58zalurx48nh1.png?width=1600&format=png&auto=webp&s=10b55a99130141e1a83da2032eb2b23ba5fa406c",
         "https://preview.redd.it/czf94wsq48nh1.png?width=1382&format=png&auto=webp&s=c14071594beb5ff4e2e0ab5f0840337ed3a96688"
       ],
-      "ms": 18688,
+      "ms": 21708,
       "outcome": "checked",
       "provider": null,
       "period": [
@@ -16145,7 +15596,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 4147
+      "spentMicros": 4945,
+      "change": null
     },
     {
       "id": "1w9b7od",
@@ -16255,7 +15707,7 @@
       "images": [
         "https://i.redd.it/qblxkwy2kknh1.jpeg"
       ],
-      "ms": 15071,
+      "ms": 23410,
       "outcome": "checked",
       "provider": null,
       "period": [
@@ -16273,7 +15725,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 3233
+      "spentMicros": 4625,
+      "change": null
     },
     {
       "id": "1wahnu1",
@@ -16385,7 +15838,7 @@
       "images": [
         "https://i.redd.it/4t9f6w1rhrnh1.jpeg"
       ],
-      "ms": 15768,
+      "ms": 15575,
       "outcome": "checked",
       "provider": "T-Mobile",
       "period": [
@@ -16403,10 +15856,9 @@
         {
           "kind": "partial_period",
           "lines": [
-            "Home Internet Backup",
             "Home Internet Backup"
           ],
-          "cents": -1700
+          "cents": -1800
         },
         {
           "kind": "unagreed_fee",
@@ -16419,7 +15871,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 1,
-      "spentMicros": 3583
+      "spentMicros": 3204,
+      "change": null
     },
     {
       "id": "1wbww73",
@@ -16577,7 +16030,7 @@
       "images": [
         "https://preview.redd.it/vqj7852yrqoh1.png?width=512&format=png&auto=webp&s=a4953a50d2b40b54ca1e70af9ec07a333b5944ce"
       ],
-      "ms": 10242,
+      "ms": 10582,
       "outcome": "checked",
       "provider": "Verizon",
       "period": [
@@ -16595,7 +16048,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 2162
+      "spentMicros": 2145,
+      "change": null
     },
     {
       "id": "1wdxh1b",
@@ -16639,7 +16093,7 @@
         "https://preview.redd.it/8ylmt971n6oh1.png?width=1038&format=png&auto=webp&s=acaf48169b3aa96657b388fcbbc864dd5265fd24",
         "https://preview.redd.it/j5fczo51n6oh1.jpg?width=1232&format=pjpg&auto=webp&s=3ffcedae8a72faff16239da967ad40ba63a12dd3"
       ],
-      "ms": 23366,
+      "ms": 44733,
       "outcome": "checked",
       "provider": "T-Mobile",
       "period": [
@@ -16647,37 +16101,13 @@
         null
       ],
       "lines": 14,
-      "lineSum": "not_printed",
+      "lineSum": "mismatch",
       "billPages": [
-        0,
-        1,
-        2
+        1
       ],
       "claims": [],
       "dropped": [],
       "questions": [
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Experience Signature",
-            "Experience Select AAL"
-          ],
-          "cents": 7140
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Netflix Discount"
-          ],
-          "cents": -899
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Apple TV Discount"
-          ],
-          "cents": -999
-        },
         {
           "kind": "unagreed_fee",
           "lines": [
@@ -16696,8 +16126,12 @@
       ],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 3,
-      "spentMicros": 5561
+      "matchedPromises": 0,
+      "spentMicros": 10116,
+      "change": {
+        "earlierCents": 17371,
+        "currentCents": 16252
+      }
     },
     {
       "id": "1wd0dvz",
@@ -16709,7 +16143,7 @@
       "images": [
         "https://i.redd.it/y4zo3blb9soh1.jpeg"
       ],
-      "ms": 12128,
+      "ms": 10491,
       "outcome": "checked",
       "provider": "Visible",
       "period": [
@@ -16723,37 +16157,12 @@
       ],
       "claims": [],
       "dropped": [],
-      "questions": [
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Visible+ Pro annual plan",
-            "Referral discount",
-            "50% off Visible+ Pro annual plan"
-          ],
-          "cents": 20500
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Visible+ Pro annual plan",
-            "50% off Visible+ Pro annual plan"
-          ],
-          "cents": 22500
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Visible+ Pro annual plan",
-            "Referral discount"
-          ],
-          "cents": 43000
-        }
-      ],
+      "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 3,
-      "spentMicros": 2741
+      "matchedPromises": 0,
+      "spentMicros": 2284,
+      "change": null
     },
     {
       "id": "1wbtzj6",
@@ -16766,7 +16175,7 @@
         "https://preview.redd.it/5ww2h8lufjoh1.png?width=375&format=png&auto=webp&s=38b3eb9634abbbfb69639e62d91beb6bc0697036",
         "https://preview.redd.it/j0cgu11yfjoh1.png?width=613&format=png&auto=webp&s=f57121fb3aa8bcb1dcd2f09b2404e972574222c1"
       ],
-      "ms": 19233,
+      "ms": 9351,
       "outcome": "checked",
       "provider": null,
       "period": [
@@ -16774,7 +16183,7 @@
         null
       ],
       "lines": 0,
-      "lineSum": "mismatch",
+      "lineSum": "not_printed",
       "billPages": [
         0
       ],
@@ -16784,7 +16193,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 3294
+      "spentMicros": 1391,
+      "change": null
     },
     {
       "id": "1wdyobw",
@@ -16945,7 +16355,7 @@
       "images": [
         "https://i.redd.it/dzq5snh8xzoh1.jpeg"
       ],
-      "ms": 5725,
+      "ms": 6618,
       "outcome": "checked",
       "provider": "AT&T",
       "period": [
@@ -16963,7 +16373,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 967
+      "spentMicros": 1071,
+      "change": null
     },
     {
       "id": "1weopfg",
@@ -17018,14 +16429,14 @@
       "images": [
         "https://external-preview.redd.it/OIObHdLDOJ9L7WU3y2ApfeK__z4v8S0c9pNhd6d7kPw.png?auto=webp&s=40e4c3fcf05c2cab7c3f85b71b6052ebf079d2fa"
       ],
-      "ms": 10809,
+      "ms": 10489,
       "outcome": "checked",
       "provider": null,
       "period": [
         null,
         null
       ],
-      "lines": 1,
+      "lines": 10,
       "lineSum": "not_printed",
       "billPages": [
         0
@@ -17036,7 +16447,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 2236
+      "spentMicros": 2354,
+      "change": null
     },
     {
       "id": "1wfgfrp",
@@ -17106,7 +16518,7 @@
       "images": [
         "https://preview.redd.it/987onquzm7ph1.png?width=517&format=png&auto=webp&s=010d0053f926d6764d18e191bca0706fcda000bf"
       ],
-      "ms": 9612,
+      "ms": 9666,
       "outcome": "checked",
       "provider": "AT&T",
       "period": [
@@ -17132,7 +16544,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 1901
+      "spentMicros": 2092,
+      "change": null
     },
     {
       "id": "1wfltt0",
@@ -17306,7 +16719,7 @@
       "images": [
         "https://i.redd.it/fl0j5rocjeph1.png"
       ],
-      "ms": 9592,
+      "ms": 18233,
       "outcome": "checked",
       "provider": null,
       "period": [
@@ -17318,23 +16731,28 @@
       "billPages": [
         0
       ],
-      "claims": [],
-      "dropped": [],
-      "questions": [
+      "claims": [
         {
-          "kind": "partial_period",
+          "kind": "credit_missing",
+          "amountCents": 1000,
+          "actualCents": 1000,
+          "expectedCents": 2000,
           "lines": [
             "ONE Plan Tablet",
             "ONE Plan Tablet",
             "Kickback Discount"
           ],
-          "cents": 6500
+          "promise": "I had it in my iPad for the longest time but rarely used it to take advantage of the free $10 credit most months.",
+          "needsConfirmation": true
         }
       ],
+      "dropped": [],
+      "questions": [],
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 1,
-      "spentMicros": 1997
+      "spentMicros": 3476,
+      "change": null
     },
     {
       "id": "1whhwd2",
@@ -17481,7 +16899,7 @@
         "https://preview.redd.it/ru0scyzx2lph1.png?width=960&format=png&auto=webp&s=dbc7d7fc0582b70fba356565af2921aaa7abb8aa",
         "https://preview.redd.it/x22d4zzx2lph1.png?width=960&format=png&auto=webp&s=dc4ffd873976595d6331b5d78c7e5460d1b44b9e"
       ],
-      "ms": 12906,
+      "ms": 20287,
       "outcome": "checked",
       "provider": "Google Fi",
       "period": [
@@ -17492,8 +16910,7 @@
       "lineSum": "not_printed",
       "billPages": [
         0,
-        1,
-        3
+        1
       ],
       "claims": [],
       "dropped": [],
@@ -17510,7 +16927,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 2652
+      "spentMicros": 3662,
+      "change": null
     },
     {
       "id": "1w77072",
@@ -17884,7 +17302,7 @@
       "images": [
         "https://i.redd.it/r8qi7lzux9qh1.jpeg"
       ],
-      "ms": 10936,
+      "ms": 14494,
       "outcome": "checked",
       "provider": "Spectrum",
       "period": [
@@ -17898,20 +17316,12 @@
       ],
       "claims": [],
       "dropped": [],
-      "questions": [
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Spectrum Internet 1 Gig",
-            "Promotional Discount"
-          ],
-          "cents": 6000
-        }
-      ],
+      "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 1,
-      "spentMicros": 2324
+      "matchedPromises": 0,
+      "spentMicros": 2978,
+      "change": null
     },
     {
       "id": "1wnfxsg",
@@ -18103,7 +17513,7 @@
         "https://preview.redd.it/4yzislg5olqh1.jpg?width=1289&format=pjpg&auto=webp&s=a665657e5cf7120aa24613cc858e8eaf13f53ba3",
         "https://preview.redd.it/q8ccqlg5olqh1.jpg?width=1284&format=pjpg&auto=webp&s=5c5d8ebca53886c97632f9578eb4ddca9ebc14ed"
       ],
-      "ms": 12368,
+      "ms": 15873,
       "outcome": "checked",
       "provider": null,
       "period": [
@@ -18111,7 +17521,7 @@
         null
       ],
       "lines": 25,
-      "lineSum": "not_printed",
+      "lineSum": "ok",
       "billPages": [
         0,
         1
@@ -18175,7 +17585,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 2850
+      "spentMicros": 2823,
+      "change": null
     },
     {
       "id": "1wo66dv",
@@ -18424,25 +17835,152 @@
         "https://preview.redd.it/kr8rist2v4ph1.jpg?width=822&format=pjpg&auto=webp&s=ae4608ebd467aba12437f7f919a16bdc1c55201b",
         "https://preview.redd.it/oyff6aefd5ph1.png?width=1096&format=png&auto=webp&s=82a9d8bf17497d411e6e9edac30487df299d2420"
       ],
-      "ms": 58347,
+      "ms": 20026,
       "outcome": "checked",
       "provider": "AT&T",
       "period": [
         null,
         null
       ],
-      "lines": 0,
-      "lineSum": "not_printed",
+      "lines": 30,
+      "lineSum": "ok",
       "billPages": [
-        0
+        0,
+        1
       ],
       "claims": [],
       "dropped": [],
-      "questions": [],
+      "questions": [
+        {
+          "kind": "conditions_unproven",
+          "lines": [
+            "Monthly charges",
+            "Monthly charges",
+            "Monthly charges",
+            "Monthly charges",
+            "Monthly charges"
+          ],
+          "cents": 25495
+        },
+        {
+          "kind": "unagreed_fee",
+          "lines": [
+            "Company fees & surcharges"
+          ],
+          "cents": 530
+        },
+        {
+          "kind": "unagreed_fee",
+          "lines": [
+            "Company fees & surcharges"
+          ],
+          "cents": 530
+        },
+        {
+          "kind": "unagreed_fee",
+          "lines": [
+            "Company fees & surcharges"
+          ],
+          "cents": 530
+        },
+        {
+          "kind": "unagreed_fee",
+          "lines": [
+            "Company fees & surcharges"
+          ],
+          "cents": 508
+        },
+        {
+          "kind": "unagreed_fee",
+          "lines": [
+            "Company fees & surcharges"
+          ],
+          "cents": 530
+        },
+        {
+          "kind": "unagreed_fee",
+          "lines": [
+            "Company fees & surcharges"
+          ],
+          "cents": 508
+        },
+        {
+          "kind": "unagreed_fee",
+          "lines": [
+            "Company fees & surcharges"
+          ],
+          "cents": 508
+        },
+        {
+          "kind": "unagreed_fee",
+          "lines": [
+            "Company fees & surcharges"
+          ],
+          "cents": 508
+        },
+        {
+          "kind": "unagreed_fee",
+          "lines": [
+            "Company fees & surcharges"
+          ],
+          "cents": 530
+        },
+        {
+          "kind": "unagreed_fee",
+          "lines": [
+            "Company fees & surcharges"
+          ],
+          "cents": 508
+        },
+        {
+          "kind": "repeated_charge",
+          "lines": [
+            "Monthly charges",
+            "Monthly charges",
+            "Monthly charges",
+            "Monthly charges",
+            "Monthly charges"
+          ],
+          "cents": 25495
+        },
+        {
+          "kind": "repeated_charge",
+          "lines": [
+            "Company fees & surcharges",
+            "Company fees & surcharges",
+            "Company fees & surcharges",
+            "Company fees & surcharges",
+            "Company fees & surcharges"
+          ],
+          "cents": 2650
+        },
+        {
+          "kind": "repeated_charge",
+          "lines": [
+            "Monthly charges",
+            "Monthly charges",
+            "Monthly charges",
+            "Monthly charges"
+          ],
+          "cents": 4396
+        },
+        {
+          "kind": "repeated_charge",
+          "lines": [
+            "Company fees & surcharges",
+            "Company fees & surcharges",
+            "Company fees & surcharges",
+            "Company fees & surcharges",
+            "Company fees & surcharges"
+          ],
+          "cents": 2540
+        }
+      ],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 0,
-      "spentMicros": 3074
+      "matchedPromises": 1,
+      "spentMicros": 4684,
+      "change": null
     },
     {
       "id": "1wrc8lt",
@@ -18501,17 +18039,16 @@
         "https://preview.redd.it/5ufnr9fejdrh1.png?width=1530&format=png&auto=webp&s=35ac6facd816acf1be50feda02ae6cc875bdb2e6",
         "https://preview.redd.it/jebhlcskjdrh1.png?width=1536&format=png&auto=webp&s=dc679b77051e42371f186ace5a6927e73c604fad"
       ],
-      "ms": 11869,
+      "ms": 16399,
       "outcome": "checked",
       "provider": null,
       "period": [
-        null,
-        null
+        "2026-09-24",
+        "2026-10-24"
       ],
-      "lines": 4,
+      "lines": 3,
       "lineSum": "not_printed",
       "billPages": [
-        0,
         1
       ],
       "claims": [],
@@ -18520,7 +18057,11 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 2175
+      "spentMicros": 3103,
+      "change": {
+        "earlierCents": 15750,
+        "currentCents": 18500
+      }
     },
     {
       "id": "1wsjh7m",
@@ -19048,7 +18589,7 @@
         "https://preview.redd.it/7ehe8mgp5ish1.jpg?width=1206&format=pjpg&auto=webp&s=4c77f3c326e6c88078ae1cdc4a469a010627e0d8",
         "https://preview.redd.it/zs3i0rgp5ish1.jpg?width=1206&format=pjpg&auto=webp&s=7e7b540e92768f676f0c50ff04f9de907f88b748"
       ],
-      "ms": 15893,
+      "ms": 13404,
       "outcome": "checked",
       "provider": "Verizon",
       "period": [
@@ -19103,7 +18644,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 3036
+      "spentMicros": 2512,
+      "change": null
     },
     {
       "id": "1wwu1qe",
@@ -19607,7 +19149,7 @@
       "images": [
         "https://i.redd.it/3ik29vo7wwth1.png"
       ],
-      "ms": 11645,
+      "ms": 40729,
       "outcome": "checked",
       "provider": "Optimum",
       "period": [
@@ -19615,26 +19157,18 @@
         null
       ],
       "lines": 6,
-      "lineSum": "not_printed",
+      "lineSum": "mismatch",
       "billPages": [
         0
       ],
       "claims": [],
       "dropped": [],
-      "questions": [
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Modem/Gateway",
-            "Internet Equip Cr"
-          ],
-          "cents": 1000
-        }
-      ],
+      "questions": [],
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 1,
-      "spentMicros": 2650
+      "spentMicros": 4022,
+      "change": null
     },
     {
       "id": "1x1zocw",
@@ -19738,7 +19272,7 @@
       "images": [
         "https://external-preview.redd.it/hn2Geeo9JJ9ovG0VYRQNN7rLf74JYYhcBt7Mq4JCzpc.png?auto=webp&s=604b66d9fd637a50d046571a3bc5df44cfa512bf"
       ],
-      "ms": 15393,
+      "ms": 15715,
       "outcome": "checked",
       "provider": "AT&T",
       "period": [
@@ -19791,7 +19325,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 4,
-      "spentMicros": 3768
+      "spentMicros": 3927,
+      "change": null
     },
     {
       "id": "1x32gy7",
@@ -20077,7 +19612,7 @@
       "images": [
         "https://i.redd.it/iqfed0domcuh1.png"
       ],
-      "ms": 19968,
+      "ms": 39606,
       "outcome": "checked",
       "provider": "optimum",
       "period": [
@@ -20095,7 +19630,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 4021
+      "spentMicros": 3239,
+      "change": null
     },
     {
       "id": "1x5zlhc",
@@ -20465,9 +20001,9 @@
         "https://preview.redd.it/8eu1zqbj95vh1.jpg?width=1080&format=pjpg&auto=webp&s=f0876a77a982e95d458f6bf7c27f466fe954f41a",
         "https://preview.redd.it/hksmywid95vh1.jpg?width=1080&format=pjpg&auto=webp&s=7dc595bafea5dadbe34b7c5547e25c6876203236"
       ],
-      "ms": 21621,
+      "ms": 24167,
       "outcome": "checked",
-      "provider": "xfinity",
+      "provider": "Xfinity",
       "period": [
         "2026-09-16",
         "2026-10-15"
@@ -20475,29 +20011,19 @@
       "lines": 3,
       "lineSum": "not_printed",
       "billPages": [
-        0,
-        1,
-        2
+        0
       ],
-      "claims": [
-        {
-          "kind": "credit_missing",
-          "amountCents": 1000,
-          "actualCents": 0,
-          "expectedCents": 1000,
-          "lines": [
-            "Internet: 1 Gig"
-          ],
-          "promise": "my transaction history shows this month's payment as autopay but this month's billing doesn't apply the $10 autopay discount.",
-          "needsConfirmation": true
-        }
-      ],
+      "claims": [],
       "dropped": [],
       "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 1,
-      "spentMicros": 4257
+      "matchedPromises": 0,
+      "spentMicros": 4773,
+      "change": {
+        "earlierCents": 5000,
+        "currentCents": 6151
+      }
     },
     {
       "id": "1x7vo1b",
@@ -20925,25 +20451,9 @@
       "images": [
         "https://i.redd.it/6gilvvg3xhwh1.jpeg"
       ],
-      "ms": 8532,
-      "outcome": "checked",
-      "provider": "AT&T",
-      "period": [
-        null,
-        null
-      ],
-      "lines": 0,
-      "lineSum": "not_printed",
-      "billPages": [
-        0
-      ],
-      "claims": [],
-      "dropped": [],
-      "questions": [],
-      "explained": 0,
-      "hadOffer": true,
-      "matchedPromises": 0,
-      "spentMicros": 1761
+      "ms": 4192,
+      "outcome": "not_a_bill",
+      "spentMicros": 773
     },
     {
       "id": "1xcvlde",
@@ -21023,7 +20533,7 @@
       "images": [
         "https://i.redd.it/izdftlhn04wh1.jpeg"
       ],
-      "ms": 19114,
+      "ms": 12973,
       "outcome": "checked",
       "provider": "Spectrum",
       "period": [
@@ -21031,28 +20541,18 @@
         null
       ],
       "lines": 13,
-      "lineSum": "not_printed",
+      "lineSum": "ok",
       "billPages": [
         0
       ],
       "claims": [],
       "dropped": [],
-      "questions": [
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Invincible WiFi",
-            "Promotional Discount",
-            "Invincible WiFi Partial Month(s)",
-            "Promotional Discount"
-          ],
-          "cents": 3933
-        }
-      ],
+      "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 1,
-      "spentMicros": 4448
+      "matchedPromises": 0,
+      "spentMicros": 2992,
+      "change": null
     },
     {
       "id": "1xd49su",
@@ -21079,7 +20579,7 @@
         "https://i.redd.it/0nvsfbsaqvvh1.png",
         "https://i.redd.it/epxjnasaqvvh1.png"
       ],
-      "ms": 24458,
+      "ms": 19523,
       "outcome": "checked",
       "provider": "AT&T",
       "period": [
@@ -21092,30 +20592,9 @@
         0,
         1
       ],
-      "claims": [
-        {
-          "kind": "price_above_promise",
-          "amountCents": 400,
-          "actualCents": 7600,
-          "expectedCents": 7200,
-          "lines": [
-            "AT&T Unlimited &More(SM) Multi Line",
-            "Discount for AutoPay & paperless disc ($5 off w/ credit card)",
-            "Discount for unlimited one phone"
-          ],
-          "promise": "The website shows when I go to look at new plans that with my signature discount I get can AT&T Premium 2.0 for $72.00 a month.",
-          "needsConfirmation": true
-        }
-      ],
+      "claims": [],
       "dropped": [],
       "questions": [
-        {
-          "kind": "unagreed_fee",
-          "lines": [
-            "TX State Cost Recovery Charge"
-          ],
-          "cents": 27
-        },
         {
           "kind": "unagreed_fee",
           "lines": [
@@ -21129,12 +20608,20 @@
             "TX State Cost Recovery Charge"
           ],
           "cents": 14
+        },
+        {
+          "kind": "unagreed_fee",
+          "lines": [
+            "TX State Cost Recovery Charge"
+          ],
+          "cents": 27
         }
       ],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 1,
-      "spentMicros": 5223
+      "matchedPromises": 0,
+      "spentMicros": 3666,
+      "change": null
     },
     {
       "id": "1xdgnqs",
@@ -21379,58 +20866,9 @@
       "images": [
         "https://i.redd.it/t2bf48kb64xh1.jpeg"
       ],
-      "ms": 14450,
-      "outcome": "checked",
-      "provider": "Verizon",
-      "period": [
-        null,
-        null
-      ],
-      "lines": 6,
-      "lineSum": "not_printed",
-      "billPages": [
-        0
-      ],
-      "claims": [],
-      "dropped": [],
-      "questions": [
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Fios 300 Mbps",
-            "Auto Pay and Paper Free Data Discount"
-          ],
-          "cents": 3000
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Fios 300 Mbps",
-            "Deals at Work - Data"
-          ],
-          "cents": 3600
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Rent: Verizon Router"
-          ],
-          "cents": 1800
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Fios 300 Mbps",
-            "Auto Pay and Paper Free Data Discount",
-            "Deals at Work - Data"
-          ],
-          "cents": 2600
-        }
-      ],
-      "explained": 0,
-      "hadOffer": true,
-      "matchedPromises": 4,
-      "spentMicros": 3514
+      "ms": 5088,
+      "outcome": "not_a_bill",
+      "spentMicros": 977
     },
     {
       "id": "1xgq7n4",
@@ -21652,14 +21090,14 @@
       "images": [
         "https://i.redd.it/sw71g1pe4xxh1.png"
       ],
-      "ms": 14924,
+      "ms": 10509,
       "outcome": "checked",
       "provider": "T-Mobile",
       "period": [
         null,
         null
       ],
-      "lines": 4,
+      "lines": 3,
       "lineSum": "ok",
       "billPages": [
         0
@@ -21668,26 +21106,18 @@
       "dropped": [],
       "questions": [
         {
-          "kind": "partial_period",
+          "kind": "unagreed_fee",
           "lines": [
-            "Experience More w/ 55+ Savings",
-            "Experience More w/ 55+ Savings"
+            "T-Mobile fees & charges"
           ],
-          "cents": 267
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Experience More w/ 55+ Savings",
-            "Experience More w/ 55+ Savings"
-          ],
-          "cents": 267
+          "cents": 1
         }
       ],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 2,
-      "spentMicros": 3535
+      "matchedPromises": 0,
+      "spentMicros": 2349,
+      "change": null
     },
     {
       "id": "1xkrabz",
@@ -21775,7 +21205,7 @@
         "https://i.redd.it/l4o4h7lcguwh1.jpeg",
         "https://i.redd.it/mj6ze7lcguwh1.jpeg"
       ],
-      "ms": 33840,
+      "ms": 36095,
       "outcome": "checked",
       "provider": "AT&T",
       "period": [
@@ -21785,33 +21215,27 @@
       "lines": 18,
       "lineSum": "not_printed",
       "billPages": [
+        1,
         2,
         3
       ],
       "claims": [
         {
-          "kind": "credit_missing",
-          "amountCents": 2778,
-          "actualCents": 0,
-          "expectedCents": 2778,
+          "kind": "price_above_promise",
+          "amountCents": 2000,
+          "actualCents": 4000,
+          "expectedCents": 2000,
           "lines": [
-            "Plan",
-            "Plan"
+            "Premium 2.0 - 4+ Lines",
+            "Discount for switching to AT&T with own device",
+            "Discount for Military & Veteran Appreciation"
           ],
-          "promise": "Promotional Credit w Trade In is saving you $27.78",
+          "promise": "I was quoted approximately $269 per month for four wireless lines, with home internet supposedly costing around $20 per month.",
           "needsConfirmation": true
         }
       ],
       "dropped": [],
       "questions": [
-        {
-          "kind": "overlapping_claim",
-          "lines": [
-            "Plan",
-            "Plan"
-          ],
-          "cents": 9600
-        },
         {
           "kind": "unagreed_fee",
           "lines": [
@@ -21859,6 +21283,14 @@
         {
           "kind": "repeated_charge",
           "lines": [
+            "Plan",
+            "Plan"
+          ],
+          "cents": 9600
+        },
+        {
+          "kind": "repeated_charge",
+          "lines": [
             "Company fees & surcharges",
             "Company fees & surcharges"
           ],
@@ -21867,8 +21299,9 @@
       ],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 6,
-      "spentMicros": 7718
+      "matchedPromises": 4,
+      "spentMicros": 7702,
+      "change": null
     },
     {
       "id": "1xjjvb5",
@@ -21880,7 +21313,7 @@
       "images": [
         "https://i.redd.it/s89s3w9brmyh1.png"
       ],
-      "ms": 8607,
+      "ms": 19923,
       "outcome": "checked",
       "provider": "Xfinity",
       "period": [
@@ -21888,7 +21321,7 @@
         null
       ],
       "lines": 3,
-      "lineSum": "not_printed",
+      "lineSum": "mismatch",
       "billPages": [
         0
       ],
@@ -21898,7 +21331,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 1718
+      "spentMicros": 3728,
+      "change": null
     },
     {
       "id": "1xlj9dg",
@@ -21925,7 +21359,7 @@
         "https://i.redd.it/shqt93pgabxh1.png",
         "https://i.redd.it/zf67qxogabxh1.jpeg"
       ],
-      "ms": 30367,
+      "ms": 51926,
       "outcome": "checked",
       "provider": "Xfinity",
       "period": [
@@ -21937,11 +21371,46 @@
       "billPages": [
         0
       ],
-      "claims": [],
+      "claims": [
+        {
+          "kind": "price_above_promise",
+          "amountCents": 7650,
+          "actualCents": 20650,
+          "expectedCents": 13000,
+          "lines": [
+            "Premier Triple Play",
+            "Premier Triple Play"
+          ],
+          "promise": "Internet\n$130.00/mo",
+          "needsConfirmation": true
+        },
+        {
+          "kind": "included_charged",
+          "amountCents": 2800,
+          "actualCents": 2800,
+          "expectedCents": 0,
+          "lines": [
+            "TV Box + Remote"
+          ],
+          "promise": "First 4K TV Box",
+          "needsConfirmation": true
+        },
+        {
+          "kind": "included_charged",
+          "amountCents": 1060,
+          "actualCents": 1060,
+          "expectedCents": 0,
+          "lines": [
+            "Regional Sports Fee"
+          ],
+          "promise": "Sports & News",
+          "needsConfirmation": true
+        }
+      ],
       "dropped": [],
       "questions": [
         {
-          "kind": "partial_period",
+          "kind": "price_gap",
           "lines": [
             "Premier Triple Play",
             "Premier Triple Play"
@@ -21949,7 +21418,7 @@
           "cents": 20650
         },
         {
-          "kind": "partial_period",
+          "kind": "price_gap",
           "lines": [
             "Premier Triple Play",
             "Premier Triple Play"
@@ -21957,7 +21426,7 @@
           "cents": 20650
         },
         {
-          "kind": "partial_period",
+          "kind": "conditions_unproven",
           "lines": [
             "Premier Triple Play",
             "Premier Triple Play"
@@ -21965,38 +21434,14 @@
           "cents": 20650
         },
         {
-          "kind": "partial_period",
-          "lines": [
-            "Premier Triple Play",
-            "Premier Triple Play"
-          ],
-          "cents": 20650
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Premier Triple Play",
-            "Premier Triple Play"
-          ],
-          "cents": 20650
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Premier Triple Play",
-            "Premier Triple Play"
-          ],
-          "cents": 20650
-        },
-        {
-          "kind": "partial_period",
+          "kind": "end_date_unread",
           "lines": [
             "Peacock Premium Included"
           ],
           "cents": 0
         },
         {
-          "kind": "partial_period",
+          "kind": "overlapping_claim",
           "lines": [
             "Premier Triple Play",
             "Premier Triple Play"
@@ -22004,7 +21449,7 @@
           "cents": 20650
         },
         {
-          "kind": "partial_period",
+          "kind": "overlapping_claim",
           "lines": [
             "Premier Triple Play",
             "Premier Triple Play"
@@ -22012,48 +21457,12 @@
           "cents": 20650
         },
         {
-          "kind": "partial_period",
-          "lines": [
-            "Internet/Voice Equipment Rental."
-          ],
-          "cents": 1500
-        },
-        {
-          "kind": "partial_period",
+          "kind": "overlapping_claim",
           "lines": [
             "Premier Triple Play",
             "Premier Triple Play"
           ],
           "cents": 20650
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "TV Box + Remote"
-          ],
-          "cents": 2800
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Premier Triple Play",
-            "Premier Triple Play"
-          ],
-          "cents": 20650
-        },
-        {
-          "kind": "unagreed_fee",
-          "lines": [
-            "Broadcast TV Fee"
-          ],
-          "cents": 2900
-        },
-        {
-          "kind": "unagreed_fee",
-          "lines": [
-            "Regional Sports Fee"
-          ],
-          "cents": 1060
         },
         {
           "kind": "unagreed_fee",
@@ -22061,19 +21470,13 @@
             "Regulatory Cost Recovery"
           ],
           "cents": 164
-        },
-        {
-          "kind": "unagreed_fee",
-          "lines": [
-            "Franchise Fee"
-          ],
-          "cents": 862
         }
       ],
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 13,
-      "spentMicros": 7193
+      "spentMicros": 12587,
+      "change": null
     },
     {
       "id": "1xm7w5l",
@@ -22159,7 +21562,7 @@
       "images": [
         "https://i.redd.it/lb3gy8su69zh1.jpeg"
       ],
-      "ms": 8261,
+      "ms": 8890,
       "outcome": "checked",
       "provider": null,
       "period": [
@@ -22177,7 +21580,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 1638
+      "spentMicros": 1629,
+      "change": null
     },
     {
       "id": "1xlx3bh",
@@ -22189,7 +21593,7 @@
       "images": [
         "https://i.redd.it/77brmttma7zh1.png"
       ],
-      "ms": 9110,
+      "ms": 10661,
       "outcome": "checked",
       "provider": null,
       "period": [
@@ -22197,7 +21601,7 @@
         null
       ],
       "lines": 2,
-      "lineSum": "not_printed",
+      "lineSum": "ok",
       "billPages": [
         0
       ],
@@ -22207,7 +21611,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 1806
+      "spentMicros": 1842,
+      "change": null
     },
     {
       "id": "1xnns46",
@@ -22251,7 +21656,7 @@
       "images": [
         "https://i.redd.it/a04v4y55uayh1.jpeg"
       ],
-      "ms": 20958,
+      "ms": 11583,
       "outcome": "checked",
       "provider": "Xfinity",
       "period": [
@@ -22259,27 +21664,18 @@
         null
       ],
       "lines": 6,
-      "lineSum": "ok",
+      "lineSum": "not_printed",
       "billPages": [
         0
       ],
       "claims": [],
       "dropped": [],
-      "questions": [
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Internet: Gigabit",
-            "Contract Discount",
-            "Automatic Payments Discount"
-          ],
-          "cents": 6500
-        }
-      ],
+      "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 1,
-      "spentMicros": 4724
+      "matchedPromises": 0,
+      "spentMicros": 2588,
+      "change": null
     },
     {
       "id": "1xnskpo",
@@ -22427,7 +21823,7 @@
       "images": [
         "https://i.redd.it/fr89fxj2vczh1.jpeg"
       ],
-      "ms": 12436,
+      "ms": 10677,
       "outcome": "checked",
       "provider": "Visible",
       "period": [
@@ -22441,20 +21837,12 @@
       ],
       "claims": [],
       "dropped": [],
-      "questions": [
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Visible+ Pro annual plan",
-            "A32_25 | 50% off with BYOD | BLACKFRIDAY50 | V+ Pro annual plan"
-          ],
-          "cents": 22500
-        }
-      ],
+      "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 1,
-      "spentMicros": 2608
+      "matchedPromises": 0,
+      "spentMicros": 2239,
+      "change": null
     },
     {
       "id": "1xour3n",
@@ -22480,7 +21868,7 @@
       "images": [
         "https://i.redd.it/qdvwzrnl7ozh1.png"
       ],
-      "ms": 8403,
+      "ms": 6303,
       "outcome": "checked",
       "provider": null,
       "period": [
@@ -22494,19 +21882,12 @@
       ],
       "claims": [],
       "dropped": [],
-      "questions": [
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Getting Started Kit Delivery"
-          ],
-          "cents": 0
-        }
-      ],
+      "questions": [],
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 1,
-      "spentMicros": 1534
+      "spentMicros": 1292,
+      "change": null
     },
     {
       "id": "1xp2yx4",
@@ -22595,7 +21976,7 @@
       "images": [
         "https://i.redd.it/fjesqrtzuozh1.jpeg"
       ],
-      "ms": 9138,
+      "ms": 9551,
       "outcome": "checked",
       "provider": null,
       "period": [
@@ -22622,7 +22003,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 1913
+      "spentMicros": 2195,
+      "change": null
     },
     {
       "id": "1xsb6ah",
@@ -22786,22 +22168,18 @@
         "https://i.redd.it/g8oqfw8nzhzh1.png",
         "https://i.redd.it/iubb5w8nzhzh1.png"
       ],
-      "ms": 19534,
+      "ms": 27381,
       "outcome": "checked",
       "provider": "Xfinity",
       "period": [
-        "2026-09-01",
-        "2026-09-30"
+        "2026-10-01",
+        "2026-10-31"
       ],
-      "lines": 5,
+      "lines": 3,
       "lineSum": "ok",
       "billPages": [
-        0,
-        1,
-        2,
         3,
-        4,
-        5
+        4
       ],
       "claims": [],
       "dropped": [],
@@ -22809,7 +22187,11 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 4063
+      "spentMicros": 5706,
+      "change": {
+        "earlierCents": 17053,
+        "currentCents": 6120
+      }
     },
     {
       "id": "1xsds60",
@@ -23232,7 +22614,7 @@
       "images": [
         "https://i.redd.it/6mvsmluiy71i1.jpeg"
       ],
-      "ms": 10309,
+      "ms": 12275,
       "outcome": "checked",
       "provider": "AT&T",
       "period": [
@@ -23250,7 +22632,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 1995
+      "spentMicros": 2387,
+      "change": null
     },
     {
       "id": "1xwmjvc",
@@ -23320,7 +22703,7 @@
       "images": [
         "https://i.redd.it/7l9voajjkd1i1.jpeg"
       ],
-      "ms": 13055,
+      "ms": 29665,
       "outcome": "checked",
       "provider": "AT&T",
       "period": [
@@ -23328,7 +22711,7 @@
         null
       ],
       "lines": 14,
-      "lineSum": "not_printed",
+      "lineSum": "ok",
       "billPages": [
         0
       ],
@@ -23346,7 +22729,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 3019
+      "spentMicros": 6843,
+      "change": null
     },
     {
       "id": "1xxyeiz",
@@ -23608,7 +22992,7 @@
         "https://i.redd.it/eaqelj2fgx0i1.jpeg",
         "https://i.redd.it/qdcjs6vegx0i1.jpeg"
       ],
-      "ms": 26732,
+      "ms": 14522,
       "outcome": "checked",
       "provider": "STARLINK",
       "period": [
@@ -23618,28 +23002,19 @@
       "lines": 4,
       "lineSum": "ok",
       "billPages": [
-        0,
-        1
+        0
       ],
-      "claims": [
-        {
-          "kind": "credit_missing",
-          "amountCents": 4500,
-          "actualCents": 0,
-          "expectedCents": 4500,
-          "lines": [
-            "Residential Max (Thursday, December 3, 2026 - Saturday, January 2, 2027)"
-          ],
-          "promise": "Well I got $45 off my main service line.",
-          "needsConfirmation": true
-        }
-      ],
+      "claims": [],
       "dropped": [],
       "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 1,
-      "spentMicros": 5712
+      "matchedPromises": 0,
+      "spentMicros": 2790,
+      "change": {
+        "earlierCents": 25499,
+        "currentCents": 20999
+      }
     },
     {
       "id": "1y0dbkd",
@@ -23755,7 +23130,7 @@
         "https://i.redd.it/hcirpwqay12i1.jpeg",
         "https://i.redd.it/pxqpyvqay12i1.jpeg"
       ],
-      "ms": 11260,
+      "ms": 9880,
       "outcome": "checked",
       "provider": null,
       "period": [
@@ -23773,7 +23148,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 2156
+      "spentMicros": 1574,
+      "change": null
     },
     {
       "id": "1y0vfkm",
@@ -23921,7 +23297,7 @@
       "images": [
         "https://external-preview.redd.it/qMsTu2bO8S12uzKbbFKWKCIXZoPwX6UPBzFSiUUZ3XQ.jpeg?auto=webp&s=486594948dd2a2d33288afb2d9ef8c60faf5883b"
       ],
-      "ms": 13656,
+      "ms": 14711,
       "outcome": "checked",
       "provider": "AT&T",
       "period": [
@@ -23970,7 +23346,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 2733
+      "spentMicros": 3273,
+      "change": null
     },
     {
       "id": "1y0smwh",
@@ -24282,48 +23659,9 @@
         "https://i.redd.it/9ubz4j5kxa2i1.png",
         "https://i.redd.it/k2ck1fefxa2i1.png"
       ],
-      "ms": 24998,
-      "outcome": "checked",
-      "provider": "Visible",
-      "period": [
-        "2026-10-31",
-        "2026-11-30"
-      ],
-      "lines": 6,
-      "lineSum": "not_printed",
-      "billPages": [
-        0
-      ],
-      "claims": [
-        {
-          "kind": "included_charged",
-          "amountCents": 14106,
-          "actualCents": 14106,
-          "expectedCents": 0,
-          "lines": [
-            "Visible +Pro One Plan",
-            "One months of service"
-          ],
-          "promise": "To sign up, Visible requires you to pay 2 months upfront, and the included router is allegedly supposed to arrive in 2–5 business days.",
-          "needsConfirmation": true
-        }
-      ],
-      "dropped": [],
-      "questions": [
-        {
-          "kind": "overlapping_claim",
-          "lines": [
-            "Visible +Pro One Plan",
-            "One months of service",
-            "ONE-for-2 discount"
-          ],
-          "cents": 13606
-        }
-      ],
-      "explained": 0,
-      "hadOffer": true,
-      "matchedPromises": 2,
-      "spentMicros": 5802
+      "ms": 24849,
+      "outcome": "could_not_check",
+      "spentMicros": 5018
     },
     {
       "id": "1y4o95z",
@@ -24681,14 +24019,14 @@
         "https://i.redd.it/5o1j5ppz1p3i1.png",
         "https://i.redd.it/ld3od2b82p3i1.png"
       ],
-      "ms": 14535,
+      "ms": 11160,
       "outcome": "checked",
       "provider": "Xfinity",
       "period": [
         "2026-11-18",
         "2026-12-17"
       ],
-      "lines": 4,
+      "lines": 1,
       "lineSum": "ok",
       "billPages": [
         0
@@ -24702,19 +24040,13 @@
             "Internet: 500 MBPS"
           ],
           "cents": 9500
-        },
-        {
-          "kind": "end_date_unread",
-          "lines": [
-            "Internet: 500 MBPS"
-          ],
-          "cents": 9500
         }
       ],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 2,
-      "spentMicros": 3530
+      "matchedPromises": 1,
+      "spentMicros": 2400,
+      "change": null
     },
     {
       "id": "wq6399",
@@ -24915,7 +24247,7 @@
         "https://i.redd.it/hxs49sxi9n3i1.png",
         "https://i.redd.it/xt3925ii9n3i1.png"
       ],
-      "ms": 27932,
+      "ms": 15537,
       "outcome": "checked",
       "provider": "T-Mobile",
       "period": [
@@ -24923,7 +24255,7 @@
         null
       ],
       "lines": 33,
-      "lineSum": "not_printed",
+      "lineSum": "ok",
       "billPages": [
         0,
         1,
@@ -24934,100 +24266,6 @@
       "claims": [],
       "dropped": [],
       "questions": [
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Plan cost",
-            "T-Mobile Insider",
-            "Person C",
-            "3rd Line Service Promo with New Line(ID240575)",
-            "T-Mobile Insider",
-            "Person D",
-            "T-Mobile Insider",
-            "Person E",
-            "T-Mobile Insider",
-            "Person E",
-            "Premium Voice Discount",
-            "Person A",
-            "HSI Voice Bundle Discount",
-            "Person A",
-            "Premium Voice Discount",
-            "Promotional credit",
-            "Promotional credit",
-            "Promotional credit",
-            "Promotional credit",
-            "Promotional credit",
-            "Netflix Discount",
-            "Apple TV Discount"
-          ],
-          "cents": 11278
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Plan cost",
-            "T-Mobile Insider",
-            "Person C",
-            "3rd Line Service Promo with New Line(ID240575)",
-            "T-Mobile Insider",
-            "Person D",
-            "T-Mobile Insider",
-            "Person E",
-            "T-Mobile Insider"
-          ],
-          "cents": 23600
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Person A",
-            "HSI Voice Bundle Discount"
-          ],
-          "cents": 6000
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Person A",
-            "HSI Voice Bundle Discount"
-          ],
-          "cents": 6000
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Person E",
-            "Premium Voice Discount",
-            "Person A",
-            "Premium Voice Discount"
-          ],
-          "cents": 1000
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Promotional credit",
-            "Promotional credit",
-            "Promotional credit",
-            "Promotional credit",
-            "Promotional credit"
-          ],
-          "cents": -17424
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Netflix Discount"
-          ],
-          "cents": -699
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Apple TV Discount"
-          ],
-          "cents": -1199
-        },
         {
           "kind": "unagreed_fee",
           "lines": [
@@ -25045,8 +24283,9 @@
       ],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 8,
-      "spentMicros": 7146
+      "matchedPromises": 0,
+      "spentMicros": 3595,
+      "change": null
     },
     {
       "id": "vb10zw",
@@ -25060,82 +24299,37 @@
         "https://preview.redd.it/r1hfzkabma591.png?width=1212&format=png&auto=webp&s=b3522a94aa35f45911970efc056aac54688a6cb7",
         "https://preview.redd.it/rrwxj734na591.png?width=937&format=png&auto=webp&s=83a6b80328f719084388610fe2d5ab2dde92763e"
       ],
-      "ms": 16789,
+      "ms": 18281,
       "outcome": "checked",
       "provider": "AT&T",
       "period": [
         null,
         null
       ],
-      "lines": 2,
-      "lineSum": "not_printed",
+      "lines": 9,
+      "lineSum": "ok",
       "billPages": [
-        1
+        0,
+        1,
+        2
       ],
       "claims": [],
       "dropped": [],
       "questions": [
         {
-          "kind": "partial_period",
+          "kind": "conditions_unproven",
           "lines": [
-            "Internet 300 Stand-alone"
+            "Internet 300°",
+            "$5 off with AutoPay and Paperless Bill"
           ],
-          "cents": 0
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Internet 300 Stand-alone"
-          ],
-          "cents": 0
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Internet 300 Stand-alone"
-          ],
-          "cents": 0
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Internet 300 Stand-alone"
-          ],
-          "cents": 0
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Internet 300 Stand-alone"
-          ],
-          "cents": 0
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Internet 300 Stand-alone"
-          ],
-          "cents": 0
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Internet 300 Stand-alone"
-          ],
-          "cents": 0
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Installation"
-          ],
-          "cents": 0
+          "cents": 5500
         }
       ],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 8,
-      "spentMicros": 3434
+      "matchedPromises": 1,
+      "spentMicros": 3755,
+      "change": null
     },
     {
       "id": "147aqp8",
@@ -25723,7 +24917,7 @@
       "images": [
         "https://external-preview.redd.it/Z-HW7uUPpVqe6ahUSjld6GXzdYLgZ-iZCdQnSQH5Ano.jpg?auto=webp&s=a11ba23b4a160ddada71dc8a93511d8e47fd71fb"
       ],
-      "ms": 9554,
+      "ms": 9158,
       "outcome": "checked",
       "provider": "KINETIC BY WINDSTREAM",
       "period": [
@@ -25737,19 +24931,12 @@
       ],
       "claims": [],
       "dropped": [],
-      "questions": [
-        {
-          "kind": "partial_period",
-          "lines": [
-            "KINETIC ONE INTERNET PLAN"
-          ],
-          "cents": 6200
-        }
-      ],
+      "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 1,
-      "spentMicros": 1829
+      "matchedPromises": 0,
+      "spentMicros": 1557,
+      "change": null
     },
     {
       "id": "1jcvarj",
@@ -25818,15 +25005,15 @@
       "images": [
         "https://preview.redd.it/8m428ibjtvee1.jpg?width=1280&format=pjpg&auto=webp&s=cf3fe595a89cdc09830a44dd865f91d228e34e5d"
       ],
-      "ms": 9342,
+      "ms": 25082,
       "outcome": "checked",
-      "provider": "Xtream by Mediacom",
+      "provider": "Xtream",
       "period": [
         "2024-12-24",
         "2025-01-23"
       ],
       "lines": 2,
-      "lineSum": "not_printed",
+      "lineSum": "mismatch",
       "billPages": [
         0
       ],
@@ -25836,7 +25023,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 1841
+      "spentMicros": 5308,
+      "change": null
     },
     {
       "id": "1sliqul",
@@ -25964,7 +25152,7 @@
       "images": [
         "https://preview.redd.it/l0phvo3q1hje1.jpg?width=549&format=pjpg&auto=webp&s=37c8c2b74b23a712b1050f99884d62d25eff23fb"
       ],
-      "ms": 11242,
+      "ms": 9474,
       "outcome": "checked",
       "provider": null,
       "period": [
@@ -25978,19 +25166,12 @@
       ],
       "claims": [],
       "dropped": [],
-      "questions": [
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Infinite Unlimited+"
-          ],
-          "cents": 5000
-        }
-      ],
+      "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 1,
-      "spentMicros": 2304
+      "matchedPromises": 0,
+      "spentMicros": 1792,
+      "change": null
     },
     {
       "id": "1t5k213",
@@ -26344,15 +25525,15 @@
         "https://preview.redd.it/w6op6qhrxa7e1.png?width=1320&format=png&auto=webp&s=a471d1f0c1dbffc591202a61754251cbfcf71f3b",
         "https://preview.redd.it/x5ycvshrxa7e1.jpg?width=977&format=pjpg&auto=webp&s=89b4ba598b69f1ff38206680d398da16b8e3bfcd"
       ],
-      "ms": 23214,
+      "ms": 23237,
       "outcome": "checked",
       "provider": null,
       "period": [
-        "2024-11-06",
-        "2024-12-06"
+        null,
+        null
       ],
       "lines": 12,
-      "lineSum": "not_printed",
+      "lineSum": "ok",
       "billPages": [
         2,
         3,
@@ -26372,8 +25553,9 @@
       ],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 1,
-      "spentMicros": 5240
+      "matchedPromises": 0,
+      "spentMicros": 4861,
+      "change": null
     },
     {
       "id": "1ul1k19",
@@ -26683,7 +25865,7 @@
       "images": [
         "https://i.redd.it/pjthgv50cu8h1.jpeg"
       ],
-      "ms": 11822,
+      "ms": 12510,
       "outcome": "checked",
       "provider": null,
       "period": [
@@ -26701,7 +25883,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
-      "spentMicros": 2827
+      "spentMicros": 2651,
+      "change": null
     },
     {
       "id": "o8wfts",
@@ -26742,7 +25925,7 @@
       "images": [
         "https://external-preview.redd.it/R4510LQeRpa7cFihvzd7upd9jtbMrrPWLXzLCCRmEQc.png?auto=webp&s=96795ce5d4e53a60da76115568ccff1892889940"
       ],
-      "ms": 12304,
+      "ms": 14994,
       "outcome": "checked",
       "provider": "DIRECTV",
       "period": [
@@ -26758,15 +25941,6 @@
       "dropped": [],
       "questions": [
         {
-          "kind": "partial_period",
-          "lines": [
-            "ULTIMATE (all included)",
-            "$5 off for 12 mo w/ABP + eBill",
-            "$63 off for 12 months"
-          ],
-          "cents": 6000
-        },
-        {
           "kind": "unagreed_fee",
           "lines": [
             "Regional Sports Fee"
@@ -26777,7 +25951,8 @@
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 1,
-      "spentMicros": 2581
+      "spentMicros": 3549,
+      "change": null
     }
   ]
 }

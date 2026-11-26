@@ -197,7 +197,7 @@ function Check() {
 
 type Step = { key: "sort" | "bill" | "offer" | "compare" | "challenge"; stages: Stage[]; label: string };
 const STAGE_ORDER: Stage[] = ["sorting", "reading_bill", "rereading_bill", "reading_offer", "comparing", "challenging"];
-const KIND_NAMES: Record<PageKind, string> = { bill: "Bill", promise: "Promise", other: "Not used" };
+const KIND_NAMES: Record<PageKind, string> = { bill: "Bill", older_bill: "Earlier bill", promise: "Promise", other: "Not used" };
 
 function stepStatus(step: Step, stage: Stage | null, active: boolean): "done" | "now" | "later" {
   if (!stage) return step.key === "bill" && active ? "now" : "later";
@@ -331,7 +331,7 @@ function Working({ state, onCancel, dispatch }: { state: Exclude<CheckState, { s
                   <ul className="ml-7 mt-2 grid grid-cols-4 gap-2 sm:grid-cols-6">
                     {pages.map((shown, i) => (
                       <li key={i} className="appear flex flex-col gap-1">
-                        <div className={`h-16 overflow-hidden rounded-[4px] bg-white shadow-[inset_0_0_0_1px_var(--line)] ${kinds[i] === "other" ? "opacity-40" : ""}`}>
+                        <div className={`h-16 overflow-hidden rounded-[4px] bg-white shadow-[inset_0_0_0_1px_var(--line)] ${kinds[i] === "other" || kinds[i] === "older_bill" ? "opacity-40" : ""}`}>
                           <img src={shown.image} alt="" className="h-full w-full object-cover object-top" />
                         </div>
                         <span className="text-[12px] text-text-2">{KIND_NAMES[kinds[i] ?? "bill"]}</span>

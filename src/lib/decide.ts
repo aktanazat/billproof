@@ -62,15 +62,17 @@ const CREDIT_KINDS: KindSet = { credit: true, discount: true };
 const GENERIC_WORDS = new Set(["fee", "fees", "rental", "rent", "charge", "charges", "monthly", "service", "services", "plan", "line", "the", "and", "for", "with"]);
 
 // An "included" promise names its item ("Wi-Fi Gateway: included"); a charge whose label shares no specific word
-// with the quote is some other item the model linked by mistake.
-function quoteNamesLine(quote: string, label: string): boolean {
+// with the quote is some other item the model linked by mistake. The company's own name says nothing about the item.
+function quoteNamesLine(quote: string, label: string, provider: string | null): boolean {
   const said = new Set(tokens(quote));
-  return tokens(label).some((word) => word.length >= 3 && !GENERIC_WORDS.has(word) && said.has(word));
+  const company = new Set(tokens(provider ?? ""));
+  return tokens(label).some((word) => word.length >= 3 && !GENERIC_WORDS.has(word) && !company.has(word) && said.has(word));
 }
 
+// A plan's own price is never "included": a promise of a free item linked to the plan line is about something else.
 const COVERABLE: Record<Exclude<PromiseTerm["kind"], "other">, KindSet> = {
   monthly_price: { plan: true, discount: true, credit: true },
-  included: { equipment: true, company_fee: true, one_time: true, plan: true, other: true, credit: true, discount: true },
+  included: { equipment: true, company_fee: true, one_time: true, other: true, credit: true, discount: true },
   recurring_credit: { plan: true, credit: true, discount: true },
 };
 
@@ -88,11 +90,12 @@ function promiseEvidenceProblem(promise: PromiseTerm, proof: Source): UnusedReas
 type Activity = { state: "active" } | { state: "ended"; on: string } | { state: "not_started" } | { state: "partial" } | { state: "unknown" };
 
 function activity(promise: PromiseTerm, reading: Reading): Activity {
+  const from = promise.applies_from;
+  const until = promise.applies_until;
+  if (!from && !until) return { state: "active" };
   const start = reading.period_start ?? reading.statement_date;
   const end = reading.period_end ?? reading.statement_date;
   if (!start || !end) return { state: "unknown" };
-  const from = promise.applies_from;
-  const until = promise.applies_until;
   if (until && until < start) return { state: "ended", on: until };
   if (from && from > end) return { state: "not_started" };
   if ((until && until < end) || (from && from > start)) return { state: "partial" };
@@ -124,6 +127,33 @@ export function checkTotals(reading: Reading, bill: Source): Totals {
 }
 
 const sum = (lines: LineItem[]) => lines.reduce((total, line) => total + line.amount_cents, 0);
+
+export type BillChange = { earlierCents: number; currentCents: number; lines: { label: string; beforeCents: number | null; afterCents: number | null }[] };
+
+const labelKey = (label: string) => label.toLowerCase().replace(/\s+/g, " ").trim();
+
+function centsByLabel(reading: Reading): Map<string, { label: string; cents: number }> {
+  const totals = new Map<string, { label: string; cents: number }>();
+  for (const line of reading.line_items) {
+    const key = labelKey(line.label);
+    const seen = totals.get(key);
+    totals.set(key, { label: seen?.label ?? line.label, cents: (seen?.cents ?? 0) + line.amount_cents });
+  }
+  return totals;
+}
+
+// What moved between an earlier statement and this one: lines with the same label are summed, and only lines
+// whose amount changed, appeared or went away are kept, the biggest move first.
+export function compareBills(earlier: Reading, current: Reading): BillChange {
+  const before = centsByLabel(earlier);
+  const after = centsByLabel(current);
+  const move = (line: BillChange["lines"][number]) => Math.abs((line.afterCents ?? 0) - (line.beforeCents ?? 0));
+  const lines = [...new Set([...before.keys(), ...after.keys()])]
+    .map((key) => ({ label: after.get(key)?.label ?? before.get(key)?.label ?? key, beforeCents: before.get(key)?.cents ?? null, afterCents: after.get(key)?.cents ?? null }))
+    .filter((line) => line.beforeCents !== line.afterCents)
+    .sort((a, b) => move(b) - move(a));
+  return { earlierCents: sum(earlier.line_items), currentCents: sum(current.line_items), lines };
+}
 
 const GENERIC_PROVIDER_WORDS = new Set(["fiber", "cable", "internet", "wireless", "mobile", "power", "energy", "electric", "gas", "water", "tv", "communications", "telecom", "broadband", "inc", "llc", "co", "corp", "company", "the", "and", "of"]);
 
@@ -240,7 +270,7 @@ export function decide(reading: Reading, promises: PromiseTerm[], bill: Source, 
     }
 
     if (promise.kind === "included") {
-      const named = covered.filter((line) => line.amount_cents > 0 && quoteNamesLine(promise.quote, line.label));
+      const named = covered.filter((line) => line.amount_cents > 0 && quoteNamesLine(promise.quote, line.label, reading.provider));
       const credits = covered.filter((line) => line.amount_cents < 0);
       const actual = sum([...named, ...credits]);
       if (named.length === 0 && covered.some((line) => line.amount_cents > 0)) unused.push({ promiseId: promise.id, reason: "item_not_named" });

@@ -31,6 +31,7 @@ function summary(post: Post, result: CheckResult | null, error: string | null, m
     lines: result.reading.line_items.length,
     lineSum: result.totals.lineSum,
     billPages: result.billPages,
+    change: result.change && { earlierCents: result.change.earlierCents, currentCents: result.change.currentCents },
     claims: result.claims.map((claim) => ({
       kind: claim.kind,
       amountCents: claim.amountCents,

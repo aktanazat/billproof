@@ -428,6 +428,21 @@ export function ResultView({
             </Section>
           )}
 
+          {result.change && result.change.lines.length > 0 && (
+            <Section title={`${result.change.currentCents >= result.change.earlierCents ? "Up" : "Down"} ${usd(Math.abs(result.change.currentCents - result.change.earlierCents))} since the earlier bill`}>
+              <ul>
+                {result.change.lines.map((line) => (
+                  <li key={line.label} className="flex items-baseline justify-between gap-4 border-b border-line py-3 text-[15px]">
+                    <p>{line.label}</p>
+                    <p className="shrink-0 tabular-nums text-text-2">
+                      {line.beforeCents === null ? "new" : usd(line.beforeCents)} → <span className="text-text">{line.afterCents === null ? "gone" : usd(line.afterCents)}</span>
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </Section>
+          )}
+
           {result.explained.length > 0 && (
             <Section title="Explained by your offer">
               <ul>

@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, test } from "vitest";
 import { rasterize } from "../../scripts/samples/raster";
 import { renderBillPdf } from "../../scripts/samples/render";
 import { internetExpired, internetGuaranteed, mobile, type BillSpec } from "../../scripts/samples/specs";
-import { checkTotals, decide, settleChallenges, type Source } from "./decide";
+import { checkTotals, compareBills, decide, settleChallenges, type Source } from "./decide";
 import type { LineItem, LineKind, PromiseTerm, Reading } from "./schemas";
 
 const KIND_BY_LABEL: Record<string, LineKind> = {
@@ -129,6 +129,13 @@ describe("decide on the internet bill with an active price guarantee", () => {
     expect(settled.dropped.map((d) => d.claim.id)).toEqual([claims[1].id]);
   });
 
+  test("a cropped bill with no dates still gets claims for undated promises, and questions for dated ones", () => {
+    const undated: Reading = { ...reading, statement_date: null, period_start: null, period_end: null, due_date: null };
+    const decision = decide(undated, promises, billText.get(internetGuaranteed.id)!, offer(internetGuaranteed));
+    expect(decision.claims.map((c) => [c.kind, c.amountCents])).toEqual([["included_charged", 1500]]);
+    expect(decision.questions.filter((q) => q.promiseId).map((q) => [q.kind, q.promiseId])).toEqual([["partial_period", "P1"]]);
+  });
+
   test("an offer rebuttal not in the offer's exact words keeps the claim for the person to confirm", () => {
     const { claims } = decide(reading, promises, billText.get(internetGuaranteed.id)!, offer(internetGuaranteed));
     const loose = { claim_id: claims[0].id, looked_for: "an exclusion", verdict: "refuted" as const, counter_quote: "The price guarantee applies to your internet plan rate.", counter_source: "offer" as const };
@@ -170,11 +177,19 @@ describe("decide on the internet bill with an active price guarantee", () => {
     expect(decision.claims).toEqual([]);
   });
 
-  test("makes no included claim on a charge the promise doesn't name", () => {
-    const misLinked = [{ ...promises[1], covers_line_ids: idOf(reading, "Fiber 500 Internet") }];
+  test("makes no included claim on a charge the promise doesn't name, or on the plan itself", () => {
+    const misLinked = [{ ...promises[1], covers_line_ids: idOf(reading, "Network Enhancement Fee") }];
     const decision = decide(reading, misLinked, billText.get(internetGuaranteed.id)!, offer(internetGuaranteed));
     expect(decision.claims).toEqual([]);
     expect(decision.unused).toEqual([{ promiseId: "P2", reason: "item_not_named" }]);
+    const onPlan = [{ ...promises[1], quote: "Fiber 500 Internet modem included", covers_line_ids: idOf(reading, "Fiber 500 Internet") }];
+    expect(decide(reading, onPlan, billText.get(internetGuaranteed.id)!, { kind: "image" }).claims).toEqual([]);
+  });
+
+  test("the company's name in a promise does not make it name a charge", () => {
+    const named = [{ ...promises[1], quote: "Bayline Network gateway included", covers_line_ids: idOf(reading, "Network Enhancement Fee") }];
+    const withProvider: Reading = { ...reading, provider: "Bayline Network" };
+    expect(decide(withProvider, named, billText.get(internetGuaranteed.id)!, { kind: "image" }).claims).toEqual([]);
   });
 
   test("never counts a linked tax toward the promised price", () => {
@@ -360,5 +375,21 @@ describe("decide refuses claims the evidence does not carry", () => {
     const invented: Reading = { ...reading, printed: { ...reading.printed, current_charges: { cents: 9999, quote: "Current charges $99.99" } } };
     expect(checkTotals(invented, billText.get(internetGuaranteed.id)!).lineSum).toBe("not_printed");
     expect(checkTotals(reading, billText.get(internetGuaranteed.id)!).lineSum).toBe("ok");
+  });
+});
+
+describe("compare with an earlier bill", () => {
+  test("lists the lines that moved, matching labels across spacing and case, biggest move first", () => {
+    const current = readingOf(internetGuaranteed);
+    const plan = current.line_items.find((line) => line.label === "Fiber 500 Internet")!;
+    const earlierLines = current.line_items
+      .filter((line) => line.label !== "Wi-Fi Gateway Rental")
+      .map((line) => (line.id === plan.id ? { ...line, label: "FIBER 500  internet", amount_cents: plan.amount_cents - 1000 } : line));
+    const change = compareBills({ ...current, line_items: earlierLines }, current);
+    expect(change.lines).toEqual([
+      { label: "Wi-Fi Gateway Rental", beforeCents: null, afterCents: 1500 },
+      { label: "Fiber 500 Internet", beforeCents: plan.amount_cents - 1000, afterCents: plan.amount_cents },
+    ]);
+    expect(change.currentCents - change.earlierCents).toBe(2500);
   });
 });
