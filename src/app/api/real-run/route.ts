@@ -57,7 +57,7 @@ export async function POST(request: Request) {
         try {
           if (!request.signal.aborted) controller.enqueue(encoder.encode(JSON.stringify(event) + "\n"));
         } catch {
-          // The visitor left; the checks already running finish and settle in the ledger.
+          // The visitor left: no lane takes another bill, and calls cut off mid-way stay counted at what they reserved.
         }
       };
       try {
