@@ -101,14 +101,16 @@ function feeList(fees: LineItem[][]): string {
   return named.length === 1 ? named[0] : `${named.slice(0, -1).join(", ")} and ${named.at(-1)}`;
 }
 
-function feeSentence(fees: LineItem[][]): string {
-  return fees.length === 1
-    ? `Please explain the ${feeList(fees)}. It was not part of the plan I agreed to; if it is not required, please remove it.`
-    : `Please explain the ${feeList(fees)}. They were not part of the plan I agreed to; if they are not required, please remove them.`;
+// "Not part of the plan I agreed to" rests on the offer; when the offer is another company's, it says nothing about
+// this company's plan, so the fee is only asked about.
+function feeSentence(fees: LineItem[][], offerCovers: boolean): string {
+  const one = fees.length === 1;
+  const remove = `${one ? "it is" : "they are"} not required, please remove ${one ? "it" : "them"}.`;
+  return offerCovers ? `Please explain the ${feeList(fees)}. ${one ? "It was" : "They were"} not part of the plan I agreed to; if ${remove}` : `Please explain the ${feeList(fees)}. If ${remove}`;
 }
 
-function feeFact(fees: LineItem[][]): string {
-  return `The bill charges the ${feeList(fees)}, which ${fees.length === 1 ? "was" : "were"} not part of the plan I agreed to.`;
+function feeFact(fees: LineItem[][], offerCovers: boolean): string {
+  return offerCovers ? `The bill charges the ${feeList(fees)}, which ${fees.length === 1 ? "was" : "were"} not part of the plan I agreed to.` : `The bill charges the ${feeList(fees)}, which the company hasn't explained.`;
 }
 
 export type Message = { totalCents: number; chat: string; email: string; call: string; complaint: string };
@@ -167,12 +169,14 @@ export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<stri
   const claimText = claimPartsFor("your representative", "this bill").map(({ fact, request }) => `${fact} ${request}`);
   const included = result.questions.filter((question) => includedQuestionIds.has(question.id));
   const fees = included.filter((question) => question.kind === "unagreed_fee").map((question) => linesOf(question.lineIds)).filter((lines) => lines.length > 0);
+  // Only an offer from this company can show a fee wasn't part of the plan; without one, the fee is just asked about.
+  const offerCovers = result.hadOffer && !result.providerMismatch;
   const questionText = [
-    ...(fees.length > 0 ? [feeSentence(fees)] : []),
+    ...(fees.length > 0 ? [feeSentence(fees, offerCovers)] : []),
     ...included.filter((question) => question.kind === "repeated_charge").map((question) => repeatSentence(linesOf(question.lineIds))),
   ];
   const questionFacts = [
-    ...(fees.length > 0 ? [feeFact(fees)] : []),
+    ...(fees.length > 0 ? [feeFact(fees, offerCovers)] : []),
     ...included.filter((question) => question.kind === "repeated_charge").map((question) => repeatFact(linesOf(question.lineIds))),
   ];
 
@@ -209,7 +213,7 @@ export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<stri
   ]
     .filter(Boolean)
     .join("\n\n");
-  const problem = claims.length > 0 ? claimProblem(claims) : fees.length > 0 ? "fees on my bill I never agreed to." : "charges on my bill the company hasn't explained.";
+  const problem = claims.length > 0 ? claimProblem(claims) : fees.length > 0 && offerCovers ? "fees on my bill I never agreed to." : "charges on my bill the company hasn't explained.";
   return { totalCents, chat, email, call, complaint: complaintText(provider, account, problem, regulatorBody, claims) };
 }
 

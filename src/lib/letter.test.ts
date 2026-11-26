@@ -41,7 +41,7 @@ function billWith(lines: LineItem[]): Checked {
     billIsImage: true,
     billPages: [0],
     change: null,
-    hadOffer: false,
+    hadOffer: true,
     spentMicros: 0,
     calls: [],
   };
@@ -59,6 +59,16 @@ describe("the message's fee questions", () => {
   test("one fee keeps the singular request", () => {
     const { chat } = buildMessage(result, new Set(), new Set(["Q3"]));
     expect(chat).toContain("Please explain the Regional Sports Fee ($19.86). It was not part of the plan I agreed to; if it is not required, please remove it.");
+  });
+
+  test("with no offer, or another company's, a fee is asked about without claiming it wasn't agreed to", () => {
+    for (const unrelated of [{ ...result, hadOffer: false }, { ...result, providerMismatch: true, offerProvider: "Westline Cable" }]) {
+      const message = buildMessage(unrelated, new Set(), new Set(["Q3"]));
+      expect(message.chat).toContain("Please explain the Regional Sports Fee ($19.86). If it is not required, please remove it.");
+      expect(`${message.chat}\n${message.complaint}`).not.toContain("agreed to");
+      expect(message.complaint).toContain("Problem: charges on my bill the company hasn't explained.");
+      expect(message.complaint).toContain("- The bill charges the Regional Sports Fee ($19.86), which the company hasn't explained.");
+    }
   });
 });
 
