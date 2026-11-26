@@ -256,7 +256,7 @@ export default function RealBills() {
               {paidBack.map(({ id, said, bill }) => (
                 <li key={id} className="flex flex-col gap-1 border-b border-line py-3">
                   <p className="text-[13px] text-text-2">{companyOf(bill.provider ?? bill.sub)}</p>
-                  <p className="text-[15px] leading-snug">“{said}”</p>
+                  <p className="text-[15px] leading-snug wrap-anywhere">“{said}”</p>
                   <Finding bill={bill} />
                   <Change bill={bill} />
                   <div className="mt-1 flex gap-2">
@@ -340,7 +340,7 @@ export default function RealBills() {
                   <p className="text-[13px] text-text-2">
                     {[displayName(bill), monthName(bill.period[0])].filter(Boolean).join(", ") || "Bill"}
                   </p>
-                  <p className="text-[15px] font-medium leading-snug">“{bill.title}”</p>
+                  <p className="text-[15px] font-medium leading-snug wrap-anywhere">“{bill.title}”</p>
                   <Finding bill={bill} />
                   <Change bill={bill} />
                 </div>

@@ -158,7 +158,9 @@ function ClaimRow({ claim, index, result, callUrl, mark, onToggle, onConfirm, on
         <dd className="tabular-nums sm:text-right">{usd(claim.expectedCents)}</dd>
         <dd className="col-span-2 flex items-start gap-2 text-text-2 sm:col-span-1">
           {heard !== null && <PlayButton url={callUrl} from={heard} to={turnEnd(result.transcript, heard)} label={`Play what was said at ${formatClock(heard)}`} />}
-          <span className={heard !== null ? "pt-[5px]" : ""}>“{promise?.quote}”</span>
+          {/* Quotes are the visitor's words, which can hold a long address with no spaces; they break anywhere, or one
+              would widen a phone's page. */}
+          <span className={`wrap-anywhere ${heard !== null ? "pt-[5px]" : ""}`}>“{promise?.quote}”</span>
         </dd>
       </dl>
 
@@ -352,7 +354,7 @@ export function ResultView({
     return (
       <section className="mx-auto flex w-full max-w-[1120px] flex-col items-start gap-3 px-6 pt-10">
         <h1 ref={focusOnShow} tabIndex={-1} className="text-[28px] font-semibold leading-[1.2] tracking-[-0.02em] outline-none">{result.outcome === "not_a_bill" ? "This isn't a bill" : "Couldn't check this bill"}</h1>
-        {result.outcome === "could_not_check" && <p className="text-[17px] text-text-2">{inPlainWords(result.reason)}</p>}
+        {result.outcome === "could_not_check" && <p className="text-[17px] text-text-2 wrap-anywhere">{inPlainWords(result.reason)}</p>}
         <p className="max-w-[40rem] text-[15px]">
           {result.outcome === "not_a_bill"
             ? "Add the statement itself: the PDF, or screenshots of the page that shows the billing period and each charge."
@@ -504,7 +506,7 @@ export function ResultView({
                       </div>
                       <p className="flex items-start gap-2 text-[13px] leading-[18px] text-text-2">
                         {said !== null && <PlayButton url={callUrl} from={said} to={turnEnd(result.transcript, said)} label={`Play what was said at ${formatClock(said)}`} />}
-                        <span className={said !== null ? "pt-[5px]" : ""}>
+                        <span className={`wrap-anywhere ${said !== null ? "pt-[5px]" : ""}`}>
                           {item.source === "bill" ? "The bill says" : result.transcript ? "Said on the call" : "The offer says"} “{item.counterQuote}”
                         </span>
                       </p>
@@ -540,7 +542,7 @@ export function ResultView({
                       {judgedAgainst && (
                         <p className="flex items-start gap-2 text-[13px] leading-[18px] text-text-2">
                           {heard !== null && <PlayButton url={callUrl} from={heard} to={turnEnd(result.transcript, heard)} label={`Play what was said at ${formatClock(heard)}`} />}
-                          <span className={heard !== null ? "pt-[5px]" : ""}>Promised: “{judgedAgainst.quote}”</span>
+                          <span className={`wrap-anywhere ${heard !== null ? "pt-[5px]" : ""}`}>Promised: “{judgedAgainst.quote}”</span>
                         </p>
                       )}
                       {canInclude && (
@@ -585,7 +587,7 @@ export function ResultView({
                       {promise && (
                         <p className="flex items-start gap-2 text-[13px] leading-[18px] text-text-2">
                           {heard !== null && <PlayButton url={callUrl} from={heard} to={turnEnd(result.transcript, heard)} label={`Play what was said at ${formatClock(heard)}`} />}
-                          <span className={heard !== null ? "pt-[5px]" : ""}>“{promise.quote}”</span>
+                          <span className={`wrap-anywhere ${heard !== null ? "pt-[5px]" : ""}`}>“{promise.quote}”</span>
                         </p>
                       )}
                     </li>

@@ -162,9 +162,9 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
               verdict
             )}
           </h1>
-          {skipped.length > 0 && <p className="mt-1 text-[13px] text-text-2">Not counted: {skipped.join(", ")}</p>}
+          {skipped.length > 0 && <p className="mt-1 text-[13px] text-text-2 wrap-anywhere">Not counted: {skipped.join(", ")}</p>}
           {unreadable.map(({ bill, name, reason }) => (
-            <p key={bill} className="mt-1 text-[13px] text-text-2">
+            <p key={bill} className="mt-1 text-[13px] text-text-2 wrap-anywhere">
               {name}: {inPlainWords(reason)}
             </p>
           ))}
