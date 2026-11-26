@@ -99,12 +99,15 @@ test("a year with nothing owed shows no $0.00, and says plainly when there was n
   };
   const matched = render(clean(true));
   expect(matched).toContain(">All 12 statements match the offer</h1>");
+  expect(matched).toContain("12 bills read in parallel, 12 checked against the offer.");
   expect(matched).not.toContain("$0.00");
   const noOffer = render(clean(false));
   expect(noOffer).toContain(">Read 12 statements; there was no offer to check them against</h1>");
   expect(noOffer).not.toContain("match the offer");
   expect(noOffer).not.toContain("matches the offer");
   expect(noOffer).toContain("August 2026: no offer to compare");
+  expect(noOffer).not.toContain("checked against the offer");
+  expect(noOffer).toContain("12 bills read in parallel.");
 });
 
 test("a year whose offer couldn't be compared says why, never that every statement matches", () => {

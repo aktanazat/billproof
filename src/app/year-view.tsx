@@ -161,7 +161,7 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
 
       <div className="mt-12 flex max-w-[720px] flex-col gap-10">
         {message && <MessageBox message={message} />}
-        <Trace calls={summarize(result.calls)} spentMicros={result.spentMicros} notes={[`${result.months.length} bills read in parallel, ${checked.length} checked against the offer.`]} />
+        <Trace calls={summarize(result.calls)} spentMicros={result.spentMicros} notes={[`${result.months.length} bills read in parallel${hadOffer ? `, ${checked.length} checked against the offer` : ""}.`]} />
       </div>
     </section>
   );
