@@ -335,10 +335,13 @@ const MAX_PLAUSIBLE_SHARE = 0.5;
 
 // Wording that limits a promise in time. When the quote has it but no end date was read, the promise may
 // already have ended, so it can only raise a question. A unit run into its number counts only as "mos" or "yrs":
-// "$55mo" is a price per month.
+// "$55mo" is a price per month. "Through", "until", "ends" and "expires" count only with a date or time after them:
+// in posts they as often say how a price was got ("$85 through chat") or what it came to ("it'll end up costing").
 const COUNT = "\\d+|a|one|two|three|four|five|six|nine|twelve|eighteen|twenty-four";
+const MONTH = "(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\\.?";
+const WHEN = `(\\d{1,2}\\/\\d{1,2}|${MONTH}|20\\d\\d|next|this|the end|soon|in (about )?(\\d+|a|one|two|three|six|twelve) (days?|weeks?|months?|years?))`;
 const TIME_LIMIT = new RegExp(
-  `\\b(through|thru|until|ends?|ending|expires?|limited[- ]time|intro(ductory)? (offers?|rates?|prices?|pricing|period)|first (year|month|(${COUNT}) (months?|mos?|years?|yrs?|bills?))|for (${COUNT}) (months?|mos?|years?|yrs?)|(\\d+|one|two|three|five)[- ](months?|mos?|years?|yrs?)|\\d+(mos|yrs)|promo(tional)?|\\d{1,2}\\/\\d{1,2}\\/\\d{2,4}|(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\\.? \\d{1,2},? \\d{4})\\b`,
+  `\\b((through|thru|until|till) ${WHEN}|(ends?|ending|expires?|expiring) (on |at |after )?${WHEN}|limited[- ]time|intro(ductory)? (offers?|rates?|prices?|pricing|period)|first (year|month|(${COUNT}) (months?|mos?|years?|yrs?|bills?))|for (${COUNT}) (months?|mos?|years?|yrs?)|(\\d+|one|two|three|five)[- ](months?|mos?|years?|yrs?)|\\d+(mos|yrs)|promo(tional)?|\\d{1,2}\\/\\d{1,2}\\/\\d{2,4}|${MONTH} \\d{1,2},? \\d{4})\\b`,
   "i",
 );
 

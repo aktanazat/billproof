@@ -582,6 +582,20 @@ describe("promises read from a person's own words", () => {
     expect(decide(internet, [monthly], photo, photo).claims.map((c) => c.kind)).toEqual(["price_above_promise"]);
   });
 
+  // "Through", "end", "until" and "expire" limit a price only with a date or time after them; in the real posts they
+  // as often say how the price was got ("$85 through chat") or what it came to ("it'll end up costing"), and such a
+  // promise was asked about as having an end date it never had.
+  test("end words limit a price only when a date or time follows them", () => {
+    for (const quote of ["they gave me $55 a month through chat", "it would end up costing $55 a month", "$55 a month, set to never expire", "$55 a month on the account ending in 4415", "$55/mo, thru customer service"]) {
+      const said = promise({ kind: "monthly_price", amount_cents: 5500, quote, covers_line_ids: plan });
+      expect(decide(internet, [said], photo, photo).claims.map((c) => c.kind), quote).toEqual(["price_above_promise"]);
+    }
+    for (const quote of ["$55 a month through 10/31/2027", "$55 a month until next year", "$55 a month, discount ends 6/30", "$55 a month; it expires in 3 months", "$55 a month until May 14th", "$55/mo through the end of the year", "my $55 promo expires this month"]) {
+      const limited = promise({ kind: "monthly_price", amount_cents: 5500, quote, covers_line_ids: plan });
+      expect(decide(internet, [limited], photo, photo).questions.filter((q) => q.promiseId).map((q) => q.kind), quote).toEqual(["end_date_unread"]);
+    }
+  });
+
   test("a per-line credit is owed once per charged line, not for a $0 line", () => {
     const phones = boxed(readingOf(mobile));
     const [first, second] = phones.line_items.filter((line) => line.kind === "plan");
