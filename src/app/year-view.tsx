@@ -62,11 +62,12 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
   const skippedMonths = { duplicates: 0, otherAccount: 0 };
   for (const month of read) {
     const { period_start, period_end, statement_date } = month.result.reading;
-    const key = [period_start, period_end, statement_date].join("|");
+    // A statement with no date read can't be shown to repeat another, so it is always counted.
+    const key = period_start || period_end || statement_date ? [period_start, period_end, statement_date].join("|") : null;
     if (anotherAccount(month)) skippedMonths.otherAccount += 1;
-    else if (seen.has(key)) skippedMonths.duplicates += 1;
+    else if (key !== null && seen.has(key)) skippedMonths.duplicates += 1;
     else {
-      seen.add(key);
+      if (key !== null) seen.add(key);
       checked.push(month);
     }
   }

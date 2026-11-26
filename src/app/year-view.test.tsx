@@ -73,6 +73,21 @@ test("a statement whose account number couldn't be read counts with the year's a
   expect(html).toContain("In total, please credit $70.00 to account ending 4415.");
 });
 
+test("two statements whose dates couldn't be read are both counted, not taken for one statement twice", () => {
+  if (!year) throw new Error("the saved run has no year result");
+  const undated = (start: string) => year.months.find((month) => month.result.outcome === "checked" && month.result.reading.period_start?.startsWith(start));
+  const blank = new Set([undated("2026-08")?.bill, undated("2026-09")?.bill]);
+  if (blank.has(undefined)) throw new Error("the sample has no August or September statement");
+  const months = year.months.map((month) => (blank.has(month.bill) && month.result.outcome === "checked" ? { ...month, result: { ...month.result, reading: { ...month.result.reading, period_start: null, period_end: null, statement_date: null } } } : month));
+  const blurred: YearResult = { ...year, months };
+  const running = { s: "running", inputs: initialState.inputs, attempts: 1, attempt: 1, stage: null, spentMicros: 0, live: {} } as unknown as CheckState;
+  const done = reduce(running, { type: "finished", attempt: 1, result: blurred });
+  if (done.s !== "done") throw new Error("the finished year did not become a done state");
+  const html = renderToStaticMarkup(createElement(YearView, { state: done, result: blurred, dispatch: () => {} }));
+  expect(html).toMatch(/>\$70\.00<\/p><h1[^>]*>to ask back from Bayline Fiber across 12 statements/);
+  expect(html).not.toContain("duplicate");
+});
+
 test("a year with nothing owed shows no $0.00, and says plainly when there was no offer to check against", () => {
   if (!year) throw new Error("the saved run has no year result");
   const clean = (hadOffer: boolean): YearResult => ({ ...year, months: year.months.map((month) => (month.result.outcome === "checked" ? { ...month, result: { ...month.result, claims: [], hadOffer, promises: hadOffer ? month.result.promises : [], matchedPromiseIds: hadOffer ? month.result.matchedPromiseIds : [] } } : month)) });
