@@ -25,7 +25,7 @@ const BRANDS: [RegExp, string][] = [
   [/verizon|fios/i, "Verizon"],
   [/at&t|\batt/i, "AT&T"],
   [/spectrum|charter/i, "Spectrum"],
-  [/t[- ]?mobile|metro/i, "T-Mobile"],
+  [/\bt[- ]?mobile|metro/i, "T-Mobile"],
   [/google ?fiber/i, "Google Fiber"],
   [/google/i, "Google Fi"],
   [/directv/i, "DirecTV"],
