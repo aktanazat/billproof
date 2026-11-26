@@ -107,7 +107,7 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
     const doc = state.inputs.bills[open];
     const selection = state.selections[open];
     if (month && doc?.status === "ready" && selection) {
-      return <ResultView result={month.result} bill={open} pages={doc.pages} callUrl={callUrl} selection={selection} dispatch={dispatch} backLabel="Back to the year" onBack={() => setOpen(null)} />;
+      return <ResultView result={month.result} bill={open} pages={doc.pages} omittedPages={doc.omitted} callUrl={callUrl} selection={selection} dispatch={dispatch} backLabel="Back to the year" onBack={() => setOpen(null)} />;
     }
   }
 

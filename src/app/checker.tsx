@@ -565,6 +565,7 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
         result={state.result}
         bill={0}
         pages={bill?.status === "ready" ? bill.pages : []}
+        omittedPages={bill?.status === "ready" ? bill.omitted : 0}
         callUrl={offer.kind === "call" && offer.call.status === "ready" ? offer.call.url : null}
         selection={state.selections[0]}
         dispatch={dispatch}

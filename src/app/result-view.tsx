@@ -277,6 +277,7 @@ export function ResultView({
   result,
   bill,
   pages,
+  omittedPages,
   callUrl,
   selection,
   dispatch,
@@ -286,6 +287,8 @@ export function ResultView({
   result: SingleResult;
   bill: number;
   pages: ShownPage[];
+  // Pages of a long PDF past the limit that weren't read.
+  omittedPages: number;
   callUrl: string | null;
   selection: Selection;
   dispatch: (action: CheckAction) => void;
@@ -355,6 +358,7 @@ export function ResultView({
   const notes = [
     // Pictures in a pile that weren't the bill were read as the offer, as an earlier bill, or set aside; say so rather than drop them silently.
     ...(pages.length > billPages.length && billPages.length > 0 ? [`Read ${billPages.length} of the ${pages.length} pictures as this bill; the other ${pages.length - billPages.length === 1 ? "one was" : `${pages.length - billPages.length} were`} read as the offer or an earlier bill, or set aside.`] : []),
+    ...(omittedPages > 0 ? [`Read the first ${pages.length} of ${pages.length + omittedPages} pages of this PDF; charges on the rest aren't included.`] : []),
     ...(printed && result.totals.lineSum === "mismatch" ? [`The charges add up to ${usd(result.totals.lineSumCents)}, but the bill prints ${usd(printed.cents)}.`] : []),
     ...(result.totals.balance === "mismatch" ? ["The previous balance, payments and new charges don't add up to the amount due."] : []),
     ...(result.hadOffer ? [`Compared ${read} ${read === 1 ? "charge" : "charges"} with ${result.matchedPromiseIds.length} ${result.matchedPromiseIds.length === 1 ? "promise" : "promises"}.`] : []),
