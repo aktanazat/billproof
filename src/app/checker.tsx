@@ -557,11 +557,24 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
   // and their promises apply to it, rather than becoming a second "month" that holds no bill.
   const addBills = async (dropped: File[]) => {
     const digest = async (file: File) => Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", await file.arrayBuffer())), (byte) => byte.toString(16).padStart(2, "0")).join("");
-    const seen = new Set(state.s === "composing" ? state.inputs.bills.flatMap((doc) => billHashes.current.get(doc.id) ?? []) : []);
+    const existing = state.s === "composing" ? state.inputs.bills : [];
+    const digests = new Map(await Promise.all(dropped.map(async (file) => [file, await digest(file)] as const)));
+    const seen = new Set(existing.flatMap((doc) => billHashes.current.get(doc.id) ?? []));
+    // A statement added on its own and dropped again with new screenshots, as the offer box advises, means them to go
+    // with it: its bill is replaced by one holding both, rather than the screenshots becoming a bill of their own.
+    const droppedPdfs = dropped.filter(isPdf);
+    const newPictures = dropped.filter((file) => !isPdf(file) && !seen.has(digests.get(file) ?? ""));
+    const statementHash = droppedPdfs.length === 1 && newPictures.length > 0 ? digests.get(droppedPdfs[0]) : undefined;
+    const joined = statementHash === undefined ? undefined : existing.find((doc) => billHashes.current.get(doc.id)?.join() === statementHash);
+    if (joined && statementHash) {
+      seen.delete(statementHash);
+      billHashes.current.delete(joined.id);
+      dispatch({ type: "removed", id: joined.id });
+    }
     const hashes = new Map<File, string>();
     const repeated: string[] = [];
     for (const file of dropped) {
-      const hash = await digest(file);
+      const hash = digests.get(file) ?? "";
       if (seen.has(hash)) repeated.push(file.name);
       else {
         seen.add(hash);
@@ -573,7 +586,7 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
     const pdfs = files.filter(isPdf);
     const pictures = files.filter((file) => !isPdf(file));
     const groups = pdfs.length === 1 && pictures.length > 0 ? [[pdfs[0], ...pictures]] : [...pdfs.map((file) => [file]), ...(pictures.length > 1 ? [pictures] : pictures.map((file) => [file]))];
-    const room = MAX_BILLS - (state.s === "composing" ? state.inputs.bills.length : 0);
+    const room = MAX_BILLS - existing.length + (joined ? 1 : 0);
     const nameOf = (group: File[]) => (group.length === 1 ? group[0].name : isPdf(group[0]) ? `${group[0].name} and ${group.length - 1} ${group.length === 2 ? "picture" : "pictures"}` : `${group.length} pictures`);
     const named = groups.map((group) => ({ name: nameOf(group), group }));
     const docs = named.slice(0, room).map(({ name, group }) => ({ id: id(), name, group }));
