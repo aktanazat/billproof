@@ -52,7 +52,10 @@ const realSamples = [...realRun.results]
 // The post id is request data, so it is read inside a boundary; the plain start screen renders without it.
 async function CheckerFor({ searchParams }: { searchParams: PageProps<"/">["searchParams"] }) {
   const { post } = await searchParams;
-  return <Checker samples={samples} realSamples={realSamples} startWith={realSample(typeof post === "string" ? post : undefined)} />;
+  const startWith = realSample(typeof post === "string" ? post : undefined);
+  // The router keeps this page when the visitor leaves and shows it again for the next address it matches, so a
+  // different post (or none) gets its own checker rather than the last one's files and result.
+  return <Checker key={startWith?.id ?? ""} samples={samples} realSamples={realSamples} startWith={startWith} />;
 }
 
 // Once the demo's budget can't cover one more check, the page says so before anyone tries; read on every visit.
