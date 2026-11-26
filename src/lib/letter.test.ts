@@ -119,6 +119,13 @@ describe("a message with no dollar claim", () => {
     expect(message.email).toMatch(/^Subject: Questions about the charges on my account\n/);
   });
 
+  // Read aloud, a lone "1." has the caller looking for a point 2 that isn't there.
+  test("a call script with one point leaves it unnumbered", () => {
+    const message = buildMessage(result, new Set(), new Set(["Q1"]));
+    expect(message.call).not.toMatch(/^1\. /m);
+    expect(message.call).toMatch(/^Please explain /m);
+  });
+
   test("the complaint states the fees as facts for the regulator, while the email asks the company", () => {
     const message = buildMessage(result, new Set(), new Set(["Q1", "Q2"]));
     expect(message.complaint).toContain("- The bill charges the Broadcast TV Fee ($47.23) and TV Access Fee ($14.00, charged 2 times), which were not part of the plan I agreed to.");

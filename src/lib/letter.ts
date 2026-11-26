@@ -191,6 +191,9 @@ export function increaseSentence(change: BillChange | null): string | null {
   return fact && `${fact} Please explain the increase and correct anything I didn't agree to.`;
 }
 
+// A call script's points are numbered only when there are several: read aloud, a lone "1." promises a point 2.
+const numbered = (points: string[]) => (points.length > 1 ? points.map((point, i) => `${i + 1}. ${point}`) : points);
+
 export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<string>, includedQuestionIds: ReadonlySet<string>): Message {
   const lines = new Map(result.reading.line_items.map((line) => [line.id, line]));
   const promises = new Map(result.promises.map((promise) => [promise.id, promise]));
@@ -246,7 +249,7 @@ export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<stri
   ].join("\n");
   const call = [
     `I'm calling about ${about}.`,
-    ...body.map((sentence, i) => `${i + 1}. ${sentence}`),
+    ...numbered(body),
     ask,
     totalCents > 0 ? "Before ending the call, ask for a reference number and the date the credit will post." : "Before ending the call, ask for a reference number and what will change on the next bill.",
   ]
@@ -292,7 +295,7 @@ export function buildYearMessage(months: Checked[]): Message {
   const opening = `I'm writing about ${account}. I checked my statements against the plan I signed up for.`;
   const chat = [`Hi, ${opening}`, ...sections, ask].filter(Boolean).join("\n\n");
   const email = [`Subject: Billing correction for ${account}`, "", provider ? `Hello ${provider} billing team,` : "Hello billing team,", "", opening, "", ...sections.flatMap((s) => [s, ""]), ...(ask ? [ask, ""] : []), "Please reply with the corrected amount and the date the credit will post.", "", "Thank you,", "[Your name]"].join("\n");
-  const call = [`I'm calling about ${account}.`, ...sectionsFor("your representative", true, "as I mentioned").map((s, i) => `${i + 1}. ${s}`), ask, "Before ending the call, ask for a reference number and the date the credit will post."].filter(Boolean).join("\n\n");
+  const call = [`I'm calling about ${account}.`, ...numbered(sectionsFor("your representative", true, "as I mentioned")), ask, "Before ending the call, ask for a reference number and the date the credit will post."].filter(Boolean).join("\n\n");
   // Shorter accounts for a complaint too long for the regulator's form: each month in a line, then each month's amount
   // with every promise quoted once, then the amounts alone.
   const regulator = `${provider ?? "the company"}'s representative`;
