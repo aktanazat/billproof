@@ -70,7 +70,9 @@ export async function POST(request: Request) {
               { bills: [{ pages }], offer: { kind: "text", text: postNotes(post) } },
               {
                 ledger,
-                client: `${client}#live`,
+                // Each run is its own ledger client: the limits above bound runs, and a run's 24 checks must not
+                // collide with the 30-an-hour cap left over from a run before a restart cleared those limits.
+                client: `${client}#live:${now}`,
                 signal: request.signal,
                 emit: (event) => {
                   // The run's cost is its own checks' final costs, not the whole ledger's movement.
