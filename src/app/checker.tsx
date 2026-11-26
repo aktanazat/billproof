@@ -504,6 +504,18 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
     };
   }, [hasWork]);
 
+  // A check can take a minute, often in a background tab; its title says whether it's still going, done or stopped,
+  // and the start screen's own title comes back after.
+  const phase = state.s === "running" ? "Checking" : state.s === "done" ? "Checked" : state.s === "failed" || state.s === "cancelled" ? "Stopped" : null;
+  useEffect(() => {
+    if (!phase) return;
+    const before = document.title;
+    document.title = `${phase} — Billproof`;
+    return () => {
+      document.title = before;
+    };
+  }, [phase]);
+
   const runningAttempt = state.s === "running" ? state.attempt : null;
   useEffect(() => {
     if (runningAttempt === null || controllers.current.has(runningAttempt)) return;
