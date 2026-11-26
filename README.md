@@ -84,6 +84,8 @@ What the real posts taught it, each fix checked against the synthetic set (still
 
 The outcome check: the authors' own later comments on every real bill were read for whether the company paid them back. Four said it did for a charge Billproof checks. On the Xfinity bill the company credited, Billproof shows the $95.12 jump line by line; on the Verizon one it asks about the plan line that was missing its promised discount; on a Spectrum and a Google Fi bill it found nothing, because the bill the poster pictured did not show the problem. The page lists all four.
 
+The reading check by eye: seven real bills, six of them drawn at random, were compared with their pictures after the fixes (AT&T, two DIRECTV, Xfinity, Spectrum side by side with its earlier month, Visible, Verizon). All 45 lines were read with the right label and amount, and from the newest statement.
+
 The real-bills page also runs live: one button checks 24 of these real bills at once, eight at a time, with every bill's reading, fees and cost streaming into a grid. Only the site's own page can start a run; one run goes at a time, six an hour across the site and one an hour per address.
 
 Only public posts are used. The site shows each post's title and links to it; pictures are fetched from Reddit by post and position, never by an address the visitor supplies.
