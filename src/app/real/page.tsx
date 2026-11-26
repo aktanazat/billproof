@@ -88,6 +88,7 @@ export default function RealBills() {
       }, new Map<string, { name: string; bills: number; withFees: number; feeCents: number }>())
       .values(),
   ]
+    .filter((company) => company.name !== "Unknown")
     .sort((a, b) => b.bills - a.bills || b.feeCents - a.feeCents)
     .slice(0, 10);
 
@@ -108,7 +109,7 @@ export default function RealBills() {
         <div className="max-w-[46rem] pt-12">
           <h1 className="text-[40px] font-semibold leading-[1.1] tracking-[-0.025em]">Real bills people posted, checked</h1>
           <p className="mt-4 text-[17px] leading-[26px] text-text-2 text-pretty">
-            {results.length} public Reddit posts about phone, internet and TV bills, from Xfinity, Spectrum, AT&amp;T, Verizon and others. Muse Ember sorted every picture, read each real bill line by line, and checked it against what the poster wrote they were promised. The whole run took {minutes} {minutes === 1 ? "minute" : "minutes"} and cost {formatMicros(realRun.spentMicros)}.
+            {results.length.toLocaleString("en-US")} public Reddit posts about phone, internet and TV bills, from Xfinity, Spectrum, AT&amp;T, Verizon and others. Muse Ember sorted every picture, read each real bill line by line, and checked it against what the poster wrote they were promised. The whole run took {minutes} {minutes === 1 ? "minute" : "minutes"} and cost {formatMicros(realRun.spentMicros)}.
           </p>
         </div>
 
