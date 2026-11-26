@@ -36,6 +36,21 @@ describe("check machine", () => {
     expect(play([{ type: "sample_ready", inputs: { bills: [{ id: "p", name: "3 pictures from the post", status: "ready", pages: [page] }], offer } }]).s).toBe("running");
   });
 
+  test("a failure from an attempt already given up on is ignored, and only a retryable failure can be retried", () => {
+    const failed = (retryable: boolean): CheckAction => ({ type: "errored", attempt: 2, failure: retryable ? "upstream" : "refused", message: "Muse Ember had a problem on Meta's side. Try again.", spentMicros: 400, retryable });
+    const retried = play([...readyBill, { type: "start" }, { type: "cancel" }, { type: "retry" }]);
+    expect(play([{ type: "errored", attempt: 1, failure: "upstream", message: "late", spentMicros: 0, retryable: true }], retried)).toMatchObject({ s: "running", attempt: 2 });
+    expect(play([failed(true)], retried)).toMatchObject({ s: "failed", message: "Muse Ember had a problem on Meta's side. Try again.", spentMicros: 400 });
+    expect(play([failed(true), { type: "retry" }], retried)).toMatchObject({ s: "running", attempt: 3 });
+    expect(play([failed(false), { type: "retry" }], retried).s).toBe("failed");
+  });
+
+  test("going back from a finished check keeps the files, so the person can change one and check again", () => {
+    const back = play([...readyBill, { type: "start" }, { type: "finished", attempt: 1, result: notABill }, { type: "edit" }]);
+    expect(back).toMatchObject({ s: "composing", inputs: { bills: [{ id: "b", status: "ready" }] } });
+    expect(play([{ type: "start" }], back)).toMatchObject({ s: "running", attempt: 2 });
+  });
+
   test("a check waits for every bill of a year to open", () => {
     const state = play([{ type: "bills_added", docs: [{ id: "a", name: "jan.pdf" }, { id: "b", name: "feb.pdf" }] }, { type: "doc_prepared", id: "a", pages: [page] }, { type: "start" }]);
     expect(state.s).toBe("composing");
