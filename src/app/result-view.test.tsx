@@ -330,4 +330,12 @@ describe("the result page's other sections", () => {
     const unread = render({ outcome: "could_not_check", reason: "The page image is entirely black.", spentMicros: 0 });
     expect(unread).toContain("Couldn't check this bill The page image is entirely black. Try the PDF from the company's website, or screenshots that show every charge and the total, uncropped.");
   });
+
+  test("a long PDF that couldn't be checked says only its first pages were read and how to add the rest", () => {
+    const pdfPage = (n: number) => ({ image: `data:image/png;base64,UA${n}`, text: "Bayline Fiber", rows: null });
+    const result = { outcome: "could_not_check" as const, reason: "The charges on this bill could not be read the same way twice.", spentMicros: 0 };
+    const html = text(renderToStaticMarkup(createElement(ResultView, { result, bill: 0, pages: [0, 1, 2, 3, 4, 5].map(pdfPage), omittedPages: { bill: 3, offer: 0 }, callUrl: null, selection: { claims: {}, questions: {} }, dispatch: () => {}, backLabel: "Check another bill", onBack: () => {} })).replace(/&#x27;/g, "'"));
+    expect(html).toContain("Only the first 6 of 9 pages were read. Add the pages with the charges as their own PDF, or as screenshots.");
+    expect(html).not.toContain("Try the PDF from the company's website");
+  });
 });
