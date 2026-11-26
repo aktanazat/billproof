@@ -275,7 +275,7 @@ function WorkingYear({ state, onCancel, dispatch }: { state: Exclude<CheckState,
           <span aria-live="polite" aria-atomic>
             {done} of {bills.length} done
           </span>
-          {state.spentMicros > 0 ? `, ${formatMicros(state.spentMicros)}` : ""}
+          {state.s === "running" && state.spentMicros > 0 ? `, ${formatMicros(state.spentMicros)}` : ""}
         </p>
       </div>
       <ol className="grid grid-cols-3 gap-4 sm:grid-cols-4 lg:grid-cols-6">
@@ -362,7 +362,8 @@ function Working({ state, onCancel, dispatch }: { state: Exclude<CheckState, { s
           <h1 key={`${state.attempts}-${state.s}`} ref={focusOnShow} tabIndex={-1} aria-live="polite" className="text-[28px] font-semibold leading-[1.2] tracking-[-0.02em] outline-none">
             {current?.label ?? (running ? "Starting" : "Stopped")}
           </h1>
-          {state.spentMicros > 0 && <p className="text-[13px] text-text-2 tabular-nums">{formatMicros(state.spentMicros)}</p>}
+          {/* Once stopped, the footer states the spend, with "At least" when the total isn't final. */}
+          {state.s === "running" && state.spentMicros > 0 && <p className="text-[13px] text-text-2 tabular-nums">{formatMicros(state.spentMicros)}</p>}
         </div>
         <p className="min-h-[44px] text-[15px] leading-[22px] text-text-2">{latestThought ?? (running ? "Muse Ember is starting on the bill." : "")}</p>
 
