@@ -120,11 +120,14 @@ function ClaimRow({ claim, index, result, callUrl, mark, onToggle, onConfirm, on
   const promise = result.promises.find((p) => p.id === claim.promiseId);
   const heardAt = result.transcript && promise?.said_at_seconds !== null && promise?.said_at_seconds !== undefined ? promise.said_at_seconds : null;
   const focusIds = [...claim.lineIds];
+  // A charge's controls are spoken with its title after the words shown, so a list of them tells the charges apart.
+  const title = claimTitle(claim, lines);
+  const confirmLabel = result.transcript ? "I heard it, use this" : "The marked line matches my bill";
   return (
     <li tabIndex={0} onMouseEnter={() => onFocus(focusIds)} onMouseLeave={() => onFocus(null)} onFocus={() => onFocus(focusIds)} onBlur={() => onFocus(null)} className="flex flex-col gap-3 border-b border-line py-4 outline-none focus-visible:bg-fill">
       <div className="flex items-start gap-3">
         <span className="mt-0.5 grid size-[18px] shrink-0 place-items-center rounded-full bg-red text-[11px] font-semibold text-white tabular-nums">{index + 1}</span>
-        <h3 className="flex-1 text-[15px] font-semibold leading-snug">{claimTitle(claim, lines)}</h3>
+        <h3 className="flex-1 text-[15px] font-semibold leading-snug">{title}</h3>
         <p className="text-[15px] font-semibold text-red tabular-nums">{usd(claim.amountCents)}</p>
       </div>
 
@@ -150,12 +153,12 @@ function ClaimRow({ claim, index, result, callUrl, mark, onToggle, onConfirm, on
       <div className="flex flex-wrap items-center justify-between gap-3 sm:ml-[30px]">
         <p className="max-w-[34rem] text-[13px] leading-[18px] text-text-2">{claim.lookedFor ? "Checked against the company's side before claiming." : ""}</p>
         {mark === "needs_confirmation" ? (
-          <button type="button" onClick={onConfirm} className="h-8 rounded-lg bg-text px-3 text-[13px] font-medium text-white hover:bg-black">
-            {result.transcript ? "I heard it, use this" : "The marked line matches my bill"}
+          <button type="button" onClick={onConfirm} aria-label={`${confirmLabel}: ${title}`} className="h-8 rounded-lg bg-text px-3 text-[13px] font-medium text-white hover:bg-black">
+            {confirmLabel}
           </button>
         ) : (
           <label className="inline-flex cursor-pointer items-center gap-2 text-[13px] text-text-2 select-none">
-            <input type="checkbox" checked={mark === "selected"} onChange={onToggle} className="size-4 accent-[var(--text)]" />
+            <input type="checkbox" checked={mark === "selected"} onChange={onToggle} aria-label={`In message: ${title}`} className="size-4 accent-[var(--text)]" />
             In message
           </label>
         )}
@@ -488,7 +491,7 @@ export function ResultView({
                       </div>
                       {canInclude && (
                         <label className="inline-flex cursor-pointer items-center gap-2 text-[13px] text-text-2 select-none">
-                          <input type="checkbox" checked={selection.questions[question.id] === true} onChange={() => dispatch({ type: "toggle_question", bill, id: question.id })} className="size-4 accent-[var(--text)]" />
+                          <input type="checkbox" checked={selection.questions[question.id] === true} onChange={() => dispatch({ type: "toggle_question", bill, id: question.id })} aria-label={`Ask in message: ${questionTitle(question, questionLines, result)}`} className="size-4 accent-[var(--text)]" />
                           Ask in message
                         </label>
                       )}

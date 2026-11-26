@@ -109,6 +109,22 @@ test("every saved result page keeps its buttons to inline content and gives each
   }
 });
 
+// Each charge and question has its own "In message" or "Ask in message" box; a screen reader listing them hears only
+// that, over and over, unless each also names its row. The name starts with the words shown, for voice control.
+test("each charge's and question's control is named after its row, starting with the words shown", () => {
+  const run = JSON.parse(readFileSync(path.join(import.meta.dirname, "../../eval/run-2026-11-26.json"), "utf8")) as { raw: { id: string; variant?: string; events: CheckEvent[] }[] };
+  const event = run.raw.find((r) => r.id === "internet-guaranteed" && r.variant === "pdf")?.events.find((e) => e.type === "result");
+  if (event?.type !== "result" || event.result.outcome !== "checked") throw new Error("missing saved result");
+  const running = { s: "running", inputs: initialState.inputs, attempts: 1, attempt: 1, stage: null, spentMicros: 0, live: {} } as unknown as CheckState;
+  const done = reduce(running, { type: "finished", attempt: 1, result: event.result });
+  if (done.s !== "done") throw new Error("the finished check did not become a done state");
+  const html = renderToStaticMarkup(createElement(ResultView, { result: event.result, bill: 0, pages: [], omittedPages: { bill: 0, offer: 0 }, callUrl: null, selection: done.selections[0], dispatch: () => {}, backLabel: "Check another bill", onBack: () => {} }));
+  const boxes = [...html.matchAll(/(<input\b[^>]*type="checkbox"[^>]*>)([^<]*)/g)].map((m) => ({ name: m[1].match(/aria-label="([^"]*)"/)?.[1] ?? m[2].trim(), shown: m[2].trim() }));
+  expect(boxes.length).toBe(event.result.claims.length + event.result.questions.length);
+  expect(new Set(boxes.map((box) => box.name)).size).toBe(boxes.length);
+  for (const box of boxes) expect(box.name.startsWith(`${box.shown}: `)).toBe(true);
+});
+
 const line = (id: string, label: string, cents: number, kind: LineItem["kind"]): LineItem => ({ id, label, amount_cents: cents, kind, page: 1, box: null, quote: `${label} $${(cents / 100).toFixed(2)}`, prorated: false });
 
 function checked(lines: LineItem[], questions: Checked["questions"]): Checked {
