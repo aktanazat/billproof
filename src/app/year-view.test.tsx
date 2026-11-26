@@ -110,6 +110,19 @@ test("a year with nothing owed shows no $0.00, and says plainly when there was n
   expect(noOffer).toContain("12 bills read in parallel.");
 });
 
+test("a year where no file could be checked says so, never 'Read 0 statements'", () => {
+  if (!year) throw new Error("the saved run has no year result");
+  const none: YearResult = { ...year, months: year.months.map((month) => ({ ...month, result: { outcome: "not_a_bill" as const, spentMicros: 0 } })) };
+  const bills = Array.from({ length: 12 }, (_, i) => ({ id: `b${i}`, name: `bill-${i + 1}.pdf`, status: "preparing" as const }));
+  const running = { s: "running", inputs: { ...initialState.inputs, bills }, attempts: 1, attempt: 1, stage: null, spentMicros: 0, live: {} } as unknown as CheckState;
+  const done = reduce(running, { type: "finished", attempt: 1, result: none });
+  if (done.s !== "done") throw new Error("the finished year did not become a done state");
+  const html = renderToStaticMarkup(createElement(YearView, { state: done, result: none, dispatch: () => {} })).replace(/&#x27;/g, "'");
+  expect(html).toContain(">None of the 12 files could be checked</h1>");
+  expect(html).not.toContain("0 statements");
+  expect(html).not.toContain("Overcharge by month");
+});
+
 test("a year whose offer couldn't be compared says why, never that every statement matches", () => {
   if (!year) throw new Error("the saved run has no year result");
   const variant = (change: (result: Extract<YearResult["months"][number]["result"], { outcome: "checked" }>) => object): YearResult => ({ ...year, months: year.months.map((month) => (month.result.outcome === "checked" ? { ...month, result: { ...month.result, claims: [], ...change(month.result) } } : month)) });

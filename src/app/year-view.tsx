@@ -89,17 +89,20 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
   const compared = (month: (typeof read)[number]) => month.result.matchedPromiseIds.length > 0;
   const asks = (month: (typeof read)[number]) => month.result.questions.some((question) => SHOWN_QUESTIONS.has(question.kind));
   const asking = checked.filter(asks).length;
-  const verdict = otherCompany
-    ? `The offer is from ${otherCompany}, not ${provider ?? "this company"}`
-    : asking > 0
-      ? `Charges worth asking about on ${asking} of ${checked.length} statements`
-      : !hadOffer
-        ? `Read ${checked.length} statements; there was no offer to check them against`
-        : !checked.some((month) => month.result.promises.length > 0)
-          ? "No price or promise found to check the statements against"
-          : !checked.some(compared)
-            ? "Couldn't match your offer to these statements"
-            : `All ${checked.length} statements match the offer`;
+  const verdict =
+    checked.length === 0
+      ? `None of the ${result.months.length} files could be checked`
+      : otherCompany
+        ? `The offer is from ${otherCompany}, not ${provider ?? "this company"}`
+        : asking > 0
+          ? `Charges worth asking about on ${asking} of ${checked.length} statements`
+          : !hadOffer
+            ? `Read ${checked.length} statements; there was no offer to check them against`
+            : !checked.some((month) => month.result.promises.length > 0)
+              ? "No price or promise found to check the statements against"
+              : !checked.some(compared)
+                ? "Couldn't match your offer to these statements"
+                : `All ${checked.length} statements match the offer`;
   const callUrl = state.inputs.offer.kind === "call" && state.inputs.offer.call.status === "ready" ? state.inputs.offer.call.url : null;
 
   if (open !== null) {
@@ -136,28 +139,30 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
         </button>
       </header>
 
-      <section className="flex flex-col gap-4">
-        <h2 className="text-[17px] font-semibold">{firstBad > 0 ? `Overcharged from ${monthOf(checked[firstBad].result, true)}` : "Overcharge by month"}</h2>
-        <ol className="grid grid-cols-6 gap-x-2 gap-y-6 lg:grid-cols-12" aria-label="Overcharge by month">
-          {checked.map((month) => {
-            const amount = claimed(month.result);
-            const unconfirmed = month.result.claims.some((claim) => markOf(month.bill, claim.id) === "needs_confirmation");
-            return (
-              <li key={month.bill}>
-                <button type="button" onClick={() => setOpen(month.bill)} className="group flex w-full flex-col gap-2 rounded-lg text-left" aria-label={`${monthOf(month.result, true)}: ${amount > 0 ? `${usd(amount)} overcharged` : asks(month) ? "charges worth asking about" : !hadOffer ? "no offer to compare" : compared(month) ? "matches the offer" : "not compared with the offer"}${unconfirmed ? ", to confirm" : ""}`}>
-                  <div className="flex h-28 items-end rounded-t-md border-b border-line px-1.5 group-hover:bg-fill">
-                    {amount > 0 && <div className="w-full rounded-t-[3px] bg-red" style={{ height: `${Math.max(8, (amount / largest) * 100)}%` }} />}
-                  </div>
-                  <span className="text-[13px] text-text-2">{monthOf(month.result)}</span>
-                  <span className={`text-[13px] tabular-nums ${amount > 0 ? "font-semibold text-red" : "text-text-2"}`}>{amount > 0 ? usd(amount) : "—"}</span>
-                  {unconfirmed && <span className="text-[12px] text-text-2">To confirm</span>}
-                </button>
-              </li>
-            );
-          })}
-        </ol>
-        <p className="text-[13px] text-text-2">{waiting ? "Open a month marked “To confirm” and confirm its marked lines to add them to the message." : "Select a month to see its bill and evidence."}</p>
-      </section>
+      {checked.length > 0 && (
+        <section className="flex flex-col gap-4">
+          <h2 className="text-[17px] font-semibold">{firstBad > 0 ? `Overcharged from ${monthOf(checked[firstBad].result, true)}` : "Overcharge by month"}</h2>
+          <ol className="grid grid-cols-6 gap-x-2 gap-y-6 lg:grid-cols-12" aria-label="Overcharge by month">
+            {checked.map((month) => {
+              const amount = claimed(month.result);
+              const unconfirmed = month.result.claims.some((claim) => markOf(month.bill, claim.id) === "needs_confirmation");
+              return (
+                <li key={month.bill}>
+                  <button type="button" onClick={() => setOpen(month.bill)} className="group flex w-full flex-col gap-2 rounded-lg text-left" aria-label={`${monthOf(month.result, true)}: ${amount > 0 ? `${usd(amount)} overcharged` : asks(month) ? "charges worth asking about" : !hadOffer ? "no offer to compare" : compared(month) ? "matches the offer" : "not compared with the offer"}${unconfirmed ? ", to confirm" : ""}`}>
+                    <div className="flex h-28 items-end rounded-t-md border-b border-line px-1.5 group-hover:bg-fill">
+                      {amount > 0 && <div className="w-full rounded-t-[3px] bg-red" style={{ height: `${Math.max(8, (amount / largest) * 100)}%` }} />}
+                    </div>
+                    <span className="text-[13px] text-text-2">{monthOf(month.result)}</span>
+                    <span className={`text-[13px] tabular-nums ${amount > 0 ? "font-semibold text-red" : "text-text-2"}`}>{amount > 0 ? usd(amount) : "—"}</span>
+                    {unconfirmed && <span className="text-[12px] text-text-2">To confirm</span>}
+                  </button>
+                </li>
+              );
+            })}
+          </ol>
+          <p className="text-[13px] text-text-2">{waiting ? "Open a month marked “To confirm” and confirm its marked lines to add them to the message." : "Select a month to see its bill and evidence."}</p>
+        </section>
+      )}
 
       <div className="mt-12 flex max-w-[720px] flex-col gap-10">
         {message && <MessageBox message={message} />}
