@@ -459,6 +459,16 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
     };
   }, []);
 
+  // Closing or reloading the tab loses everything here: added files, a check already being paid for, a drafted message.
+  // While there's any of that, the browser asks before leaving; a page with nothing added leaves freely.
+  const hasWork = state.s !== "composing" || state.inputs.bills.length > 0 || state.inputs.offer.kind !== "none";
+  useEffect(() => {
+    if (!hasWork) return;
+    const ask = (event: BeforeUnloadEvent) => event.preventDefault();
+    window.addEventListener("beforeunload", ask);
+    return () => window.removeEventListener("beforeunload", ask);
+  }, [hasWork]);
+
   const runningAttempt = state.s === "running" ? state.attempt : null;
   useEffect(() => {
     if (runningAttempt === null || controllers.current.has(runningAttempt)) return;
