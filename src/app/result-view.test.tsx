@@ -314,6 +314,17 @@ describe("the result page's wording", () => {
     };
     expect(page(result)).toContain("The bill doesn't show that you meet your offer's conditions");
   });
+
+  // A price too far from the promise to claim is judged against the promise, so the note shows what was promised.
+  test("a price too far from the promise to claim shows the promise beside it", () => {
+    const result: Checked = {
+      ...checked([line("L1", "Fiber 1 Gig", 12000, "plan")], [{ id: "Q1", kind: "price_gap", lineIds: ["L1"], promiseId: "P1" }]),
+      promises: [{ id: "P1", kind: "monthly_price", description: "", amount_cents: 3000, per_line: false, conditions: [], applies_from: null, applies_until: null, quote: "Fiber 300 for $30 a month", said_at_seconds: null, covers_line_ids: ["L1"] }],
+    };
+    const html = page(result);
+    expect(html).toContain("Fiber 1 Gig is too far from the promised amount to claim");
+    expect(html).toContain("Promised: “Fiber 300 for $30 a month”");
+  });
 });
 
 describe("the result page's heading", () => {

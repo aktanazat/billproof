@@ -491,6 +491,8 @@ export function ResultView({
                 {questions.map((question) => {
                   const questionLines = linesOf(question.lineIds);
                   const canInclude = question.kind === "unagreed_fee" || question.kind === "repeated_charge";
+                  // A price too far from the promise is judged against it, so the promise is shown with it.
+                  const judgedAgainst = question.kind === "price_gap" && question.promiseId ? promises.get(question.promiseId) : undefined;
                   return (
                     <li key={question.id} tabIndex={0} onMouseEnter={() => setFocus(question.lineIds)} onMouseLeave={() => setFocus(null)} onFocus={() => setFocus(question.lineIds)} onBlur={() => setFocus(null)} className="flex flex-col gap-2 border-b border-line py-3 outline-none focus-visible:bg-fill">
                       <div className="flex items-baseline justify-between gap-4 text-[15px]">
@@ -504,6 +506,7 @@ export function ResultView({
                           </p>
                         )}
                       </div>
+                      {judgedAgainst && <p className="text-[13px] leading-[18px] text-text-2">Promised: “{judgedAgainst.quote}”</p>}
                       {canInclude && (
                         <label className="inline-flex cursor-pointer items-center gap-2 text-[13px] text-text-2 select-none">
                           <input type="checkbox" checked={selection.questions[question.id] === true} onChange={() => dispatch({ type: "toggle_question", bill, id: question.id })} aria-label={`Ask in message: ${questionTitle(question, questionLines, result)}`} className="size-4 accent-[var(--text)]" />
