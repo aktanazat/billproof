@@ -222,7 +222,9 @@ export function reduce(state: CheckState, action: CheckAction): CheckState {
       if (action.type === "edit") return { s: "composing", inputs: state.inputs, attempts: state.attempts };
       return state;
     case "done": {
-      if (action.type === "edit") return { s: "composing", inputs: state.inputs, attempts: state.attempts };
+      // A checked bill or year is done with its files, and keeping them would fold the next bill in with them as one
+      // year; a file that wasn't a bill, or couldn't be checked, stays for the person to swap.
+      if (action.type === "edit") return { s: "composing", inputs: state.result.outcome === "checked" || state.result.outcome === "year" ? initialState.inputs : state.inputs, attempts: state.attempts };
       if (action.type !== "toggle_claim" && action.type !== "confirm_claim" && action.type !== "toggle_question") return state;
       const selection = state.selections[action.bill];
       if (!selection) return state;

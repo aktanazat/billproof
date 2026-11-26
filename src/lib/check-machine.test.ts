@@ -152,4 +152,14 @@ describe("check machine", () => {
   test("typing an offer and deleting it leaves the page as it started", () => {
     expect(play([{ type: "offer_text", text: "Fiber 500 for $55" }, { type: "offer_text", text: "" }])).toEqual(initialState);
   });
+
+  // A checked bill's files stay behind otherwise: a bill dropped in after "Check another bill" on a sample would be
+  // checked together with the sample's bill, as a year, against the sample's offer.
+  test("going back from a checked bill starts an empty screen; from a failed check the files stay to change", () => {
+    const checked = { outcome: "checked", claims: [], questions: [], spentMicros: 0 } as unknown as CheckResult;
+    const finished = play([...readyBill, { type: "offer_text", text: "$55 a month" }, { type: "start" }, { type: "finished", attempt: 1, result: checked }, { type: "edit" }]);
+    expect(finished).toMatchObject({ s: "composing", inputs: initialState.inputs });
+    const failed = play([...readyBill, { type: "start" }, { type: "errored", attempt: 1, failure: "network", message: "The connection dropped.", spentMicros: 0, retryable: true }, { type: "edit" }]);
+    expect(failed).toMatchObject({ s: "composing", inputs: { bills: [{ id: "b", status: "ready" }] } });
+  });
 });
