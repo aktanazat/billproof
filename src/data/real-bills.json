@@ -5445,15 +5445,7 @@
       ],
       "claims": [],
       "dropped": [],
-      "questions": [
-        {
-          "kind": "unagreed_fee",
-          "lines": [
-            "Taxes & regulatory fees"
-          ],
-          "cents": 892
-        }
-      ],
+      "questions": [],
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
@@ -8241,13 +8233,6 @@
             "Broadcast TV Surcharge"
           ],
           "cents": 2800
-        },
-        {
-          "kind": "unagreed_fee",
-          "lines": [
-            "WiFi Service"
-          ],
-          "cents": 1000
         }
       ],
       "explained": 0,
@@ -13908,15 +13893,7 @@
       ],
       "claims": [],
       "dropped": [],
-      "questions": [
-        {
-          "kind": "unagreed_fee",
-          "lines": [
-            "Return Payment Fee"
-          ],
-          "cents": 1500
-        }
-      ],
+      "questions": [],
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 1,
@@ -24076,13 +24053,6 @@
       "claims": [],
       "dropped": [],
       "questions": [
-        {
-          "kind": "unagreed_fee",
-          "lines": [
-            "Taxes & fees"
-          ],
-          "cents": 260
-        },
         {
           "kind": "unagreed_fee",
           "lines": [

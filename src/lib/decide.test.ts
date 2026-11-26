@@ -495,12 +495,16 @@ describe("promises read from a person's own words", () => {
     expect(decide(withQuote("Fiber 500 Internet $65.00"), [price], photo, photo).unused).toEqual([{ promiseId: "P1", reason: "line_not_on_bill" }]);
   });
 
-  test("a government fee read as a company fee is not asked about; a company's own tax recovery fee is", () => {
+  test("only the company's own added fees are asked about, not government fees, combined taxes, services or penalties", () => {
     const fee = internet.line_items.find((line) => line.label === "Network Enhancement Fee")!;
     const named = (label: string): Reading => ({ ...internet, line_items: internet.line_items.map((line) => (line.id === fee.id ? { ...line, label } : line)) });
     const asked = (reading: Reading) => decide(reading, [], photo, photo).questions.filter((q) => q.kind === "unagreed_fee" && q.lineIds.includes(fee.id)).length;
     expect(asked(named("Franchise Fee"))).toBe(0);
     expect(asked(named("State 911 Surcharge"))).toBe(0);
+    expect(asked(named("Taxes & regulatory fees"))).toBe(0);
+    expect(asked(named("WiFi Service"))).toBe(0);
+    expect(asked(named("Return Payment Fee"))).toBe(0);
     expect(asked(named("TN Bus Tax Recovery Fee"))).toBe(1);
+    expect(asked(named("Company fees & surcharges"))).toBe(1);
   });
 });
