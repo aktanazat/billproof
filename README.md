@@ -6,6 +6,10 @@ Drop in the bill (PDF or a phone photo) and the promise: the offer email, a scre
 
 Live: https://billproof.aktan.us (six samples run from the start screen, including two recorded calls and a year of bills).
 
+![A checked bill: $30.00 to ask back from Bayline Fiber, with the two overcharged lines marked on the bill photo, the promise each breaks, the fees worth asking about and the message ready to send](docs/result.png)
+
+The "Internet, price guaranteed" sample, a made-up bill, as the site shows it after a check.
+
 ## How a check works
 
 1. The browser renders each PDF page to an image and keeps its text layer; photos are scaled to 1600 px; a recorded call is decoded to 16 kHz mono WAV. Nothing is uploaded until you press Check. The server measures the recording from its bytes and refuses anything over four minutes.
