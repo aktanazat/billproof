@@ -57,3 +57,12 @@ test("the company table adds up to every real bill, every bill with fees and the
   expect(rows.reduce((t, row) => t + Number(row[2]), 0)).toBe(fees.filter((c) => c > 0).length);
   expect(rows.reduce((t, row) => t + cents(row[3]), 0)).toBe(fees.reduce((t, c) => t + c, 0));
 });
+
+test("the most common fees count bills, so a fee printed once per phone line counts its bill once", () => {
+  const list = text.slice(text.indexOf("Fees that showed up most") + 2, text.indexOf("By company"));
+  const key = (label: string) => label.toLowerCase().replace(/[^a-z ]/g, "").replace(/\s+/g, " ").trim();
+  const billsWith = (label: string) => realRun.results.filter((bill) => bill.outcome === "checked" && unagreedFees(bill).some((fee) => fee.lines.some((line) => key(line) === key(label)))).length;
+  const rows = list.flatMap((part, i) => (/^\d+ bills?$/.test(part) ? [{ label: list[i - 1], count: Number.parseInt(part, 10) }] : []));
+  expect(rows.length).toBeGreaterThan(0);
+  for (const row of rows) expect(row, row.label).toEqual({ label: row.label, count: billsWith(row.label) });
+});

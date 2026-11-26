@@ -178,7 +178,13 @@ export default function RealBills() {
     return bill ? [{ ...post, bill }] : [];
   });
 
-  const leaderboard = [...fees.flatMap((fee) => fee.lines).reduce((map, label) => map.set(feeKey(label), { label, count: (map.get(feeKey(label))?.count ?? 0) + 1 }), new Map<string, { label: string; count: number }>()).values()]
+  // A fee printed once per phone line is still one bill's fee, so each bill counts once for each fee it carries.
+  const leaderboard = [
+    ...bills
+      .flatMap((bill) => [...new Map(unagreedFees(bill).flatMap((fee) => fee.lines.map((label) => [feeKey(label), label] as const))).entries()])
+      .reduce((map, [key, label]) => map.set(key, { label: map.get(key)?.label ?? label, count: (map.get(key)?.count ?? 0) + 1 }), new Map<string, { label: string; count: number }>())
+      .values(),
+  ]
     .sort((a, b) => b.count - a.count)
     .slice(0, 8);
 
