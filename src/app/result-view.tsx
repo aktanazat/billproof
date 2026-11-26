@@ -67,7 +67,7 @@ function questionTitle(question: Question, lines: LineItem[], result: Checked): 
     case "provider_mismatch":
       return `The offer is from ${result.offerProvider ?? "another company"}, not ${result.reading.provider ?? "this company"}`;
     case "end_date_unread":
-      return `The end date of your offer for ${listNames(charged(lines))} couldn't be read`;
+      return `The end date of your offer for ${listNames(charged(lines).length > 0 ? charged(lines) : lines)} couldn't be read`;
     case "overlapping_claim":
       return "";
   }
@@ -336,7 +336,7 @@ export function ResultView({
   const notes = [
     ...(printed && result.totals.lineSum === "mismatch" ? [`The charges add up to ${usd(result.totals.lineSumCents)}, but the bill prints ${usd(printed.cents)}.`] : []),
     ...(result.totals.balance === "mismatch" ? ["The previous balance, payments and new charges don't add up to the amount due."] : []),
-    ...(result.hadOffer ? [`Compared ${result.reading.line_items.length} charges with ${result.matchedPromiseIds.length} ${result.matchedPromiseIds.length === 1 ? "promise" : "promises"}.`] : []),
+    ...(result.hadOffer ? [`Compared ${read} ${read === 1 ? "charge" : "charges"} with ${result.matchedPromiseIds.length} ${result.matchedPromiseIds.length === 1 ? "promise" : "promises"}.`] : []),
     ...result.unused.flatMap((item) => {
       const why = UNUSED_TEXT[item.reason];
       return why ? [`Not used: ${promises.get(item.promiseId)?.description ?? "a promise"} (${why}).`] : [];
