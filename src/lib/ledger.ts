@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { mkdirSync } from "node:fs";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
+import { formatMicros } from "./cost";
 
 export const CHECK_CAP_MICROS = 30_000;
 export const CHECKS_PER_CLIENT_PER_HOUR = 30;
@@ -92,7 +93,7 @@ export function openLedger(file: string, eventCapMicros: number): Ledger {
       return writeTransaction(() => {
         const forCheck = micros(checkSpent.get(checkId));
         if (forCheck + amount > capMicros) {
-          throw new LedgerRefusal("over_budget", `This step could cost up to ${amount} µ$, past this check's ${capMicros} µ$ limit`);
+          throw new LedgerRefusal("over_budget", `This check would pass its ${formatMicros(capMicros)} limit. Use fewer pages.`);
         }
         if (micros(eventSpent.get()) + amount > eventCapMicros) {
           throw new LedgerRefusal("over_budget", "The demo's model budget is used up");

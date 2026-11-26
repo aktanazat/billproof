@@ -6,7 +6,7 @@ describe("ledger", () => {
     const ledger = openLedger(":memory:", 1_000_000);
     const check = ledger.admitCheck("a");
     ledger.settle(ledger.reserve(check, CHECK_CAP_MICROS - 1_000, CHECK_CAP_MICROS), CHECK_CAP_MICROS - 1_000);
-    expect(() => ledger.reserve(check, 1_001, CHECK_CAP_MICROS)).toThrow(LedgerRefusal);
+    expect(() => ledger.reserve(check, 1_001, CHECK_CAP_MICROS)).toThrow(new LedgerRefusal("over_budget", "This check would pass its $0.03 limit. Use fewer pages."));
     expect(ledger.reserve(check, 1_000, CHECK_CAP_MICROS)).toEqual(expect.any(String));
   });
 

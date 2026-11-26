@@ -488,14 +488,27 @@ const RETRYABLE: Record<CheckFailure, boolean> = {
   bad_input: false,
 };
 
+// What a person sees when Muse Ember fails. The raw detail (an HTTP body, a setting's name, a schema error) goes to the
+// server log only.
+const PLAIN: Record<EmberError["kind"] | "network", string> = {
+  rate_limited: "Muse Ember is busy right now.",
+  upstream: "Muse Ember had a problem on Meta's side. Try again.",
+  truncated: "This bill is too long for Muse Ember to read in one check. Use the pages with the charges.",
+  invalid_output: "Muse Ember's answer came back incomplete. Try again.",
+  refused: "Muse Ember declined to read these files.",
+  config: "Billproof can't reach Muse Ember right now.",
+  network: "The connection to Muse Ember dropped. Try again.",
+};
+
 function failureOf(error: unknown): [CheckFailure, string] {
   if (error instanceof CheckStop) return [error.failure, error.message];
   if (error instanceof LedgerRefusal) return [error.kind, error.message];
+  console.error("check failed:", error);
   if (error instanceof EmberError) {
     const wait = error.kind === "rate_limited" && error.retryAfterSeconds ? ` Try again in ${Math.ceil(error.retryAfterSeconds)} seconds.` : "";
-    return [error.kind, error.message + wait];
+    return [error.kind, PLAIN[error.kind] + wait];
   }
-  return ["network", error instanceof Error ? error.message : "The connection to the model failed"];
+  return ["network", PLAIN.network];
 }
 
 // Emits exactly one terminal event: a result or an error.

@@ -138,7 +138,12 @@ export async function prepareCall(file: File, maxSeconds: number): Promise<Prepa
   } finally {
     void context.close();
   }
-  if (decoded.duration > maxSeconds) throw new PrepareError(`This recording is ${Math.round(decoded.duration / 60)} minutes long. Trim it to the part with the promise, up to ${maxSeconds / 60} minutes.`);
+  if (decoded.duration > maxSeconds) {
+    // Whole minutes would round 4:20 down to "4 minutes long" beside a 4-minute limit.
+    const seconds = Math.ceil(decoded.duration);
+    const length = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+    throw new PrepareError(`This recording is ${length} long. Trim it to the part with the promise, up to ${maxSeconds / 60} minutes.`);
+  }
   const offline = new OfflineAudioContext(1, Math.ceil(decoded.duration * CALL_SAMPLE_RATE), CALL_SAMPLE_RATE);
   const source = offline.createBufferSource();
   source.buffer = decoded;
