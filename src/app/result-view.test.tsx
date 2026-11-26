@@ -34,6 +34,32 @@ test("no result page from a saved result shows a placeholder or '1' before a plu
   expect(slips).toEqual([]);
 });
 
+// The result replaces the check screen, so its heading (with the amount to ask back, when there is one) takes focus
+// when it appears: a screen reader reads it, and the keyboard continues from there. That needs an element that allows
+// focus, either the heading or the block holding it, before any other text on the page.
+test("every result's heading, and the year's, sits in an element that can take focus when the result appears", () => {
+  const run = JSON.parse(readFileSync(path.join(import.meta.dirname, "../../eval/run-2026-11-26.json"), "utf8")) as { raw: { id: string; variant?: string; events: CheckEvent[] }[] };
+  const resultOf = (id: string, variant?: string) => run.raw.find((r) => r.id === id && (!variant || r.variant === variant))?.events.find((e) => e.type === "result");
+  const done = (result: CheckResult) => {
+    const running = { s: "running", inputs: initialState.inputs, attempts: 1, attempt: 1, stage: null, spentMicros: 0, live: {} } as unknown as CheckState;
+    const state = reduce(running, { type: "finished", attempt: 1, result });
+    if (state.s !== "done") throw new Error("the finished check did not become a done state");
+    return state;
+  };
+  const single = (result: SingleResult) => renderToStaticMarkup(createElement(ResultView, { result, bill: 0, pages: [], omittedPages: { bill: 0, offer: 0 }, callUrl: null, selection: done(result).selections[0], dispatch: () => {}, backLabel: "Check another bill", onBack: () => {} }));
+  const claims = resultOf("internet-guaranteed", "pdf");
+  const verdict = resultOf("internet-expired", "pdf");
+  const year = resultOf("year-12");
+  if (claims?.type !== "result" || claims.result.outcome !== "checked" || verdict?.type !== "result" || verdict.result.outcome !== "checked" || year?.type !== "result" || year.result.outcome !== "year") throw new Error("missing saved results");
+  const pages = [single(claims.result), single(verdict.result), single({ outcome: "not_a_bill", spentMicros: 0 }), renderToStaticMarkup(createElement(YearView, { state: done(year.result), result: year.result, dispatch: () => {} }))];
+  for (const html of pages) {
+    const target = html.indexOf('tabindex="-1"');
+    expect(target).toBeGreaterThan(-1);
+    expect(target).toBeLessThan(html.indexOf(">", html.indexOf("<h1")));
+    expect(html.slice(html.lastIndexOf("<", target), target)).toMatch(/^<(h1|div)\b/);
+  }
+});
+
 const line = (id: string, label: string, cents: number, kind: LineItem["kind"]): LineItem => ({ id, label, amount_cents: cents, kind, page: 1, box: null, quote: `${label} $${(cents / 100).toFixed(2)}`, prorated: false });
 
 function checked(lines: LineItem[], questions: Checked["questions"]): Checked {

@@ -186,6 +186,10 @@ function Transcript({ transcript, provider, callUrl }: { transcript: TranscriptT
   );
 }
 
+// A result replaces the check screen, so its heading takes focus when it appears: a screen reader reads it, and the
+// keyboard continues from there instead of the top of the page. Used as a ref on an element with tabIndex -1.
+export const focusOnShow = (element: HTMLElement | null) => element?.focus();
+
 export function MessageBox({ message }: { message: Message }) {
   const [format, setFormat] = useState<"chat" | "email" | "call" | "complaint">("chat");
   const [copied, setCopied] = useState<"no" | "yes" | "failed">("no");
@@ -305,7 +309,7 @@ export function ResultView({
   if (result.outcome !== "checked") {
     return (
       <section className="mx-auto flex w-full max-w-[1120px] flex-col items-start gap-3 px-6 pt-10">
-        <h1 className="text-[28px] font-semibold tracking-[-0.02em]">{result.outcome === "not_a_bill" ? "This isn't a bill" : "Couldn't check this bill"}</h1>
+        <h1 ref={focusOnShow} tabIndex={-1} className="text-[28px] font-semibold tracking-[-0.02em] outline-none">{result.outcome === "not_a_bill" ? "This isn't a bill" : "Couldn't check this bill"}</h1>
         {result.outcome === "could_not_check" && <p className="text-[17px] text-text-2">{result.reason}</p>}
         <p className="max-w-[40rem] text-[15px]">
           {result.outcome === "not_a_bill"
@@ -376,7 +380,7 @@ export function ResultView({
   return (
     <section className="mx-auto w-full max-w-[1120px] px-6 pb-24 pt-6">
       <header className="flex flex-wrap items-end justify-between gap-4 pb-6">
-        <div>
+        <div ref={focusOnShow} tabIndex={-1} className="outline-none">
           {verdict ? (
             <h1 className="text-[28px] font-semibold tracking-[-0.02em]">{verdict}</h1>
           ) : (
