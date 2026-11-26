@@ -134,4 +134,5 @@ export type CheckEvent =
   | { type: "challenge"; challenge: SeenChallenge }
   | { type: "month"; bill: number; result: SingleResult }
   | { type: "result"; result: CheckResult }
-  | { type: "error"; failure: CheckFailure; message: string; spentMicros: number; retryable: boolean };
+  // `bill`: in a year check, the statement a failure belongs to, by its place in the list.
+  | { type: "error"; failure: CheckFailure; message: string; spentMicros: number; retryable: boolean; bill?: number };

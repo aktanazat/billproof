@@ -87,8 +87,8 @@ test("a claim the company's side defeats with the offer's own words is dropped, 
   expect(`${message.chat}\n${message.complaint}`).not.toContain("$15.00");
 });
 
-// A year stops at its first failure. One that belongs to a single bill says which, so the person can fix that one;
-// "This bill is too long" alone, among twelve, leaves them guessing at another paid try.
+// A year stops at its first failure. One that belongs to a single bill says which, so the page can name its file and
+// the person can fix that one; "This bill is too long" alone, among twelve, leaves them guessing at another paid try.
 test("a year stopped by one bill's failure names that bill by its place in the list", async () => {
   scenario.billedCents = 5500;
   scenario.counterQuote = null;
@@ -101,5 +101,5 @@ test("a year stopped by one bill's failure names that bill by its place in the l
     { ledger: openLedger(":memory:", 1_000_000), client: "test", signal: new AbortController().signal, emit: (event) => events.push(event) },
   );
   scenario.tooLong = null;
-  expect(events.at(-1)).toMatchObject({ type: "error", failure: "truncated", message: "Bill 2 in the list: This bill is too long for Muse Ember to read in one check. Use the pages with the charges.", retryable: false });
+  expect(events.at(-1)).toMatchObject({ type: "error", failure: "truncated", message: "This bill is too long for Muse Ember to read in one check. Use the pages with the charges.", bill: 1, retryable: false });
 });

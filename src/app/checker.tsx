@@ -98,7 +98,7 @@ async function streamCheck(input: CheckInput, attempt: number, signal: AbortSign
             break;
           case "error":
             terminal = true;
-            dispatch({ type: "errored", attempt, failure: event.failure, message: event.message, spentMicros: event.spentMicros, retryable: event.retryable });
+            dispatch({ type: "errored", attempt, failure: event.failure, message: event.message, spentMicros: event.spentMicros, retryable: event.retryable, bill: event.bill });
             break;
         }
       }
@@ -279,10 +279,12 @@ function WorkingYear({ state, onCancel, dispatch }: { state: Exclude<CheckState,
             return box ? [{ id: `R${j}`, box, tone: "read" as const }] : [];
           });
           const over = month?.outcome === "checked" ? month.claims.reduce((t, c) => t + c.amountCents, 0) : 0;
+          // The bill a stopped year stopped on is marked, so the person sees which statement to fix.
+          const stoppedHere = state.s === "failed" && state.bill === i;
           return (
             <li key={doc.id} className="flex flex-col gap-2">
               {doc.status === "ready" && <BillPage image={doc.pages[0].image} alt={`Bill ${i + 1}`} marks={marks} visibleAspect="1000 / 900" />}
-              <p className={`flex items-center gap-2 text-[13px] tabular-nums ${over > 0 ? "font-semibold text-red" : "text-text-2"}`}>
+              <p className={`flex items-center gap-2 text-[13px] tabular-nums ${over > 0 || stoppedHere ? "font-semibold text-red" : "text-text-2"}`}>
                 {!month && state.s === "running" && lines.length > 0 && <Spinner />}
                 {month
                   ? month.outcome === "checked"
@@ -292,7 +294,9 @@ function WorkingYear({ state, onCancel, dispatch }: { state: Exclude<CheckState,
                     : month.outcome === "not_a_bill"
                       ? "Not a bill"
                       : "Couldn't read"
-                  : lines.length > 0
+                  : stoppedHere
+                    ? "Couldn't read"
+                    : lines.length > 0
                     ? `${lines.length} ${lines.length === 1 ? "line" : "lines"}`
                     : state.s === "running"
                       ? "Waiting"

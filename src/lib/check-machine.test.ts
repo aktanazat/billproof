@@ -181,4 +181,16 @@ describe("check machine", () => {
     if (state.s !== "composing") throw new Error("adding bills left the start screen");
     expect(state.inputs.bills.map((doc) => doc.id)).toEqual(Array.from({ length: 12 }, (_, i) => `b${i + 1}`));
   });
+
+  // A year's failure that belongs to one bill comes with that bill's place; the person sees its file named, and the
+  // progress screen marks it, rather than "Bill 2" to count out among twelve.
+  test("a year's failure that belongs to one bill names its file and marks it", () => {
+    const bills: CheckAction[] = [
+      { type: "bills_added", docs: [{ id: "a", name: "october.pdf" }, { id: "b", name: "november.pdf" }] },
+      { type: "doc_prepared", id: "a", pages: [page], omitted: 0 },
+      { type: "doc_prepared", id: "b", pages: [page], omitted: 0 },
+    ];
+    const state = play([...bills, { type: "start" }, { type: "errored", attempt: 1, failure: "truncated", message: "This bill is too long for Muse Ember to read in one check.", spentMicros: 900, retryable: false, bill: 1 }]);
+    expect(state).toMatchObject({ s: "failed", message: "november.pdf: This bill is too long for Muse Ember to read in one check.", bill: 1 });
+  });
 });

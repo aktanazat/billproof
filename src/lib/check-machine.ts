@@ -42,7 +42,8 @@ export type CheckState =
   // `spentFinal` is false when the connection dropped mid-check: only the server knows the final cost, so the amount
   // shown is what had been reported so far, a lower bound. A stopped check keeps `live`, so the months a year check
   // finished before it stopped stay on screen.
-  | { s: "failed"; inputs: Inputs; attempts: number; stage: Stage | null; failure: CheckFailure; message: string; spentMicros: number; spentFinal: boolean; retryable: boolean; live: Live }
+  // `bill`: in a year check, the statement the failure belongs to, marked on the progress screen.
+  | { s: "failed"; inputs: Inputs; attempts: number; stage: Stage | null; failure: CheckFailure; message: string; spentMicros: number; spentFinal: boolean; retryable: boolean; live: Live; bill: number | null }
   | { s: "cancelled"; inputs: Inputs; attempts: number; stage: Stage | null; spentMicros: number; live: Live };
 
 export type CheckAction =
@@ -68,7 +69,7 @@ export type CheckAction =
   | { type: "month_done"; attempt: number; bill: number; result: SingleResult }
   | { type: "finished"; attempt: number; result: CheckResult }
   // `spentMicros` is null when the server's own account of the cost never arrived.
-  | { type: "errored"; attempt: number; failure: CheckFailure; message: string; spentMicros: number | null; retryable: boolean }
+  | { type: "errored"; attempt: number; failure: CheckFailure; message: string; spentMicros: number | null; retryable: boolean; bill?: number }
   | { type: "cancel" }
   | { type: "retry" }
   | { type: "edit" }
@@ -208,8 +209,11 @@ function running(state: Extract<CheckState, { s: "running" }>, action: CheckActi
       return { ...state, live: { ...live, months: { ...live.months, [action.bill]: action.result } } };
     case "finished":
       return { s: "done", inputs: state.inputs, attempts: state.attempts, result: action.result, selections: initialSelections(action.result) };
-    case "errored":
-      return { s: "failed", inputs: state.inputs, attempts: state.attempts, stage: state.stage, failure: action.failure, message: action.message, spentMicros: action.spentMicros ?? state.spentMicros, spentFinal: action.spentMicros !== null, retryable: action.retryable, live: state.live };
+    case "errored": {
+      // A failure that belongs to one bill of a year is told by that bill's file, which the person can find and fix.
+      const named = action.bill === undefined ? undefined : state.inputs.bills[action.bill]?.name;
+      return { s: "failed", inputs: state.inputs, attempts: state.attempts, stage: state.stage, failure: action.failure, message: named ? `${named}: ${action.message}` : action.message, spentMicros: action.spentMicros ?? state.spentMicros, spentFinal: action.spentMicros !== null, retryable: action.retryable, live: state.live, bill: action.bill ?? null };
+    }
     case "cancel":
       return { s: "cancelled", inputs: state.inputs, attempts: state.attempts, stage: state.stage, spentMicros: state.spentMicros, live: state.live };
     default:

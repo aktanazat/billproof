@@ -95,6 +95,8 @@ class CheckStop extends Error {
     readonly failure: CheckFailure,
     message: string,
     readonly retryable: boolean,
+    // In a year check, the bill the failure belongs to.
+    readonly bill?: number,
   ) {
     super(message);
   }
@@ -494,12 +496,12 @@ async function check(input: CheckInput, checkId: string, capMicros: number, deps
   return { outcome: "year", months, spentMicros: deps.ledger.spentForCheck(checkId), calls: run.calls.flat() };
 }
 
-// A year stops at its first failure. One that belongs to a single bill (too long to read, declined, too large) names it
-// by its place in the list, so the person can fix that statement rather than guess among twelve and pay to try again.
+// A year stops at its first failure. One that belongs to a single bill (too long to read, declined, too large) carries
+// that bill's place, so the page names its file and the person can fix that statement rather than guess among twelve
+// and pay to try again.
 function ofBill(error: unknown, bill: number): unknown {
-  const named = (message: string) => `Bill ${bill + 1} in the list: ${message}`;
-  if (error instanceof EmberError && (error.kind === "truncated" || error.kind === "refused")) return new CheckStop(error.kind, named(PLAIN[error.kind]), false);
-  if (error instanceof CheckStop && error.failure === "bad_input") return new CheckStop(error.failure, named(error.message), error.retryable);
+  if (error instanceof EmberError && (error.kind === "truncated" || error.kind === "refused")) return new CheckStop(error.kind, PLAIN[error.kind], false, bill);
+  if (error instanceof CheckStop && error.failure === "bad_input") return new CheckStop(error.failure, error.message, error.retryable, bill);
   return error;
 }
 
@@ -529,15 +531,15 @@ const PLAIN: Record<EmberError["kind"] | "network", string> = {
   network: "The connection to Muse Ember dropped. Try again.",
 };
 
-function failureOf(error: unknown): [CheckFailure, string] {
-  if (error instanceof CheckStop) return [error.failure, error.message];
-  if (isLedgerRefusal(error)) return [error.kind, error.message];
+function failureOf(error: unknown): [CheckFailure, string, number | undefined] {
+  if (error instanceof CheckStop) return [error.failure, error.message, error.bill];
+  if (isLedgerRefusal(error)) return [error.kind, error.message, undefined];
   console.error("check failed:", error);
   if (error instanceof EmberError) {
     const wait = error.kind === "rate_limited" && error.retryAfterSeconds ? ` Try again in ${Math.ceil(error.retryAfterSeconds)} seconds.` : "";
-    return [error.kind, PLAIN[error.kind] + wait];
+    return [error.kind, PLAIN[error.kind] + wait, undefined];
   }
-  return ["network", PLAIN.network];
+  return ["network", PLAIN.network, undefined];
 }
 
 // Emits exactly one terminal event: a result or an error.
@@ -549,7 +551,7 @@ export async function runCheck(input: CheckInput, deps: CheckDeps): Promise<void
     deps.emit({ type: "result", result: await check(input, checkId, capMicros, deps) });
   } catch (error) {
     const spentMicros = checkId ? deps.ledger.spentForCheck(checkId) : 0;
-    const [failure, message] = failureOf(error);
-    deps.emit({ type: "error", failure, message, spentMicros, retryable: RETRYABLE[failure] });
+    const [failure, message, bill] = failureOf(error);
+    deps.emit({ type: "error", failure, message, spentMicros, retryable: RETRYABLE[failure], ...(bill === undefined ? {} : { bill }) });
   }
 }
