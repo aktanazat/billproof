@@ -13,7 +13,8 @@ ENV NODE_ENV=production PORT=3000 HOSTNAME=0.0.0.0 LEDGER_PATH=/data/ledger.db
 COPY --from=build /app/.next/standalone ./
 COPY --from=build /app/.next/static ./.next/static
 COPY --from=build /app/public ./public
-RUN mkdir /data && chown node:node /data
+# The ledger lives in /data; Next saves resized thumbnails under .next/cache, which the app user must be able to write.
+RUN mkdir -p /data /app/.next/cache && chown node:node /data /app/.next/cache
 USER node
 EXPOSE 3000
 CMD ["node", "server.js"]
