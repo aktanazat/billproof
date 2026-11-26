@@ -26,16 +26,18 @@ describe("ledger", () => {
     expect(ledger.spentTotal()).toBe(20_000);
   });
 
-  test("the event cap holds across checks and clients", () => {
-    const ledger = openLedger(":memory:", 25_000);
-    ledger.reserve(ledger.admitCheck("a"), 20_000, CHECK_CAP_MICROS);
-    expect(() => ledger.reserve(ledger.admitCheck("b"), 6_000, CHECK_CAP_MICROS)).toThrow(new LedgerRefusal("budget_spent", "This demo has used its budget for live checks. Every saved result is still on the Real bills page."));
-    // The demo's total cap and one check's own limit are told apart, so a refused check says which it hit.
-    try {
-      ledger.reserve(ledger.admitCheck("c"), 6_000, CHECK_CAP_MICROS);
-    } catch (error) {
-      expect(error).toMatchObject({ kind: "budget_spent" });
-    }
+  test("the event cap holds across checks and clients, and a new check is refused once one can't fit", () => {
+    const spent = new LedgerRefusal("budget_spent", "This demo has used its budget for live checks. Every saved result is still on the Real bills page.");
+    const ledger = openLedger(":memory:", 50_000);
+    const a = ledger.admitCheck("a");
+    const b = ledger.admitCheck("b");
+    ledger.reserve(a, 25_000, CHECK_CAP_MICROS);
+    // Admitted while the budget still covered a check, b still can't pass the demo's cap, and the refusal names the
+    // demo's cap rather than the check's own limit.
+    expect(() => ledger.reserve(b, 26_000, CHECK_CAP_MICROS)).toThrow(spent);
+    expect(ledger.reserve(b, 25_000, CHECK_CAP_MICROS)).toEqual(expect.any(String));
+    // With less left than one check's own limit, the next check is refused before it starts.
+    expect(() => ledger.admitCheck("c")).toThrow(spent);
   });
 
   test("what's left falls as calls are reserved, and counts an open call at its full reservation", () => {

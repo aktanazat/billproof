@@ -8,11 +8,19 @@ import { formatMicros } from "./cost";
 export const CHECK_CAP_MICROS = 30_000;
 export const CHECKS_PER_CLIENT_PER_HOUR = 30;
 const HOUR_MS = 3_600_000;
+const BUDGET_SPENT = "This demo has used its budget for live checks. Every saved result is still on the Real bills page.";
 
 export class LedgerRefusal extends Error {
+  override readonly name = "LedgerRefusal";
   constructor(readonly kind: "over_budget" | "budget_spent" | "too_many_checks", message: string) {
     super(message);
   }
+}
+
+// The site builds this module twice, for its pages and for checks, and the one ledger they share comes from whichever
+// loaded first, so a refusal is recognised by its name: `instanceof` fails against the other copy's class.
+export function isLedgerRefusal(error: unknown): error is LedgerRefusal {
+  return error instanceof Error && error.name === "LedgerRefusal";
 }
 
 export type Ledger = {
@@ -82,6 +90,8 @@ export function openLedger(file: string, eventCapMicros: number): Ledger {
   return {
     admitCheck(client: string, now = Date.now()): string {
       return writeTransaction(() => {
+        // The page says checks are paused at this point, so a check started anyway is refused before anything is sent.
+        if (eventCapMicros - micros(eventSpent.get()) < CHECK_CAP_MICROS) throw new LedgerRefusal("budget_spent", BUDGET_SPENT);
         const recent = recentChecks.get(client, now - HOUR_MS);
         const n = numberColumn(recent, "n");
         if (n >= CHECKS_PER_CLIENT_PER_HOUR) {
@@ -101,7 +111,7 @@ export function openLedger(file: string, eventCapMicros: number): Ledger {
           throw new LedgerRefusal("over_budget", `This check would pass its ${formatMicros(capMicros)} limit. Use fewer pages.`);
         }
         if (micros(eventSpent.get()) + amount > eventCapMicros) {
-          throw new LedgerRefusal("budget_spent", "This demo has used its budget for live checks. Every saved result is still on the Real bills page.");
+          throw new LedgerRefusal("budget_spent", BUDGET_SPENT);
         }
         const id = randomUUID();
         insertAttempt.run(id, checkId, amount, Date.now());

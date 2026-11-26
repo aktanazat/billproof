@@ -4,7 +4,7 @@ import { ceilingMicros, LONG_CONTEXT_THRESHOLD } from "./cost";
 import { checkTotals, decide, earlierChange, settleChallenges, withoutHeadings, type BillChange, type Claim, type Source } from "./decide";
 import { buildRequest, countInputTokens, EmberError, send, type EmberCall, type Part } from "./ember";
 import { usd } from "./letter";
-import { CHECK_CAP_MICROS, LedgerRefusal, type Ledger } from "./ledger";
+import { CHECK_CAP_MICROS, isLedgerRefusal, type Ledger } from "./ledger";
 import { wavSeconds, type CallRecord, type CheckEvent, type CheckFailure, type CheckInput, type CheckResult, type OfferInput, type PageKind, type PreparedPage, type SingleResult, type Stage } from "./result";
 import { billReadingSchema, challengeSchema, sortSchema, termsSchema, type BillReading, type PromiseTerm, type Reading, type TranscriptTurn } from "./schemas";
 
@@ -520,7 +520,7 @@ const PLAIN: Record<EmberError["kind"] | "network", string> = {
 
 function failureOf(error: unknown): [CheckFailure, string] {
   if (error instanceof CheckStop) return [error.failure, error.message];
-  if (error instanceof LedgerRefusal) return [error.kind, error.message];
+  if (isLedgerRefusal(error)) return [error.kind, error.message];
   console.error("check failed:", error);
   if (error instanceof EmberError) {
     const wait = error.kind === "rate_limited" && error.retryAfterSeconds ? ` Try again in ${Math.ceil(error.retryAfterSeconds)} seconds.` : "";
