@@ -22,6 +22,8 @@ main() {
   git pull -q
   cd deploy
   docker compose -p billproof up -d --build 2>&1 | tail -1
+  # The Caddyfile is mounted, so a change to it needs a reload; this one keeps connections open.
+  docker compose -p billproof exec -T caddy caddy reload --config /etc/caddy/Caddyfile
   docker builder prune -f >/dev/null
   docker image prune -f >/dev/null
 }

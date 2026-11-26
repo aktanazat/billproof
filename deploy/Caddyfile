@@ -1,3 +1,16 @@
+# Caddy writes no access log, but its warnings and errors carry the request, visitor address included; the address is
+# dropped from every message (owner approval 2026-11-27 to keep no visitor address past its hour).
+{
+	log default {
+		format filter {
+			wrap json
+			request>remote_ip delete
+			request>client_ip delete
+			request>headers>X-Forwarded-For delete
+		}
+	}
+}
+
 billproof.aktan.us {
 	encode {
 		zstd
