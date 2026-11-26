@@ -1,14 +1,16 @@
 // Runs every eval bill through the real pipeline and Muse Ember, as a PDF and as a phone photo, and scores the
 // result against the planted ground truth. Spend goes through the same ledger as the app.
 // Usage: MODEL_API_KEY=… pnpm eval [case-id-substring]
+//        pnpm eval --replay eval/run-….json   (today's rules on a saved run's readings; no Muse Ember, no spend)
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { formatMicros } from "../src/lib/cost";
+import { decide, type Source } from "../src/lib/decide";
 import { openLedger } from "../src/lib/ledger";
 import { runCheck } from "../src/lib/pipeline";
-import type { CheckEvent, CheckInput, CheckResult } from "../src/lib/result";
+import type { CheckEvent, CheckInput, CheckResult, Checked } from "../src/lib/result";
 import { evalBills } from "./samples/eval-specs";
 import { jpegDataUrl, photoOf, rasterize } from "./samples/raster";
 import { renderBillPdf } from "./samples/render";
@@ -35,16 +37,32 @@ async function inputFor(spec: BillSpec, variant: "pdf" | "photo"): Promise<Check
   return { bills: [{ pages: [{ image: await jpegDataUrl(photo, LONG_SIDE), text: null }] }], offer: { kind: "text", text: spec.proof } };
 }
 
-type Case = { id: string; variant: Variant; specs: BillSpec[]; input: () => Promise<CheckInput> };
+// `bills` are the statements the check is given and `offer` the written offer, if any; `specs` hold the expected answers.
+type Case = { id: string; variant: Variant; specs: BillSpec[]; bills: BillSpec[]; offer: string | null; input: () => Promise<CheckInput> };
 
 const samples = path.join(process.cwd(), "public", "samples");
 const cases: Case[] = [
-  ...evalBills.flatMap((spec) => (["pdf", "photo"] as const).map((variant) => ({ id: spec.id, variant, specs: [spec], input: () => inputFor(spec, variant) }))),
+  ...evalBills.flatMap((spec) => (["pdf", "photo"] as const).map((variant) => ({ id: spec.id, variant, specs: [spec], bills: [spec], offer: spec.proof, input: () => inputFor(spec, variant) }))),
   // The same bill against two recorded calls: one promises two years, the other only the first year.
-  { id: "call-two-years", variant: "call", specs: [internetGuaranteed], input: async () => ({ bills: [await billPage(internetGuaranteed)], offer: { kind: "audio", ...wavOf(path.join(samples, "call-two-years.m4a")) } }) },
-  { id: "call-first-year", variant: "call", specs: [internetExpired], input: async () => ({ bills: [await billPage(internetGuaranteed)], offer: { kind: "audio", ...wavOf(path.join(samples, "call-first-year.m4a")) } }) },
-  { id: "year-12", variant: "year", specs: yearBills, input: async () => ({ bills: await Promise.all(yearBills.map(billPage)), offer: { kind: "text", text: internetGuaranteed.proof } }) },
+  { id: "call-two-years", variant: "call", specs: [internetGuaranteed], bills: [internetGuaranteed], offer: null, input: async () => ({ bills: [await billPage(internetGuaranteed)], offer: { kind: "audio", ...wavOf(path.join(samples, "call-two-years.m4a")) } }) },
+  { id: "call-first-year", variant: "call", specs: [internetExpired], bills: [internetGuaranteed], offer: null, input: async () => ({ bills: [await billPage(internetGuaranteed)], offer: { kind: "audio", ...wavOf(path.join(samples, "call-first-year.m4a")) } }) },
+  { id: "year-12", variant: "year", specs: yearBills, bills: yearBills, offer: internetGuaranteed.proof, input: async () => ({ bills: await Promise.all(yearBills.map(billPage)), offer: { kind: "text", text: internetGuaranteed.proof } }) },
 ];
+
+// A saved check decided again by today's rules: Muse Ember's readings and promises as saved, the bill's text rendered
+// again, and the claims the company-side step struck out last time struck out again (a year has no such step).
+async function redecided(saved: Checked, c: Case, bill: BillSpec): Promise<Checked> {
+  const source: Source = c.variant === "photo" ? { kind: "image" } : { kind: "text", text: (await rasterize(await renderBillPdf(bill), LONG_SIDE)).text };
+  const proof: Source = c.offer === null ? { kind: "heard", text: (saved.transcript ?? []).map((turn) => turn.text).join("\n") } : { kind: "text", text: c.offer };
+  const decision = decide(saved.reading, saved.promises, source, proof, saved.offerProvider);
+  const key = (claim: { kind: string; lineIds: string[] }) => `${claim.kind}|${[...claim.lineIds].sort().join(",")}`;
+  const struck = new Set(saved.dropped.map((d) => key(d.claim)));
+  const claims = decision.claims.filter((claim) => !struck.has(key(claim))).map((claim) => ({ ...claim, lookedFor: null }));
+  return { ...saved, claims, questions: decision.questions, explained: decision.explained };
+}
+
+const replayFile = process.argv[2] === "--replay" ? process.argv[3] : null;
+const replayed: { id: string; variant: Variant; events: CheckEvent[] }[] = replayFile ? JSON.parse(readFileSync(replayFile, "utf8")).raw : [];
 
 type Score = {
   id: string;
@@ -87,7 +105,7 @@ function score(spec: BillSpec, variant: Variant, result: CheckResult | null, err
   return { ...base, outcome: "checked", claimsFound, falseClaims, questionsFound, explainedFound, costMicros: result.spentMicros };
 }
 
-const filter = process.argv[2] ?? "";
+const filter = replayFile ? "" : (process.argv[2] ?? "");
 const ledger = openLedger(path.join(process.cwd(), "data", "ledger.db"), Number(process.env.EVENT_BUDGET_MICROS ?? 6_000_000));
 const scores: Score[] = [];
 const raw: { id: string; variant: Variant; events: CheckEvent[] }[] = [];
@@ -95,16 +113,25 @@ const raw: { id: string; variant: Variant; events: CheckEvent[] }[] = [];
 for (const c of cases.filter((c) => c.id.includes(filter))) {
   const events: CheckEvent[] = [];
   const started = performance.now();
-  await runCheck(await c.input(), {
-    ledger,
-    client: `eval:${c.id}:${c.variant}:${Date.now()}`,
-    signal: AbortSignal.timeout(240_000),
-    emit: (event) => events.push(event),
-  });
+  if (replayFile) {
+    events.push(...(replayed.find((r) => r.id === c.id && r.variant === c.variant)?.events ?? []));
+  } else {
+    await runCheck(await c.input(), {
+      ledger,
+      client: `eval:${c.id}:${c.variant}:${Date.now()}`,
+      signal: AbortSignal.timeout(240_000),
+      emit: (event) => events.push(event),
+    });
+  }
   const ms = Math.round(performance.now() - started);
   const terminal = events.at(-1);
-  const result = terminal?.type === "result" ? terminal.result : null;
-  const error = terminal?.type === "error" ? `${terminal.failure}: ${terminal.message}` : null;
+  let result: CheckResult | null = terminal?.type === "result" ? terminal.result : null;
+  if (replayFile && result?.outcome === "checked") result = await redecided(result, c, c.bills[0]);
+  if (replayFile && result?.outcome === "year") {
+    const months = await Promise.all(result.months.map(async (m) => ({ ...m, result: m.result.outcome === "checked" ? await redecided(m.result, c, c.bills[m.bill]) : m.result })));
+    result = { ...result, months };
+  }
+  const error = terminal?.type === "error" ? `${terminal.failure}: ${terminal.message}` : terminal ? null : "not in the saved run";
   let s: Score;
   if (result?.outcome === "year") {
     // A year is scored month by month against each statement's planted truth, then summed.
@@ -147,8 +174,10 @@ for (const variant of ["pdf", "photo", "call", "year"] as const) {
 }
 console.log(`\nruns ${scores.length}, total ${formatMicros(sum((s) => s.costMicros))}, median ${formatMicros(median)} per check, ledger total ${formatMicros(ledger.spentTotal())}`);
 
-const outDir = path.join(process.cwd(), "eval", "results");
-await mkdir(outDir, { recursive: true });
-const file = path.join(outDir, `${new Date().toISOString().replaceAll(":", "-")}.json`);
-await writeFile(file, JSON.stringify({ scores, raw }, null, 2));
-console.log(`saved ${file}`);
+if (!replayFile) {
+  const outDir = path.join(process.cwd(), "eval", "results");
+  await mkdir(outDir, { recursive: true });
+  const file = path.join(outDir, `${new Date().toISOString().replaceAll(":", "-")}.json`);
+  await writeFile(file, JSON.stringify({ scores, raw }, null, 2));
+  console.log(`saved ${file}`);
+}
