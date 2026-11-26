@@ -702,7 +702,9 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
         <div className="flex min-h-[180px] flex-col rounded-xl bg-fill p-4">
           <p className="text-[15px] font-semibold">Bill</p>
           {bills.length > 0 ? (
-            <div className="mt-2 max-h-[200px] overflow-y-auto">
+            // The padding, taken back by the margins, keeps the focus ring of a button at the list's edge inside the
+            // scrolling box, which would cut it off.
+            <div className="-mx-1 -mb-1 mt-1 max-h-[208px] overflow-y-auto p-1">
               {bills.map((doc) => (
                 <DocRow key={doc.id} doc={doc} onRemove={() => dispatch({ type: "removed", id: doc.id })} />
               ))}
