@@ -58,6 +58,25 @@ test("a duplicate, another account's bill and an unreadable one are named as not
   expect([...html.matchAll(/aria-label="August 2026: /g)]).toHaveLength(1);
 });
 
+test("a year with nothing owed shows no $0.00, and says plainly when there was no offer to check against", () => {
+  if (!year) throw new Error("the saved run has no year result");
+  const clean = (hadOffer: boolean): YearResult => ({ ...year, months: year.months.map((month) => (month.result.outcome === "checked" ? { ...month, result: { ...month.result, claims: [], hadOffer, promises: hadOffer ? month.result.promises : [], matchedPromiseIds: hadOffer ? month.result.matchedPromiseIds : [] } } : month)) });
+  const render = (result: YearResult) => {
+    const running = { s: "running", inputs: initialState.inputs, attempts: 1, attempt: 1, stage: null, spentMicros: 0, live: {} } as unknown as CheckState;
+    const done = reduce(running, { type: "finished", attempt: 1, result });
+    if (done.s !== "done") throw new Error("the finished year did not become a done state");
+    return renderToStaticMarkup(createElement(YearView, { state: done, result, dispatch: () => {} }));
+  };
+  const matched = render(clean(true));
+  expect(matched).toContain(">All 12 statements match the offer</h1>");
+  expect(matched).not.toContain("$0.00");
+  const noOffer = render(clean(false));
+  expect(noOffer).toContain(">Read 12 statements; there was no offer to check them against</h1>");
+  expect(noOffer).not.toContain("match the offer");
+  expect(noOffer).not.toContain("matches the offer");
+  expect(noOffer).toContain("August 2026: no offer to compare");
+});
+
 test("a year of statements is headed with its total and the month the overcharge began", () => {
   const html = yearPage();
   expect(html).toContain("$70.00");
