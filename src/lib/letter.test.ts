@@ -210,4 +210,11 @@ describe("a claim on a promise heard on a call", () => {
     expect(email).toContain("Subject: Billing correction for account ending 4415");
     expect(complaint).toContain("Company: Bayline Fiber");
   });
+
+  test("a month whose period end wasn't read is still named by the start date that was", () => {
+    const started = month("2026-10-12", "2026-11-11");
+    const { chat, email } = buildYearMessage([{ ...started, reading: { ...started.reading, period_end: null } }, month("2026-11-12", "2026-12-11")]);
+    expect(chat).toContain("For the bill starting Oct 12, 2026, Fiber 500 Internet");
+    expect(email).not.toContain("For this bill");
+  });
 });
