@@ -51,10 +51,16 @@ function cased(name: string): string {
 }
 const companyOf = (provider: string | null) => (provider ? (BRANDS.find(([pattern]) => pattern.test(provider))?.[1] ?? cased(provider)) : "Unknown");
 
-// A bill whose company name wasn't read is named by the company of its subreddit, when the subreddit is one company's.
+// Subreddits whose company goes by a longer name than some bills print ("Google", "Metro").
+const FULL_NAMES: Record<string, string> = { GoogleFi: "Google Fi", GoogleFiber: "Google Fiber", MetroPCS: "Metro by T-Mobile" };
+
+// A bill whose company name wasn't read is named by the company of its subreddit, when the subreddit is one company's;
+// a printed name that is the start of its subreddit's company name gets the whole name.
 function displayName(bill: Checked): string | null {
-  if (bill.provider) return cased(bill.provider);
-  return BRANDS.find(([pattern]) => pattern.test(bill.sub))?.[1] ?? null;
+  if (!bill.provider) return BRANDS.find(([pattern]) => pattern.test(bill.sub))?.[1] ?? null;
+  const name = cased(bill.provider);
+  const full = FULL_NAMES[bill.sub];
+  return full && full.toLowerCase().startsWith(`${name.toLowerCase()} `) ? full : name;
 }
 
 // Every real post whose author later wrote in the thread that the company paid them back for a charge Billproof
