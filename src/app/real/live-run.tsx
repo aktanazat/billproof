@@ -27,6 +27,10 @@ export function LiveRun({ paused }: { paused: boolean }) {
   const [elapsed, setElapsed] = useState(0);
   const [total, setTotal] = useState<{ seconds: number; spentMicros: number } | null>(null);
   const started = useRef(0);
+  // A run in which no bill was checked, every one stopped by the service rather than by its post, is a stopped run
+  // with the service's reason, not "Checked" with 24 bills done and $0.00 found.
+  const checked = useRef(0);
+  const serviceFailure = useRef<string | null>(null);
 
   useEffect(() => {
     if (state !== "running") return;
@@ -51,6 +55,8 @@ export function LiveRun({ paused }: { paused: boolean }) {
     setTiles([]);
     setTotal(null);
     started.current = performance.now();
+    checked.current = 0;
+    serviceFailure.current = null;
     const response = await fetch("/api/real-run", { method: "POST" }).catch(() => null);
     if (!response?.body) {
       setState("refused");
@@ -86,9 +92,16 @@ export function LiveRun({ paused }: { paused: boolean }) {
           } else if (event.type === "done") {
             ended = true;
             setTotal({ seconds: event.seconds, spentMicros: event.spentMicros });
-            setState("done");
+            if (checked.current === 0 && serviceFailure.current) {
+              setState("refused");
+              setMessage(serviceFailure.current);
+            } else {
+              setState("done");
+            }
           } else {
             const inner = event.event;
+            if (inner.type === "result") checked.current += 1;
+            if (inner.type === "error" && inner.failure !== "bad_input") serviceFailure.current = inner.message;
             setTiles((all) =>
               all.map((tile, i) => {
                 if (i !== event.i) return tile;
