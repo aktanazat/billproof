@@ -59,7 +59,7 @@ MODEL_API_KEY=… pnpm dev
 
 Checks: `pnpm typecheck`, `pnpm lint`, `pnpm test`.
 
-Deploy: `deploy/compose.yml` runs the app behind Caddy on one server. On the server, run `deploy/deploy.sh`: it stops without changing anything if a check started in the last five minutes (`deploy/active-checks.mjs`; a rebuild replaces the container, which would cut that check off after its spend), appends the running app's log to `logs/app.log` (Docker deletes a container's log with it), pulls the repo and runs `docker compose -p billproof up -d --build` in `deploy/`. A change to `deploy/Caddyfile` also needs `docker compose -p billproof restart caddy`: Caddy reads its config through a bind mount of the file, and `git pull` replaces the file rather than editing it, so a reload alone still sees the old one. Validate a Caddyfile first with `caddy validate --adapter caddyfile`, since a bad one takes the site down.
+Deploy: `deploy/compose.yml` runs the app behind Caddy on one server. On the server, run `deploy/deploy.sh`: it stops without changing anything if a check started in the last five minutes (`deploy/active-checks.mjs`; a rebuild replaces the container, which would cut that check off after its spend), appends the running app's log to `logs/app.log` (Docker deletes a container's log with it), pulls the repo, runs `docker compose -p billproof up -d --build` in `deploy/` and reloads Caddy. Caddy's config is `deploy/caddy/Caddyfile`, mounted as a folder so a pulled change is seen (`git pull` replaces the file, which a file mount would hide). Validate a Caddyfile first with `caddy validate --adapter caddyfile`, since a bad one takes the site down. Caddy's log keeps no visitor address, and the ledger clears a check's address once it is an hour old.
 
 ## Evaluation
 
