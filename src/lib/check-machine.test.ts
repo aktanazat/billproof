@@ -53,6 +53,20 @@ describe("check machine", () => {
     expect(reported).toMatchObject({ s: "failed", spentMicros: 5100, spentFinal: true });
   });
 
+  test("a year check that stops partway keeps the months it finished; a retry starts them over", () => {
+    const year: CheckAction[] = [
+      { type: "bills_added", docs: [{ id: "jan", name: "jan.pdf" }, { id: "feb", name: "feb.pdf" }, { id: "mar", name: "mar.pdf" }] },
+      ...["jan", "feb", "mar"].map((id): CheckAction => ({ type: "doc_prepared", id, pages: [page] })),
+      { type: "start" },
+      { type: "month_done", attempt: 1, bill: 0, result: notABill },
+    ];
+    const dropped = play([...year, { type: "errored", attempt: 1, failure: "network", message: "The connection dropped before the check finished.", spentMicros: null, retryable: true }]);
+    expect(dropped).toMatchObject({ s: "failed", live: { months: { 0: notABill } } });
+    expect(play([...year, { type: "cancel" }])).toMatchObject({ s: "cancelled", live: { months: { 0: notABill } } });
+    const retried = play([{ type: "retry" }], dropped);
+    expect(retried.s === "running" && retried.live.months).toEqual({});
+  });
+
   test("going back from a finished check keeps the files, so the person can change one and check again", () => {
     const back = play([...readyBill, { type: "start" }, { type: "finished", attempt: 1, result: notABill }, { type: "edit" }]);
     expect(back).toMatchObject({ s: "composing", inputs: { bills: [{ id: "b", status: "ready" }] } });

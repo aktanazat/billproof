@@ -36,9 +36,10 @@ export type CheckState =
   | { s: "running"; inputs: Inputs; attempts: number; attempt: number; stage: Stage | null; spentMicros: number; live: Live }
   | { s: "done"; inputs: Inputs; attempts: number; result: CheckResult; selections: Selection[] }
   // `spentFinal` is false when the connection dropped mid-check: only the server knows the final cost, so the amount
-  // shown is what had been reported so far, a lower bound.
-  | { s: "failed"; inputs: Inputs; attempts: number; stage: Stage | null; failure: CheckFailure; message: string; spentMicros: number; spentFinal: boolean; retryable: boolean }
-  | { s: "cancelled"; inputs: Inputs; attempts: number; stage: Stage | null; spentMicros: number };
+  // shown is what had been reported so far, a lower bound. A stopped check keeps `live`, so the months a year check
+  // finished before it stopped stay on screen.
+  | { s: "failed"; inputs: Inputs; attempts: number; stage: Stage | null; failure: CheckFailure; message: string; spentMicros: number; spentFinal: boolean; retryable: boolean; live: Live }
+  | { s: "cancelled"; inputs: Inputs; attempts: number; stage: Stage | null; spentMicros: number; live: Live };
 
 export type CheckAction =
   | { type: "bills_added"; docs: { id: string; name: string }[] }
@@ -189,9 +190,9 @@ function running(state: Extract<CheckState, { s: "running" }>, action: CheckActi
     case "finished":
       return { s: "done", inputs: state.inputs, attempts: state.attempts, result: action.result, selections: initialSelections(action.result) };
     case "errored":
-      return { s: "failed", inputs: state.inputs, attempts: state.attempts, stage: state.stage, failure: action.failure, message: action.message, spentMicros: action.spentMicros ?? state.spentMicros, spentFinal: action.spentMicros !== null, retryable: action.retryable };
+      return { s: "failed", inputs: state.inputs, attempts: state.attempts, stage: state.stage, failure: action.failure, message: action.message, spentMicros: action.spentMicros ?? state.spentMicros, spentFinal: action.spentMicros !== null, retryable: action.retryable, live: state.live };
     case "cancel":
-      return { s: "cancelled", inputs: state.inputs, attempts: state.attempts, stage: state.stage, spentMicros: state.spentMicros };
+      return { s: "cancelled", inputs: state.inputs, attempts: state.attempts, stage: state.stage, spentMicros: state.spentMicros, live: state.live };
     default:
       return state;
   }

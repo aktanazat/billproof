@@ -244,9 +244,9 @@ function Footer({ state, onCancel, dispatch }: { state: Exclude<CheckState, { s:
 }
 
 function WorkingYear({ state, onCancel, dispatch }: { state: Exclude<CheckState, { s: "composing" } | { s: "done" }>; onCancel: () => void; dispatch: (action: CheckAction) => void }) {
-  const live = state.s === "running" ? state.live : null;
+  const live = state.live;
   const bills = state.inputs.bills;
-  const done = live ? Object.keys(live.months).length : 0;
+  const done = Object.keys(live.months).length;
   return (
     <section className="mx-auto w-full max-w-[1120px] px-6 pb-20 pt-6">
       <div className="flex items-baseline justify-between gap-6 pb-6">
@@ -257,8 +257,8 @@ function WorkingYear({ state, onCancel, dispatch }: { state: Exclude<CheckState,
       </div>
       <ol className="grid grid-cols-3 gap-4 sm:grid-cols-4 lg:grid-cols-6">
         {bills.map((doc, i) => {
-          const month = live?.months[i];
-          const lines = live?.lines[i] ?? [];
+          const month = live.months[i];
+          const lines = live.lines[i] ?? [];
           const rows = doc.status === "ready" ? doc.pages[0].rows : null;
           const marks: Mark[] = lines.flatMap((line, j) => {
             const box = line.page === 1 ? snapBox(line.box, line.label, rows) : null;
