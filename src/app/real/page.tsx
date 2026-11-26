@@ -36,8 +36,10 @@ const monthName = (iso: string | null) => {
   return date && !Number.isNaN(date.getTime()) ? date.toLocaleDateString("en-US", { month: "short", year: "numeric", timeZone: "UTC" }) : null;
 };
 
-// Fee names repeat with small differences across companies; the leaderboard groups them by their words.
-const feeKey = (label: string) => label.toLowerCase().replace(/[^a-z ]/g, "").replace(/\s+/g, " ").trim();
+// Fee names repeat with small differences across companies; the leaderboard groups them by their words, without a final
+// "fee", "charge" or "surcharge" and with California as CA ("California Cost Recovery Charge" is "CA Cost Recovery Charge").
+const feeKey = (label: string) =>
+  label.toLowerCase().replace(/\bcalifornia\b/, "ca").replace(/[^a-z ]/g, "").replace(/\s+/g, " ").trim().replace(/ (fee|charge|surcharge)$/, "");
 
 // Bills name the same company many ways ("xfinity", "Comcast", "Verizon Fios"); the table groups them by brand.
 const BRANDS: [RegExp, string][] = [

@@ -60,9 +60,21 @@ test("the company table adds up to every real bill, every bill with fees and the
 
 test("the most common fees count bills, so a fee printed once per phone line counts its bill once", () => {
   const list = text.slice(text.indexOf("Fees that showed up most") + 2, text.indexOf("By company"));
-  const key = (label: string) => label.toLowerCase().replace(/[^a-z ]/g, "").replace(/\s+/g, " ").trim();
+  const key = (label: string) =>
+    label.toLowerCase().replace(/\bcalifornia\b/, "ca").replace(/[^a-z ]/g, "").replace(/\s+/g, " ").trim().replace(/ (fee|charge|surcharge)$/, "");
   const billsWith = (label: string) => realRun.results.filter((bill) => bill.outcome === "checked" && unagreedFees(bill).some((fee) => fee.lines.some((line) => key(line) === key(label)))).length;
   const rows = list.flatMap((part, i) => (/^\d+ bills?$/.test(part) ? [{ label: list[i - 1], count: Number.parseInt(part, 10) }] : []));
   expect(rows.length).toBeGreaterThan(0);
   for (const row of rows) expect(row, row.label).toEqual({ label: row.label, count: billsWith(row.label) });
+});
+
+// Bills print the same fee different ways ("California Cost Recovery Charge" beside "CA Cost Recovery Charge",
+// "Broadcast TV Surcharge" beside "Broadcast TV Fee"); each is one fee on the list, counted on every bill that has it.
+test("a fee printed two ways is one fee on the most-common list", () => {
+  const list = text.slice(text.indexOf("Fees that showed up most") + 2, text.indexOf("By company"));
+  const count = (label: string) => list[list.indexOf(label) + 1];
+  expect(count("CA Cost Recovery Charge")).toBe("7 bills");
+  expect(count("Broadcast TV Fee")).toBe("6 bills");
+  expect(count("Regulatory Cost Recovery")).toBe("5 bills");
+  expect(list).not.toContain("California Cost Recovery Charge");
 });
