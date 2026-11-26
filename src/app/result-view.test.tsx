@@ -158,4 +158,14 @@ describe("the result page's other sections", () => {
     expect(t).toContain("The charges add up to $80.00, but the bill prints $90.00.");
     expect(t).toContain("Not used: Phone at $32.22 a month (it's a device payment or order total, not a plan price).");
   });
+
+  test("a missing credit is titled as missing and shows what was credited against what was promised", () => {
+    const credit: Checked["promises"][number] = { id: "P1", kind: "recurring_credit", description: "", amount_cents: 750, per_line: false, conditions: [], applies_from: null, applies_until: null, quote: "-$7.50 per line", said_at_seconds: null, covers_line_ids: ["L1"] };
+    const missing: Checked["claims"][number] = { id: "C1", kind: "credit_missing", lineIds: ["L1"], promiseId: "P1", actualCents: 0, expectedCents: 750, amountCents: 750, needsConfirmation: false, lookedFor: null };
+    const result: Checked = { ...checked([line("L1", "Number share plan", 1500, "plan")], []), promises: [credit], matchedPromiseIds: ["P1"], claims: [missing] };
+    const t = text(page(result, { claims: { C1: "selected" }, questions: {} }));
+    expect(t).toContain("Missing from the bill");
+    expect(t).toContain("Credited $0.00 Number share plan $15.00 Promised $7.50");
+    expect(t).not.toContain("Charged above the promise");
+  });
 });

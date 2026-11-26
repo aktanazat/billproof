@@ -39,8 +39,9 @@ function citation(promise: PromiseTerm, onCall: boolean, speaker: string): strin
   return `${speaker} told me on the call, at ${at} in my recording: "${promise.quote.trim()}"`;
 }
 
-// A claim as what happened, for a regulator, and what the company is asked to do about it.
-function claimParts(claim: Claim, lines: LineItem[], quoted: string, period: string): { fact: string; request: string } {
+// A claim as what happened, for a regulator, and what the company is asked to do about it. A missing credit mentions
+// autopay only when the promise depends on it; many promised credits (a line discount, a promotion) do not.
+function claimParts(claim: Claim, lines: LineItem[], promise: PromiseTerm, quoted: string, period: string): { fact: string; request: string } {
   switch (claim.kind) {
     case "price_above_promise": {
       const discounted = lines.some((line) => line.amount_cents < 0) ? " after discounts" : "";
@@ -54,11 +55,13 @@ function claimParts(claim: Claim, lines: LineItem[], quoted: string, period: str
         fact: `I was charged ${usd(claim.amountCents)} for ${names(lines.filter((line) => line.amount_cents > 0))}, which was included at no extra cost (${quoted}).`,
         request: `Please remove it and credit ${usd(claim.amountCents)}.`,
       };
-    case "credit_missing":
+    case "credit_missing": {
+      const missing = `${claim.actualCents === 0 ? "no" : `only ${usd(claim.actualCents)} of the`} ${usd(claim.expectedCents)} monthly credit I was promised (${quoted})`;
       return {
-        fact: `My account is on autopay, but this bill has ${claim.actualCents === 0 ? "no" : `only ${usd(claim.actualCents)} of the`} ${usd(claim.expectedCents)} monthly credit I was promised (${quoted}).`,
+        fact: promise.conditions.includes("autopay") ? `My account is on autopay, but this bill has ${missing}.` : `This bill has ${missing}.`,
         request: `Please apply the missing ${usd(claim.amountCents)}.`,
       };
+    }
   }
 }
 
@@ -143,7 +146,7 @@ export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<stri
   const claimPartsFor = (speaker: string) =>
     claims.flatMap((claim) => {
       const promise = promises.get(claim.promiseId);
-      return promise ? [claimParts(claim, linesOf(claim.lineIds), citation(promise, result.transcript !== null, speaker), period)] : [];
+      return promise ? [claimParts(claim, linesOf(claim.lineIds), promise, citation(promise, result.transcript !== null, speaker), period)] : [];
     });
   const claimText = claimPartsFor("your representative").map(({ fact, request }) => `${fact} ${request}`);
   const included = result.questions.filter((question) => includedQuestionIds.has(question.id));
@@ -211,7 +214,7 @@ export function buildYearMessage(months: Checked[]): Message {
         const key = promise.quote.trim();
         const cite = quoted.has(key) ? "as quoted above" : citation(promise, month.transcript !== null, speaker);
         quoted.add(key);
-        const { fact, request } = claimParts(claim, claim.lineIds.flatMap((id) => lines.get(id) ?? []), cite, periodText(month));
+        const { fact, request } = claimParts(claim, claim.lineIds.flatMap((id) => lines.get(id) ?? []), promise, cite, periodText(month));
         return [asking ? `${fact} ${request}` : fact];
       });
       return sentences.join(" ");

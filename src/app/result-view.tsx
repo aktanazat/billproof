@@ -123,7 +123,7 @@ function ClaimRow({ claim, index, result, callUrl, mark, onToggle, onConfirm, on
       </div>
 
       <dl className="grid grid-cols-[4.5rem_minmax(0,1fr)] gap-x-3 gap-y-1.5 text-[13px] leading-[18px] sm:ml-[30px] sm:grid-cols-[4.5rem_4.5rem_minmax(0,1fr)] sm:gap-y-2">
-        <dt className="text-text-2">Billed</dt>
+        <dt className="text-text-2">{claim.kind === "credit_missing" ? "Credited" : "Billed"}</dt>
         <dd className="tabular-nums sm:text-right">{usd(claim.actualCents)}</dd>
         <dd className="col-span-2 mb-1.5 flex flex-col gap-0.5 text-text-2 sm:col-span-1 sm:mb-0">
           {lines.map((line) => (
@@ -133,7 +133,7 @@ function ClaimRow({ claim, index, result, callUrl, mark, onToggle, onConfirm, on
             </span>
           ))}
         </dd>
-        <dt className="text-text-2">{claim.kind === "credit_missing" ? "Credit" : "Promised"}</dt>
+        <dt className="text-text-2">Promised</dt>
         <dd className="tabular-nums sm:text-right">{usd(claim.expectedCents)}</dd>
         <dd className="col-span-2 flex items-start gap-2 text-text-2 sm:col-span-1">
           {heardAt !== null && <PlayButton url={callUrl} from={heardAt} to={turnEnd(result.transcript, heardAt)} label={`Play what was said at ${formatClock(heardAt)}`} />}
@@ -391,7 +391,7 @@ export function ResultView({
 
         <div className="flex flex-col gap-10">
           {result.claims.length > 0 && (
-            <Section title={`Charged above the promise`}>
+            <Section title={result.claims.every((claim) => claim.kind === "credit_missing") ? "Missing from the bill" : result.claims.some((claim) => claim.kind === "credit_missing") ? "Not billed as promised" : "Charged above the promise"}>
               <ol>
                 {result.claims.map((claim, i) => (
                   <ClaimRow

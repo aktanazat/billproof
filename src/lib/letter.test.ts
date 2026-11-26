@@ -97,9 +97,15 @@ describe("a missing autopay credit on a bill with no company name", () => {
 
   test("the complaint names a missing credit as the problem and states it without asking the regulator for it", () => {
     expect(message.complaint).toContain("Problem: a credit I was promised is missing from my bill.");
-    expect(message.complaint).toContain('- My account is on autopay, but this bill has no $7.50 monthly credit I was promised ("50% discount that showed -$7.50 per line").\n');
+    expect(message.complaint).toContain('- This bill has no $7.50 monthly credit I was promised ("50% discount that showed -$7.50 per line").\n');
+    expect(message.chat).not.toContain("autopay");
     expect(message.complaint).not.toContain("Please");
     expect(message.chat).toContain("Please apply the missing $7.50.");
+  });
+
+  test("a missing credit mentions autopay only when the promise depends on it", () => {
+    const onAutopay = buildMessage({ ...result, promises: [{ ...promise, conditions: ["autopay"] }] }, new Set(["C1"]), new Set());
+    expect(onAutopay.chat).toContain('My account is on autopay, but this bill has no $7.50 monthly credit I was promised ("50% discount that showed -$7.50 per line"). Please apply the missing $7.50.');
   });
 
   test("an unread company name is left for the person to fill in, never written as 'your company'", () => {
