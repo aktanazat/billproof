@@ -605,6 +605,12 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
     }
   };
 
+  // A sample replaces whatever was added and starts at once, so files and an offer the person added are asked about first.
+  const trySample = (sample: Sample) => {
+    if (hasWork && !window.confirm("Replace the files you added with this sample? It will be checked right away.")) return;
+    void runSample(sample);
+  };
+
   // Opened from the real-bills page: that post's check starts as soon as its pictures load.
   const started = useRef(false);
   useEffect(() => {
@@ -735,7 +741,7 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
           <p className="mt-1 text-[13px] text-text-2">Pictures from public Reddit posts, checked live against what the poster wrote.</p>
           <div className="-mx-3 mt-3 grid sm:grid-cols-2 lg:grid-cols-3">
             {realSamples.map((sample) => (
-              <SampleButton key={sample.id} sample={sample} busy={loadingSample !== null} loading={loadingSample === sample.id} onRun={() => void runSample(sample)} />
+              <SampleButton key={sample.id} sample={sample} busy={loadingSample !== null} loading={loadingSample === sample.id} onRun={() => trySample(sample)} />
             ))}
           </div>
         </section>
@@ -746,7 +752,7 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
         <p className="mt-1 text-[13px] text-text-2">Made-up bills that show each kind of check. Each one runs live on Muse Ember.</p>
         <div className="-mx-3 mt-3 grid sm:grid-cols-2 lg:grid-cols-3">
           {samples.map((sample) => (
-            <SampleButton key={sample.id} sample={sample} busy={loadingSample !== null} loading={loadingSample === sample.id} onRun={() => void runSample(sample)} />
+            <SampleButton key={sample.id} sample={sample} busy={loadingSample !== null} loading={loadingSample === sample.id} onRun={() => trySample(sample)} />
           ))}
         </div>
       </section>
