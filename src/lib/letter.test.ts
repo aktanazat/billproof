@@ -376,4 +376,13 @@ describe("a year message with fees to ask about", () => {
     const { complaint } = buildYearMessage([october, november]);
     expect(complaint).toContain("- My statements charge the Broadcast TV Fee ($31.50) and Regional Sports Fee ($19.86), which were not part of the plan I agreed to.");
   });
+
+  // With claims and fees together, the reply asked for covers both: the credit, and an answer about the fees.
+  test("an email with claims and fees asks for the credit and for an answer about the fees", () => {
+    const claimed: Checked = { ...november, claims: [{ id: "C1", kind: "price_above_promise", lineIds: ["F2"], promiseId: "P1", actualCents: 1986, expectedCents: 0, amountCents: 1986, needsConfirmation: false, lookedFor: null }], promises: [{ id: "P1", kind: "included", description: "", amount_cents: 0, per_line: false, conditions: [], applies_from: null, applies_until: null, quote: "Sports included", said_at_seconds: null, covers_line_ids: ["F2"] }], questions: [november.questions[0]] };
+    const reply = "Please reply with the corrected amount, the date the credit will post, and an explanation of the charges I asked about.";
+    expect(buildMessage(claimed, new Set(["C1"]), new Set(["Q1"])).email).toContain(reply);
+    expect(buildYearMessage([october, claimed]).email).toContain(reply);
+    expect(buildMessage(claimed, new Set(["C1"]), new Set()).email).toContain("Please reply with the corrected amount and the date the credit will post.");
+  });
 });

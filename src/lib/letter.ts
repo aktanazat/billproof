@@ -195,6 +195,12 @@ export function increaseSentence(change: BillChange | null): string | null {
 // A call script's points are numbered only when there are several: read aloud, a lone "1." promises a point 2.
 const numbered = (points: string[]) => (points.length > 1 ? points.map((point, i) => `${i + 1}. ${point}`) : points);
 
+// What an email asks the company to reply with: the credit, an answer to its questions, or both.
+function replyAsk(credit: boolean, questions: boolean): string {
+  if (!credit) return "Please reply with an explanation of these charges and anything you will correct on my bill.";
+  return questions ? "Please reply with the corrected amount, the date the credit will post, and an explanation of the charges I asked about." : "Please reply with the corrected amount and the date the credit will post.";
+}
+
 export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<string>, includedQuestionIds: ReadonlySet<string>): Message {
   const lines = new Map(result.reading.line_items.map((line) => [line.id, line]));
   const promises = new Map(result.promises.map((promise) => [promise.id, promise]));
@@ -243,7 +249,7 @@ export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<stri
     "",
     ...body.flatMap((sentence) => [sentence, ""]),
     ...(ask ? [ask, ""] : []),
-    totalCents > 0 ? "Please reply with the corrected amount and the date the credit will post." : "Please reply with an explanation of these charges and anything you will correct on my bill.",
+    replyAsk(totalCents > 0, questionText.length > 0 || increase !== null),
     "",
     "Thank you,",
     "[Your name]",
@@ -332,7 +338,7 @@ export function buildYearMessage(months: Checked[]): Message {
     "",
     ...[...sections, ...feeText].flatMap((s) => [s, ""]),
     ...(ask ? [ask, ""] : []),
-    totalCents > 0 ? "Please reply with the corrected amount and the date the credit will post." : "Please reply with an explanation of these charges and anything you will correct on my bill.",
+    replyAsk(totalCents > 0, feeText.length > 0),
     "",
     "Thank you,",
     "[Your name]",
