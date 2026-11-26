@@ -153,7 +153,8 @@ function compose(state: Extract<CheckState, { s: "composing" }>, action: CheckAc
       return withInputs({ bills: inputs.bills.filter((doc) => doc.id !== action.id), offer: offerGone ? { kind: "none" } : inputs.offer });
     }
     case "offer_text":
-      return inputs.offer.kind === "file" || inputs.offer.kind === "call" ? state : withInputs({ ...inputs, offer: { kind: "text", text: action.text } });
+      if (inputs.offer.kind === "file" || inputs.offer.kind === "call") return state;
+      return withInputs({ ...inputs, offer: action.text ? { kind: "text", text: action.text } : { kind: "none" } });
     case "sample_ready":
       // A sample whose pictures didn't load stays on the start screen, with the reason on its row.
       return checkInput(action.inputs) ? run({ ...state, inputs: action.inputs }) : withInputs(action.inputs);

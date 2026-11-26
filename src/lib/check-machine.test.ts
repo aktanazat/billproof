@@ -129,4 +129,8 @@ describe("check machine", () => {
     expect(play([{ type: "toggle_claim", bill: 0, id: "C1" }], done)).toMatchObject({ selections: [{ claims: { C1: "needs_confirmation" } }] });
     expect(play([{ type: "confirm_claim", bill: 0, id: "C1" }], done)).toMatchObject({ selections: [{ claims: { C1: "selected" } }] });
   });
+
+  test("typing an offer and deleting it leaves the page as it started", () => {
+    expect(play([{ type: "offer_text", text: "Fiber 500 for $55" }, { type: "offer_text", text: "" }])).toEqual(initialState);
+  });
 });
