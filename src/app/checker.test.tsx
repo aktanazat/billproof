@@ -1,7 +1,7 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { expect, test } from "vitest";
-import { Checker, type Sample } from "./checker";
+import { Checker, readableThought, type Sample } from "./checker";
 
 // HTML lets a button hold only inline content; a block inside one is invalid markup, which browsers repair in their own
 // ways and some assistive technology reads poorly. The start screen's samples, made up and real, are buttons.
@@ -12,4 +12,12 @@ test("no button on the start screen holds block content", () => {
   const buttons = [...html.matchAll(/<button\b[^>]*>([\s\S]*?)<\/button>/g)].map((m) => m[1]);
   expect(buttons.length).toBeGreaterThanOrEqual(2);
   expect(buttons.filter((inner) => /<(div|p|section|ul|ol|li|h[1-6]|table)\b/.test(inner))).toEqual([]);
+});
+
+// Muse Ember's thinking summary, shown while a check runs, names fields of the reading format in 14 of the 93 saved
+// summaries ("applies_from"); a visitor reads plain words.
+test("a thinking summary shows plain words for the reading format's field names", () => {
+  expect(readableThought("Resolving applies_from by inferring the start date from the order date while keeping applies_until explicit.")).toBe("Resolving start date by inferring the start date from the order date while keeping end date explicit.");
+  expect(readableThought("Checking section_totals against total_due.")).toBe("Checking section totals against total due.");
+  expect(readableThought("Reading the bill's charges.")).toBe("Reading the bill's charges.");
 });

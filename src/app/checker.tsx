@@ -318,6 +318,13 @@ function WorkingYear({ state, onCancel, dispatch }: { state: Exclude<CheckState,
   );
 }
 
+// Muse Ember's thinking summary sometimes names a field of the reading format ("applies_from"); the page shows plain
+// words instead: the two date fields by what they mean, any other by its words.
+const FIELD_WORDS: Record<string, string> = { applies_from: "start date", applies_until: "end date", covers_line_ids: "covered lines", said_at_seconds: "time said", start_seconds: "start time" };
+export function readableThought(text: string): string {
+  return text.replace(/\b[a-z]+(?:_[a-z]+)+\b/g, (field) => FIELD_WORDS[field] ?? field.replaceAll("_", " "));
+}
+
 function Working({ state, onCancel, dispatch }: { state: Exclude<CheckState, { s: "composing" } | { s: "done" }>; onCancel: () => void; dispatch: (action: CheckAction) => void }) {
   if (state.inputs.bills.length > 1) return <WorkingYear state={state} onCancel={onCancel} dispatch={dispatch} />;
   const bill = state.inputs.bills[0];
@@ -344,7 +351,8 @@ function Working({ state, onCancel, dispatch }: { state: Exclude<CheckState, { s
     ...(promised ? [{ key: "challenge" as const, stages: ["challenging"] as Stage[], label: "Checking the company's side" }] : []),
   ];
   const current = steps.find((step) => stepStatus(step, stage, running) === "now");
-  const latestThought = current ? (live?.thoughts ?? []).filter((t) => current.stages.includes(t.stage)).at(-1)?.text.split("\n\n").at(-1) : undefined;
+  const latest = current ? (live?.thoughts ?? []).filter((t) => current.stages.includes(t.stage)).at(-1)?.text.split("\n\n").at(-1) : undefined;
+  const latestThought = latest && readableThought(latest);
 
   return (
     <section className="mx-auto grid w-full max-w-[1120px] gap-10 px-6 pb-20 pt-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
