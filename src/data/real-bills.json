@@ -18535,13 +18535,6 @@
         {
           "kind": "unagreed_fee",
           "lines": [
-            "Video Franchise Fee"
-          ],
-          "cents": 377
-        },
-        {
-          "kind": "unagreed_fee",
-          "lines": [
             "Regulatory Recovery Fee - Federal"
           ],
           "cents": 10

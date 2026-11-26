@@ -21,7 +21,7 @@ Rules:
   - plan: the main service or plan price.
   - equipment: rented or financed devices (modem, gateway, router, box, phone installment).
   - company_fee: a fee the company itself charges, even when named "recovery", "regulatory", "administrative", "network" or "broadcast". These are not taxes.
-  - government_tax: taxes and government-mandated surcharges (sales or utility users tax, 911, Universal Service Fund).
+  - government_tax: taxes and government-mandated surcharges (sales or utility users tax, 911, Universal Service Fund, cable franchise fees, public, educational and government access fees).
   - usage: metered usage (kWh, therms, gallons, overage, per-minute).
   - one_time: installation, activation, or other one-time charges.
   - credit or discount: amounts subtracted.
@@ -45,7 +45,7 @@ List each concrete promise about price, included items or recurring credits:
 
 For each promise:
 - per_line is true when the amount is per line, device or unit.
-- conditions lists requirements stated for it (autopay, paperless, bundle, contract).
+- conditions lists requirements stated for it (autopay, paperless, bundle, contract). Use contract only when the price requires a term commitment; a promise written in the agreement the customer already signed is not conditioned on it.
 - applies_from and applies_until are the first and last days it applies, when stated or when they follow from it ("through 10/31/2027" ends 2027-10-31; "for 12 months" from an order dated 2025-10-28 ends 2026-10-27; "for two years" said on a call dated 2025-10-28 ends 2027-10-27). Use null when no date is stated.
 - quote is the exact line or sentence that makes the promise. amount_cents must be one of the dollar amounts written in that quote.
 - covers_line_ids are the IDs of the bill lines the promise is about. For monthly_price, include the plan line or lines and any discount or credit lines that are part of the promised price. For recurring_credit, include the plan lines it applies to and any credit lines that already pay it. Never include taxes.

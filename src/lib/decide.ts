@@ -265,6 +265,10 @@ const MAX_PLAUSIBLE_SHARE = 0.5;
 // already have ended, so it can only raise a question.
 const TIME_LIMIT = /\b(through|thru|until|ends?|ending|expires?|for (\d+|a|one|two|three) (months?|mos?|years?|yrs?)|\d+[- ](months?|mos?|years?)|promo(tional)?|\d{1,2}\/\d{1,2}\/\d{2,4}|(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.? \d{1,2},? \d{4})\b/i;
 
+// Charges a government sets and the company only collects, whatever kind the reading gave them. "Tax Recovery" and
+// "Regulatory Cost Recovery" fees are the company's own and don't match.
+const GOVERNMENT_FEE = /\b(franchise fee|9-?1-?1|988|universal service|sales (and use )?tax|users? tax|excise tax|public,? educ)/i;
+
 type Draft = Omit<Claim, "id">;
 
 export function decide(reading: Reading, promises: PromiseTerm[], bill: Source, proof: Source, offerProvider: string | null = null): Decision {
@@ -407,7 +411,7 @@ export function decide(reading: Reading, promises: PromiseTerm[], bill: Source, 
   }
 
   for (const line of reading.line_items) {
-    if (line.kind === "company_fee" && line.amount_cents > 0 && !governed.has(line.id) && lineIsEvidenced(line, bill)) {
+    if (line.kind === "company_fee" && line.amount_cents > 0 && !governed.has(line.id) && !GOVERNMENT_FEE.test(line.label) && lineIsEvidenced(line, bill)) {
       questions.push({ kind: "unagreed_fee", lineIds: [line.id], promiseId: null });
     }
   }
