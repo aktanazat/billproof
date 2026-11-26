@@ -31,9 +31,15 @@ function names(lines: LineItem[]): string {
   return labels.length <= 1 ? (labels[0] ?? "this charge") : `${labels.slice(0, -1).join(", ")} and ${labels.at(-1)}`;
 }
 
-function claimSentence(claim: Claim, lines: LineItem[], promise: PromiseTerm, period: string, onCall: boolean): string {
-  // A promise heard on a recorded call is cited as what the representative said, with the moment it was said.
-  const quoted = onCall && promise.said_at_seconds !== null ? `your representative told me on the call, at ${Math.floor(promise.said_at_seconds / 60)}:${String(Math.floor(promise.said_at_seconds % 60)).padStart(2, "0")} in my recording: "${promise.quote.trim()}"` : `"${promise.quote.trim()}"`;
+// A promise heard on a recorded call is cited as what the representative said, with the moment it was said; who
+// "the representative" is depends on who reads it ("your representative" to the company, its name to a regulator).
+function citation(promise: PromiseTerm, onCall: boolean, speaker: string): string {
+  if (!onCall || promise.said_at_seconds === null) return `"${promise.quote.trim()}"`;
+  const at = `${Math.floor(promise.said_at_seconds / 60)}:${String(Math.floor(promise.said_at_seconds % 60)).padStart(2, "0")}`;
+  return `${speaker} told me on the call, at ${at} in my recording: "${promise.quote.trim()}"`;
+}
+
+function claimSentence(claim: Claim, lines: LineItem[], quoted: string, period: string): string {
   switch (claim.kind) {
     case "price_above_promise": {
       const discounted = lines.some((line) => line.amount_cents < 0) ? " after discounts" : "";
@@ -100,10 +106,12 @@ export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<stri
 
   const claims = result.claims.filter((claim) => selectedClaimIds.has(claim.id));
   const totalCents = claims.reduce((total, claim) => total + claim.amountCents, 0);
-  const claimText = claims.flatMap((claim) => {
-    const promise = promises.get(claim.promiseId);
-    return promise ? [claimSentence(claim, linesOf(claim.lineIds), promise, period, result.transcript !== null)] : [];
-  });
+  const claimTextFor = (speaker: string) =>
+    claims.flatMap((claim) => {
+      const promise = promises.get(claim.promiseId);
+      return promise ? [claimSentence(claim, linesOf(claim.lineIds), citation(promise, result.transcript !== null, speaker), period)] : [];
+    });
+  const claimText = claimTextFor("your representative");
   const included = result.questions.filter((question) => includedQuestionIds.has(question.id));
   const fees = included.filter((question) => question.kind === "unagreed_fee").map((question) => linesOf(question.lineIds)).filter((lines) => lines.length > 0);
   const questionText = [
@@ -116,6 +124,7 @@ export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<stri
   const ask = totalCents > 0 ? `In total, please credit ${usd(totalCents)} to ${account}.` : "";
   const increase = increaseSentence(result.change);
   const body = [...claimText, ...(increase ? [increase] : []), ...questionText];
+  const regulatorBody = [...claimTextFor(`${result.reading.provider ?? "the company"}'s representative`), ...(increase ? [increase] : []), ...questionText];
 
   const about = aboutText(result, account);
   const chat = [`Hi, I'm writing about ${about}.`, ...body, ask].filter(Boolean).join("\n\n");
@@ -143,7 +152,7 @@ export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<stri
     .join("\n\n");
   // A complaint names the problem the message raises: a price above a promise, fees never agreed to, or charges unexplained.
   const problem = totalCents > 0 ? "billed above the price I was promised." : fees.length > 0 ? "fees on my bill I never agreed to." : "charges on my bill the company hasn't explained.";
-  return { totalCents, chat, email, call, complaint: complaintText(provider, account, problem, body, totalCents) };
+  return { totalCents, chat, email, call, complaint: complaintText(provider, account, problem, regulatorBody, totalCents) };
 }
 
 // One message for a year of statements: each month's claims under its statement, then the total.
@@ -152,18 +161,27 @@ export function buildYearMessage(months: Checked[]): Message {
   const totalCents = withClaims.reduce((sum, month) => sum + month.claims.reduce((t, claim) => t + claim.amountCents, 0), 0);
   const first = withClaims[0]?.reading;
   const account = first?.account_last4 ? `account ending ${first.account_last4}` : "my account";
-  const sections = withClaims.map((month) => {
-    const lines = new Map(month.reading.line_items.map((line) => [line.id, line]));
-    const promises = new Map(month.promises.map((promise) => [promise.id, promise]));
-    const sentences = month.claims.flatMap((claim) => {
-      const promise = promises.get(claim.promiseId);
-      return promise ? [claimSentence(claim, claim.lineIds.flatMap((id) => lines.get(id) ?? []), promise, periodText(month), month.transcript !== null)] : [];
+  // A promise already quoted for an earlier month is referred back to, not quoted again in full.
+  const sectionsFor = (speaker: string) => {
+    const quoted = new Set<string>();
+    return withClaims.map((month) => {
+      const lines = new Map(month.reading.line_items.map((line) => [line.id, line]));
+      const promises = new Map(month.promises.map((promise) => [promise.id, promise]));
+      const sentences = month.claims.flatMap((claim) => {
+        const promise = promises.get(claim.promiseId);
+        if (!promise) return [];
+        const key = promise.quote.trim();
+        const cite = quoted.has(key) ? "as quoted above" : citation(promise, month.transcript !== null, speaker);
+        quoted.add(key);
+        return [claimSentence(claim, claim.lineIds.flatMap((id) => lines.get(id) ?? []), cite, periodText(month))];
+      });
+      return sentences.join(" ");
     });
-    return sentences.join(" ");
-  });
+  };
+  const sections = sectionsFor("your representative");
   const ask = totalCents > 0 ? `In total, please credit ${usd(totalCents)} to ${account}.` : "";
   const chat = [`Hi, I'm writing about ${account}. I checked my statements against the plan I signed up for.`, ...sections, ask].filter(Boolean).join("\n\n");
   const email = [`Subject: Billing correction for ${account}`, "", `Hello ${first?.provider ?? "billing"} team,`, "", ...sections.flatMap((s) => [s, ""]), ...(ask ? [ask, ""] : []), "Please reply with the corrected amount and the date the credit will post.", "", "Thank you,", "[Your name]"].join("\n");
   const call = [`I'm calling about ${account}.`, ...sections.map((s, i) => `${i + 1}. ${s}`), ask, "Before ending the call, ask for a reference number and the date the credit will post."].filter(Boolean).join("\n\n");
-  return { totalCents, chat, email, call, complaint: complaintText(first?.provider ?? "the company", account, "billed above the price I was promised.", sections, totalCents) };
+  return { totalCents, chat, email, call, complaint: complaintText(first?.provider ?? "the company", account, "billed above the price I was promised.", sectionsFor(`${first?.provider ?? "the company"}'s representative`), totalCents) };
 }
