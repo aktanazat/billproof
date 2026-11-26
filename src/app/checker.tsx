@@ -267,7 +267,19 @@ function WorkingYear({ state, onCancel, dispatch }: { state: Exclude<CheckState,
               {doc.status === "ready" && <BillPage image={doc.pages[0].image} alt={`Bill ${i + 1}`} marks={marks} visibleAspect="1000 / 900" />}
               <p className={`flex items-center gap-2 text-[13px] tabular-nums ${over > 0 ? "font-semibold text-red" : "text-text-2"}`}>
                 {!month && state.s === "running" && lines.length > 0 && <Spinner />}
-                {month ? (month.outcome === "checked" ? (over > 0 ? `${usd(over)} over` : "Matches") : "Couldn't read") : lines.length > 0 ? `${lines.length} lines` : "Waiting"}
+                {month
+                  ? month.outcome === "checked"
+                    ? over > 0
+                      ? `${usd(over)} over`
+                      : "Matches"
+                    : month.outcome === "not_a_bill"
+                      ? "Not a bill"
+                      : "Couldn't read"
+                  : lines.length > 0
+                    ? `${lines.length} ${lines.length === 1 ? "line" : "lines"}`
+                    : state.s === "running"
+                      ? "Waiting"
+                      : "Stopped"}
               </p>
             </li>
           );
