@@ -144,6 +144,22 @@ test("a company name missing from some statements is taken from the others for t
   expect(html).toContain("to ask back from Bayline Fiber across 12 statements");
 });
 
+test("months whose claims wait for confirmation are marked, so the person knows which to open", () => {
+  if (!year) throw new Error("the saved run has no year result");
+  const august = year.months.find((month) => month.result.outcome === "checked" && month.result.reading.period_start?.startsWith("2026-08"));
+  if (!august || august.result.outcome !== "checked") throw new Error("the sample has no August statement");
+  const photo = { ...august.result, claims: august.result.claims.map((claim) => ({ ...claim, needsConfirmation: true })) };
+  const waiting: YearResult = { ...year, months: year.months.map((month) => (month.bill === august.bill ? { ...month, result: photo } : month)) };
+  const running = { s: "running", inputs: initialState.inputs, attempts: 1, attempt: 1, stage: null, spentMicros: 0, live: {} } as unknown as CheckState;
+  const done = reduce(running, { type: "finished", attempt: 1, result: waiting });
+  if (done.s !== "done") throw new Error("the finished year did not become a done state");
+  const html = renderToStaticMarkup(createElement(YearView, { state: done, result: waiting, dispatch: () => {} }));
+  expect(html).toContain('aria-label="August 2026: $5.00 overcharged, to confirm"');
+  expect(html).toContain('aria-label="September 2026: $5.00 overcharged"');
+  expect([...html.matchAll(/>To confirm</g)]).toHaveLength(1);
+  expect(html).toContain("Open a month marked “To confirm” and confirm its marked lines to add them to the message.");
+});
+
 test("a month whose date was misread is labeled as written, never 'undefined'", () => {
   if (!year) throw new Error("the saved run has no year result");
   const misread: YearResult = { ...year, months: year.months.map((month, i) => (i === 0 && month.result.outcome === "checked" ? { ...month, result: { ...month.result, reading: { ...month.result.reading, period_start: "2026-13-12" } } } : month)) };
