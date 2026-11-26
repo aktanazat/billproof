@@ -2,6 +2,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { expect, test } from "vitest";
 import { realRun } from "@/data/real-bills";
+import { unagreedFees } from "@/lib/real-bills";
 import RealBills from "./page";
 
 // The real-bills page as built from the saved run, reduced to its text.
@@ -42,4 +43,17 @@ test("every post read is accounted for: real bills, not bills, and bills that co
   expect(page).toContain(`Posts read ${read.toLocaleString("en-US")}`);
   expect(page).toContain(`Real bills among them ${count("checked")}`);
   expect(page).toContain(`${count("not_a_bill").toLocaleString("en-US")} posts showed chats, app screens or ads rather than a bill, ${count("could_not_check")} showed a bill whose charges couldn't be read reliably, so they weren't checked, and`);
+});
+
+test("the company table adds up to every real bill, every bill with fees and the page's fee total", () => {
+  const html = renderToStaticMarkup(createElement(RealBills));
+  const table = html.slice(html.indexOf(">By company<"), html.indexOf(">Every bill<"));
+  const rows = [...table.matchAll(/<tr[^>]*>((?:<td[^>]*>.*?<\/td>){4})<\/tr>/g)].map((row) => [...row[1].matchAll(/<td[^>]*>(.*?)<\/td>/g)].map((cell) => cell[1].replace(/<!-- -->/g, "")));
+  const cents = (cell: string) => (cell === "—" ? 0 : Math.round(Number(cell.replace(/[$,]/g, "")) * 100));
+  const bills = realRun.results.filter((bill) => bill.outcome === "checked");
+  const fees = bills.map((bill) => unagreedFees(bill).reduce((t, fee) => t + fee.cents, 0));
+  expect(rows.length).toBeGreaterThan(1);
+  expect(rows.reduce((t, row) => t + Number(row[1]), 0)).toBe(bills.length);
+  expect(rows.reduce((t, row) => t + Number(row[2]), 0)).toBe(fees.filter((c) => c > 0).length);
+  expect(rows.reduce((t, row) => t + cents(row[3]), 0)).toBe(fees.reduce((t, c) => t + c, 0));
 });

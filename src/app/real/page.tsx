@@ -182,7 +182,7 @@ export default function RealBills() {
     .sort((a, b) => b.count - a.count)
     .slice(0, 8);
 
-  const companies = [
+  const groups = [
     ...bills
       .reduce((map, bill) => {
         const name = companyOf(bill.provider);
@@ -191,10 +191,15 @@ export default function RealBills() {
         return map.set(name, { name, bills: seen.bills + 1, withFees: seen.withFees + (cents > 0 ? 1 : 0), feeCents: seen.feeCents + cents });
       }, new Map<string, { name: string; bills: number; withFees: number; feeCents: number }>())
       .values(),
-  ]
+  ];
+  const companies = groups
     .filter((company) => company.name !== "Unknown")
     .sort((a, b) => b.bills - a.bills || b.feeCents - a.feeCents)
     .slice(0, 10);
+  // The rest, with the bills whose company couldn't be read, get one row so the table adds up to the page's totals.
+  const others = groups
+    .filter((company) => !companies.includes(company))
+    .reduce((t, company) => ({ bills: t.bills + company.bills, withFees: t.withFees + company.withFees, feeCents: t.feeCents + company.feeCents }), { bills: 0, withFees: 0, feeCents: 0 });
 
   const ordered = [...bills].sort((a, b) => claimedCents(b) - claimedCents(a) || unagreedFees(b).length - unagreedFees(a).length || b.created - a.created);
 
@@ -302,6 +307,14 @@ export default function RealBills() {
                   <td className="py-2 text-right">{company.feeCents > 0 ? usd(company.feeCents) : "—"}</td>
                 </tr>
               ))}
+              {others.bills > 0 && (
+                <tr className="border-t border-line text-text-2">
+                  <td className="py-2">Other companies, or none named</td>
+                  <td className="py-2 text-right">{others.bills}</td>
+                  <td className="py-2 text-right">{others.withFees}</td>
+                  <td className="py-2 text-right">{others.feeCents > 0 ? usd(others.feeCents) : "—"}</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </section>
