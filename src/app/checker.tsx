@@ -436,6 +436,8 @@ async function fetchFile(url: string, name: string, type: string): Promise<File>
 
 export function Checker({ samples, realSamples, startWith }: { samples: Sample[]; realSamples: Sample[]; startWith: Sample | null }) {
   const [state, dispatch] = useReducer(reduce, initialState);
+  // Files dropped past the 12-bill limit, so the person knows some were left out rather than finding months missing.
+  const [leftOut, setLeftOut] = useState(0);
   const controllers = useRef(new Map<number, AbortController>());
   const nextId = useRef(0);
   const id = () => `doc-${++nextId.current}`;
@@ -471,6 +473,7 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
     const groups = [...files.filter(isPdf).map((file) => [file]), ...(pictures.length > 1 ? [pictures] : pictures.map((file) => [file]))];
     const room = MAX_BILLS - (state.s === "composing" ? state.inputs.bills.length : 0);
     const docs = groups.slice(0, room).map((group) => ({ id: id(), name: group.length > 1 ? `${group.length} pictures` : group[0].name, group }));
+    setLeftOut(groups.length - docs.length);
     dispatch({ type: "bills_added", docs: docs.map(({ id: docId, name }) => ({ id: docId, name })) });
     for (const doc of docs) {
       if (doc.group.length === 1) void prepareDoc(doc.id, doc.group[0], MAX_BILL_PAGES);
@@ -600,6 +603,11 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
                 <FileTarget label="Add more bills" accept={BILL_ACCEPT} multiple onFiles={addBills} className="mt-1 h-8 rounded-lg px-2 text-[13px] text-text-2 hover:bg-fill-2 hover:text-text">
                   Add another month
                 </FileTarget>
+              )}
+              {leftOut > 0 && (
+                <p role="status" className="mt-2 px-2 text-[13px] text-text-2">
+                  {leftOut === 1 ? "1 file was" : `${leftOut} files were`} left out: a check reads up to {MAX_BILLS} bills.
+                </p>
               )}
             </div>
           ) : (
