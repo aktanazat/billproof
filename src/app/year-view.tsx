@@ -121,8 +121,13 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
     }
   }
 
-  const selectedMonths = checked.map((month) => ({ ...month.result, claims: month.result.claims.filter((claim) => markOf(month.bill, claim.id) === "selected") }));
-  const message = selectedMonths.some((month) => month.claims.length > 0) ? buildYearMessage(selectedMonths) : null;
+  // The message carries what each month's page keeps ticked: its claims, and the questions shown there.
+  const selectedMonths = checked.map((month) => ({
+    ...month.result,
+    claims: month.result.claims.filter((claim) => markOf(month.bill, claim.id) === "selected"),
+    questions: month.result.questions.filter((question) => SHOWN_QUESTIONS.has(question.kind) && state.selections[month.bill]?.questions[question.id] === true),
+  }));
+  const message = selectedMonths.some((month) => month.claims.length > 0 || month.questions.length > 0) ? buildYearMessage(selectedMonths) : null;
   const skipped = [
     leftOut("could_not_check", "couldn't be read", "couldn't be read"),
     leftOut("not_a_bill", "isn't a bill", "aren't bills"),

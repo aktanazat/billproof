@@ -260,7 +260,8 @@ export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<stri
   return { totalCents, chat, email, call, complaint: complaintText(provider, result.reading.account_last4, problem, [regulatorBody, shortFacts], claims) };
 }
 
-// One message for a year of statements: each month's claims under its statement, then the total.
+// One message for a year of statements: each month's claims under its statement, then the fees to ask about, then the
+// total.
 export function buildYearMessage(months: Checked[]): Message {
   const withClaims = months.filter((month) => month.claims.length > 0);
   const totalCents = withClaims.reduce((sum, month) => sum + month.claims.reduce((t, claim) => t + claim.amountCents, 0), 0);
@@ -291,11 +292,55 @@ export function buildYearMessage(months: Checked[]): Message {
   };
   const sections = sectionsFor("your representative", true, "as quoted above");
   const provider = months.find((month) => month.reading.provider)?.reading.provider ?? null;
+  // A company fee recurs on every statement, so each is asked about once, at what the latest statement showing it
+  // charges (the months come oldest first), rather than once a month.
+  const latestFee = new Map<string, LineItem[]>();
+  for (const month of months) {
+    for (const question of month.questions) {
+      if (question.kind !== "unagreed_fee") continue;
+      const lines = question.lineIds.flatMap((id) => month.reading.line_items.find((line) => line.id === id) ?? []);
+      if (lines.length > 0) latestFee.set(lines.map((line) => line.label).join("\n"), lines);
+    }
+  }
+  const fees = [...latestFee.values()];
+  const offerCovers = months.some((month) => month.hadOffer && !month.providerMismatch);
+  // A charge printed twice is one statement's, so it is asked about under that statement.
+  const onBill = (month: Checked) => {
+    const period = periodText(month);
+    return period.startsWith("the ") ? `On ${period}` : `On the bill for ${period}`;
+  };
+  const repeats = months.flatMap((month) =>
+    month.questions.flatMap((question) => {
+      const lines = question.kind === "repeated_charge" ? question.lineIds.flatMap((id) => month.reading.line_items.find((line) => line.id === id) ?? []) : [];
+      return lines.length > 0 ? [{ month, lines }] : [];
+    }),
+  );
+  const feeText = [...(fees.length > 0 ? [feeSentence(fees, offerCovers)] : []), ...repeats.map(({ month, lines }) => `${onBill(month)}, ${repeatSentence(lines)}`)];
   const ask = withClaims.flatMap((month) => month.claims).length > 1 ? `In total, please credit ${usd(totalCents)} to ${account}.` : "";
   const opening = `I'm writing about ${account}. I checked my statements against the plan I signed up for.`;
-  const chat = [`Hi, ${opening}`, ...sections, ask].filter(Boolean).join("\n\n");
-  const email = [`Subject: Billing correction for ${account}`, "", provider ? `Hello ${provider} billing team,` : "Hello billing team,", "", opening, "", ...sections.flatMap((s) => [s, ""]), ...(ask ? [ask, ""] : []), "Please reply with the corrected amount and the date the credit will post.", "", "Thank you,", "[Your name]"].join("\n");
-  const call = [`I'm calling about ${account}.`, ...numbered(sectionsFor("your representative", true, "as I mentioned")), ask, "Before ending the call, ask for a reference number and the date the credit will post."].filter(Boolean).join("\n\n");
+  const chat = [`Hi, ${opening}`, ...sections, ...feeText, ask].filter(Boolean).join("\n\n");
+  const email = [
+    totalCents > 0 ? `Subject: Billing correction for ${account}` : `Subject: Questions about the charges on ${account}`,
+    "",
+    provider ? `Hello ${provider} billing team,` : "Hello billing team,",
+    "",
+    opening,
+    "",
+    ...[...sections, ...feeText].flatMap((s) => [s, ""]),
+    ...(ask ? [ask, ""] : []),
+    totalCents > 0 ? "Please reply with the corrected amount and the date the credit will post." : "Please reply with an explanation of these charges and anything you will correct on my bill.",
+    "",
+    "Thank you,",
+    "[Your name]",
+  ].join("\n");
+  const call = [
+    `I'm calling about ${account}.`,
+    ...numbered([...sectionsFor("your representative", true, "as I mentioned"), ...feeText]),
+    ask,
+    totalCents > 0 ? "Before ending the call, ask for a reference number and the date the credit will post." : "Before ending the call, ask for a reference number and what will change on the next bill.",
+  ]
+    .filter(Boolean)
+    .join("\n\n");
   // Shorter accounts for a complaint too long for the regulator's form: each month in a line, then each month's amount
   // with every promise quoted once, then the amounts alone.
   const regulator = `${provider ?? "the company"}'s representative`;
@@ -316,6 +361,9 @@ export function buildYearMessage(months: Checked[]): Message {
     return `For ${periodText(month)}: ${month.claims.map((claim) => shortClaim(claim, claim.lineIds.flatMap((id) => lines.get(id) ?? []))).join("; ")}.`;
   });
   const amounts = withClaims.map((month) => `${capitalized(periodText(month))}: ${usd(month.claims.reduce((t, claim) => t + claim.amountCents, 0))} more than I was promised.`);
-  const complaint = complaintText(provider, last4, claimProblem(claims), [sectionsFor(regulator, false, "as quoted above"), [promisedLine, ...byMonth], [promisedLine, ...amounts], amounts], claims);
+  const feeFacts = [...(fees.length > 0 ? [feeFact(fees, offerCovers)] : []), ...repeats.map(({ month, lines }) => `${onBill(month)}, ${repeatFact(lines)}`)];
+  const problem = claims.length > 0 ? claimProblem(claims) : fees.length > 0 && offerCovers ? "fees on my bill I never agreed to." : "charges on my bill the company hasn't explained.";
+  const versions = claims.length > 0 ? [sectionsFor(regulator, false, "as quoted above"), [promisedLine, ...byMonth], [promisedLine, ...amounts], amounts] : [[]];
+  const complaint = complaintText(provider, last4, problem, versions.map((facts) => [...facts, ...feeFacts]), claims);
   return { totalCents, chat, email, call, complaint };
 }

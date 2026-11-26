@@ -313,3 +313,40 @@ describe("the complaint a regulator receives", () => {
     expect(buildMessage(due, new Set(["C1"]), new Set()).chat).toContain("I'm writing about account ending 4415, bill due Nov 5, 2026.");
   });
 });
+
+// A year's statements usually all carry the same company fees. Its heading counts the statements with fees worth asking
+// about, so its message asks about them too: once each, at what the latest statement charges, not once a month.
+describe("a year message with fees to ask about", () => {
+  const statement = (start: string, end: string, lines: LineItem[], questions: Checked["questions"]): Checked => {
+    const base = billWith(lines);
+    return { ...base, reading: { ...base.reading, provider: "Xfinity", account_last4: "2271", period_start: start, period_end: end }, questions };
+  };
+  const october = statement("2026-10-01", "2026-10-31", [fee("F1", "Broadcast TV Fee", 2950)], [{ id: "Q1", kind: "unagreed_fee", lineIds: ["F1"], promiseId: null }]);
+  const november = statement("2026-11-01", "2026-11-30", [fee("F1", "Broadcast TV Fee", 3150), fee("F2", "Regional Sports Fee", 1986)], [
+    { id: "Q1", kind: "unagreed_fee", lineIds: ["F1"], promiseId: null },
+    { id: "Q2", kind: "unagreed_fee", lineIds: ["F2"], promiseId: null },
+  ]);
+
+  test("asks about each fee once, at the latest statement's amount, and asks for no credit", () => {
+    const message = buildYearMessage([october, november]);
+    expect(message.chat).toContain("Please explain the Broadcast TV Fee ($31.50) and Regional Sports Fee ($19.86).");
+    expect(message.chat.match(/Broadcast TV Fee/g)).toHaveLength(1);
+    expect(message.email).toMatch(/^Subject: Questions about the charges on account ending 2271\n/);
+    expect(`${message.email}\n${message.call}`).not.toContain("the date the credit will post");
+    expect(message.complaint).toContain("Problem: fees on my bill I never agreed to.");
+  });
+
+  test("follows the month-by-month claims when there are claims too", () => {
+    const claimed: Checked = { ...november, claims: [{ id: "C1", kind: "price_above_promise", lineIds: ["F2"], promiseId: "P1", actualCents: 1986, expectedCents: 0, amountCents: 1986, needsConfirmation: false, lookedFor: null }], promises: [{ id: "P1", kind: "included", description: "", amount_cents: 0, per_line: false, conditions: [], applies_from: null, applies_until: null, quote: "Sports included", said_at_seconds: null, covers_line_ids: ["F2"] }], questions: [november.questions[0]] };
+    const { chat } = buildYearMessage([october, claimed]);
+    expect(chat.indexOf("Please explain the Broadcast TV Fee ($31.50).")).toBeGreaterThan(chat.indexOf("For Nov 1, 2026 to Nov 30, 2026"));
+  });
+
+  // A charge printed twice is one statement's, so the year message asks about it under that statement's period.
+  test("a charge printed twice on one statement is asked about under that statement", () => {
+    const doubled = statement("2026-11-01", "2026-11-30", [fee("F1", "Modem Rental", 1500), fee("F2", "Modem Rental", 1500)], [{ id: "Q1", kind: "repeated_charge", lineIds: ["F1", "F2"], promiseId: null }]);
+    const message = buildYearMessage([october, doubled]);
+    expect(message.chat).toContain("On the bill for Nov 1, 2026 to Nov 30, 2026, Modem Rental appears 2 times on the bill ($15.00 and $15.00). Please confirm whether this is a duplicate and credit it if so.");
+    expect(message.complaint).toContain("On the bill for Nov 1, 2026 to Nov 30, 2026, Modem Rental appears 2 times");
+  });
+});
