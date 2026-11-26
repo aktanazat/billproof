@@ -22,6 +22,8 @@ export type Ledger = {
   lose(attemptId: string): void;
   spentForCheck(checkId: string): number;
   spentTotal(): number;
+  // What the demo's cap still allows, counting open and lost calls at their full reservation.
+  left(): number;
 };
 
 function numberColumn(row: unknown, column: string): number {
@@ -117,6 +119,9 @@ export function openLedger(file: string, eventCapMicros: number): Ledger {
     },
     spentTotal(): number {
       return micros(eventSpent.get());
+    },
+    left(): number {
+      return eventCapMicros - micros(eventSpent.get());
     },
   };
 }

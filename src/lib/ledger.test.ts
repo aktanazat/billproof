@@ -38,6 +38,16 @@ describe("ledger", () => {
     }
   });
 
+  test("what's left falls as calls are reserved, and counts an open call at its full reservation", () => {
+    const ledger = openLedger(":memory:", 50_000);
+    const check = ledger.admitCheck("a");
+    expect(ledger.left()).toBe(50_000);
+    const open = ledger.reserve(check, 20_000, CHECK_CAP_MICROS);
+    expect(ledger.left()).toBe(30_000);
+    ledger.settle(open, 700);
+    expect(ledger.left()).toBe(49_300);
+  });
+
   test("a client gets a fixed number of checks an hour", () => {
     const ledger = openLedger(":memory:", 1_000_000);
     const start = 1_800_000_000_000;
