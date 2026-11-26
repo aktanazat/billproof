@@ -583,9 +583,10 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
   };
 
   const preparePile = async (docId: string, group: File[]) => {
-    // Trimming the pile could drop the screenshot with the offer, so the person picks which to keep.
+    // Trimming the pile could drop the screenshot with the offer, so the person picks which to keep. Pictures added
+    // together are one bill, so someone adding a picture per month is told to add each month on its own.
     if (group.length > MAX_BILL_PAGES) {
-      dispatch({ type: "prep_failed", id: docId, message: `${group.length} pictures were added together. Use up to ${MAX_BILL_PAGES}: the ones with the charges and the offer.` });
+      dispatch({ type: "prep_failed", id: docId, message: `${group.length} pictures added together are read as one bill, which takes up to ${MAX_BILL_PAGES}: keep the ones with the charges and the offer. For more than one month, add each month's pictures separately.` });
       return;
     }
     try {
