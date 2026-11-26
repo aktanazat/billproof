@@ -129,6 +129,9 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
     duplicates > 0 ? `${duplicates} duplicate ${duplicates === 1 ? "statement" : "statements"}` : null,
     otherAccount > 0 ? `${otherAccount} from another account` : null,
   ].filter(Boolean);
+  // A month that couldn't be read can't be opened from the year, so its reason is given here, by file, or the person
+  // can't tell what to replace it with.
+  const unreadable = result.months.flatMap((month) => (month.result.outcome === "could_not_check" ? [{ bill: month.bill, name: state.inputs.bills[month.bill]?.name ?? `Bill ${month.bill + 1}`, reason: month.result.reason }] : []));
   const largest = Math.max(1, ...checked.map((month) => claimed(month.result)));
 
   return (
@@ -149,6 +152,11 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
             )}
           </h1>
           {skipped.length > 0 && <p className="mt-1 text-[13px] text-text-2">Not counted: {skipped.join(", ")}</p>}
+          {unreadable.map(({ bill, name, reason }) => (
+            <p key={bill} className="mt-1 text-[13px] text-text-2">
+              {name}: {reason}
+            </p>
+          ))}
         </div>
         <button type="button" onClick={() => dispatch({ type: "edit" })} className="h-9 shrink-0 rounded-lg bg-fill px-4 text-[15px] hover:bg-fill-2">
           Check other bills

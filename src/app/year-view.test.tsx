@@ -57,6 +57,8 @@ test("a duplicate, another account's bill and an unreadable one are named as not
   if (done.s !== "done") throw new Error("the finished year did not become a done state");
   const html = renderToStaticMarkup(createElement(YearView, { state: done, result: extra, dispatch: () => {} }));
   expect(html).toContain("Not counted: december.jpg couldn&#x27;t be read, 1 duplicate statement, 1 from another account");
+  // The month can't be opened from the year, so its reason is shown here, or the person can't tell what to fix.
+  expect(html).toContain("december.jpg: The page image is entirely black.");
   expect(heading(html)).toMatch(/^\$70\.00 to ask back from Bayline Fiber across 12 statements/);
   expect([...html.matchAll(/aria-label="Aug 26 \$5\.00, August 2026: /g)]).toHaveLength(1);
 });
