@@ -123,3 +123,39 @@ describe("the result page's heading", () => {
     expect(heading(result, { claims: { C1: "selected" }, questions: {} })).toContain("$10.00 to ask back from AT&T");
   });
 });
+
+describe("the result page's other sections", () => {
+  const text = (html: string) => html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
+
+  test("an earlier bill lists what rose, what is new and what is gone", () => {
+    const result: Checked = {
+      ...checked([line("L1", "Internet: Gigabit", 16525, "plan")], []),
+      change: { earlierCents: 18802, currentCents: 28314, lines: [{ label: "Internet: Gigabit", beforeCents: 10900, afterCents: 16525 }, { label: "Transfer Service", beforeCents: null, afterCents: 5000 }, { label: "2 Product Discount", beforeCents: -3000, afterCents: null }] },
+    };
+    const t = text(page(result));
+    expect(t).toContain("Up $95.12 since the earlier bill");
+    expect(t).toContain("Internet: Gigabit $109.00 → $165.25");
+    expect(t).toContain("Transfer Service new → $50.00");
+    expect(t).toContain("2 Product Discount -$30.00 → gone");
+  });
+
+  test("a lower bill is listed as down", () => {
+    const result: Checked = { ...checked([line("L1", "Plan", 5000, "plan")], []), change: { earlierCents: 6286, currentCents: 5000, lines: [{ label: "Plan", beforeCents: 6286, afterCents: 5000 }] } };
+    expect(text(page(result))).toContain("Down $12.86 since the earlier bill");
+  });
+
+  test("the checking notes say when the charges miss the printed total and why a promise went unused", () => {
+    const base = checked([line("L1", "Internet 1000", 8000, "plan")], []);
+    const reading: Reading = { ...base.reading, printed: { ...base.reading.printed, current_charges: { cents: 9000, quote: "Total $90.00" } } };
+    const result: Checked = {
+      ...base,
+      reading,
+      totals: checkTotals(reading, { kind: "image" }),
+      promises: [{ id: "P1", kind: "monthly_price", description: "Phone at $32.22 a month", amount_cents: 3222, per_line: false, conditions: [], applies_from: null, applies_until: null, quote: "Due monthly $32.22", said_at_seconds: null, covers_line_ids: ["L1"] }],
+      unused: [{ promiseId: "P1", reason: "device_or_cart_total" }],
+    };
+    const t = text(page(result));
+    expect(t).toContain("The charges add up to $80.00, but the bill prints $90.00.");
+    expect(t).toContain("Not used: Phone at $32.22 a month (it's a device payment or order total, not a plan price).");
+  });
+});
