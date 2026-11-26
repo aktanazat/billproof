@@ -329,6 +329,9 @@ describe("the result page's heading", () => {
     ["one question is worth asking", checked([plan, line("F1", "Network Fee", 399, "company_fee")], [{ id: "Q1", kind: "unagreed_fee", lineIds: ["F1"], promiseId: null }]), "1 charge worth asking about"],
     ["no promise matched a line", { ...checked([plan], []), promises: [promise] }, "Couldn't match your offer to this bill"],
     ["every promise was kept", { ...checked([plan], []), promises: [promise], matchedPromiseIds: ["P1"] }, "Nothing is billed above your offer"],
+    // A rise since the earlier bill is what the page's message asks about, so the heading can't say there's nothing.
+    ["the bill rose and there was no offer", { ...checked([plan], []), hadOffer: false, change: { earlierCents: 6000, currentCents: 8000, lines: [{ label: "Internet", beforeCents: 6000, afterCents: 8000 }] } }, "This bill is $20.00 higher than the one before"],
+    ["the bill rose though the offer matches", { ...checked([plan], []), promises: [promise], matchedPromiseIds: ["P1"], change: { earlierCents: 6000, currentCents: 8000, lines: [{ label: "Internet", beforeCents: 6000, afterCents: 8000 }] } }, "This bill is $20.00 higher than the one before"],
   ])("when %s", (_case, result, expected) => {
     expect(heading(result)).toContain(expected);
   });

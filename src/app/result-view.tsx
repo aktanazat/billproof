@@ -372,6 +372,9 @@ export function ResultView({
         ? `The offer is from ${result.offerProvider}, not ${provider ?? "this company"}`
         : questions.length > 0
           ? `${questions.length} ${questions.length === 1 ? "charge" : "charges"} worth asking about`
+          : // A rise since the earlier bill is what the message asks about, so it heads the page rather than "nothing".
+            result.change && result.change.currentCents > result.change.earlierCents
+            ? `This bill is ${usd(result.change.currentCents - result.change.earlierCents)} higher than the one before`
           : !result.hadOffer
             ? "Nothing to flag on this bill"
             : result.promises.length === 0
