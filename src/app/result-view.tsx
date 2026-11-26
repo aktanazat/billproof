@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import type { CheckAction, Selection } from "@/lib/check-machine";
 import { formatMicros } from "@/lib/cost";
 import type { Claim, Question, TestedClaim, UnusedReason } from "@/lib/decide";
@@ -185,7 +185,8 @@ function Transcript({ transcript, provider, callUrl }: { transcript: TranscriptT
 
 export function MessageBox({ message }: { message: Message }) {
   const [format, setFormat] = useState<"chat" | "email" | "call" | "complaint">("chat");
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState<"no" | "yes" | "failed">("no");
+  const box = useRef<HTMLTextAreaElement>(null);
   const text = message[format];
   const formats = [
     ["chat", "Chat"],
@@ -200,7 +201,7 @@ export function MessageBox({ message }: { message: Message }) {
         <div className="flex flex-wrap items-center gap-2">
           <div role="tablist" aria-label="Message format" className="inline-flex rounded-lg bg-fill p-0.5">
             {formats.map(([value, label]) => (
-              <button key={value} role="tab" type="button" aria-selected={format === value} onClick={() => setFormat(value)} className={`h-7 whitespace-nowrap rounded-md px-2.5 text-[13px] sm:px-3 ${format === value ? "bg-white font-medium shadow-[0_1px_2px_rgb(0_0_0/0.12)]" : "text-text-2 hover:text-text"}`}>
+              <button key={value} role="tab" type="button" aria-selected={format === value} onClick={() => { setFormat(value); setCopied("no"); }} className={`h-7 whitespace-nowrap rounded-md px-2.5 text-[13px] sm:px-3 ${format === value ? "bg-white font-medium shadow-[0_1px_2px_rgb(0_0_0/0.12)]" : "text-text-2 hover:text-text"}`}>
                 {label}
               </button>
             ))}
@@ -208,18 +209,25 @@ export function MessageBox({ message }: { message: Message }) {
           <button
             type="button"
             onClick={() => {
-              void navigator.clipboard.writeText(text).then(() => {
-                setCopied(true);
-                setTimeout(() => setCopied(false), 1600);
-              });
+              navigator.clipboard.writeText(text).then(
+                () => {
+                  setCopied("yes");
+                  setTimeout(() => setCopied("no"), 1600);
+                },
+                // A browser that blocks the clipboard (an embedded page, a denied permission) gets the text selected to copy by hand.
+                () => {
+                  box.current?.select();
+                  setCopied("failed");
+                },
+              );
             }}
             className="h-8 min-w-[72px] rounded-lg bg-text px-3 text-[13px] font-medium text-white hover:bg-black"
           >
-            {copied ? "Copied" : "Copy"}
+            {copied === "yes" ? "Copied" : copied === "failed" ? "Selected, copy it yourself" : "Copy"}
           </button>
         </div>
       </div>
-      <textarea readOnly value={text} aria-label="Message to send" className="h-[280px] w-full resize-none rounded-xl bg-fill p-4 text-[15px] leading-[22px] focus:outline-none" />
+      <textarea ref={box} readOnly value={text} aria-label="Message to send" className="h-[280px] w-full resize-none rounded-xl bg-fill p-4 text-[15px] leading-[22px] focus:outline-none" />
     </section>
   );
 }
