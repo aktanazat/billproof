@@ -36,3 +36,13 @@ test("an amount written in cents is read as money, and a percentage is not", () 
   expect(moneyIn("just 1 cent more")).toEqual([1]);
   expect(moneyIn("50 percent off for 12 months")).toEqual([]);
 });
+
+// 27 of the 1,517 posts write amounts as "70 dollars" and 6 as "bucks", including what a rep promised ("the phone rep
+// said itd be 70 dollars"); a promise whose quote shows no amount the reader knows is set aside.
+test("an amount written as dollars or bucks is read as money", () => {
+  expect(moneyIn("the phone rep said itd be 70 dollars")).toEqual([7000]);
+  expect(moneyIn("they promised 49.99 dollars a month")).toEqual([4999]);
+  expect(moneyIn("only 1 dollar more for the second line")).toEqual([100]);
+  expect(moneyIn("he said 40 bucks a month, locked in")).toEqual([4000]);
+  expect(moneyIn("Fiber 500 for 24 months")).toEqual([]);
+});

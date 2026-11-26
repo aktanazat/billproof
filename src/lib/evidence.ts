@@ -1,19 +1,20 @@
-// Money amounts written with a dollar sign ("$55", "-$5.00", "$1,299.99", "$55.5", "$.99"), with cents ("75.00"), or
-// in cents ("99 cents", "75¢"). Bare integers ("Fiber 500") are not money.
-// Groups: dollars and cents after "$", cents alone after "$.", dollars and cents written without "$", and a count of
-// cents.
-const MONEY = /\$\s?(?:(\d{1,3}(?:,\d{3})+|\d+)(?:\.(\d{1,2})(?!\d))?|\.(\d{2})(?!\d))|\b(\d{1,3}(?:,\d{3})+|\d+)\.(\d{2})\b|\b(\d+)\s?(?:¢|cents?\b)/g;
+// Money amounts written with a dollar sign ("$55", "-$5.00", "$1,299.99", "$55.5", "$.99"), in words ("70 dollars",
+// "40 bucks"), with cents ("75.00"), or in cents ("99 cents", "75¢"). Bare integers ("Fiber 500") are not money.
+// Groups: dollars and cents after "$", cents alone after "$.", dollars and cents before the word, dollars and cents
+// written without "$", and a count of cents.
+const MONEY =
+  /\$\s?(?:(\d{1,3}(?:,\d{3})+|\d+)(?:\.(\d{1,2})(?!\d))?|\.(\d{2})(?!\d))|\b(\d{1,3}(?:,\d{3})+|\d+)(?:\.(\d{2}))?\s?(?:dollars?|bucks)\b|\b(\d{1,3}(?:,\d{3})+|\d+)\.(\d{2})\b|\b(\d+)\s?(?:¢|cents?\b)/gi;
 
 export function moneyIn(text: string): number[] {
   const found: number[] = [];
-  for (const [, whole, cents, only, bare, bareCents, centCount] of text.matchAll(MONEY)) {
+  for (const [, whole, cents, only, worded, wordedCents, bare, bareCents, centCount] of text.matchAll(MONEY)) {
     if (centCount !== undefined) {
       found.push(Number(centCount));
       continue;
     }
-    const dollars = Number((whole ?? bare ?? "0").replaceAll(",", ""));
+    const dollars = Number((whole ?? worded ?? bare ?? "0").replaceAll(",", ""));
     // One decimal is tenths of a dollar: "$55.5" is $55.50.
-    const fraction = only ?? bareCents ?? (cents ?? "00").padEnd(2, "0");
+    const fraction = only ?? wordedCents ?? bareCents ?? (cents ?? "00").padEnd(2, "0");
     found.push(dollars * 100 + Number(fraction));
   }
   return found;
