@@ -119,9 +119,9 @@ function claimRemedy(claims: Claim[]): string {
   return kinds.size === 1 ? REMEDY[claims[0].kind] : "future bills charged as promised";
 }
 
-// A repeated charge as a fact, for a regulator, and as a request, for the company.
-const repeatFact = (lines: LineItem[]) => `${names(lines)} appears ${lines.length} times on the bill (${lines.map((line) => usd(line.amount_cents)).join(" and ")}).`;
-const repeatSentence = (lines: LineItem[]) => `${repeatFact(lines)} Please confirm whether this is a duplicate and credit it if so.`;
+// A repeated charge as a fact, for a regulator, and as a request, for the company. `where` is the bill it is printed on.
+const repeatFact = (lines: LineItem[], where = "the bill") => `${names(lines)} appears ${lines.length} times on ${where} (${lines.map((line) => usd(line.amount_cents)).join(" and ")}).`;
+const repeatSentence = (lines: LineItem[], where?: string) => `${repeatFact(lines, where)} Please confirm whether this is a duplicate and credit it if so.`;
 
 // Every fee asked about goes in one sentence, each with its amount ("the Broadcast TV Fee ($47.23), Regional Sports
 // Fee ($19.86) and …"), rather than the same sentence once per fee: a request to the company, a fact to a regulator.
@@ -304,10 +304,12 @@ export function buildYearMessage(months: Checked[]): Message {
   }
   const fees = [...latestFee.values()];
   const offerCovers = months.some((month) => month.hadOffer && !month.providerMismatch);
-  // A charge printed twice is one statement's, so it is asked about under that statement.
-  const onBill = (month: Checked) => {
+  // A charge printed twice is one statement's, so it is asked about under that statement; one that can't be named by
+  // dates, due date or total is just "one bill".
+  const repeatOn = (month: Checked, lines: LineItem[], sentence: typeof repeatFact) => {
     const period = periodText(month);
-    return period.startsWith("the ") ? `On ${period}` : `On the bill for ${period}`;
+    if (period === "this bill") return sentence(lines, "one bill");
+    return `${period.startsWith("the ") ? `On ${period}` : `On the bill for ${period}`}, ${sentence(lines)}`;
   };
   const repeats = months.flatMap((month) =>
     month.questions.flatMap((question) => {
@@ -315,7 +317,7 @@ export function buildYearMessage(months: Checked[]): Message {
       return lines.length > 0 ? [{ month, lines }] : [];
     }),
   );
-  const feeText = [...(fees.length > 0 ? [feeSentence(fees, offerCovers)] : []), ...repeats.map(({ month, lines }) => `${onBill(month)}, ${repeatSentence(lines)}`)];
+  const feeText = [...(fees.length > 0 ? [feeSentence(fees, offerCovers)] : []), ...repeats.map(({ month, lines }) => repeatOn(month, lines, repeatSentence))];
   const ask = withClaims.flatMap((month) => month.claims).length > 1 ? `In total, please credit ${usd(totalCents)} to ${account}.` : "";
   const opening = `I'm writing about ${account}. I checked my statements against the plan I signed up for.`;
   const chat = [`Hi, ${opening}`, ...sections, ...feeText, ask].filter(Boolean).join("\n\n");
@@ -361,7 +363,7 @@ export function buildYearMessage(months: Checked[]): Message {
     return `For ${periodText(month)}: ${month.claims.map((claim) => shortClaim(claim, claim.lineIds.flatMap((id) => lines.get(id) ?? []))).join("; ")}.`;
   });
   const amounts = withClaims.map((month) => `${capitalized(periodText(month))}: ${usd(month.claims.reduce((t, claim) => t + claim.amountCents, 0))} more than I was promised.`);
-  const feeFacts = [...(fees.length > 0 ? [feeFact(fees, offerCovers)] : []), ...repeats.map(({ month, lines }) => `${onBill(month)}, ${repeatFact(lines)}`)];
+  const feeFacts = [...(fees.length > 0 ? [feeFact(fees, offerCovers)] : []), ...repeats.map(({ month, lines }) => repeatOn(month, lines, repeatFact))];
   const problem = claims.length > 0 ? claimProblem(claims) : fees.length > 0 && offerCovers ? "fees on my bill I never agreed to." : "charges on my bill the company hasn't explained.";
   const versions = claims.length > 0 ? [sectionsFor(regulator, false, "as quoted above"), [promisedLine, ...byMonth], [promisedLine, ...amounts], amounts] : [[]];
   const complaint = complaintText(provider, last4, problem, versions.map((facts) => [...facts, ...feeFacts]), claims);

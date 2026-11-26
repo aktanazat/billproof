@@ -349,4 +349,17 @@ describe("a year message with fees to ask about", () => {
     expect(message.chat).toContain("On the bill for Nov 1, 2026 to Nov 30, 2026, Modem Rental appears 2 times on the bill ($15.00 and $15.00). Please confirm whether this is a duplicate and credit it if so.");
     expect(message.complaint).toContain("On the bill for Nov 1, 2026 to Nov 30, 2026, Modem Rental appears 2 times");
   });
+
+  // A statement with no dates, due date or printed total can't be named, so the charge alone is asked about, without
+  // "On the bill for this bill"; one with a due date is named by it.
+  test("a charge printed twice on a statement that can't be named reads plainly", () => {
+    const doubled = (reading: Partial<Checked["reading"]>) => {
+      const base = statement("2026-11-01", "2026-11-30", [fee("F1", "Modem Rental", 1500), fee("F2", "Modem Rental", 1500)], [{ id: "Q1", kind: "repeated_charge", lineIds: ["F1", "F2"], promiseId: null }]);
+      return { ...base, reading: { ...base.reading, period_start: null, period_end: null, ...reading } };
+    };
+    const unnamed = buildYearMessage([october, doubled({})]);
+    expect(unnamed.chat).not.toContain("this bill");
+    expect(unnamed.chat).toContain("Modem Rental appears 2 times on one bill ($15.00 and $15.00).");
+    expect(buildYearMessage([october, doubled({ due_date: "2026-12-05" })]).chat).toContain("On the bill due Dec 5, 2026, Modem Rental appears 2 times");
+  });
 });
