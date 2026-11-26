@@ -300,6 +300,12 @@ async function paid<T>(call: EmberCall<T>, run: Run, live: Live): Promise<T> {
   }
 }
 
+// A promise's moment on the call is cited in the message and played from the result, so a time outside the recording
+// (or any time on a written offer) is dropped; the quote itself stays and is cited without one.
+export function heardWithin(at: number | null, recordingSeconds: number | null): number | null {
+  return at !== null && recordingSeconds !== null && at >= 0 && at <= recordingSeconds ? at : null;
+}
+
 function offerSource(offer: Offer, transcriptText: string): Source {
   switch (offer.kind) {
     case "text":
@@ -405,7 +411,8 @@ async function checkOne(uploaded: PreparedPage[], given: OfferInput | null, run:
   if (offer) {
     stage("reading_offer");
     const terms = await readTerms(offer, reading, run, bill);
-    promises = terms.promises.map((promise, i) => ({ ...promise, id: `P${i + 1}` }));
+    const length = offer.kind === "audio" ? wavSeconds(offer.wav) : null;
+    promises = terms.promises.map((promise, i) => ({ ...promise, id: `P${i + 1}`, said_at_seconds: heardWithin(promise.said_at_seconds, length) }));
     offerProvider = terms.provider;
     transcript = terms.transcript;
     proof = offerSource(offer, (terms.transcript ?? []).map((turn) => turn.text).join("\n"));
