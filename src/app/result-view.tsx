@@ -55,8 +55,11 @@ const CONDITION_NAMES: Record<string, string> = { autopay: "autopay", paperless:
 function questionTitle(question: Question, lines: LineItem[], result: Checked): string {
   const promise = result.promises.find((p) => p.id === question.promiseId);
   switch (question.kind) {
-    case "unagreed_fee":
-      return `${listNames(lines)} isn't in your offer${lines.length > 1 ? `, charged ${lines.length} times` : ""}`;
+    case "unagreed_fee": {
+      // Only this company's own offer can show a fee is missing from it; otherwise the fee is just one it added.
+      const said = result.hadOffer && !result.providerMismatch ? "isn't in your offer" : "is a fee the company added";
+      return `${listNames(lines)} ${said}${lines.length > 1 ? `, charged ${lines.length} times` : ""}`;
+    }
     case "repeated_charge":
       return `${listNames(lines)} is charged ${lines.length} times`;
     case "partial_period":

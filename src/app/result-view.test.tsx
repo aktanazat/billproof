@@ -67,6 +67,15 @@ describe("the result page's wording", () => {
     expect(html).toContain("$14.00");
   });
 
+  test("with no offer, or another company's, a fee is titled as one the company added, not as missing from the offer", () => {
+    const result = checked([line("L1", "Entertainment", 12200, "plan"), line("F1", "Broadcast TV Fee", 2150, "company_fee")], [{ id: "Q1", kind: "unagreed_fee", lineIds: ["F1"], promiseId: null }]);
+    for (const unrelated of [{ ...result, hadOffer: false }, { ...result, providerMismatch: true, offerProvider: "Westline Cable" }]) {
+      const html = page(unrelated);
+      expect(html).toContain("Broadcast TV Fee is a fee the company added");
+      expect(html).not.toContain("isn't in your offer");
+    }
+  });
+
   test("a charge listed twice shows what one copy costs, since only the extra copy is in question", () => {
     const lines = [line("L1", "Boost Protect", 1800, "other"), line("L2", "Boost Protect", 1800, "other")];
     const t = page(checked(lines, [{ id: "Q1", kind: "repeated_charge", lineIds: ["L1", "L2"], promiseId: null }])).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
