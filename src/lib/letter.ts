@@ -184,19 +184,20 @@ function complaintText(provider: string | null, last4: string | null, problem: s
 }
 
 // When the pictures held an earlier statement and this bill is higher: the rise, naming what rose most, as a fact.
-function increaseFact(change: BillChange | null): string | null {
+// `bill` names the statement: "This bill" alone, or one month's among a year's.
+function increaseFact(change: BillChange | null, bill = "This bill"): string | null {
   if (!change || change.currentCents <= change.earlierCents) return null;
   const rose = change.lines.flatMap((line) => {
     if (line.afterCents === null || line.afterCents <= (line.beforeCents ?? 0)) return [];
     return [line.beforeCents === null ? `${line.label} (${usd(line.afterCents)}) is new` : `${line.label} went from ${usd(line.beforeCents)} to ${usd(line.afterCents)}`];
   });
   const named = rose.length > 0 ? `: ${rose.slice(0, 3).join("; ")}` : "";
-  return `This bill is ${usd(change.currentCents - change.earlierCents)} higher than the one before${named}.`;
+  return `${bill} is ${usd(change.currentCents - change.earlierCents)} higher than the one before${named}.`;
 }
 
 // The same rise as a request to the company: the message asks why.
-export function increaseSentence(change: BillChange | null): string | null {
-  const fact = increaseFact(change);
+export function increaseSentence(change: BillChange | null, bill?: string): string | null {
+  const fact = increaseFact(change, bill);
   return fact && `${fact} Please explain the increase and correct anything I didn't agree to.`;
 }
 
@@ -345,10 +346,17 @@ export function buildYearMessage(months: Checked[]): Message {
     }),
   );
   const feeText = [...(fees.length > 0 ? [feeSentence(fees, offerCovers)] : []), ...repeats.map(({ month, lines }) => repeatOn(month, lines, repeatSentence))];
+  // A month whose pictures held an earlier statement and rose is asked about under that month's name.
+  const billName = (month: Checked) => {
+    const period = periodText(month);
+    return period === "this bill" ? "One of the bills" : period.startsWith("the ") ? capitalized(period) : `The bill for ${period}`;
+  };
+  const riseText = months.flatMap((month) => increaseSentence(month.change, billName(month)) ?? []);
+  const asked = [...riseText, ...feeText];
   const ask = withClaims.flatMap((month) => month.claims).length > 1 ? `In total, please credit ${usd(totalCents)} to ${account}.` : "";
   // Only an offer from this company is a plan the statements were checked against.
   const opening = offerCovers ? `I'm writing about ${account}. I checked my statements against the plan I signed up for.` : `I'm writing about ${account}.`;
-  const chat = [`Hi, ${opening}`, ...totalAfter(sections, ask, feeText)].join("\n\n");
+  const chat = [`Hi, ${opening}`, ...totalAfter(sections, ask, asked)].join("\n\n");
   const email = [
     totalCents > 0 ? `Subject: Billing correction for ${account}` : `Subject: Questions about the charges on ${account}`,
     "",
@@ -356,16 +364,16 @@ export function buildYearMessage(months: Checked[]): Message {
     "",
     opening,
     "",
-    ...totalAfter(sections, ask, feeText).flatMap((s) => [s, ""]),
-    replyAsk(totalCents > 0, feeText.length > 0),
+    ...totalAfter(sections, ask, asked).flatMap((s) => [s, ""]),
+    replyAsk(totalCents > 0, asked.length > 0),
     "",
     "Thank you,",
     "[Your name]",
   ].join("\n");
   const call = [
     `I'm calling about ${account}.`,
-    ...numberedTotalAfter(sectionsFor("your representative", true, "as I mentioned"), ask, feeText),
-    callClose(totalCents > 0, feeText.length > 0),
+    ...numberedTotalAfter(sectionsFor("your representative", true, "as I mentioned"), ask, asked),
+    callClose(totalCents > 0, asked.length > 0),
   ]
     .filter(Boolean)
     .join("\n\n");
@@ -389,8 +397,9 @@ export function buildYearMessage(months: Checked[]): Message {
     return `For ${periodText(month)}: ${month.claims.map((claim) => shortClaim(claim, claim.lineIds.flatMap((id) => lines.get(id) ?? []))).join("; ")}.`;
   });
   const amounts = withClaims.map((month) => `${capitalized(periodText(month))}: ${usd(month.claims.reduce((t, claim) => t + claim.amountCents, 0))} more than I was promised.`);
-  const feeFacts = [...(fees.length > 0 ? [feeFact(fees, offerCovers, "My statements charge")] : []), ...repeats.map(({ month, lines }) => repeatOn(month, lines, repeatFact))];
-  const problem = claims.length > 0 ? claimProblem(claims) : questionProblem(fees.length > 0, offerCovers, false);
+  const riseFacts = months.flatMap((month) => increaseFact(month.change, billName(month)) ?? []);
+  const feeFacts = [...riseFacts, ...(fees.length > 0 ? [feeFact(fees, offerCovers, "My statements charge")] : []), ...repeats.map(({ month, lines }) => repeatOn(month, lines, repeatFact))];
+  const problem = claims.length > 0 ? claimProblem(claims) : questionProblem(fees.length > 0, offerCovers, riseFacts.length > 0);
   const versions = claims.length > 0 ? [sectionsFor(regulator, false, "as quoted above"), [promisedLine, ...byMonth], [promisedLine, ...amounts], amounts] : [[]];
   const complaint = complaintText(provider, last4, problem, versions.map((facts) => [...facts, ...feeFacts]), claims);
   return { totalCents, chat, email, call, complaint };

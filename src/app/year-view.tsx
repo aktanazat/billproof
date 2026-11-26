@@ -92,6 +92,9 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
   const compared = (month: (typeof read)[number]) => month.result.matchedPromiseIds.length > 0;
   const asks = (month: (typeof read)[number]) => month.result.questions.some((question) => SHOWN_QUESTIONS.has(question.kind));
   const asking = checked.filter(asks).length;
+  // A month whose pictures held an earlier statement can show a rise since it, which its message asks about.
+  const rose = (month: (typeof read)[number]) => (month.result.change ? month.result.change.currentCents > month.result.change.earlierCents : false);
+  const rising = checked.filter(rose).length;
   const one = checked.length === 1;
   const statements = one ? "1 statement" : `${checked.length} statements`;
   const verdict =
@@ -101,6 +104,8 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
         ? `The offer is from ${otherCompany}, not ${provider ?? "this company"}`
         : asking > 0
           ? `Charges worth asking about on ${asking} of ${statements}`
+          : rising > 0
+            ? `Higher than the bill before on ${rising} of ${statements}`
           : !hadOffer
             ? `Read ${statements}; there was no offer to check ${one ? "it" : "them"} against`
             : !checked.some((month) => month.result.promises.length > 0)
@@ -127,7 +132,7 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
     claims: month.result.claims.filter((claim) => markOf(month.bill, claim.id) === "selected"),
     questions: month.result.questions.filter((question) => SHOWN_QUESTIONS.has(question.kind) && state.selections[month.bill]?.questions[question.id] === true),
   }));
-  const message = selectedMonths.some((month) => month.claims.length > 0 || month.questions.length > 0) ? buildYearMessage(selectedMonths) : null;
+  const message = selectedMonths.some((month) => month.claims.length > 0 || month.questions.length > 0) || rising > 0 ? buildYearMessage(selectedMonths) : null;
   const skipped = [
     leftOut("could_not_check", "couldn't be read", "couldn't be read"),
     leftOut("not_a_bill", "isn't a bill", "aren't bills"),
@@ -180,7 +185,7 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
               const shown = monthOf(month.result);
               const full = monthOf(month.result, true);
               const visible = [shown, ...(amount > 0 ? [usd(amount)] : []), ...(unconfirmed ? ["To confirm"] : [])].join(" ");
-              const status = amount > 0 ? "overcharged" : asks(month) ? "charges worth asking about" : !hadOffer ? "no offer to compare" : compared(month) ? "matches the offer" : "not compared with the offer";
+              const status = amount > 0 ? "overcharged" : asks(month) ? "charges worth asking about" : rose(month) ? "higher than the bill before" : !hadOffer ? "no offer to compare" : compared(month) ? "matches the offer" : "not compared with the offer";
               return (
                 <li key={month.bill}>
                   <button type="button" ref={month.bill === cameBackFrom ? focusOnShow : undefined} onClick={() => setOpen(month.bill)} className="group flex w-full flex-col gap-2 rounded-lg text-left" aria-label={`${visible}${shown === full ? "" : `, ${full}`}: ${status}`}>

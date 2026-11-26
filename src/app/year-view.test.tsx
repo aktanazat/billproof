@@ -284,3 +284,20 @@ test("each month button's spoken name starts with the words shown on it, so voic
   expect(html).toContain('aria-label="Aug 26 $5.00 To confirm, August 2026: overcharged"');
   expect(html).toContain('aria-label="Jul 26, July 2026: matches the offer"');
 });
+
+// A month whose pictures held an earlier statement and rose is not a match; its button, the year's heading and the
+// message say so, as its own page does.
+test("a month that rose since the bill before is called higher, and the year offers a message about it", () => {
+  if (!year) throw new Error("the saved run has no year result");
+  const flat: YearResult = { ...year, months: year.months.map((month) => (month.result.outcome === "checked" ? { ...month, result: { ...month.result, claims: [], questions: [] } } : month)) };
+  const july = flat.months.find((month) => month.result.outcome === "checked" && month.result.reading.period_start?.startsWith("2026-07"));
+  if (!july || july.result.outcome !== "checked") throw new Error("the sample has no July statement");
+  const rose: YearResult = { ...flat, months: flat.months.map((month) => (month.bill === july.bill && month.result.outcome === "checked" ? { ...month, result: { ...month.result, change: { earlierCents: 7249, currentCents: 9249, lines: [{ label: "Fiber 500 Internet", beforeCents: 5500, afterCents: 7500 }] } } } : month)) };
+  const running = { s: "running", inputs: initialState.inputs, attempts: 1, attempt: 1, stage: null, spentMicros: 0, live: {} } as unknown as CheckState;
+  const done = reduce(running, { type: "finished", attempt: 1, result: rose });
+  if (done.s !== "done") throw new Error("the finished year did not become a done state");
+  const html = renderToStaticMarkup(createElement(YearView, { state: done, result: rose, dispatch: () => {} }));
+  expect(html).toContain('aria-label="Jul 26, July 2026: higher than the bill before"');
+  expect(heading(html)).toBe("Higher than the bill before on 1 of 12 statements");
+  expect(html).toContain("is $20.00 higher than the one before: Fiber 500 Internet went from $55.00 to $75.00.");
+});

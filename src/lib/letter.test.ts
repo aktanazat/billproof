@@ -411,4 +411,15 @@ describe("a year message with fees to ask about", () => {
     expect(buildYearMessage([october, claimed]).call).toContain(close);
     expect(buildMessage(claimed, new Set(["C1"]), new Set()).call).toContain("Before ending the call, ask for a reference number and the date the credit will post.");
   });
+
+  // A month whose pictures held an earlier statement can show a rise; the year message asks about it under that month,
+  // as the month's own message does, and the complaint states it.
+  test("a month's rise since the bill before is asked about in the year message", () => {
+    const risen: Checked = { ...november, questions: [], change: { earlierCents: 6000, currentCents: 8000, lines: [{ label: "Fiber 500 Internet", beforeCents: 5500, afterCents: 7500 }] } };
+    const message = buildYearMessage([{ ...october, questions: [] }, risen]);
+    expect(message.chat).toContain("The bill for Nov 1, 2026 to Nov 30, 2026 is $20.00 higher than the one before: Fiber 500 Internet went from $55.00 to $75.00. Please explain the increase and correct anything I didn't agree to.");
+    expect(message.email).toMatch(/^Subject: Questions about the charges on /);
+    expect(message.complaint).toContain("- The bill for Nov 1, 2026 to Nov 30, 2026 is $20.00 higher than the one before");
+    expect(message.complaint).toContain("Problem: a price increase on my bill the company hasn't explained.");
+  });
 });
