@@ -16,6 +16,9 @@ export type Call =
 
 export type Offer = { kind: "none" } | { kind: "text"; text: string } | { kind: "file"; doc: Doc } | { kind: "call"; call: Call };
 
+// Pages of an offer PDF past the limit that weren't read; nothing for any other kind of offer.
+export const offerOmitted = (offer: Offer): number => (offer.kind === "file" && offer.doc.status === "ready" ? offer.doc.omitted : 0);
+
 export type Inputs = { bills: Doc[]; offer: Offer };
 
 export type ClaimMark = "selected" | "unselected" | "needs_confirmation";

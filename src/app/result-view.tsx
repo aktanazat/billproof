@@ -5,7 +5,7 @@ import type { CheckAction, Selection } from "@/lib/check-machine";
 import { formatMicros } from "@/lib/cost";
 import type { Claim, Question, TestedClaim, UnusedReason } from "@/lib/decide";
 import { buildMessage, increaseSentence, shortDate, usd, type Message } from "@/lib/letter";
-import type { ShownPage } from "@/lib/prepare";
+import { MAX_OFFER_PAGES, type ShownPage } from "@/lib/prepare";
 import type { CallRecord, Checked, SingleResult } from "@/lib/result";
 import type { LineItem, PromiseTerm, TranscriptTurn } from "@/lib/schemas";
 import { BillPage, snapBox, type Mark } from "./bill-page";
@@ -287,8 +287,8 @@ export function ResultView({
   result: SingleResult;
   bill: number;
   pages: ShownPage[];
-  // Pages of a long PDF past the limit that weren't read.
-  omittedPages: number;
+  // Pages of a long PDF past the limit that weren't read, of the bill and of the offer.
+  omittedPages: { bill: number; offer: number };
   callUrl: string | null;
   selection: Selection;
   dispatch: (action: CheckAction) => void;
@@ -358,7 +358,8 @@ export function ResultView({
   const notes = [
     // Pictures in a pile that weren't the bill were read as the offer, as an earlier bill, or set aside; say so rather than drop them silently.
     ...(pages.length > billPages.length && billPages.length > 0 ? [`Read ${billPages.length} of the ${pages.length} pictures as this bill; the other ${pages.length - billPages.length === 1 ? "one was" : `${pages.length - billPages.length} were`} read as the offer or an earlier bill, or set aside.`] : []),
-    ...(omittedPages > 0 ? [`Read the first ${pages.length} of ${pages.length + omittedPages} pages of this PDF; charges on the rest aren't included.`] : []),
+    ...(omittedPages.bill > 0 ? [`Read the first ${pages.length} of ${pages.length + omittedPages.bill} pages of this PDF; charges on the rest aren't included.`] : []),
+    ...(omittedPages.offer > 0 ? [`Read the first ${MAX_OFFER_PAGES} of ${MAX_OFFER_PAGES + omittedPages.offer} pages of the offer; promises on the rest aren't included.`] : []),
     ...(printed && result.totals.lineSum === "mismatch" ? [`The charges add up to ${usd(result.totals.lineSumCents)}, but the bill prints ${usd(printed.cents)}.`] : []),
     ...(result.totals.balance === "mismatch" ? ["The previous balance, payments and new charges don't add up to the amount due."] : []),
     ...(result.hadOffer ? [`Compared ${read} ${read === 1 ? "charge" : "charges"} with ${result.matchedPromiseIds.length} ${result.matchedPromiseIds.length === 1 ? "promise" : "promises"}.`] : []),

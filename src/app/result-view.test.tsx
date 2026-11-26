@@ -47,7 +47,7 @@ function checked(lines: LineItem[], questions: Checked["questions"]): Checked {
 }
 
 const page = (result: Checked, selection: Parameters<typeof ResultView>[0]["selection"] = { claims: {}, questions: {} }) =>
-  renderToStaticMarkup(createElement(ResultView, { result, bill: 0, pages: [], omittedPages: 0, callUrl: null, selection, dispatch: () => {}, backLabel: "Check another bill", onBack: () => {} })).replace(/&#x27;/g, "'").replace(/&amp;/g, "&");
+  renderToStaticMarkup(createElement(ResultView, { result, bill: 0, pages: [], omittedPages: { bill: 0, offer: 0 }, callUrl: null, selection, dispatch: () => {}, backLabel: "Check another bill", onBack: () => {} })).replace(/&#x27;/g, "'").replace(/&amp;/g, "&");
 
 describe("the result page's wording", () => {
   test("a bill with one charge says it compared 1 charge", () => {
@@ -150,20 +150,23 @@ describe("the result page's wording", () => {
   test("the page shows the picture the check sorted as the bill, not the first one in the pile", () => {
     const picture = (name: string) => ({ image: `data:image/png;base64,${name}`, text: null, rows: null });
     const result: Checked = { ...checked([line("L1", "Internet 1000", 8000, "plan")], []), billPages: [1] };
-    const html = renderToStaticMarkup(createElement(ResultView, { result, bill: 0, pages: [picture("Q0hBVA=="), picture("QklMTA==")], omittedPages: 0, callUrl: null, selection: { claims: {}, questions: {} }, dispatch: () => {}, backLabel: "Check another bill", onBack: () => {} }));
+    const html = renderToStaticMarkup(createElement(ResultView, { result, bill: 0, pages: [picture("Q0hBVA=="), picture("QklMTA==")], omittedPages: { bill: 0, offer: 0 }, callUrl: null, selection: { claims: {}, questions: {} }, dispatch: () => {}, backLabel: "Check another bill", onBack: () => {} }));
     expect(html).toContain("data:image/png;base64,QklMTA==");
     expect(html).not.toContain("data:image/png;base64,Q0hBVA==");
     expect(html).toContain("Read 1 of the 2 pictures as this bill; the other one was read as the offer or an earlier bill, or set aside.");
-    const single = renderToStaticMarkup(createElement(ResultView, { result: { ...result, billPages: [0] }, bill: 0, pages: [picture("QklMTA==")], omittedPages: 0, callUrl: null, selection: { claims: {}, questions: {} }, dispatch: () => {}, backLabel: "Check another bill", onBack: () => {} }));
+    const single = renderToStaticMarkup(createElement(ResultView, { result: { ...result, billPages: [0] }, bill: 0, pages: [picture("QklMTA==")], omittedPages: { bill: 0, offer: 0 }, callUrl: null, selection: { claims: {}, questions: {} }, dispatch: () => {}, backLabel: "Check another bill", onBack: () => {} }));
     expect(single).not.toContain("pictures as this bill");
     expect(single).not.toContain("pages of this PDF");
   });
 
-  test("a long PDF read from its first pages says how many were left out", () => {
+  test("a long PDF read from its first pages, bill or offer, says how many were left out", () => {
     const pdfPage = (n: number) => ({ image: `data:image/png;base64,UA${n}`, text: "Bayline Fiber", rows: null });
     const result: Checked = { ...checked([line("L1", "Internet 1000", 8000, "plan")], []), billPages: [0, 1, 2, 3, 4, 5] };
-    const html = renderToStaticMarkup(createElement(ResultView, { result, bill: 0, pages: [0, 1, 2, 3, 4, 5].map(pdfPage), omittedPages: 3, callUrl: null, selection: { claims: {}, questions: {} }, dispatch: () => {}, backLabel: "Check another bill", onBack: () => {} }));
-    expect(html).toContain("Read the first 6 of 9 pages of this PDF; charges on the rest aren&#x27;t included.");
+    const render = (omittedPages: { bill: number; offer: number }) => renderToStaticMarkup(createElement(ResultView, { result, bill: 0, pages: [0, 1, 2, 3, 4, 5].map(pdfPage), omittedPages, callUrl: null, selection: { claims: {}, questions: {} }, dispatch: () => {}, backLabel: "Check another bill", onBack: () => {} }));
+    expect(render({ bill: 3, offer: 0 })).toContain("Read the first 6 of 9 pages of this PDF; charges on the rest aren&#x27;t included.");
+    const offer = render({ bill: 0, offer: 3 });
+    expect(offer).toContain("Read the first 4 of 7 pages of the offer; promises on the rest aren&#x27;t included.");
+    expect(offer).not.toContain("pages of this PDF");
   });
 
   test("a claim waiting on one marked line asks to confirm the marked line", () => {
@@ -322,7 +325,7 @@ describe("the result page's other sections", () => {
   });
 
   test("a picture that isn't a bill, or a bill that can't be read, says what to add instead", () => {
-    const render = (result: Parameters<typeof ResultView>[0]["result"]) => text(renderToStaticMarkup(createElement(ResultView, { result, bill: 0, pages: [], omittedPages: 0, callUrl: null, selection: { claims: {}, questions: {} }, dispatch: () => {}, backLabel: "Check another bill", onBack: () => {} })).replace(/&#x27;/g, "'"));
+    const render = (result: Parameters<typeof ResultView>[0]["result"]) => text(renderToStaticMarkup(createElement(ResultView, { result, bill: 0, pages: [], omittedPages: { bill: 0, offer: 0 }, callUrl: null, selection: { claims: {}, questions: {} }, dispatch: () => {}, backLabel: "Check another bill", onBack: () => {} })).replace(/&#x27;/g, "'"));
     expect(render({ outcome: "not_a_bill", spentMicros: 0 })).toContain("This isn't a bill Add the statement itself: the PDF, or screenshots of the page that shows the billing period and each charge.");
     const unread = render({ outcome: "could_not_check", reason: "The page image is entirely black.", spentMicros: 0 });
     expect(unread).toContain("Couldn't check this bill The page image is entirely black. Try the PDF from the company's website, or screenshots that show every charge and the total, uncropped.");

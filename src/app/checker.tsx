@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useReducer, useRef, useState, type ChangeEvent, type DragEvent, type ReactNode } from "react";
-import { checkInput, initialState, reduce, type Call, type CheckAction, type CheckState, type Doc, type Inputs } from "@/lib/check-machine";
+import { checkInput, initialState, offerOmitted, reduce, type Call, type CheckAction, type CheckState, type Doc, type Inputs } from "@/lib/check-machine";
 import { formatMicros } from "@/lib/cost";
 import { usd } from "@/lib/letter";
 import { isAudio, MAX_BILL_PAGES, MAX_OFFER_PAGES, prepareCall, prepareFile, PrepareError } from "@/lib/prepare";
@@ -565,7 +565,7 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
         result={state.result}
         bill={0}
         pages={bill?.status === "ready" ? bill.pages : []}
-        omittedPages={bill?.status === "ready" ? bill.omitted : 0}
+        omittedPages={{ bill: bill?.status === "ready" ? bill.omitted : 0, offer: offerOmitted(offer) }}
         callUrl={offer.kind === "call" && offer.call.status === "ready" ? offer.call.url : null}
         selection={state.selections[0]}
         dispatch={dispatch}
