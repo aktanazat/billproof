@@ -65,10 +65,14 @@ const GENERIC_WORDS = new Set(["fee", "fees", "rental", "rent", "charge", "charg
 
 // An "included" promise names its item ("Wi-Fi Gateway: included"); a charge whose label shares no specific word
 // with the quote is some other item the model linked by mistake. The company's own name says nothing about the item.
+// Offers write items in the plural or hyphenated ("modems", "set-top boxes") where bills print "Modem", "Set Top Box",
+// so words are compared by their singular, and a hyphenated word also as its parts and run together ("wi-fi", "wifi").
+const singular = (word: string) => (word.length <= 4 || word.endsWith("ss") ? word : /(x|ch|sh)es$/.test(word) ? word.slice(0, -2) : word.endsWith("ies") ? `${word.slice(0, -3)}y` : word.endsWith("s") ? word.slice(0, -1) : word);
+const stems = (text: string) => new Set(tokens(text).flatMap((word) => (word.includes("-") ? [word, word.replaceAll("-", ""), ...word.split("-")] : [word])).map(singular));
 function quoteNamesLine(quote: string, label: string, provider: string | null): boolean {
-  const said = new Set(tokens(quote));
-  const company = new Set(tokens(provider ?? ""));
-  return tokens(label).some((word) => word.length >= 3 && !GENERIC_WORDS.has(word) && !company.has(word) && said.has(word));
+  const said = stems(quote);
+  const company = stems(provider ?? "");
+  return [...stems(label)].some((word) => word.length >= 3 && !GENERIC_WORDS.has(word) && !company.has(word) && said.has(word));
 }
 
 // A plan's own price is never "included": a promise of a free item linked to the plan line is about something else.

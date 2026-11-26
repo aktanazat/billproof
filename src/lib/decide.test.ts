@@ -237,6 +237,21 @@ describe("decide on the internet bill with an active price guarantee", () => {
     expect(decide(reading, onPlan, billText.get(internetGuaranteed.id)!, { kind: "image" }).claims).toEqual([]);
   });
 
+  // Offers name equipment in the plural or hyphenated ("modems", "set-top boxes"), bills in the singular ("Modem
+  // Rental", "Set Top Box"); compared word for word, the promise named nothing and the charge went unclaimed.
+  test("an included promise names its item in the plural or hyphenated, as offers write it", () => {
+    const gateway = idOf(reading, "Wi-Fi Gateway Rental")[0];
+    for (const [label, quote] of [["Modem Rental", "Your modems are included at no extra cost"], ["HD Receiver Fee", "HD receivers included"], ["Wi-Fi Extender", "Extenders included"], ["Set Top Box", "Set-top boxes included"]]) {
+      const relabelled: Reading = { ...reading, line_items: reading.line_items.map((line) => (line.id === gateway ? { ...line, label } : line)) };
+      const decision = decide(relabelled, [{ ...promises[1], quote, covers_line_ids: [gateway] }], billText.get(internetGuaranteed.id)!, { kind: "text", text: quote });
+      expect(decision.claims.map((c) => [c.kind, c.amountCents]), label).toEqual([["included_charged", 1500]]);
+    }
+    // A word that only looks plural is not stripped into another: "news" stays "news".
+    const sports = { ...promises[1], quote: "New customers get the Sports pack included", covers_line_ids: [gateway] };
+    const news: Reading = { ...reading, line_items: reading.line_items.map((line) => (line.id === gateway ? { ...line, label: "News Package" } : line)) };
+    expect(decide(news, [sports], billText.get(internetGuaranteed.id)!, { kind: "text", text: sports.quote }).claims).toEqual([]);
+  });
+
   test("the company's name in a promise does not make it name a charge", () => {
     const named = [{ ...promises[1], quote: "Bayline Network gateway included", covers_line_ids: idOf(reading, "Network Enhancement Fee") }];
     const withProvider: Reading = { ...reading, provider: "Bayline Network" };
