@@ -191,7 +191,7 @@ export default function RealBills() {
               {leaderboard.map((fee) => (
                 <li key={fee.label} className="flex items-baseline justify-between gap-4 border-b border-line py-2 text-[15px]">
                   <span>{fee.label}</span>
-                  <span className="text-[13px] text-text-2 tabular-nums">
+                  <span className="shrink-0 whitespace-nowrap text-[13px] text-text-2 tabular-nums">
                     {fee.count} {fee.count === 1 ? "bill" : "bills"}
                   </span>
                 </li>
