@@ -20,8 +20,10 @@ export function tokens(text: string): string[] {
   return text
     .toLowerCase()
     .normalize("NFKC")
+    // Soft hyphens and zero-width characters don't show, so they don't split a word.
+    .replace(/[\u00ad\u200b-\u200d\u2060\ufeff]/g, "")
     .replace(/[\u2010-\u2015\u2212]/g, "-")
-    .replace(/[\u2018\u2019\u201c\u201d]/g, "'")
+    .replace(/[\u2018\u2019\u201c\u201d\u02bc\u2032]/g, "'")
     .split(/[^a-z0-9.$%'-]+/)
     .map((t) => t.replace(/^[.'-]+|[.'-]+$/g, ""))
     .filter(Boolean);
