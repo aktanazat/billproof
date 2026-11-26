@@ -75,6 +75,9 @@ async function prepareImage(file: File): Promise<Prepared> {
   canvas.height = Math.round(bitmap.height * scale);
   const context = canvas.getContext("2d");
   if (!context) throw new PrepareError("This browser could not draw the image.");
+  // JPEG has no transparency: a transparent picture would come out on black, as a PDF page would without its white.
+  context.fillStyle = "#ffffff";
+  context.fillRect(0, 0, canvas.width, canvas.height);
   context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
   bitmap.close();
   return { pages: [{ image: canvasToJpeg(canvas), text: null, rows: null }], omitted: 0 };

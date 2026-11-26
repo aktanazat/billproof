@@ -25,10 +25,29 @@ test("an iPhone HEIC photo is read where the browser can decode it, and refused 
   // No decoder, as in Chrome or Firefox: the person is told to export a JPEG.
   await expect(prepareFile(heic, 1)).rejects.toThrow(new PrepareError("HEIC photos can't be read in this browser. Export the photo as JPEG, or open Billproof in Safari."));
   // Safari decodes HEIC itself: the photo becomes a page like any other.
-  const canvas = { width: 0, height: 0, getContext: () => ({ drawImage: () => {} }), toDataURL: () => "data:image/jpeg;base64,AAAA" };
+  const canvas = { width: 0, height: 0, getContext: () => ({ fillRect: () => {}, drawImage: () => {} }), toDataURL: () => "data:image/jpeg;base64,AAAA" };
   vi.stubGlobal("createImageBitmap", async () => ({ width: 3024, height: 4032, close: () => {} }));
   vi.stubGlobal("document", { createElement: () => canvas });
   await expect(prepareFile(heic, 1)).resolves.toMatchObject({ pages: [{ image: "data:image/jpeg;base64,AAAA" }], omitted: 0 });
+});
+
+// JPEG has no transparency: a transparent picture (a PNG exported from an app) drawn onto a blank canvas comes out with
+// a black background, and black text on it unreadable. Safari does this; the canvas here behaves the same.
+test("a transparent picture is read on white, as a PDF page is", async () => {
+  const { createCanvas, loadImage } = await import("@napi-rs/canvas");
+  const source = createCanvas(200, 60);
+  const draw = source.getContext("2d");
+  draw.fillStyle = "#000";
+  draw.fillRect(20, 20, 40, 20);
+  const png = new File([new Uint8Array(source.toBuffer("image/png"))], "bill.png", { type: "image/png" });
+  vi.stubGlobal("createImageBitmap", async (file: File) => Object.assign(await loadImage(Buffer.from(await file.arrayBuffer())), { close: () => {} }));
+  vi.stubGlobal("document", { createElement: () => createCanvas(1, 1) });
+  const { pages } = await prepareFile(png, 1);
+  const jpeg = await loadImage(Buffer.from(pages[0].image.split(",")[1], "base64"));
+  const read = createCanvas(jpeg.width, jpeg.height).getContext("2d");
+  read.drawImage(jpeg, 0, 0);
+  expect([...read.getImageData(5, 5, 1, 1).data.slice(0, 3)].every((channel) => channel > 240)).toBe(true);
+  expect([...read.getImageData(40, 30, 1, 1).data.slice(0, 3)].every((channel) => channel < 15)).toBe(true);
 });
 
 // Android phones and call-recorder apps save calls as .3gp, which the system labels video, and a call can be a screen
