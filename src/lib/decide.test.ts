@@ -574,3 +574,14 @@ describe("charges printed once per person", () => {
     expect(checkTotals(split([...parts, { cents: 4506, quote: "Total $45.06" }]), photo).lineSum).toBe("sections");
   });
 });
+
+describe("a fee printed twice", () => {
+  test("is asked about once, with both copies, and not again as a repeated charge", () => {
+    const base = readingOf(internetGuaranteed);
+    const fee = (id: string) => ({ id, label: "TV Access Fee", amount_cents: 700, kind: "company_fee" as const, page: 1, box: { x0: 80, y0: 400, x1: 920, y1: 420 }, quote: "TV Access Fee $7.00", prorated: false });
+    const reading: Reading = { ...base, line_items: [...base.line_items, fee("F1"), fee("F2")] };
+    const photo: Source = { kind: "image" };
+    const questions = decide(reading, [], photo, photo).questions;
+    expect(questions.filter((q) => q.lineIds.includes("F1")).map((q) => [q.kind, q.lineIds])).toEqual([["unagreed_fee", ["F1", "F2"]]]);
+  });
+});

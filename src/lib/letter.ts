@@ -49,7 +49,7 @@ function claimSentence(claim: Claim, lines: LineItem[], promise: PromiseTerm, pe
 function questionSentence(question: Question, lines: LineItem[]): string | null {
   switch (question.kind) {
     case "unagreed_fee":
-      return `Please explain the ${names(lines)} (${usd(lines[0].amount_cents)}). It was not part of the plan I agreed to; if it is not required, please remove it.`;
+      return `Please explain the ${names(lines)} (${lines.length > 1 ? `${usd(lines.reduce((t, line) => t + line.amount_cents, 0))}, charged ${lines.length} times` : usd(lines[0].amount_cents)}). It was not part of the plan I agreed to; if it is not required, please remove it.`;
     case "repeated_charge":
       return `${names(lines)} appears ${lines.length} times (${lines.map((line) => usd(line.amount_cents)).join(" and ")}). Please confirm whether this is a duplicate and credit it if so.`;
     default:

@@ -52,7 +52,7 @@ function questionTitle(question: Question, lines: LineItem[], result: Checked): 
   const promise = result.promises.find((p) => p.id === question.promiseId);
   switch (question.kind) {
     case "unagreed_fee":
-      return `${listNames(lines)} isn't in your offer`;
+      return `${listNames(lines)} isn't in your offer${lines.length > 1 ? `, charged ${lines.length} times` : ""}`;
     case "repeated_charge":
       return `${listNames(lines)} is charged ${lines.length} times`;
     case "partial_period":

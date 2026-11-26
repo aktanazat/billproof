@@ -2534,20 +2534,6 @@
         {
           "kind": "unagreed_fee",
           "lines": [
-            "TV Access Fee"
-          ],
-          "cents": 700
-        },
-        {
-          "kind": "unagreed_fee",
-          "lines": [
-            "TV Access Fee"
-          ],
-          "cents": 700
-        },
-        {
-          "kind": "repeated_charge",
-          "lines": [
             "TV Access Fee",
             "TV Access Fee"
           ],
@@ -2744,30 +2730,18 @@
         {
           "kind": "unagreed_fee",
           "lines": [
+            "Administrative Fee",
             "Administrative Fee"
           ],
-          "cents": 237
+          "cents": 474
         },
         {
           "kind": "unagreed_fee",
           "lines": [
+            "Regulatory Cost Recovery Fee",
             "Regulatory Cost Recovery Fee"
           ],
-          "cents": 354
-        },
-        {
-          "kind": "unagreed_fee",
-          "lines": [
-            "Administrative Fee"
-          ],
-          "cents": 237
-        },
-        {
-          "kind": "unagreed_fee",
-          "lines": [
-            "Regulatory Cost Recovery Fee"
-          ],
-          "cents": 354
+          "cents": 708
         },
         {
           "kind": "repeated_charge",
@@ -2776,22 +2750,6 @@
             "Plan Charges - Unlimited Data Plan"
           ],
           "cents": 7998
-        },
-        {
-          "kind": "repeated_charge",
-          "lines": [
-            "Administrative Fee",
-            "Administrative Fee"
-          ],
-          "cents": 474
-        },
-        {
-          "kind": "repeated_charge",
-          "lines": [
-            "Regulatory Cost Recovery Fee",
-            "Regulatory Cost Recovery Fee"
-          ],
-          "cents": 708
         }
       ],
       "explained": 0,
@@ -17285,30 +17243,18 @@
         {
           "kind": "unagreed_fee",
           "lines": [
+            "Administrative & Regulatory Cost Recovery Fee",
             "Administrative & Regulatory Cost Recovery Fee"
           ],
-          "cents": 499
+          "cents": 998
         },
         {
           "kind": "unagreed_fee",
           "lines": [
+            "TN Bus Tax Recovery Fee",
             "TN Bus Tax Recovery Fee"
           ],
-          "cents": 1
-        },
-        {
-          "kind": "unagreed_fee",
-          "lines": [
-            "Administrative & Regulatory Cost Recovery Fee"
-          ],
-          "cents": 499
-        },
-        {
-          "kind": "unagreed_fee",
-          "lines": [
-            "TN Bus Tax Recovery Fee"
-          ],
-          "cents": 1
+          "cents": 2
         }
       ],
       "explained": 0,
@@ -17594,72 +17540,18 @@
         {
           "kind": "unagreed_fee",
           "lines": [
+            "Company fees & surcharges",
+            "Company fees & surcharges",
+            "Company fees & surcharges",
+            "Company fees & surcharges",
+            "Company fees & surcharges",
+            "Company fees & surcharges",
+            "Company fees & surcharges",
+            "Company fees & surcharges",
+            "Company fees & surcharges",
             "Company fees & surcharges"
           ],
-          "cents": 530
-        },
-        {
-          "kind": "unagreed_fee",
-          "lines": [
-            "Company fees & surcharges"
-          ],
-          "cents": 530
-        },
-        {
-          "kind": "unagreed_fee",
-          "lines": [
-            "Company fees & surcharges"
-          ],
-          "cents": 530
-        },
-        {
-          "kind": "unagreed_fee",
-          "lines": [
-            "Company fees & surcharges"
-          ],
-          "cents": 508
-        },
-        {
-          "kind": "unagreed_fee",
-          "lines": [
-            "Company fees & surcharges"
-          ],
-          "cents": 530
-        },
-        {
-          "kind": "unagreed_fee",
-          "lines": [
-            "Company fees & surcharges"
-          ],
-          "cents": 508
-        },
-        {
-          "kind": "unagreed_fee",
-          "lines": [
-            "Company fees & surcharges"
-          ],
-          "cents": 508
-        },
-        {
-          "kind": "unagreed_fee",
-          "lines": [
-            "Company fees & surcharges"
-          ],
-          "cents": 508
-        },
-        {
-          "kind": "unagreed_fee",
-          "lines": [
-            "Company fees & surcharges"
-          ],
-          "cents": 530
-        },
-        {
-          "kind": "unagreed_fee",
-          "lines": [
-            "Company fees & surcharges"
-          ],
-          "cents": 508
+          "cents": 5190
         }
       ],
       "explained": 0,
@@ -20261,9 +20153,10 @@
         {
           "kind": "unagreed_fee",
           "lines": [
+            "TX State Cost Recovery Charge",
             "TX State Cost Recovery Charge"
           ],
-          "cents": 27
+          "cents": 41
         },
         {
           "kind": "unagreed_fee",
@@ -20271,13 +20164,6 @@
             "Administrative & Regulatory Cost Recovery Fee"
           ],
           "cents": 499
-        },
-        {
-          "kind": "unagreed_fee",
-          "lines": [
-            "TX State Cost Recovery Charge"
-          ],
-          "cents": 14
         }
       ],
       "explained": 0,
@@ -20897,30 +20783,12 @@
         {
           "kind": "unagreed_fee",
           "lines": [
+            "Company fees & surcharges",
+            "Company fees & surcharges",
+            "Company fees & surcharges",
             "Company fees & surcharges"
           ],
-          "cents": 517
-        },
-        {
-          "kind": "unagreed_fee",
-          "lines": [
-            "Company fees & surcharges"
-          ],
-          "cents": 517
-        },
-        {
-          "kind": "unagreed_fee",
-          "lines": [
-            "Company fees & surcharges"
-          ],
-          "cents": 520
-        },
-        {
-          "kind": "unagreed_fee",
-          "lines": [
-            "Company fees & surcharges"
-          ],
-          "cents": 520
+          "cents": 2074
         }
       ],
       "explained": 0,
@@ -22863,16 +22731,10 @@
         {
           "kind": "unagreed_fee",
           "lines": [
+            "Company fees & surcharges",
             "Company fees & surcharges"
           ],
-          "cents": 520
-        },
-        {
-          "kind": "unagreed_fee",
-          "lines": [
-            "Company fees & surcharges"
-          ],
-          "cents": 520
+          "cents": 1040
         }
       ],
       "explained": 0,

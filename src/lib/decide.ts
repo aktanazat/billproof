@@ -453,11 +453,17 @@ export function decide(reading: Reading, promises: PromiseTerm[], bill: Source, 
     claims.push({ ...draft, id: `C${claims.length + 1}` });
   }
 
+  // One question per fee, covering every line it is printed on: a fee charged twice is asked about once, with both.
+  const feeOf = new Map<string, string>();
+  const fees = new Map<string, string[]>();
   for (const line of reading.line_items) {
     if (line.kind === "company_fee" && line.amount_cents > 0 && !governed.has(line.id) && isCompanyAddedFee(line.label) && lineIsEvidenced(line, bill)) {
-      questions.push({ kind: "unagreed_fee", lineIds: [line.id], promiseId: null });
+      const name = tokens(line.label).join(" ");
+      feeOf.set(line.id, name);
+      fees.set(name, [...(fees.get(name) ?? []), line.id]);
     }
   }
+  for (const lineIds of fees.values()) questions.push({ kind: "unagreed_fee", lineIds, promiseId: null });
 
   // A charge printed once for each person or phone line is not a repeat: when the bill's own part totals split its
   // lines, copies that fall under different parts belong to different people. Copies on different pictures are
@@ -473,7 +479,8 @@ export function decide(reading: Reading, promises: PromiseTerm[], bill: Source, 
   }
   for (const group of byKey.values()) {
     const repeated = group.some((line, i) => group.slice(i + 1).some((other) => samePlace(line, other)));
-    if (repeated && !group.every((line) => claimed.has(line.id))) {
+    const oneFee = group.every((line) => feeOf.get(line.id) === feeOf.get(group[0].id) && feeOf.has(line.id));
+    if (repeated && !oneFee && !group.every((line) => claimed.has(line.id))) {
       questions.push({ kind: "repeated_charge", lineIds: group.map((line) => line.id), promiseId: null });
     }
   }
