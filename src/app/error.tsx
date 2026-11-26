@@ -12,6 +12,7 @@ export default function PageError({ error, reset }: { error: Error & { digest?: 
   }, [error]);
   return (
     <main className="flex min-h-full flex-col">
+      <title>Something went wrong — Billproof</title>
       <SiteHeader current={null} />
       <section className="mx-auto flex w-full max-w-[1120px] flex-col items-start gap-3 px-6 pt-16">
         <h1 className="text-[28px] font-semibold tracking-[-0.02em]">Something went wrong showing this page</h1>

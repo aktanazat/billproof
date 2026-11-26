@@ -1,5 +1,8 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteHeader } from "./site-header";
+
+export const metadata: Metadata = { title: "Page not found — Billproof" };
 
 // A mistyped address or an old link lands here, in the site's own look, with the two ways back.
 export default function NotFound() {
