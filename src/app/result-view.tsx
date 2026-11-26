@@ -323,7 +323,6 @@ export function ResultView({
               : "Nothing is billed above your offer";
 
   const notes = [
-    ...(printed && result.totals.lineSum === "ok" ? [`The charges add up to the ${usd(printed.cents)} printed on the bill.`] : []),
     ...(printed && result.totals.lineSum === "mismatch" ? [`The charges add up to ${usd(result.totals.lineSumCents)}, but the bill prints ${usd(printed.cents)}.`] : []),
     ...(result.totals.balance === "mismatch" ? ["The previous balance, payments and new charges don't add up to the amount due."] : []),
     ...(result.hadOffer ? [`Compared ${result.reading.line_items.length} charges with ${result.matchedPromiseIds.length} ${result.matchedPromiseIds.length === 1 ? "promise" : "promises"}.`] : []),
@@ -336,17 +335,24 @@ export function ResultView({
   return (
     <section className="mx-auto w-full max-w-[1120px] px-6 pb-24 pt-6">
       <header className="flex flex-wrap items-end justify-between gap-4 pb-6">
-        {verdict ? (
-          <h1 className="text-[28px] font-semibold tracking-[-0.02em]">{verdict}</h1>
-        ) : (
-          <div>
-            <p className="text-[40px] font-semibold leading-none tracking-[-0.02em] tabular-nums">{usd(askTotal)}</p>
-            <h1 className="mt-2 text-[17px] text-text-2">
-              to ask back{provider ? ` from ${provider}` : ""}
-              {waiting ? (result.transcript ? ", once you confirm what you heard" : ", once you confirm the marked lines") : ""}
-            </h1>
-          </div>
-        )}
+        <div>
+          {verdict ? (
+            <h1 className="text-[28px] font-semibold tracking-[-0.02em]">{verdict}</h1>
+          ) : (
+            <>
+              <p className="text-[40px] font-semibold leading-none tracking-[-0.02em] tabular-nums">{usd(askTotal)}</p>
+              <h1 className="mt-2 text-[17px] text-text-2">
+                to ask back{provider ? ` from ${provider}` : ""}
+                {waiting ? (result.transcript ? ", once you confirm what you heard" : ", once you confirm the marked lines") : ""}
+              </h1>
+            </>
+          )}
+          {printed && result.totals.lineSum === "ok" && (
+            <p className="mt-2 text-[13px] text-text-2">
+              Read {result.reading.line_items.length} charges that add up to the {usd(printed.cents)} printed on the bill.
+            </p>
+          )}
+        </div>
         {back}
       </header>
 

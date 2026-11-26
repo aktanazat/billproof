@@ -1,4 +1,12 @@
 import { z } from "zod";
+import type { CheckEvent } from "./result";
+
+// One live run over real posts, streamed: each post's check events tagged by its place in the batch, then the total.
+export type LiveEvent =
+  | { type: "batch"; posts: { id: string; title: string; provider: string | null; picture: string }[] }
+  | { type: "post"; i: number; event: CheckEvent }
+  | { type: "done"; seconds: number; spentMicros: number }
+  | { type: "refused"; message: string };
 
 const base = {
   id: z.string(),
@@ -23,6 +31,8 @@ export const realBillSchema = z.discriminatedUnion("outcome", [
     provider: z.string().nullable(),
     period: z.tuple([z.string().nullable(), z.string().nullable()]),
     lines: z.number(),
+    // Whether the charges read off the bill add up to its printed current charges: the accuracy check a bill carries.
+    lineSum: z.enum(["ok", "mismatch", "not_printed"]),
     billPages: z.array(z.number()),
     claims: z.array(
       z.object({

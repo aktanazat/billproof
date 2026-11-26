@@ -1,0 +1,98 @@
+import { realRun } from "@/data/real-bills";
+import { postPages } from "@/data/real-pages";
+import { runCheck } from "@/lib/pipeline";
+import { postNotes, unagreedFees, type LiveEvent } from "@/lib/real-bills";
+import { clientKey, serverLedger } from "@/lib/server-ledger";
+
+const BATCH = 24;
+const LANES = 8;
+const HOUR_MS = 60 * 60_000;
+const RUNS_PER_HOUR = 6;
+
+// The real bills with the most to show come first: fees nobody agreed to, then any other bill.
+const feeCents = (bill: (typeof realRun.results)[number]) => unagreedFees(bill).reduce((t, fee) => t + fee.cents, 0);
+const batch = realRun.results
+  .filter((bill) => bill.outcome === "checked")
+  .sort((a, b) => feeCents(b) - feeCents(a))
+  .slice(0, BATCH);
+
+// Spend limits for the button: one run at a time, a few runs an hour across the server, one per address an hour.
+let running = false;
+const startedRuns: number[] = [];
+const lastRunByClient = new Map<string, number>();
+
+function refusal(message: string, status: number) {
+  const event: LiveEvent = { type: "refused", message };
+  return new Response(JSON.stringify(event) + "\n", { status, headers: { "Content-Type": "application/x-ndjson" } });
+}
+
+export async function POST(request: Request) {
+  // Only the site's own page may start a run; another site can't spend it from its visitors' browsers.
+  if (request.headers.get("sec-fetch-site") !== "same-origin") return refusal("Start a live run from the Billproof page.", 403);
+  const now = Date.now();
+  const client = clientKey(request);
+  while (startedRuns.length > 0 && now - startedRuns[0] > HOUR_MS) startedRuns.shift();
+  if (running) return refusal("A live run is already going. Try again in a minute.", 503);
+  if (startedRuns.length >= RUNS_PER_HOUR) return refusal("The live run has been used a lot this hour. Try again later.", 429);
+  if (now - (lastRunByClient.get(client) ?? 0) < HOUR_MS) return refusal("You can start one live run an hour.", 429);
+  running = true;
+  startedRuns.push(now);
+  lastRunByClient.set(client, now);
+
+  const encoder = new TextEncoder();
+  const ledger = serverLedger();
+  const started = performance.now();
+  let spentMicros = 0;
+
+  const stream = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      // A closed stream drops lines rather than failing a check that is still spending.
+      const send = (event: LiveEvent) => {
+        try {
+          if (!request.signal.aborted) controller.enqueue(encoder.encode(JSON.stringify(event) + "\n"));
+        } catch {
+          // The visitor left; the checks already running finish and settle in the ledger.
+        }
+      };
+      try {
+        send({ type: "batch", posts: batch.map((bill) => ({ id: bill.id, title: bill.title, provider: bill.outcome === "checked" ? bill.provider : null, picture: `/api/real-image/${bill.id}/${bill.outcome === "checked" ? (bill.billPages[0] ?? 0) : 0}` })) });
+        let next = 0;
+        const lane = async () => {
+          while (next < batch.length && !request.signal.aborted) {
+            const i = next++;
+            const post = batch[i];
+            const pages = await postPages(post.images);
+            if (pages.length === 0) {
+              send({ type: "post", i, event: { type: "error", failure: "bad_input", message: "The pictures are no longer online.", spentMicros: 0, retryable: false } });
+              continue;
+            }
+            await runCheck(
+              { bills: [{ pages }], offer: { kind: "text", text: postNotes(post) } },
+              {
+                ledger,
+                client: `${client}#live`,
+                signal: request.signal,
+                emit: (event) => {
+                  // The run's cost is its own checks' final costs, not the whole ledger's movement.
+                  if (event.type === "result") spentMicros += event.result.spentMicros;
+                  if (event.type === "error") spentMicros += event.spentMicros;
+                  send({ type: "post", i, event });
+                },
+              },
+            );
+          }
+        };
+        await Promise.allSettled(Array.from({ length: LANES }, lane));
+        send({ type: "done", seconds: (performance.now() - started) / 1000, spentMicros });
+      } finally {
+        running = false;
+        try {
+          controller.close();
+        } catch {
+          // Already closed by the visitor leaving.
+        }
+      }
+    },
+  });
+  return new Response(stream, { headers: { "Content-Type": "application/x-ndjson", "Cache-Control": "no-store" } });
+}

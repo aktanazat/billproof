@@ -1,21 +1,6 @@
-import path from "node:path";
-import { openLedger, type Ledger } from "@/lib/ledger";
 import { runCheck } from "@/lib/pipeline";
 import { checkInputSchema, MAX_UPLOAD_BYTES, type CheckEvent, type CheckFailure } from "@/lib/result";
-
-const globalLedger = globalThis as typeof globalThis & { billproofLedger?: Ledger };
-
-function ledger(): Ledger {
-  globalLedger.billproofLedger ??= openLedger(
-    process.env.LEDGER_PATH ?? path.join(process.cwd(), "data", "ledger.db"),
-    Number(process.env.EVENT_BUDGET_MICROS ?? 6_000_000),
-  );
-  return globalLedger.billproofLedger;
-}
-
-function clientKey(request: Request): string {
-  return request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || request.headers.get("x-real-ip") || "local";
-}
+import { clientKey, serverLedger } from "@/lib/server-ledger";
 
 function refuse(status: number, message: string, failure: CheckFailure = "bad_input", retryable = false) {
   const event: CheckEvent = { type: "error", failure, message, spentMicros: 0, retryable };
@@ -50,7 +35,7 @@ export async function POST(request: Request) {
       async start(controller) {
         try {
           await runCheck(input.data, {
-            ledger: ledger(),
+            ledger: serverLedger(),
             client: clientKey(request),
             signal: request.signal,
             emit: (event) => {

@@ -5,6 +5,7 @@ import { formatMicros } from "@/lib/cost";
 import { usd } from "@/lib/letter";
 import { claimedCents, unagreedFees, type RealBill } from "@/lib/real-bills";
 import { SiteHeader } from "../site-header";
+import { LiveRun } from "./live-run";
 
 export const metadata: Metadata = {
   title: "Real bills — Billproof",
@@ -17,6 +18,19 @@ const monthName = (iso: string | null) => (iso ? new Date(`${iso}T12:00:00Z`).to
 
 // Fee names repeat with small differences across companies; the leaderboard groups them by their words.
 const feeKey = (label: string) => label.toLowerCase().replace(/[^a-z ]/g, "").replace(/\s+/g, " ").trim();
+
+// Bills name the same company many ways ("xfinity", "Comcast", "Verizon Fios"); the table groups them by brand.
+const BRANDS: [RegExp, string][] = [
+  [/xfinity|comcast/i, "Xfinity"],
+  [/verizon|fios/i, "Verizon"],
+  [/at&t|\batt\b/i, "AT&T"],
+  [/spectrum|charter/i, "Spectrum"],
+  [/t-?mobile|metro/i, "T-Mobile"],
+  [/google/i, "Google Fi"],
+  [/directv/i, "DirecTV"],
+  [/starlink/i, "Starlink"],
+];
+const companyOf = (provider: string | null) => (provider ? (BRANDS.find(([pattern]) => pattern.test(provider))?.[1] ?? provider) : "Unknown");
 
 function Finding({ bill }: { bill: Checked }) {
   const fees = unagreedFees(bill);
@@ -56,10 +70,26 @@ export default function RealBills() {
   const billsWithFees = bills.filter((bill) => unagreedFees(bill).length > 0).length;
   const minutes = Math.max(1, Math.round(realRun.seconds / 60));
   const perBill = realRun.spentMicros / Math.max(1, results.length);
+  // The bill's own arithmetic is the accuracy check on real data: the charges read must add up to its printed total.
+  const withTotal = bills.filter((bill) => bill.lineSum !== "not_printed");
+  const addsUp = withTotal.filter((bill) => bill.lineSum === "ok").length;
 
   const leaderboard = [...fees.flatMap((fee) => fee.lines).reduce((map, label) => map.set(feeKey(label), { label, count: (map.get(feeKey(label))?.count ?? 0) + 1 }), new Map<string, { label: string; count: number }>()).values()]
     .sort((a, b) => b.count - a.count)
     .slice(0, 8);
+
+  const companies = [
+    ...bills
+      .reduce((map, bill) => {
+        const name = companyOf(bill.provider);
+        const seen = map.get(name) ?? { name, bills: 0, withFees: 0, feeCents: 0 };
+        const cents = unagreedFees(bill).reduce((t, fee) => t + fee.cents, 0);
+        return map.set(name, { name, bills: seen.bills + 1, withFees: seen.withFees + (cents > 0 ? 1 : 0), feeCents: seen.feeCents + cents });
+      }, new Map<string, { name: string; bills: number; withFees: number; feeCents: number }>())
+      .values(),
+  ]
+    .sort((a, b) => b.bills - a.bills || b.feeCents - a.feeCents)
+    .slice(0, 10);
 
   const ordered = [...bills].sort((a, b) => claimedCents(b) - claimedCents(a) || unagreedFees(b).length - unagreedFees(a).length || b.created - a.created);
 
@@ -91,8 +121,10 @@ export default function RealBills() {
           ))}
         </dl>
         <p className="mt-3 text-[13px] text-text-2">
-          {notBills} posts showed chats, app screens or ads rather than a bill, and {gone} more had their pictures deleted. {claimed.length === 0 ? "No dollar claim was made on any post, because no poster quoted a promise the bill could be held to; Billproof asks instead of guessing." : `${claimed.length} ${claimed.length === 1 ? "post had a charge" : "posts had charges"} above a promise the poster quoted, ${usd(claimed.reduce((t, bill) => t + claimedCents(bill), 0))} in all, each waiting for the poster to confirm the marked line.`}
+          {notBills} posts showed chats, app screens or ads rather than a bill, and {gone} more had their pictures deleted. On {addsUp} of the {withTotal.length} bills that print a total, the charges Muse Ember read add up to it to the cent. {claimed.length === 0 ? "No dollar claim was made on any post, because no poster quoted a promise the bill could be held to; Billproof asks instead of guessing." : `${claimed.length} ${claimed.length === 1 ? "post had a charge" : "posts had charges"} above a promise the poster quoted, ${usd(claimed.reduce((t, bill) => t + claimedCents(bill), 0))} in all, each waiting for the poster to confirm the marked line.`}
         </p>
+
+        <LiveRun />
 
         {leaderboard.length > 0 && (
           <section className="mt-14 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
@@ -112,6 +144,33 @@ export default function RealBills() {
             </ol>
           </section>
         )}
+
+        <section className="mt-14 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+          <div>
+            <h2 className="text-[17px] font-semibold">By company</h2>
+            <p className="mt-1 text-[13px] leading-[18px] text-text-2">Real bills from each company, and the fees on them the poster never mentions agreeing to.</p>
+          </div>
+          <table className="w-full text-left text-[15px] tabular-nums">
+            <thead>
+              <tr className="text-[13px] text-text-2">
+                <th className="py-2 font-normal">Company</th>
+                <th className="py-2 text-right font-normal">Real bills</th>
+                <th className="py-2 text-right font-normal">With fees</th>
+                <th className="py-2 text-right font-normal">Fees per month</th>
+              </tr>
+            </thead>
+            <tbody>
+              {companies.map((company) => (
+                <tr key={company.name} className="border-t border-line">
+                  <td className="py-2">{company.name}</td>
+                  <td className="py-2 text-right">{company.bills}</td>
+                  <td className="py-2 text-right">{company.withFees}</td>
+                  <td className="py-2 text-right">{company.feeCents > 0 ? usd(company.feeCents) : "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
 
         <section className="mt-14">
           <h2 className="text-[17px] font-semibold">Every bill</h2>

@@ -4,7 +4,7 @@
 // Each input line: { id, sub, title, text, images: string[], permalink, created }.
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import sharp from "sharp";
+import { MAX_POST_PICTURES, postPages } from "../src/data/real-pages";
 import { formatMicros } from "../src/lib/cost";
 import { openLedger } from "../src/lib/ledger";
 import { runCheck } from "../src/lib/pipeline";
@@ -13,28 +13,11 @@ import type { CheckEvent, CheckInput, CheckResult } from "../src/lib/result";
 
 type Post = { id: string; sub: string; title: string; text: string; images: string[]; permalink: string; created: number };
 
-const LONG_SIDE = 1600;
 const CONCURRENCY = 8;
-const MAX_IMAGES = 6;
-
-async function image(url: string): Promise<string | null> {
-  try {
-    const response = await fetch(url, { headers: { "User-Agent": "billproof-research/0.1" }, signal: AbortSignal.timeout(30_000) });
-    if (!response.ok) return null;
-    const jpeg = await sharp(Buffer.from(await response.arrayBuffer()))
-      .rotate()
-      .resize({ width: LONG_SIDE, height: LONG_SIDE, fit: "inside", withoutEnlargement: true })
-      .jpeg({ quality: 85 })
-      .toBuffer();
-    return `data:image/jpeg;base64,${jpeg.toString("base64")}`;
-  } catch {
-    return null;
-  }
-}
 
 // Only what a reader of the results page needs: no names, account numbers or addresses.
 function summary(post: Post, result: CheckResult | null, error: string | null, ms: number): RealBill {
-  const base = { id: post.id, sub: post.sub, permalink: post.permalink, created: post.created, title: post.title, text: post.text, images: post.images.slice(0, MAX_IMAGES), ms };
+  const base = { id: post.id, sub: post.sub, permalink: post.permalink, created: post.created, title: post.title, text: post.text, images: post.images.slice(0, MAX_POST_PICTURES), ms };
   if (!result) return { ...base, outcome: "error", error, spentMicros: 0 };
   if (result.outcome === "year") throw new Error("A post is one bill");
   if (result.outcome !== "checked") return { ...base, outcome: result.outcome, spentMicros: result.spentMicros };
@@ -46,6 +29,7 @@ function summary(post: Post, result: CheckResult | null, error: string | null, m
     provider: result.reading.provider,
     period: [result.reading.period_start, result.reading.period_end],
     lines: result.reading.line_items.length,
+    lineSum: result.totals.lineSum,
     billPages: result.billPages,
     claims: result.claims.map((claim) => ({
       kind: claim.kind,
@@ -81,7 +65,7 @@ let next = 0;
 async function lane() {
   while (next < posts.length) {
     const post = posts[next++];
-    const pages = (await Promise.all(post.images.slice(0, MAX_IMAGES).map(image))).flatMap((page) => (page ? [{ image: page, text: null }] : []));
+    const pages = await postPages(post.images);
     if (pages.length === 0) {
       results.push(summary(post, null, "images unavailable", 0));
       continue;

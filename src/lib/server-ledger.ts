@@ -1,0 +1,18 @@
+import "server-only";
+import path from "node:path";
+import { openLedger, type Ledger } from "./ledger";
+
+const globalLedger = globalThis as typeof globalThis & { billproofLedger?: Ledger };
+
+// One ledger per server process, shared by every route that spends.
+export function serverLedger(): Ledger {
+  globalLedger.billproofLedger ??= openLedger(
+    process.env.LEDGER_PATH ?? path.join(process.cwd(), "data", "ledger.db"),
+    Number(process.env.EVENT_BUDGET_MICROS ?? 6_000_000),
+  );
+  return globalLedger.billproofLedger;
+}
+
+export function clientKey(request: Request): string {
+  return request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || request.headers.get("x-real-ip") || "local";
+}
