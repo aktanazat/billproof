@@ -139,7 +139,8 @@ export function LiveRun({ paused }: { paused: boolean }) {
     }
   };
 
-  const finished = tiles.filter((tile) => tile.stage === "done" || tile.stage === "failed").length;
+  // A bill that failed isn't checked: counting it as done made a run Meta never answered read "24 of 24" beside $0.00.
+  const checkedCount = tiles.filter((tile) => tile.stage === "done").length;
   const fees = tiles.reduce((t, tile) => t + tile.feeCents, 0);
   const claims = tiles.reduce((t, tile) => t + tile.claimCents, 0);
   const spent = total?.spentMicros ?? tiles.reduce((t, tile) => t + tile.spent, 0);
@@ -167,14 +168,14 @@ export function LiveRun({ paused }: { paused: boolean }) {
         <>
           <dl className="mt-5 grid grid-cols-2 rounded-xl bg-fill sm:grid-cols-5 sm:divide-x sm:divide-line">
             {[
-              ["Bills done", `${finished} of ${tiles.length}`],
+              ["Bills checked", `${checkedCount} of ${tiles.length}`],
               ["Fees found, per month", usd(fees)],
               ["To ask back", usd(claims)],
               ["Seconds", seconds.toFixed(1)],
               ["Spent", formatMicros(spent)],
             ].map(([label, value]) => (
-              // Only the count is announced, label and all ("Bills done 5 of 24"); the other figures change many times a second.
-              <div key={label} aria-live={label === "Bills done" ? "polite" : undefined} aria-atomic={label === "Bills done" || undefined} className="flex flex-col gap-1 p-4">
+              // Only the count is announced, label and all ("Bills checked 5 of 24"); the other figures change many times a second.
+              <div key={label} aria-live={label === "Bills checked" ? "polite" : undefined} aria-atomic={label === "Bills checked" || undefined} className="flex flex-col gap-1 p-4">
                 <dt className="text-[13px] text-text-2">{label}</dt>
                 <dd className="text-[24px] font-semibold tracking-[-0.01em] tabular-nums">{value}</dd>
               </div>
