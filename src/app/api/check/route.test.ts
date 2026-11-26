@@ -15,8 +15,9 @@ test("a check can be started only from Billproof's own page, so another site can
 });
 
 test("an older browser that sends no Sec-Fetch-Site is let through only when its Origin is Billproof's own", async () => {
+  // Behind the front server the request is addressed to the container; the site's name arrives only in Host.
   const fromOrigin = (origin: string | null) =>
-    POST(new Request("http://billproof.aktan.us/api/check", { method: "POST", body: "{}", headers: { "Content-Type": "text/plain", Host: "billproof.aktan.us", ...(origin ? { Origin: origin } : {}) } }));
+    POST(new Request("http://0.0.0.0:3000/api/check", { method: "POST", body: "{}", headers: { "Content-Type": "text/plain", Host: "billproof.aktan.us", ...(origin ? { Origin: origin } : {}) } }));
   // Safari before 16.4 (iOS 15 devices) sends Origin on a POST but not Sec-Fetch-Site.
   expect((await fromOrigin("https://billproof.aktan.us")).status).toBe(400);
   expect((await fromOrigin("https://evil.example")).status).toBe(403);

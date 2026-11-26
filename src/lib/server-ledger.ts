@@ -23,14 +23,16 @@ export function clientKey(request: Request): string {
 }
 
 // Only Billproof's own page may start paid work, so another site can't spend it from its visitors' browsers. Browsers
-// mark such a request same-origin; older ones (Safari before 16.4, on iOS 15 devices) send only its Origin.
+// mark such a request same-origin; older ones (Safari before 16.4, on iOS 15 devices) send only its Origin, compared
+// with the Host the front server passes along (the server's own URL names the container's address, not the site's).
 export function fromOwnPage(request: Request): boolean {
   const site = request.headers.get("sec-fetch-site");
   if (site !== null) return site === "same-origin";
   const origin = request.headers.get("origin");
-  if (!origin) return false;
+  const host = request.headers.get("host");
+  if (!origin || !host) return false;
   try {
-    return new URL(origin).host === new URL(request.url).host;
+    return new URL(origin).host === host;
   } catch {
     return false;
   }
