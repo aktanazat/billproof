@@ -1,5 +1,5 @@
 import { afterEach, expect, test, vi } from "vitest";
-import { isRecording, PrepareError, prepareFile } from "./prepare";
+import { isRecording, prepareCall, PrepareError, prepareFile } from "./prepare";
 
 const withResolvers = Promise.withResolvers;
 afterEach(() => {
@@ -40,4 +40,14 @@ test("a call saved by an Android phone or as a video is opened as a recording; a
   expect(isRecording(new File([], "call_20261104.3gp", { type: "" }))).toBe(true);
   expect(isRecording(new File([], "offer.pdf", { type: "application/pdf" }))).toBe(false);
   expect(isRecording(new File([], "IMG_0412.HEIC", { type: "image/heic" }))).toBe(false);
+});
+
+// A whole sales or support call often runs past an hour; "120:01 long" reads as neither minutes nor a clock.
+test("a recording over the limit is told its length as a clock reads it, hours included", async () => {
+  const lasting = (duration: number) => {
+    vi.stubGlobal("AudioContext", class { decodeAudioData = async () => ({ duration }); close = async () => {}; });
+    return prepareCall(new File(["call"], "call.m4a", { type: "audio/mp4" }), 240);
+  };
+  await expect(lasting(7200.4)).rejects.toThrow(new PrepareError("This recording is 2:00:01 long. Trim it to the part with the promise, up to 4 minutes."));
+  await expect(lasting(259.2)).rejects.toThrow(new PrepareError("This recording is 4:20 long. Trim it to the part with the promise, up to 4 minutes."));
 });
