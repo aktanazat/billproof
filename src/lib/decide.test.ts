@@ -526,6 +526,17 @@ describe("promises read from a person's own words", () => {
     }
   });
 
+  // How the real posts limit a price in time, missed in 31 of the 90 sentences that pair one with an amount: taken as
+  // lasting, a promo price was claimed after the promo ended.
+  test("a price limited the ways real posts say it is a question too, while a price per month stays a promise", () => {
+    for (const quote of ["$55 for the first year", "$55 for the first 3 months", "$55/mo with a two year price lock", "$55 for a limited time", "$55 a month intro offer", "$55 introductory offer", "$55 for six months", "$55 with 5 yr price lock", "$55/mo for 24mos", "$55 for 3yrs", "first 3 bills may be $55"]) {
+      const limited = promise({ kind: "monthly_price", amount_cents: 5500, quote, covers_line_ids: plan });
+      expect(decide(internet, [limited], photo, photo).questions.filter((q) => q.promiseId).map((q) => q.kind), quote).toEqual(["end_date_unread"]);
+    }
+    const monthly = promise({ kind: "monthly_price", amount_cents: 5500, quote: "Fiber 500 is $55mo", covers_line_ids: plan });
+    expect(decide(internet, [monthly], photo, photo).claims.map((c) => c.kind)).toEqual(["price_above_promise"]);
+  });
+
   test("a per-line credit is owed once per charged line, not for a $0 line", () => {
     const phones = boxed(readingOf(mobile));
     const [first, second] = phones.line_items.filter((line) => line.kind === "plan");

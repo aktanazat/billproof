@@ -308,8 +308,13 @@ export function providersDiffer(billProvider: string | null, offerProvider: stri
 const MAX_PLAUSIBLE_SHARE = 0.5;
 
 // Wording that limits a promise in time. When the quote has it but no end date was read, the promise may
-// already have ended, so it can only raise a question.
-const TIME_LIMIT = /\b(through|thru|until|ends?|ending|expires?|for (\d+|a|one|two|three) (months?|mos?|years?|yrs?)|\d+[- ](months?|mos?|years?)|promo(tional)?|\d{1,2}\/\d{1,2}\/\d{2,4}|(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.? \d{1,2},? \d{4})\b/i;
+// already have ended, so it can only raise a question. A unit run into its number counts only as "mos" or "yrs":
+// "$55mo" is a price per month.
+const COUNT = "\\d+|a|one|two|three|four|five|six|nine|twelve|eighteen|twenty-four";
+const TIME_LIMIT = new RegExp(
+  `\\b(through|thru|until|ends?|ending|expires?|limited[- ]time|intro(ductory)? (offers?|rates?|prices?|pricing|period)|first (year|month|(${COUNT}) (months?|mos?|years?|yrs?|bills?))|for (${COUNT}) (months?|mos?|years?|yrs?)|(\\d+|one|two|three|five)[- ](months?|mos?|years?|yrs?)|\\d+(mos|yrs)|promo(tional)?|\\d{1,2}\\/\\d{1,2}\\/\\d{2,4}|(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\\.? \\d{1,2},? \\d{4})\\b`,
+  "i",
+);
 
 // A checkout cart's monthly total or a device's financing ("Due monthly $32.22", "for 36 mos. at 0% APR") is what a
 // new order or phone costs, not the price promised for a plan already on the bill. "Checkout" alone is left out:
