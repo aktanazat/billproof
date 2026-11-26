@@ -170,8 +170,9 @@ const COMPLAINT_ROOM = 1_700;
 // The written complaint a regulator takes when the company won't fix it: the FCC for phone, internet and TV,
 // the state utility commission for electric, gas and water. The person fills in what the company already said, and
 // any company name or account number the bill didn't show: "my account" means nothing to a regulator. `factVersions`
-// runs from the fullest account of what happened to the shortest; the first that fits the form is used.
-function complaintText(provider: string | null, last4: string | null, problem: string, factVersions: string[][], claims: Claim[]): string {
+// runs from the fullest account of what happened to the shortest; the first that fits the form is used. `asks` says
+// whether the facts also raise fees or a rise, which the resolution then asks to be dealt with beside any credit.
+function complaintText(provider: string | null, last4: string | null, problem: string, factVersions: string[][], claims: Claim[], asks: boolean): string {
   const totalCents = claims.reduce((total, claim) => total + claim.amountCents, 0);
   const write = (facts: string[]) =>
     [
@@ -184,7 +185,11 @@ function complaintText(provider: string | null, last4: string | null, problem: s
       "",
       `What the company said when I asked it to correct this: [date you contacted ${provider ?? "the company"} and their answer]`,
       "",
-      totalCents > 0 ? `Resolution I'm asking for: a credit of ${usd(totalCents)} and ${claimRemedy(claims)}.` : "Resolution I'm asking for: the charges above corrected or explained in writing.",
+      totalCents === 0
+        ? "Resolution I'm asking for: the charges above corrected or explained in writing."
+        : asks
+          ? `Resolution I'm asking for: a credit of ${usd(totalCents)}, ${claimRemedy(claims)}, and the other charges above corrected or explained in writing.`
+          : `Resolution I'm asking for: a credit of ${usd(totalCents)} and ${claimRemedy(claims)}.`,
     ].join("\n");
   const texts = factVersions.map(write);
   return texts.find((text) => text.length <= COMPLAINT_ROOM) ?? texts[texts.length - 1];
@@ -292,7 +297,7 @@ export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<stri
     .join("\n\n");
   const problem = problemLine(claims, fees.length > 0, offerCovers, risen !== null);
   const shortFacts = [...(claims.length > 0 ? [`For ${periodText(result)}: ${claims.map((claim) => shortClaim(claim, linesOf(claim.lineIds))).join("; ")}.`] : []), ...(risen ? [risen] : []), ...questionFacts];
-  return { totalCents, chat, email, call, complaint: complaintText(provider, result.reading.account_last4, problem, [regulatorBody, shortFacts], claims) };
+  return { totalCents, chat, email, call, complaint: complaintText(provider, result.reading.account_last4, problem, [regulatorBody, shortFacts], claims, questionFacts.length > 0 || risen !== null) };
 }
 
 // One message for a year of statements: each month's claims under its statement, then the fees to ask about, then the
@@ -408,6 +413,6 @@ export function buildYearMessage(months: Checked[]): Message {
   const feeFacts = [...riseFacts, ...(fees.length > 0 ? [feeFact(fees, offerCovers, "My statements charge")] : []), ...repeats.map(({ month, lines }) => repeatOn(month, lines, repeatFact))];
   const problem = problemLine(claims, fees.length > 0, offerCovers, riseFacts.length > 0);
   const versions = claims.length > 0 ? [sectionsFor(regulator, false, "as quoted above"), [promisedLine, ...byMonth], [promisedLine, ...amounts], amounts] : [[]];
-  const complaint = complaintText(provider, last4, problem, versions.map((facts) => [...facts, ...feeFacts]), claims);
+  const complaint = complaintText(provider, last4, problem, versions.map((facts) => [...facts, ...feeFacts]), claims, feeFacts.length > 0);
   return { totalCents, chat, email, call, complaint };
 }

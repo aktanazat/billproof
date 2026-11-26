@@ -46,6 +46,9 @@ test("the total to credit follows the claims it adds up, before any fee question
   // The complaint goes on to state the fees too, so its problem names them after the claims.
   expect(message.complaint).toContain("Problem: billed more than I was promised, and fees on my bill I never agreed to.");
   expect(buildMessage(result, new Set(result.claims.map((c) => c.id)), new Set()).complaint).toContain("Problem: billed more than I was promised.");
+  // And its resolution asks for the fees to be dealt with as well as the credit.
+  expect(message.complaint).toContain("Resolution I'm asking for: a credit of $30.00, future bills charged as promised, and the other charges above corrected or explained in writing.");
+  expect(buildMessage(result, new Set(result.claims.map((c) => c.id)), new Set()).complaint).toContain("Resolution I'm asking for: a credit of $30.00 and future bills charged as promised.");
 });
 
 const fee = (id: string, label: string, cents: number): LineItem => ({ id, label, amount_cents: cents, kind: "company_fee", page: 1, box: { x0: 80, y0: 400, x1: 920, y1: 420 }, quote: `${label} $${(cents / 100).toFixed(2)}`, prorated: false });
