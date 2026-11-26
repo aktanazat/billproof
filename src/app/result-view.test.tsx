@@ -82,6 +82,33 @@ test("the main heading of a result with money to ask back, single or year, names
   expect(headings).toEqual([expect.stringMatching(/^\$\d[\d,]*\.\d\d to ask back from \S/), expect.stringMatching(/^\$\d[\d,]*\.\d\d to ask back from \S/)]);
 });
 
+// HTML lets a button hold only inline content, and a tab must name the panel it shows; otherwise browsers repair the
+// markup their own ways and screen readers announce tabs that lead nowhere. Checked on every saved result page.
+test("every saved result page keeps its buttons to inline content and gives each tab its panel", () => {
+  const run = JSON.parse(readFileSync(path.join(import.meta.dirname, "../../eval/run-2026-11-26.json"), "utf8")) as { raw: { id: string; events: CheckEvent[] }[] };
+  const done = (result: CheckResult) => {
+    const running = { s: "running", inputs: initialState.inputs, attempts: 1, attempt: 1, stage: null, spentMicros: 0, live: {} } as unknown as CheckState;
+    const state = reduce(running, { type: "finished", attempt: 1, result });
+    if (state.s !== "done") throw new Error("the finished check did not become a done state");
+    return state;
+  };
+  const pages = run.raw.flatMap((entry) => {
+    const event = entry.events.find((e) => e.type === "result");
+    if (event?.type !== "result") return [];
+    if (event.result.outcome === "year") return [renderToStaticMarkup(createElement(YearView, { state: done(event.result), result: event.result, dispatch: () => {} }))];
+    if (event.result.outcome !== "checked") return [];
+    return [renderToStaticMarkup(createElement(ResultView, { result: event.result, bill: 0, pages: [], omittedPages: { bill: 0, offer: 0 }, callUrl: null, selection: done(event.result).selections[0], dispatch: () => {}, backLabel: "Check another bill", onBack: () => {} }))];
+  });
+  expect(pages.length).toBeGreaterThan(20);
+  for (const html of pages) {
+    const blocks = [...html.matchAll(/<button\b[^>]*>([\s\S]*?)<\/button>/g)].filter((m) => /<(div|p|section|ul|ol|li|h[1-6]|table)\b/.test(m[1]));
+    expect(blocks.map((m) => m[0].slice(0, 80))).toEqual([]);
+    const panels = new Set([...html.matchAll(/<[^>]*role="tabpanel"[^>]*>/g)].map((m) => m[0].match(/\bid="([^"]+)"/)?.[1]));
+    const tabs = [...html.matchAll(/<[^>]*role="tab"[^>]*>/g)].map((m) => m[0].match(/aria-controls="([^"]+)"/)?.[1]);
+    expect(tabs.filter((target) => !target || !panels.has(target))).toEqual([]);
+  }
+});
+
 const line = (id: string, label: string, cents: number, kind: LineItem["kind"]): LineItem => ({ id, label, amount_cents: cents, kind, page: 1, box: null, quote: `${label} $${(cents / 100).toFixed(2)}`, prorated: false });
 
 function checked(lines: LineItem[], questions: Checked["questions"]): Checked {

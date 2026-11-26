@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type ReactNode } from "react";
+import { useId, useRef, useState, type ReactNode } from "react";
 import type { CheckAction, Selection } from "@/lib/check-machine";
 import { formatMicros } from "@/lib/cost";
 import type { Claim, Question, TestedClaim, UnusedReason } from "@/lib/decide";
@@ -194,6 +194,7 @@ export function MessageBox({ message }: { message: Message }) {
   const [format, setFormat] = useState<"chat" | "email" | "call" | "complaint">("chat");
   const [copied, setCopied] = useState<"no" | "yes" | "failed">("no");
   const box = useRef<HTMLTextAreaElement>(null);
+  const ids = useId();
   const text = message[format];
   const formats = [
     ["chat", "Chat"],
@@ -208,7 +209,7 @@ export function MessageBox({ message }: { message: Message }) {
         <div className="flex flex-wrap items-center gap-2">
           <div role="tablist" aria-label="Message format" className="inline-flex rounded-lg bg-fill p-0.5">
             {formats.map(([value, label]) => (
-              <button key={value} role="tab" type="button" aria-selected={format === value} onClick={() => { setFormat(value); setCopied("no"); }} className={`h-7 whitespace-nowrap rounded-md px-1.5 text-[13px] sm:px-3 ${format === value ? "bg-white font-medium shadow-[0_1px_2px_rgb(0_0_0/0.12)]" : "text-text-2 hover:text-text"}`}>
+              <button key={value} id={`${ids}-${value}`} role="tab" type="button" aria-selected={format === value} aria-controls={`${ids}-panel`} onClick={() => { setFormat(value); setCopied("no"); }} className={`h-7 whitespace-nowrap rounded-md px-1.5 text-[13px] sm:px-3 ${format === value ? "bg-white font-medium shadow-[0_1px_2px_rgb(0_0_0/0.12)]" : "text-text-2 hover:text-text"}`}>
                 {label}
               </button>
             ))}
@@ -234,7 +235,9 @@ export function MessageBox({ message }: { message: Message }) {
           </button>
         </div>
       </div>
-      <textarea ref={box} readOnly value={text} aria-label="Message to send" className="h-[280px] w-full resize-none rounded-xl bg-fill p-4 text-[15px] leading-[22px] focus:outline-none focus-visible:shadow-[inset_0_0_0_2px_var(--text)]" />
+      <div role="tabpanel" id={`${ids}-panel`} aria-labelledby={`${ids}-${format}`}>
+        <textarea ref={box} readOnly value={text} aria-label="Message to send" className="block h-[280px] w-full resize-none rounded-xl bg-fill p-4 text-[15px] leading-[22px] focus:outline-none focus-visible:shadow-[inset_0_0_0_2px_var(--text)]" />
+      </div>
       {format === "complaint" && <p className="text-[13px] text-text-2">{COMPLAINT_WHERE}</p>}
     </section>
   );

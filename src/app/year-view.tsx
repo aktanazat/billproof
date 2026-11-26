@@ -168,9 +168,9 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
               return (
                 <li key={month.bill}>
                   <button type="button" onClick={() => setOpen(month.bill)} className="group flex w-full flex-col gap-2 rounded-lg text-left" aria-label={`${visible}${shown === full ? "" : `, ${full}`}: ${status}`}>
-                    <div className="flex h-28 items-end rounded-t-md border-b border-line px-1.5 group-hover:bg-fill">
-                      {amount > 0 && <div className="w-full rounded-t-[3px] bg-red" style={{ height: `${Math.max(8, (amount / largest) * 100)}%` }} />}
-                    </div>
+                    <span className="flex h-28 items-end rounded-t-md border-b border-line px-1.5 group-hover:bg-fill">
+                      {amount > 0 && <span className="w-full rounded-t-[3px] bg-red" style={{ height: `${Math.max(8, (amount / largest) * 100)}%` }} />}
+                    </span>
                     {/* The spaces keep the words apart in the button's text; the column layout doesn't show them. */}
                     <span className="text-[13px] text-text-2">{shown}</span>{" "}
                     <span className={`text-[13px] tabular-nums ${amount > 0 ? "font-semibold text-red" : "text-text-2"}`}>{amount > 0 ? usd(amount) : "—"}</span>
