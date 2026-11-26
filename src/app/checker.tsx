@@ -5,7 +5,7 @@ import { useEffect, useReducer, useRef, useState, type ChangeEvent, type DragEve
 import { checkInput, initialState, offerOmitted, reduce, startBlocker, type Call, type CheckAction, type CheckState, type Doc, type Inputs } from "@/lib/check-machine";
 import { formatMicros } from "@/lib/cost";
 import { usd } from "@/lib/letter";
-import { isRecording, MAX_BILL_PAGES, MAX_OFFER_PAGES, prepareCall, prepareFile, PrepareError } from "@/lib/prepare";
+import { isPicture, isRecording, MAX_BILL_PAGES, MAX_OFFER_PAGES, prepareCall, prepareFile, PrepareError } from "@/lib/prepare";
 import { MAX_BILLS, MAX_CALL_SECONDS, type CheckEvent, type CheckInput, type PageKind, type Stage } from "@/lib/result";
 import { BillPage, snapBox, Thumbnail, type Mark } from "./bill-page";
 import { formatClock, Waveform } from "./evidence";
@@ -563,7 +563,7 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
     // A statement added on its own and dropped again with new screenshots, as the offer box advises, means them to go
     // with it: its bill is replaced by one holding both, rather than the screenshots becoming a bill of their own.
     const droppedPdfs = dropped.filter(isPdf);
-    const newPictures = dropped.filter((file) => !isPdf(file) && !seen.has(digests.get(file) ?? ""));
+    const newPictures = dropped.filter((file) => isPicture(file) && !seen.has(digests.get(file) ?? ""));
     const statementHash = droppedPdfs.length === 1 && newPictures.length > 0 ? digests.get(droppedPdfs[0]) : undefined;
     const joined = statementHash === undefined ? undefined : existing.find((doc) => billHashes.current.get(doc.id)?.join() === statementHash);
     if (joined && statementHash) {
@@ -584,8 +584,11 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
     setAlreadyAdded(repeated);
     const files = dropped.filter((file) => hashes.has(file));
     const pdfs = files.filter(isPdf);
-    const pictures = files.filter((file) => !isPdf(file));
-    const groups = pdfs.length === 1 && pictures.length > 0 ? [[pdfs[0], ...pictures]] : [...pdfs.map((file) => [file]), ...(pictures.length > 1 ? [pictures] : pictures.map((file) => [file]))];
+    const pictures = files.filter(isPicture);
+    // A file that is neither (a Word document, a spreadsheet) stays on its own row, where it is refused alone instead of
+    // failing the pile, and the statement in it, with it.
+    const others = files.filter((file) => !isPdf(file) && !isPicture(file)).map((file) => [file]);
+    const groups = [...(pdfs.length === 1 && pictures.length > 0 ? [[pdfs[0], ...pictures]] : [...pdfs.map((file) => [file]), ...(pictures.length > 1 ? [pictures] : pictures.map((file) => [file]))]), ...others];
     const room = MAX_BILLS - existing.length + (joined ? 1 : 0);
     const nameOf = (group: File[]) => (group.length === 1 ? group[0].name : isPdf(group[0]) ? `${group[0].name} and ${group.length - 1} ${group.length === 2 ? "picture" : "pictures"}` : `${group.length} pictures`);
     const named = groups.map((group) => ({ name: nameOf(group), group }));

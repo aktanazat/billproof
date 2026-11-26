@@ -62,6 +62,9 @@ async function preparePdf(file: File, maxPages: number): Promise<Prepared> {
 // An iPhone photo saved as HEIC is tried like any other: Safari decodes it, other browsers can't.
 const isHeic = (file: File) => /\.(heic|heif)$/i.test(file.name) || /^image\/hei[cf]/.test(file.type);
 
+// A photo or screenshot this opener takes: any image type, and HEIC by name, which some browsers leave untyped.
+export const isPicture = (file: File) => isHeic(file) || file.type.startsWith("image/");
+
 async function prepareImage(file: File): Promise<Prepared> {
   let bitmap: ImageBitmap;
   try {
@@ -82,7 +85,7 @@ async function prepareImage(file: File): Promise<Prepared> {
 
 export async function prepareFile(file: File, maxPages: number): Promise<Prepared> {
   const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
-  if (!isPdf && !isHeic(file) && !file.type.startsWith("image/")) throw new PrepareError("Add a PDF or a photo of the bill.");
+  if (!isPdf && !isPicture(file)) throw new PrepareError("Add a PDF or a photo of the bill.");
 
   const work = isPdf ? preparePdf(file, maxPages) : prepareImage(file);
   // A plain promise rather than Promise.withResolvers, which Safari lacks before 17.4.
