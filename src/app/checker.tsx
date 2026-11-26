@@ -261,7 +261,11 @@ function WorkingYear({ state, onCancel, dispatch }: { state: Exclude<CheckState,
   return (
     <section className="mx-auto w-full max-w-[1120px] px-6 pb-20 pt-6">
       <div className="flex items-baseline justify-between gap-6 pb-6">
-        <h1 className="text-[28px] font-semibold tracking-[-0.02em]">Reading {bills.length} bills</h1>
+        {/* Keyed to the attempt and its state, so focus lands here when a check starts and again when it stops: the
+            button pressed to start or retry is gone by then, and focus would otherwise drop to the top of the page. */}
+        <h1 key={`${state.attempts}-${state.s}`} ref={focusOnShow} tabIndex={-1} className="text-[28px] font-semibold tracking-[-0.02em] outline-none">
+          {state.s === "running" ? `Reading ${bills.length} bills` : "Stopped"}
+        </h1>
         <p className="text-[13px] text-text-2 tabular-nums">
           <span aria-live="polite">
             {done} of {bills.length} done
@@ -348,7 +352,10 @@ function Working({ state, onCancel, dispatch }: { state: Exclude<CheckState, { s
       <div className="flex flex-col gap-6">
         <div className="flex items-baseline justify-between gap-4">
           {/* Only the step is announced: the thinking text and the spend change many times a second. */}
-          <h1 aria-live="polite" className="text-[28px] font-semibold tracking-[-0.02em]">{current?.label ?? (running ? "Starting" : "Stopped")}</h1>
+          {/* Keyed to the attempt and its state, so focus lands here when a check starts and again when it stops. */}
+          <h1 key={`${state.attempts}-${state.s}`} ref={focusOnShow} tabIndex={-1} aria-live="polite" className="text-[28px] font-semibold tracking-[-0.02em] outline-none">
+            {current?.label ?? (running ? "Starting" : "Stopped")}
+          </h1>
           {state.spentMicros > 0 && <p className="text-[13px] text-text-2 tabular-nums">{formatMicros(state.spentMicros)}</p>}
         </div>
         <p className="min-h-[44px] text-[15px] leading-[22px] text-text-2">{latestThought ?? (running ? "Muse Ember is starting on the bill." : "")}</p>
