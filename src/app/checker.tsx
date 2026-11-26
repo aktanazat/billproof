@@ -536,7 +536,14 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
   useEffect(() => {
     work.current = hasWork;
     if (!hasWork) return;
-    if (!history.state?.billproofGuard) history.pushState({ ...history.state, billproofGuard: true }, "");
+    if (!history.state?.billproofGuard) {
+      // With no earlier page (a tab opened straight onto Billproof), Back has nowhere to go and "Leave" couldn't leave;
+      // closing the tab is still asked about. The history count includes pages ahead, so the browser's own answer
+      // comes first where it has one.
+      const navigation = (window as Window & { navigation?: { canGoBack: boolean } }).navigation;
+      if (!(navigation ? navigation.canGoBack : history.length > 1)) return;
+      history.pushState({ ...history.state, billproofGuard: true }, "");
+    }
     guardedHref.current = location.href;
   }, [hasWork]);
   useEffect(() => {
