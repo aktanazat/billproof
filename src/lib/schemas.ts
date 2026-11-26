@@ -103,6 +103,15 @@ export const challengeSchema = z.object({
 });
 export type Challenge = z.infer<typeof challengeSchema>["challenges"][number];
 
+export const sortSchema = z.object({
+  pages: z.array(
+    z.object({
+      page: z.number().int().describe("Page number as given, starting at 1"),
+      kind: z.enum(["bill", "promise", "other"]),
+    }),
+  ),
+});
+
 export type LineItem = BillReading["line_items"][number] & { id: string };
 export type Reading = Omit<BillReading, "line_items"> & { line_items: LineItem[] };
 export type PromiseTerm = Terms["promises"][number] & { id: string };

@@ -51,7 +51,26 @@ function questionSentence(question: Question, lines: LineItem[]): string | null 
   }
 }
 
-export type Message = { totalCents: number; chat: string; email: string; call: string };
+export type Message = { totalCents: number; chat: string; email: string; call: string; complaint: string };
+
+// The written complaint a regulator takes when the company won't fix it: the FCC for phone, internet and TV,
+// the state utility commission for electric, gas and water. The person fills in what the company already said.
+function complaintText(provider: string, account: string, facts: string[], totalCents: number): string {
+  return [
+    `Company: ${provider}`,
+    `Account: ${account}`,
+    "Problem: billed above the price I was promised.",
+    "",
+    "What happened:",
+    ...facts.map((fact) => `- ${fact}`),
+    "",
+    `What the company said when I asked it to correct this: [date you contacted ${provider} and their answer]`,
+    "",
+    totalCents > 0 ? `Resolution I'm asking for: a credit of ${usd(totalCents)} and the promised rate on future bills.` : "Resolution I'm asking for: the charges above corrected or explained in writing.",
+    "",
+    "File phone, internet and TV complaints at consumercomplaints.fcc.gov; electric, gas and water complaints go to your state utility commission.",
+  ].join("\n");
+}
 
 export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<string>, includedQuestionIds: ReadonlySet<string>): Message {
   const lines = new Map(result.reading.line_items.map((line) => [line.id, line]));
@@ -97,8 +116,7 @@ export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<stri
   ]
     .filter(Boolean)
     .join("\n\n");
-
-  return { totalCents, chat, email, call };
+  return { totalCents, chat, email, call, complaint: complaintText(provider, account, body, totalCents) };
 }
 
 // One message for a year of statements: each month's claims under its statement, then the total.
@@ -120,5 +138,5 @@ export function buildYearMessage(months: Checked[]): Message {
   const chat = [`Hi, I'm writing about ${account}. I checked my statements against the plan I signed up for.`, ...sections, ask].filter(Boolean).join("\n\n");
   const email = [`Subject: Billing correction for ${account}`, "", `Hello ${first?.provider ?? "billing"} team,`, "", ...sections.flatMap((s) => [s, ""]), ...(ask ? [ask, ""] : []), "Please reply with the corrected amount and the date the credit will post.", "", "Thank you,", "[Your name]"].join("\n");
   const call = [`I'm calling about ${account}.`, ...sections.map((s, i) => `${i + 1}. ${s}`), ask, "Before ending the call, ask for a reference number and the date the credit will post."].filter(Boolean).join("\n\n");
-  return { totalCents, chat, email, call };
+  return { totalCents, chat, email, call, complaint: complaintText(first?.provider ?? "the company", account, sections, totalCents) };
 }

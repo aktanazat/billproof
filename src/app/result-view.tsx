@@ -13,7 +13,7 @@ import { formatClock, PlayButton } from "./evidence";
 
 // A provider mismatch is said once, in the heading.
 const SHOWN_QUESTIONS = new Set<Question["kind"]>(["unagreed_fee", "repeated_charge", "partial_period", "conditions_unproven", "price_gap", "end_date_unread"]);
-const CALL_NAMES: Record<string, string> = { read_bill: "Read bill", reread_bill: "Reread bill", read_terms: "Read offer", read_call: "Listen to call", challenge: "Argue the company's side" };
+const CALL_NAMES: Record<string, string> = { sort_pages: "Sort pictures", read_bill: "Read bill", reread_bill: "Reread bill", read_terms: "Read offer", read_call: "Listen to call", challenge: "Argue the company's side" };
 // Promises that simply have nothing on this bill are not worth a line.
 const UNUSED_TEXT: Record<UnusedReason, string | null> = {
   kind_not_checked: "this kind of promise isn't checked yet",
@@ -177,13 +177,14 @@ function Transcript({ transcript, provider, callUrl }: { transcript: TranscriptT
 }
 
 export function MessageBox({ message }: { message: Message }) {
-  const [format, setFormat] = useState<"chat" | "email" | "call">("chat");
+  const [format, setFormat] = useState<"chat" | "email" | "call" | "complaint">("chat");
   const [copied, setCopied] = useState(false);
   const text = message[format];
   const formats = [
     ["chat", "Chat"],
     ["email", "Email"],
     ["call", "Call script"],
+    ["complaint", "FCC complaint"],
   ] as const;
   return (
     <section className="flex flex-col gap-3">
@@ -299,7 +300,9 @@ export function ResultView({
   const waiting = result.claims.some((claim) => selection.claims[claim.id] === "needs_confirmation");
   const provider = result.reading.provider;
   const printed = result.reading.printed.current_charges;
-  const marks = billMarks(result, pages);
+  // Pictures sorted out as chats or offers aren't bill pages; line items count pages within the bill.
+  const billPages = result.billPages.flatMap((i) => pages[i] ?? []);
+  const marks = billMarks(result, billPages);
   const focusLines = new Set(focus ?? []);
 
   const selectedIds = new Set(Object.entries(selection.claims).filter(([, mark]) => mark === "selected").map(([id]) => id));
@@ -309,15 +312,15 @@ export function ResultView({
   const verdict =
     result.claims.length > 0
       ? null
-      : !result.hadOffer
-        ? questions.length > 0
-          ? "Some charges are worth asking about"
-          : "Nothing to flag on this bill"
-        : result.providerMismatch
-          ? `The offer is from ${result.offerProvider}, not ${provider ?? "this company"}`
-          : result.matchedPromiseIds.length === 0
-            ? "Couldn't match your offer to this bill"
-            : "Nothing is billed above your offer";
+      : result.providerMismatch
+        ? `The offer is from ${result.offerProvider}, not ${provider ?? "this company"}`
+        : questions.length > 0
+          ? `${questions.length} ${questions.length === 1 ? "charge" : "charges"} worth asking about`
+          : !result.hadOffer
+            ? "Nothing to flag on this bill"
+            : result.matchedPromiseIds.length === 0
+              ? "Couldn't match your offer to this bill"
+              : "Nothing is billed above your offer";
 
   const notes = [
     ...(printed && result.totals.lineSum === "ok" ? [`The charges add up to the ${usd(printed.cents)} printed on the bill.`] : []),
@@ -349,7 +352,7 @@ export function ResultView({
 
       <div className="grid gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
         <div className="flex flex-col gap-4 lg:sticky lg:top-6 lg:self-start">
-          {pages.map((page, index) => (
+          {billPages.map((page, index) => (
             <BillPage key={index} image={page.image} alt={`Bill page ${index + 1}`} marks={marks.filter((m) => m.page === index + 1)} focus={focusLines} />
           ))}
         </div>

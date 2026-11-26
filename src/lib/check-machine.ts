@@ -1,6 +1,6 @@
 import type { PreparedCall, ShownPage } from "./prepare";
 import type { TranscriptTurn } from "./schemas";
-import type { CheckFailure, CheckInput, CheckResult, PreparedPage, SeenChallenge, SeenLine, SeenPromise, SingleResult, Stage } from "./result";
+import type { CheckFailure, CheckInput, CheckResult, PageKind, PreparedPage, SeenChallenge, SeenLine, SeenPromise, SingleResult, Stage } from "./result";
 
 export type Doc =
   | { id: string; name: string; status: "preparing" }
@@ -28,6 +28,7 @@ export type Live = {
   heard: TranscriptTurn[];
   challenges: SeenChallenge[];
   months: Record<number, SingleResult>;
+  sorted: Record<number, PageKind[]>;
 };
 
 export type CheckState =
@@ -55,6 +56,7 @@ export type CheckAction =
   | { type: "promise_read"; attempt: number; promise: SeenPromise }
   | { type: "turn_heard"; attempt: number; turn: TranscriptTurn }
   | { type: "challenged"; attempt: number; challenge: SeenChallenge }
+  | { type: "pages_sorted"; attempt: number; bill: number; kinds: PageKind[] }
   | { type: "month_done"; attempt: number; bill: number; result: SingleResult }
   | { type: "finished"; attempt: number; result: CheckResult }
   | { type: "errored"; attempt: number; failure: CheckFailure; message: string; spentMicros: number; retryable: boolean }
@@ -68,7 +70,7 @@ export type CheckAction =
 export const initialState: CheckState = { s: "composing", inputs: { bills: [], offer: { kind: "none" } }, attempts: 0 };
 
 const DEFAULT_QUESTIONS = new Set(["unagreed_fee", "repeated_charge"]);
-const EMPTY_LIVE: Live = { thoughts: [], lines: {}, promises: [], heard: [], challenges: [], months: {} };
+const EMPTY_LIVE: Live = { thoughts: [], lines: {}, promises: [], heard: [], challenges: [], months: {}, sorted: {} };
 
 function initialSelection(result: SingleResult): Selection {
   if (result.outcome !== "checked") return { claims: {}, questions: {} };
@@ -174,6 +176,8 @@ function running(state: Extract<CheckState, { s: "running" }>, action: CheckActi
       return { ...state, live: { ...live, heard: [...live.heard, action.turn] } };
     case "challenged":
       return { ...state, live: { ...live, challenges: [...live.challenges, action.challenge] } };
+    case "pages_sorted":
+      return { ...state, live: { ...live, sorted: { ...live.sorted, [action.bill]: action.kinds } } };
     case "month_done":
       return { ...state, live: { ...live, months: { ...live.months, [action.bill]: action.result } } };
     case "finished":

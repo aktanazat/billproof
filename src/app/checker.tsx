@@ -1,11 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useReducer, useRef, useState, type ChangeEvent, type DragEvent, type ReactNode } from "react";
 import { checkInput, initialState, reduce, type Call, type CheckAction, type CheckState, type Doc, type Inputs } from "@/lib/check-machine";
 import { formatMicros } from "@/lib/cost";
 import { usd } from "@/lib/letter";
 import { isAudio, MAX_BILL_PAGES, MAX_OFFER_PAGES, prepareCall, prepareFile, PrepareError } from "@/lib/prepare";
-import { MAX_BILLS, MAX_CALL_SECONDS, type CheckEvent, type CheckInput, type Stage } from "@/lib/result";
+import { MAX_BILLS, MAX_CALL_SECONDS, type CheckEvent, type CheckInput, type PageKind, type Stage } from "@/lib/result";
 import { BillPage, snapBox, type Mark } from "./bill-page";
 import { formatClock, Waveform } from "./evidence";
 import { ResultView } from "./result-view";
@@ -17,6 +18,8 @@ export type Sample = {
   outcome: string;
   image: string;
   bills: string[];
+  // Pictures from one real post: loaded as a single pile that Muse Ember sorts into bill and promise.
+  pictures?: string[];
   offer: { kind: "text"; text: string } | { kind: "call"; url: string };
 };
 
@@ -72,6 +75,9 @@ async function streamCheck(input: CheckInput, attempt: number, signal: AbortSign
             break;
           case "challenge":
             dispatch({ type: "challenged", attempt, challenge: event.challenge });
+            break;
+          case "sorted":
+            dispatch({ type: "pages_sorted", attempt, bill: event.bill, kinds: event.kinds });
             break;
           case "month":
             dispatch({ type: "month_done", attempt, bill: event.bill, result: event.result });
@@ -189,8 +195,9 @@ function Check() {
   );
 }
 
-type Step = { key: "bill" | "offer" | "compare" | "challenge"; stages: Stage[]; label: string };
-const STAGE_ORDER: Stage[] = ["reading_bill", "rereading_bill", "reading_offer", "comparing", "challenging"];
+type Step = { key: "sort" | "bill" | "offer" | "compare" | "challenge"; stages: Stage[]; label: string };
+const STAGE_ORDER: Stage[] = ["sorting", "reading_bill", "rereading_bill", "reading_offer", "comparing", "challenging"];
+const KIND_NAMES: Record<PageKind, string> = { bill: "Bill", promise: "Promise", other: "Not used" };
 
 function stepStatus(step: Step, stage: Stage | null, active: boolean): "done" | "now" | "later" {
   if (!stage) return step.key === "bill" && active ? "now" : "later";
@@ -276,7 +283,9 @@ function WorkingYear({ state, onCancel, dispatch }: { state: Exclude<CheckState,
 function Working({ state, onCancel, dispatch }: { state: Exclude<CheckState, { s: "composing" } | { s: "done" }>; onCancel: () => void; dispatch: (action: CheckAction) => void }) {
   if (state.inputs.bills.length > 1) return <WorkingYear state={state} onCancel={onCancel} dispatch={dispatch} />;
   const bill = state.inputs.bills[0];
-  const page = bill?.status === "ready" ? bill.pages[0] : null;
+  const kinds = state.s === "running" ? state.live.sorted[0] : undefined;
+  const pages = bill?.status === "ready" ? bill.pages : [];
+  const page = pages[Math.max(0, kinds?.indexOf("bill") ?? 0)] ?? null;
   const running = state.s === "running";
   const live = running ? state.live : null;
   const stage = state.stage;
@@ -288,6 +297,7 @@ function Working({ state, onCancel, dispatch }: { state: Exclude<CheckState, { s
   const offer = state.inputs.offer;
   const isCall = offer.kind === "call";
   const steps: Step[] = [
+    ...(kinds || stage === "sorting" ? [{ key: "sort" as const, stages: ["sorting"] as Stage[], label: "Sorting your pictures" }] : []),
     { key: "bill", stages: ["reading_bill", "rereading_bill"], label: stage === "rereading_bill" ? "Reading the bill again" : "Reading the bill" },
     ...(offer.kind === "none" ? [] : [{ key: "offer" as const, stages: ["reading_offer"] as Stage[], label: isCall ? "Listening to the call" : "Reading the offer" }]),
     { key: "compare", stages: ["comparing"], label: "Comparing charges with the promise" },
@@ -316,6 +326,19 @@ function Working({ state, onCancel, dispatch }: { state: Exclude<CheckState, { s
                   <span className="grid size-4 place-items-center">{status === "now" ? <Spinner /> : status === "done" ? <Check /> : <span className="size-2 rounded-full bg-fill-2" />}</span>
                   <span className="text-[15px]">{step.label}</span>
                 </div>
+
+                {step.key === "sort" && kinds && (
+                  <ul className="ml-7 mt-2 grid grid-cols-4 gap-2 sm:grid-cols-6">
+                    {pages.map((shown, i) => (
+                      <li key={i} className="appear flex flex-col gap-1">
+                        <div className={`h-16 overflow-hidden rounded-[4px] bg-white shadow-[inset_0_0_0_1px_var(--line)] ${kinds[i] === "other" ? "opacity-40" : ""}`}>
+                          <img src={shown.image} alt="" className="h-full w-full object-cover object-top" />
+                        </div>
+                        <span className="text-[12px] text-text-2">{KIND_NAMES[kinds[i] ?? "bill"]}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
 
                 {step.key === "bill" && lines.length > 0 && (
                   <ul className="ml-7 mt-2">
@@ -390,7 +413,7 @@ async function fetchFile(url: string, name: string, type: string): Promise<File>
   return new File([await (await fetch(url)).blob()], name, { type });
 }
 
-export function Checker({ samples }: { samples: Sample[] }) {
+export function Checker({ samples, realSamples, startWith }: { samples: Sample[]; realSamples: Sample[]; startWith: Sample | null }) {
   const [state, dispatch] = useReducer(reduce, initialState);
   const controllers = useRef(new Map<number, AbortController>());
   const nextId = useRef(0);
@@ -420,11 +443,27 @@ export function Checker({ samples }: { samples: Sample[] }) {
     }
   };
 
+  // Screenshots dropped together are one pile about one bill, sorted by Muse Ember; each PDF is its own bill.
   const addBills = (files: File[]) => {
+    const isPdf = (file: File) => file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+    const pictures = files.filter((file) => !isPdf(file));
+    const groups = [...files.filter(isPdf).map((file) => [file]), ...(pictures.length > 1 ? [pictures] : pictures.map((file) => [file]))];
     const room = MAX_BILLS - (state.s === "composing" ? state.inputs.bills.length : 0);
-    const docs = files.slice(0, room).map((file) => ({ id: id(), name: file.name, file }));
+    const docs = groups.slice(0, room).map((group) => ({ id: id(), name: group.length > 1 ? `${group.length} pictures` : group[0].name, group }));
     dispatch({ type: "bills_added", docs: docs.map(({ id: docId, name }) => ({ id: docId, name })) });
-    for (const doc of docs) void prepareDoc(doc.id, doc.file, MAX_BILL_PAGES);
+    for (const doc of docs) {
+      if (doc.group.length === 1) void prepareDoc(doc.id, doc.group[0], MAX_BILL_PAGES);
+      else void preparePile(doc.id, doc.group);
+    }
+  };
+
+  const preparePile = async (docId: string, group: File[]) => {
+    try {
+      const pages = (await Promise.all(group.slice(0, MAX_BILL_PAGES).map((file) => prepareFile(file, 1)))).flat();
+      dispatch({ type: "doc_prepared", id: docId, pages });
+    } catch (error) {
+      dispatch({ type: "prep_failed", id: docId, message: error instanceof PrepareError ? error.message : "One of these pictures could not be opened." });
+    }
   };
 
   const addOffer = async (file: File) => {
@@ -448,12 +487,16 @@ export function Checker({ samples }: { samples: Sample[] }) {
     const token = ++sampleToken.current;
     setLoadingSample(sample.id);
     try {
-      const bills = await Promise.all(
+      const pdfs = await Promise.all(
         sample.bills.map(async (url, i): Promise<Doc> => {
           const name = sample.bills.length > 1 ? `${sample.title} ${i + 1}.pdf` : `${sample.title}.pdf`;
           return { id: `sample-${token}-${i}`, name, status: "ready", pages: await prepareFile(await fetchFile(url, name, "application/pdf"), MAX_BILL_PAGES) };
         }),
       );
+      const pile = sample.pictures
+        ? [{ id: `sample-${token}-pile`, name: `${sample.pictures.length} pictures from the post`, status: "ready" as const, pages: (await Promise.all(sample.pictures.slice(0, MAX_BILL_PAGES).map(async (url, i) => prepareFile(await fetchFile(url, `picture-${i + 1}.jpg`, "image/jpeg"), 1)))).flat() }]
+        : [];
+      const bills: Doc[] = [...pdfs, ...pile];
       const offer: Inputs["offer"] =
         sample.offer.kind === "text"
           ? { kind: "text", text: sample.offer.text }
@@ -464,6 +507,14 @@ export function Checker({ samples }: { samples: Sample[] }) {
       if (token === sampleToken.current) setLoadingSample(null);
     }
   };
+
+  // Opened from the real-bills page: that post's check starts as soon as its pictures load.
+  const started = useRef(false);
+  useEffect(() => {
+    if (!startWith || started.current) return;
+    started.current = true;
+    void runSample(startWith);
+  });
 
   if (state.s === "done") {
     if (state.result.outcome === "year") return <YearView state={state} result={state.result} dispatch={dispatch} />;
@@ -512,8 +563,8 @@ export function Checker({ samples }: { samples: Sample[] }) {
             </div>
           ) : (
             <FileTarget label="Choose the bill" accept={BILL_ACCEPT} multiple onFiles={addBills} className="mt-3 flex h-[112px] w-full flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-text-2/40 text-center hover:bg-fill-2">
-              <span className="text-[15px]">Drop a PDF or photo, or choose a file</span>
-              <span className="text-[13px] text-text-2">Up to 12 months at once</span>
+              <span className="text-[15px]">Drop the bill, or every screenshot you have</span>
+              <span className="text-[13px] text-text-2">PDFs, photos, chats with the company. Up to 12 months of bills at once.</span>
             </FileTarget>
           )}
         </div>
@@ -552,9 +603,26 @@ export function Checker({ samples }: { samples: Sample[] }) {
         </button>
       </div>
 
+      {realSamples.length > 0 && (
+        <section className="mt-16">
+          <div className="flex items-baseline justify-between gap-4">
+            <h2 className="text-[17px] font-semibold">Real bills people posted</h2>
+            <Link href="/real" className="text-[13px] text-text-2 hover:text-text">
+              See all of them
+            </Link>
+          </div>
+          <p className="mt-1 text-[13px] text-text-2">Pictures from public Reddit posts, checked live against what the poster wrote.</p>
+          <div className="-mx-3 mt-3 grid sm:grid-cols-2 lg:grid-cols-3">
+            {realSamples.map((sample) => (
+              <SampleButton key={sample.id} sample={sample} busy={loadingSample !== null} loading={loadingSample === sample.id} onRun={() => void runSample(sample)} />
+            ))}
+          </div>
+        </section>
+      )}
+
       <section className="mt-16">
         <h2 className="text-[17px] font-semibold">Samples</h2>
-        <p className="mt-1 text-[13px] text-text-2">Each one runs live on Muse Ember.</p>
+        <p className="mt-1 text-[13px] text-text-2">Made-up bills that show each kind of check. Each one runs live on Muse Ember.</p>
         <div className="-mx-3 mt-3 grid sm:grid-cols-2 lg:grid-cols-3">
           {samples.map((sample) => (
             <SampleButton key={sample.id} sample={sample} busy={loadingSample !== null} loading={loadingSample === sample.id} onRun={() => void runSample(sample)} />

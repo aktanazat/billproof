@@ -54,7 +54,10 @@ export type CheckInput = z.infer<typeof checkInputSchema>;
 export type OfferInput = NonNullable<CheckInput["offer"]>;
 export const MAX_UPLOAD_BYTES = 40_000_000;
 
-export type Stage = "reading_bill" | "rereading_bill" | "reading_offer" | "comparing" | "challenging";
+export type Stage = "sorting" | "reading_bill" | "rereading_bill" | "reading_offer" | "comparing" | "challenging";
+
+// What each uploaded picture turned out to be: part of the bill, proof of a promise (a chat, an offer, an email), or neither.
+export type PageKind = "bill" | "promise" | "other";
 
 // What the person sees while a check runs: Muse Ember's reasoning summary and each item as soon as it is read.
 export type SeenLine = { label: string; amount_cents: number; kind: string; page: number; box: { x0: number; y0: number; x1: number; y1: number } | null };
@@ -98,6 +101,8 @@ export type Checked = {
   unused: Unused[];
   matchedPromiseIds: string[];
   billIsImage: boolean;
+  // Indices of the uploaded pages that make up the bill, in reading order; line items' page numbers count within these.
+  billPages: number[];
   hadOffer: boolean;
   spentMicros: number;
   calls: CallRecord[];
@@ -112,6 +117,7 @@ export type CheckResult = SingleResult | YearResult;
 
 export type CheckEvent =
   | { type: "stage"; stage: Stage }
+  | { type: "sorted"; bill: number; kinds: PageKind[] }
   | { type: "spent"; micros: number }
   | { type: "thinking"; stage: Stage; text: string }
   | { type: "line"; bill: number; line: SeenLine }

@@ -1,8 +1,13 @@
+import { Suspense } from "react";
 import { z } from "zod";
+import { realRun } from "@/data/real-bills";
+import { usd } from "@/lib/letter";
+import { postNotes, unagreedFees, type RealBill } from "@/lib/real-bills";
 import data from "../../public/samples/index.json";
-import { Checker } from "./checker";
+import { Checker, type Sample } from "./checker";
+import { SiteHeader } from "./site-header";
 
-const samples = z
+const samples: Sample[] = z
   .array(
     z.object({
       id: z.string(),
@@ -15,16 +20,45 @@ const samples = z
   )
   .parse(data);
 
-export default function Home() {
+function sampleOf(post: RealBill, outcome: string): Sample {
+  return {
+    id: post.id,
+    title: post.title,
+    outcome,
+    image: `/api/real-image/${post.id}/${post.outcome === "checked" ? (post.billPages[0] ?? 0) : 0}`,
+    bills: [],
+    pictures: post.images.map((_, n) => `/api/real-image/${post.id}/${n}`),
+    offer: { kind: "text", text: postNotes(post) },
+  };
+}
+
+// A real post opened from the real-bills page: its pictures as one pile, its words as what was promised.
+function realSample(id: string | undefined): Sample | null {
+  const post = realRun.results.find((bill) => bill.id === id);
+  return post ? sampleOf(post, "") : null;
+}
+
+// The three real bills with the most in company fees the poster never mentions agreeing to.
+const feeCents = (bill: RealBill) => unagreedFees(bill).reduce((t, fee) => t + fee.cents, 0);
+const realSamples = [...realRun.results]
+  .sort((a, b) => feeCents(b) - feeCents(a))
+  .slice(0, 3)
+  .filter((bill) => feeCents(bill) > 0)
+  .map((bill) => sampleOf(bill, `${usd(feeCents(bill))} in fees nobody agreed to`));
+
+// The post id is request data, so it is read inside a boundary; the plain start screen renders without it.
+async function CheckerFor({ searchParams }: { searchParams: PageProps<"/">["searchParams"] }) {
+  const { post } = await searchParams;
+  return <Checker samples={samples} realSamples={realSamples} startWith={realSample(typeof post === "string" ? post : undefined)} />;
+}
+
+export default function Home({ searchParams }: PageProps<"/">) {
   return (
     <main className="flex min-h-full flex-col">
-      <header className="mx-auto flex h-14 w-full max-w-[1120px] items-center justify-between px-6">
-        <p className="text-[17px] font-semibold tracking-[-0.01em]">Billproof</p>
-        <a href="https://github.com/aktanazat/billproof" className="text-[15px] text-text-2 hover:text-text">
-          Source
-        </a>
-      </header>
-      <Checker samples={samples} />
+      <SiteHeader current="check" />
+      <Suspense fallback={<Checker samples={samples} realSamples={realSamples} startWith={null} />}>
+        <CheckerFor searchParams={searchParams} />
+      </Suspense>
     </main>
   );
 }

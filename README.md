@@ -28,6 +28,10 @@ Only three kinds of claim produce dollars: a price above a promised monthly pric
 
 With several bills, each is checked on its own, four at a time, and its result streams in as it lands. The year view counts each statement once, only for the account most of them belong to, and adds only the claims you keep selected.
 
+Screenshots dropped together are treated as one pile. Muse Ember first sorts each picture into bill, promise (a chat with the company, an offer, an email) or neither; the bill pages are read as the bill, and the promise pictures join whatever the person wrote as the offer. Promises read off screenshots always wait for the person to confirm.
+
+Every message comes in four forms: a chat message, an email, a call script, and a complaint ready for the FCC (phone, internet, TV) or a state utility commission (electric, gas, water), with a blank for what the company said when asked.
+
 ## Spend
 
 Before each model call the server counts the exact input tokens with `POST /v1/responses/input_tokens` and reserves the worst case (all input uncached, every allowed output token) in a SQLite ledger. Reservations are checked against a per-check cap of 3¢ per bill and an event cap, then settled to the billed usage. A call lost mid-flight stays counted at its full reservation. When one bill of a year fails, no other bill starts a new paid call, and the failure is reported only after the calls already running have settled. The cost of each check, and the tokens of each model call, are shown under the result.
@@ -64,9 +68,17 @@ Median cost per single-bill check: 0.17¢, with the challenge step included. The
 
 `pnpm samples` regenerates the sample bills, the two recorded calls and the year of statements on the start screen.
 
+## Real bills
+
+The synthetic set proves the rules; the real-bills run shows what happens on the internet's actual mess. `pnpm census <posts.jsonl>` runs Billproof over public Reddit posts about phone, internet and TV bills, eight at a time, each post's pictures as one pile and its words as what the poster says they were promised. The results are on the site at `/real`, where any of them can be checked again live.
+
+Run on 2026-11-25: 54,810 posts from 22 subreddits (Xfinity, Spectrum, AT&T, Verizon, T-Mobile, Google Fi, DirecTV, Starlink and others) were scanned through the Arctic Shift archive; 817 had pictures and talked about a promise, promo, credit or price change; the pictures of 683 were still online. Muse Ember sorted those pictures and found 79 real bills among chats, app screens and ads. 20 of the bills carry company fees the poster never mentions agreeing to, $339.20 a month in all, led by "Administrative & Regulatory Cost Recovery", "Broadcast TV" and "Regional Sports" fees. Two posts had a charge above a promise the poster quoted ($86.06); both wait for the poster to confirm the marked line, because a photo can't be checked against a text layer. The whole run took 8 minutes and cost $0.52.
+
+Only public posts are used. The site shows each post's title and links to it; pictures are fetched from Reddit by post and position, never by an address the visitor supplies.
+
 ## Proof of usage
 
-Every check returns its own trace: each Muse Ember step with its reasoning effort, input, cached and output tokens, and cost, shown under "How Muse Ember checked it" on the result screen. The prompts are `READ_BILL_INSTRUCTIONS`, `READ_TERMS_INSTRUCTIONS` and `CHALLENGE_INSTRUCTIONS` in `src/lib/pipeline.ts`; the evaluation trace is `eval/run-2026-11-25b.json`. The server ledger (`data/ledger.db`) records every reservation and settled cost.
+Every check returns its own trace: each Muse Ember step with its reasoning effort, input, cached and output tokens, and cost, shown under "How it was checked" on the result screen. The prompts are `SORT_INSTRUCTIONS`, `READ_BILL_INSTRUCTIONS`, `READ_TERMS_INSTRUCTIONS` and `CHALLENGE_INSTRUCTIONS` in `src/lib/pipeline.ts`; the evaluation trace is `eval/run-2026-11-25b.json` and the real-bills run is `src/data/real-bills.json`. The server ledger (`data/ledger.db`) records every reservation and settled cost.
 
 ## Privacy
 

@@ -12,6 +12,7 @@
     "test": "vitest run",
     "samples": "tsx scripts/make-samples.ts",
     "eval": "tsx --conditions=react-server scripts/eval.ts",
+    "census": "tsx --conditions=react-server scripts/census.ts",
     "postinstall": "node scripts/copy-pdfjs.mjs"
   },
   "dependencies": {

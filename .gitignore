@@ -44,3 +44,4 @@ next-env.d.ts
 /data
 /public/pdfjs
 /eval/results
+/eval/census/raw-*.json
