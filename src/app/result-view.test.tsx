@@ -144,6 +144,9 @@ describe("the result page's wording", () => {
     const html = renderToStaticMarkup(createElement(ResultView, { result, bill: 0, pages: [picture("Q0hBVA=="), picture("QklMTA==")], callUrl: null, selection: { claims: {}, questions: {} }, dispatch: () => {}, backLabel: "Check another bill", onBack: () => {} }));
     expect(html).toContain("data:image/png;base64,QklMTA==");
     expect(html).not.toContain("data:image/png;base64,Q0hBVA==");
+    expect(html).toContain("Read 1 of the 2 pictures as this bill; the other one was read as the offer or an earlier bill, or set aside.");
+    const single = renderToStaticMarkup(createElement(ResultView, { result: { ...result, billPages: [0] }, bill: 0, pages: [picture("QklMTA==")], callUrl: null, selection: { claims: {}, questions: {} }, dispatch: () => {}, backLabel: "Check another bill", onBack: () => {} }));
+    expect(single).not.toContain("pictures as this bill");
   });
 
   test("a claim waiting on one marked line asks to confirm the marked line", () => {
