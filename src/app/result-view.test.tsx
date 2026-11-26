@@ -73,4 +73,24 @@ describe("the result page's wording", () => {
     };
     expect(page(result, { claims: { C1: "needs_confirmation" }, questions: {} })).toContain("once you confirm the marked line<");
   });
+
+  test("an offer with no price or promise in it is headed so, not as a failed match", () => {
+    const html = page(checked([line("L1", "Internet 1000", 4479, "plan")], []));
+    expect(html).toContain("No price or promise found to check the bill against");
+    expect(html).not.toContain("Couldn't match your offer");
+  });
+
+  test("one charge that adds up to the printed total is said in the singular", () => {
+    const base = checked([line("L1", "AT&T Unlimited Premium PL plan", 4479, "plan")], []);
+    const reading: Reading = { ...base.reading, printed: { ...base.reading.printed, current_charges: { cents: 4479, quote: "Monthly charges $44.79" } } };
+    expect(page({ ...base, reading, totals: checkTotals(reading, { kind: "image" }) })).toContain("Read 1 charge that adds up to the $44.79 printed on the bill.");
+  });
+
+  test("a condition the reading can't name is asked about plainly", () => {
+    const result: Checked = {
+      ...checked([line("L1", "Spectrum Internet Premier", 3000, "plan")], [{ id: "Q1", kind: "conditions_unproven", lineIds: ["L1"], promiseId: "P1" }]),
+      promises: [{ id: "P1", kind: "monthly_price", description: "", amount_cents: 3000, per_line: false, conditions: ["other"], applies_from: null, applies_until: null, quote: "$30 a month", said_at_seconds: null, covers_line_ids: ["L1"] }],
+    };
+    expect(page(result)).toContain("The bill doesn't show that you meet your offer's conditions");
+  });
 });
