@@ -67,6 +67,18 @@ describe("check machine", () => {
     expect(state).toMatchObject({ s: "running", live: { lines: { 0: [{ label: "Internet" }], 1: [{ label: "Internet" }] } } });
   });
 
+  test("a recording that finishes opening after the person swapped it for a file does not take the file's place", () => {
+    const state = play([
+      ...readyBill,
+      { type: "call_added", id: "c", name: "call.m4a" },
+      { type: "offer_file_added", id: "f", name: "offer.png" },
+      { type: "call_prepared", id: "c", call: { wav: "UklGRg==", seconds: 30, url: "blob:call", peaks: [] } },
+      { type: "prep_failed", id: "c", message: "This recording could not be opened." },
+    ]);
+    expect(state).toMatchObject({ s: "composing", inputs: { offer: { kind: "file", doc: { id: "f", status: "preparing" } } } });
+    expect(play([{ type: "doc_prepared", id: "f", pages: [page] }, { type: "start" }], state).s).toBe("running");
+  });
+
   test("a check waits for every bill of a year to open", () => {
     const state = play([{ type: "bills_added", docs: [{ id: "a", name: "jan.pdf" }, { id: "b", name: "feb.pdf" }] }, { type: "doc_prepared", id: "a", pages: [page] }, { type: "start" }]);
     expect(state.s).toBe("composing");
