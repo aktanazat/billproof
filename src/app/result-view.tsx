@@ -271,21 +271,22 @@ export function Trace({ calls, spentMicros, notes }: { calls: CallRecord[]; spen
         <table className="w-full text-left tabular-nums">
           <thead>
             <tr>
+              {/* Columns after the first keep a gap, so on a phone a long count never runs into the next one. */}
               <th className="py-1.5 font-normal">Muse Ember step</th>
-              <th className="py-1.5 font-normal">Effort</th>
-              <th className="py-1.5 text-right font-normal">Tokens in</th>
-              <th className="py-1.5 text-right font-normal">Tokens out</th>
-              <th className="py-1.5 text-right font-normal">Cost</th>
+              <th className="py-1.5 pl-3 font-normal">Effort</th>
+              <th className="py-1.5 pl-3 text-right font-normal">Tokens in</th>
+              <th className="py-1.5 pl-3 text-right font-normal">Tokens out</th>
+              <th className="py-1.5 pl-3 text-right font-normal">Cost</th>
             </tr>
           </thead>
           <tbody>
             {calls.map((call, i) => (
               <tr key={i} className="border-t border-line">
                 <td className="py-1.5 text-text">{CALL_NAMES[call.name] ?? call.name}</td>
-                <td className="py-1.5">{call.effort}</td>
-                <td className="py-1.5 text-right">{call.reused ? "reused" : call.inputTokens.toLocaleString("en-US")}</td>
-                <td className="py-1.5 text-right">{call.reused ? "" : call.outputTokens.toLocaleString("en-US")}</td>
-                <td className="py-1.5 text-right">{formatMicros(call.costMicros)}</td>
+                <td className="py-1.5 pl-3">{call.effort}</td>
+                <td className="py-1.5 pl-3 text-right">{call.reused ? "reused" : call.inputTokens.toLocaleString("en-US")}</td>
+                <td className="py-1.5 pl-3 text-right">{call.reused ? "" : call.outputTokens.toLocaleString("en-US")}</td>
+                <td className="py-1.5 pl-3 text-right">{formatMicros(call.costMicros)}</td>
               </tr>
             ))}
           </tbody>
