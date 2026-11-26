@@ -27,3 +27,12 @@ test("a dollar amount with one decimal or no leading zero is read at its value",
   expect(moneyIn("$55.50, then $1,299.99, then 75.00")).toEqual([5550, 129999, 7500]);
   expect(moneyIn("Fiber 500 through 10/31/2027")).toEqual([]);
 });
+
+// People write small amounts in cents ("an iPhone 16 for 99 cents", "75 cents a month"); a promise whose quote shows
+// no amount the reader knows is set aside, so these promises were lost.
+test("an amount written in cents is read as money, and a percentage is not", () => {
+  expect(moneyIn("iPhone 16 with a two-year contract for 99 cents")).toEqual([99]);
+  expect(moneyIn("Paperless billing saves 75¢ a month")).toEqual([75]);
+  expect(moneyIn("just 1 cent more")).toEqual([1]);
+  expect(moneyIn("50 percent off for 12 months")).toEqual([]);
+});
