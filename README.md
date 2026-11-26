@@ -2,7 +2,7 @@
 
 Billproof puts a phone, internet or utility bill on the stand against what the company promised, and drafts the message that gets the difference back.
 
-Drop in the bill (PDF or a phone photo) and the promise: the offer email, a screenshot, or a recording of the sales call. Billproof marks each charge that breaks the promise on the bill itself, sets the printed line beside the offer's words (or the moment on the call where they were said), has Muse Ember argue the company's side before anything is claimed, and writes the dispute as a chat message, an email or a call script. Drop up to twelve months of bills and it reads the whole year at once and shows the month the promise broke. Built for the Meta Muse Ember hackathon: every check runs on `muse-ember-1.0` and costs a fraction of a cent.
+Drop in the bill (PDF or a phone photo) and the promise: the offer email, a screenshot, or a recording of the sales call. Billproof marks each charge that breaks the promise on the bill itself, sets the printed line beside the offer's words (or the moment on the call where they were said), has Muse Ember argue the company's side before anything is claimed, and writes the dispute as a chat message, an email, a call script or an FCC complaint. Drop up to twelve months of bills and it reads the whole year at once and shows the month the promise broke. Built for the Meta Muse Ember hackathon: every check runs on `muse-ember-1.0` and costs a fraction of a cent.
 
 Live: https://billproof.aktan.us (six samples run from the start screen, including two recorded calls and a year of bills).
 
@@ -28,7 +28,7 @@ Only three kinds of claim produce dollars: a price above a promised monthly pric
 
 With several bills, each is checked on its own, four at a time, and its result streams in as it lands. The year view counts each statement once, only for the account most of them belong to, and adds only the claims you keep selected.
 
-Screenshots dropped together are treated as one pile. Muse Ember first sorts each picture into bill, promise (a chat with the company, an offer, an email) or neither; the bill pages are read as the bill, and the promise pictures join whatever the person wrote as the offer. Promises read off screenshots always wait for the person to confirm.
+Screenshots dropped together, up to six, are treated as one pile; a bigger pile is refused rather than cut short, since the picture left out could be the offer. Muse Ember first sorts each picture into bill, promise (a chat with the company, an offer, an email) or neither; the bill pages are read as the bill, and the promise pictures join whatever the person wrote as the offer. Promises read off screenshots always wait for the person to confirm.
 
 Every message comes in four forms: a chat message, an email, a call script, and a complaint ready for the FCC (phone, internet, TV) or a state utility commission (electric, gas, water), with a blank for what the company said when asked. The company is asked to credit a claim or explain a fee, a repeated charge or a rise; the complaint states them as facts ("The bill charges the Network Enhancement Fee ($3.99) and Regulatory Recovery Fee ($0.99), which were not part of the plan I agreed to."), since a regulator can't remove a fee, and names the problem by what the claims are (a price above a promise, a charge for something included, a missing credit). When the bill doesn't name the company, the email is addressed to the billing team and the complaint leaves the company's name to fill in.
 
