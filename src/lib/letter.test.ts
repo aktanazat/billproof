@@ -97,6 +97,7 @@ describe("a missing autopay credit on a bill with no company name", () => {
 
   test("the complaint names a missing credit as the problem and states it without asking the regulator for it", () => {
     expect(message.complaint).toContain("Problem: a credit I was promised is missing from my bill.");
+    expect(message.complaint).toContain("Resolution I'm asking for: a credit of $7.50 and the promised credit on future bills.");
     expect(message.complaint).toContain('- This bill has no $7.50 monthly credit I was promised ("50% discount that showed -$7.50 per line").\n');
     expect(message.chat).not.toContain("autopay");
     expect(message.complaint).not.toContain("Please");
@@ -138,6 +139,7 @@ describe("a price claim across several lines on a dated bill", () => {
 
   test("the complaint, which has no such opening, gives the period with the claim", () => {
     expect(message.complaint).toContain("- For Nov 8, 2026 to Dec 7, 2026, Unlimited Basic - Line 1, Unlimited Basic - Line 2 and Unlimited Basic - Line 3 come to $90.00");
+    expect(message.complaint).toContain("Resolution I'm asking for: a credit of $15.00 and the promised rate on future bills.");
   });
 });
 

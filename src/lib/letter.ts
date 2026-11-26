@@ -78,6 +78,18 @@ function claimProblem(claims: Claim[]): string {
   return kinds.size === 1 ? PROBLEM[claims[0].kind] : "billed more than I was promised.";
 }
 
+// What the complaint asks for on future bills, by the same rule: a price is a rate, a credit is applied, an included
+// item is not charged.
+const REMEDY: Record<Claim["kind"], string> = {
+  price_above_promise: "the promised rate on future bills",
+  included_charged: "no charge for what was included on future bills",
+  credit_missing: "the promised credit on future bills",
+};
+function claimRemedy(claims: Claim[]): string {
+  const kinds = new Set(claims.map((claim) => claim.kind));
+  return kinds.size === 1 ? REMEDY[claims[0].kind] : "future bills charged as promised";
+}
+
 // A repeated charge as a fact, for a regulator, and as a request, for the company.
 const repeatFact = (lines: LineItem[]) => `${names(lines)} appears ${lines.length} times on the bill (${lines.map((line) => usd(line.amount_cents)).join(" and ")}).`;
 const repeatSentence = (lines: LineItem[]) => `${repeatFact(lines)} Please confirm whether this is a duplicate and credit it if so.`;
@@ -103,7 +115,8 @@ export type Message = { totalCents: number; chat: string; email: string; call: s
 
 // The written complaint a regulator takes when the company won't fix it: the FCC for phone, internet and TV,
 // the state utility commission for electric, gas and water. The person fills in what the company already said.
-function complaintText(provider: string | null, account: string, problem: string, facts: string[], totalCents: number): string {
+function complaintText(provider: string | null, account: string, problem: string, facts: string[], claims: Claim[]): string {
+  const totalCents = claims.reduce((total, claim) => total + claim.amountCents, 0);
   return [
     `Company: ${provider ?? "[company name]"}`,
     `Account: ${account}`,
@@ -114,7 +127,7 @@ function complaintText(provider: string | null, account: string, problem: string
     "",
     `What the company said when I asked it to correct this: [date you contacted ${provider ?? "the company"} and their answer]`,
     "",
-    totalCents > 0 ? `Resolution I'm asking for: a credit of ${usd(totalCents)} and the promised rate on future bills.` : "Resolution I'm asking for: the charges above corrected or explained in writing.",
+    totalCents > 0 ? `Resolution I'm asking for: a credit of ${usd(totalCents)} and ${claimRemedy(claims)}.` : "Resolution I'm asking for: the charges above corrected or explained in writing.",
     "",
     "File phone, internet and TV complaints at consumercomplaints.fcc.gov; electric, gas and water complaints go to your state utility commission.",
   ].join("\n");
@@ -196,7 +209,7 @@ export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<stri
     .filter(Boolean)
     .join("\n\n");
   const problem = claims.length > 0 ? claimProblem(claims) : fees.length > 0 ? "fees on my bill I never agreed to." : "charges on my bill the company hasn't explained.";
-  return { totalCents, chat, email, call, complaint: complaintText(provider, account, problem, regulatorBody, totalCents) };
+  return { totalCents, chat, email, call, complaint: complaintText(provider, account, problem, regulatorBody, claims) };
 }
 
 // One message for a year of statements: each month's claims under its statement, then the total.
@@ -229,5 +242,5 @@ export function buildYearMessage(months: Checked[]): Message {
   const chat = [`Hi, I'm writing about ${account}. I checked my statements against the plan I signed up for.`, ...sections, ask].filter(Boolean).join("\n\n");
   const email = [`Subject: Billing correction for ${account}`, "", provider ? `Hello ${provider} billing team,` : "Hello billing team,", "", ...sections.flatMap((s) => [s, ""]), ...(ask ? [ask, ""] : []), "Please reply with the corrected amount and the date the credit will post.", "", "Thank you,", "[Your name]"].join("\n");
   const call = [`I'm calling about ${account}.`, ...sections.map((s, i) => `${i + 1}. ${s}`), ask, "Before ending the call, ask for a reference number and the date the credit will post."].filter(Boolean).join("\n\n");
-  return { totalCents, chat, email, call, complaint: complaintText(provider, account, claimProblem(withClaims.flatMap((month) => month.claims)), sectionsFor(`${provider ?? "the company"}'s representative`, false), totalCents) };
+  return { totalCents, chat, email, call, complaint: complaintText(provider, account, claimProblem(withClaims.flatMap((month) => month.claims)), sectionsFor(`${provider ?? "the company"}'s representative`, false), withClaims.flatMap((month) => month.claims)) };
 }
