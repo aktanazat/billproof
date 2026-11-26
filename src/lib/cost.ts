@@ -25,6 +25,9 @@ export function ceilingMicros(inputTokens: number, maxOutputTokens: number): num
 
 export function formatMicros(micros: number): string {
   const cents = micros / 10_000;
+  // A reused reading costs nothing; a cost too small for three decimals still isn't nothing.
+  if (micros === 0) return "0¢";
+  if (cents < 0.001) return "under 0.001¢";
   if (cents >= 1) return `$${(cents / 100).toFixed(2)}`;
   return `${cents.toFixed(cents >= 0.1 ? 2 : 3)}¢`;
 }
