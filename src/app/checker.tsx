@@ -144,7 +144,8 @@ function FileTarget({ label, accept, multiple, onFiles, children, className }: {
           if (files.length) onFiles(files);
         }}
       />
-      <button type="button" onClick={() => input.current?.click()} className={`${className ?? ""} ${over ? "bg-fill-2" : ""}`}>
+      {/* A file held over the target styles it as hovering does; browsers apply no hover during a drag. */}
+      <button type="button" onClick={() => input.current?.click()} data-over={over || undefined} className={className}>
         {children}
       </button>
     </div>
@@ -752,7 +753,7 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
                 <DocRow key={doc.id} doc={doc} onRemove={() => dispatch({ type: "removed", id: doc.id })} />
               ))}
               {bills.length < MAX_BILLS && (
-                <FileTarget label="Add more bills" accept={BILL_ACCEPT} multiple onFiles={addBills} className="mt-1 h-8 rounded-lg px-2 text-[13px] text-text-2 hover:bg-fill-2 hover:text-text">
+                <FileTarget label="Add more bills" accept={BILL_ACCEPT} multiple onFiles={addBills} className="mt-1 h-8 rounded-lg px-2 text-[13px] text-text-2 hover:bg-fill-2 hover:text-text data-[over]:bg-fill-2 data-[over]:text-text">
                   Add another month
                 </FileTarget>
               )}
@@ -768,7 +769,7 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
               )}
             </div>
           ) : (
-            <FileTarget label="Choose the bill" accept={BILL_ACCEPT} multiple onFiles={addBills} className="mt-3 flex h-[112px] w-full flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-text-2/40 text-center hover:bg-fill-2">
+            <FileTarget label="Choose the bill" accept={BILL_ACCEPT} multiple onFiles={addBills} className="mt-3 flex h-[112px] w-full flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-text-2/40 text-center hover:bg-white data-[over]:bg-white">
               <span className="px-2 text-[15px] text-balance">
                 <span className="sm:hidden">Choose</span>
                 <span className="hidden sm:inline">Drop</span> the bill, or every screenshot you have
@@ -802,7 +803,7 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
                 aria-label="What you were promised"
                 className="mt-2 block min-h-[88px] w-full flex-1 resize-none rounded-lg bg-white p-3 text-[15px] leading-[22px] shadow-[inset_0_0_0_1px_var(--line)] placeholder:text-text-2 focus:outline-none focus-visible:shadow-[inset_0_0_0_2px_var(--text)]"
               />
-              <FileTarget label="Add the offer as a file or recording" accept={OFFER_ACCEPT} onFiles={(files) => void addOffer(files)} className="mt-2 h-8 rounded-lg px-2 text-[13px] text-text-2 hover:bg-fill-2 hover:text-text">
+              <FileTarget label="Add the offer as a file or recording" accept={OFFER_ACCEPT} onFiles={(files) => void addOffer(files)} className="mt-2 h-8 rounded-lg px-2 text-[13px] text-text-2 hover:bg-fill-2 hover:text-text data-[over]:bg-fill-2 data-[over]:text-text">
                 Add a screenshot, PDF or call recording instead
               </FileTarget>
             </>
