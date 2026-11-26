@@ -112,6 +112,32 @@ describe("the result page's wording", () => {
     expect(after.replace(/&quot;/g, '"')).toContain('This bill has no $7.50 monthly credit I was promised ("-$7.50 per line"). Please apply the missing $7.50.');
   });
 
+  test("unticking one of two claims lowers the heading total and takes that claim and the total line out of the message", () => {
+    const price: Checked["promises"][number] = { id: "P1", kind: "monthly_price", description: "", amount_cents: 5500, per_line: false, conditions: [], applies_from: null, applies_until: null, quote: "$55 a month", said_at_seconds: null, covers_line_ids: ["L1"] };
+    const gateway: Checked["promises"][number] = { id: "P2", kind: "included", description: "", amount_cents: 0, per_line: false, conditions: [], applies_from: null, applies_until: null, quote: "Wi-Fi Gateway included", said_at_seconds: null, covers_line_ids: ["L2"] };
+    const result: Checked = {
+      ...checked([line("L1", "Fiber 500 Internet", 7000, "plan"), line("L2", "Wi-Fi Gateway Rental", 1500, "equipment")], []),
+      promises: [price, gateway],
+      matchedPromiseIds: ["P1", "P2"],
+      claims: [
+        { id: "C1", kind: "price_above_promise", lineIds: ["L1"], promiseId: "P1", actualCents: 7000, expectedCents: 5500, amountCents: 1500, needsConfirmation: false, lookedFor: null },
+        { id: "C2", kind: "included_charged", lineIds: ["L2"], promiseId: "P2", actualCents: 1500, expectedCents: 0, amountCents: 1500, needsConfirmation: false, lookedFor: null },
+      ],
+    };
+    const running = { s: "running", inputs: initialState.inputs, attempts: 1, attempt: 1, stage: null, spentMicros: 0, live: {} } as unknown as CheckState;
+    const both = reduce(running, { type: "finished", attempt: 1, result });
+    const one = reduce(both, { type: "toggle_claim", bill: 0, id: "C2" });
+    if (both.s !== "done" || one.s !== "done") throw new Error("the finished check did not become a done state");
+    const before = page(result, both.selections[0]);
+    expect(before).toMatch(/>\$30\.00<\/p><h1[^>]*>to ask back from AT&T</);
+    expect(before).toContain("In total, please credit $30.00 to my account.");
+    const after = page(result, one.selections[0]);
+    expect(after).toMatch(/>\$15\.00<\/p><h1[^>]*>to ask back from AT&T</);
+    expect(after).not.toContain("I was charged $15.00 for Wi-Fi Gateway Rental");
+    expect(after).not.toContain("In total");
+    expect(after).toContain("Fiber 500 Internet comes to $70.00, but my plan was confirmed at $55.00 a month");
+  });
+
   test("a claim waiting on one marked line asks to confirm the marked line", () => {
     const result: Checked = {
       ...checked([line("L1", "Number share plan", 1500, "plan")], []),
