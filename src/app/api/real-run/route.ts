@@ -94,6 +94,12 @@ export async function POST(request: Request) {
         send({ type: "done", seconds: (performance.now() - started) / 1000, spentMicros });
       } finally {
         running = false;
+        // The hourly limits bound spending, so a run that cost nothing (Meta down or busy) gives its slots back.
+        if (spentMicros === 0) {
+          const at = startedRuns.indexOf(now);
+          if (at >= 0) startedRuns.splice(at, 1);
+          if (lastRunByClient.get(client) === now) lastRunByClient.delete(client);
+        }
         try {
           controller.close();
         } catch {
