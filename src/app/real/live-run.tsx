@@ -12,7 +12,8 @@ type Tile = { id: string; title: string; provider: string | null; picture: strin
 const STAGE_TEXT: Record<Stage, string> = { sorting: "Sorting pictures", reading_bill: "Reading", rereading_bill: "Reading again", reading_offer: "Reading the post", comparing: "Comparing", challenging: "Checking the company's side" };
 
 function finish(tile: Tile, result: SingleResult): Tile {
-  if (result.outcome !== "checked") return { ...tile, stage: "done", note: result.outcome === "not_a_bill" ? "Not a bill" : "Couldn't read" };
+  // A post whose fresh read isn't a bill, or can't be checked, ends unchecked, like a failure: it isn't counted as checked.
+  if (result.outcome !== "checked") return { ...tile, stage: "failed", note: result.outcome === "not_a_bill" ? "Not a bill" : "Couldn't read" };
   const line = (id: string) => result.reading.line_items.find((item) => item.id === id)?.amount_cents ?? 0;
   const feeCents = result.questions.filter((q) => q.kind === "unagreed_fee").reduce((t, q) => t + q.lineIds.reduce((s, id) => s + line(id), 0), 0);
   const claimCents = result.claims.reduce((t, claim) => t + claim.amountCents, 0);
@@ -139,7 +140,8 @@ export function LiveRun({ paused }: { paused: boolean }) {
     }
   };
 
-  // A bill that failed isn't checked: counting it as done made a run Meta never answered read "24 of 24" beside $0.00.
+  // A bill that failed or couldn't be checked isn't counted: counting failures made a run Meta never answered read
+  // "24 of 24" beside $0.00.
   const checkedCount = tiles.filter((tile) => tile.stage === "done").length;
   const fees = tiles.reduce((t, tile) => t + tile.feeCents, 0);
   const claims = tiles.reduce((t, tile) => t + tile.claimCents, 0);
