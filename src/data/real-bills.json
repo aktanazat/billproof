@@ -20652,15 +20652,7 @@
       ],
       "claims": [],
       "dropped": [],
-      "questions": [
-        {
-          "kind": "unagreed_fee",
-          "lines": [
-            "T-Mobile fees & charges"
-          ],
-          "cents": 1
-        }
-      ],
+      "questions": [],
       "explained": 0,
       "hadOffer": true,
       "matchedPromises": 0,
