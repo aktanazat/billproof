@@ -41,6 +41,9 @@ function summarize(calls: CallRecord[]): CallRecord[] {
 
 export function YearView({ state, result, dispatch }: { state: Done; result: YearResult; dispatch: (action: CheckAction) => void }) {
   const [open, setOpen] = useState<number | null>(null);
+  // Back from a month, focus returns to that month's button rather than the year's heading, so a keyboard user keeps
+  // their place among the twelve.
+  const [cameBackFrom, setCameBackFrom] = useState<number | null>(null);
   const read = result.months.flatMap((month) => (month.result.outcome === "checked" ? [{ bill: month.bill, result: month.result }] : [])).sort((a, b) => (dateOf(a.result) ?? "").localeCompare(dateOf(b.result) ?? ""));
   // A bill left out is named by its file, so the person knows which one to replace; a count stands in when a name is missing.
   const leftOut = (outcome: "not_a_bill" | "could_not_check", one: string, many: string) => {
@@ -114,7 +117,7 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
     const doc = state.inputs.bills[open];
     const selection = state.selections[open];
     if (month && doc?.status === "ready" && selection) {
-      return <ResultView result={month.result} bill={open} pages={doc.pages} omittedPages={{ bill: doc.omitted, offer: offerOmitted(state.inputs.offer) }} callUrl={callUrl} selection={selection} dispatch={dispatch} backLabel="Back to the year" onBack={() => setOpen(null)} />;
+      return <ResultView result={month.result} bill={open} pages={doc.pages} omittedPages={{ bill: doc.omitted, offer: offerOmitted(state.inputs.offer) }} callUrl={callUrl} selection={selection} dispatch={dispatch} backLabel="Back to the year" onBack={() => { setCameBackFrom(open); setOpen(null); }} />;
     }
   }
 
@@ -131,7 +134,7 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
   return (
     <section className="mx-auto w-full max-w-[1120px] px-6 pb-24 pt-6">
       <header className="flex flex-wrap items-end justify-between gap-4 pb-8">
-        <div ref={focusOnShow} tabIndex={-1} className="outline-none">
+        <div ref={cameBackFrom === null ? focusOnShow : undefined} tabIndex={-1} className="outline-none">
           <h1 className={firstBad >= 0 ? undefined : "text-[28px] font-semibold tracking-[-0.02em]"}>
             {firstBad >= 0 ? (
               <>
@@ -167,7 +170,7 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
               const status = amount > 0 ? "overcharged" : asks(month) ? "charges worth asking about" : !hadOffer ? "no offer to compare" : compared(month) ? "matches the offer" : "not compared with the offer";
               return (
                 <li key={month.bill}>
-                  <button type="button" onClick={() => setOpen(month.bill)} className="group flex w-full flex-col gap-2 rounded-lg text-left" aria-label={`${visible}${shown === full ? "" : `, ${full}`}: ${status}`}>
+                  <button type="button" ref={month.bill === cameBackFrom ? focusOnShow : undefined} onClick={() => setOpen(month.bill)} className="group flex w-full flex-col gap-2 rounded-lg text-left" aria-label={`${visible}${shown === full ? "" : `, ${full}`}: ${status}`}>
                     <span className="flex h-28 items-end rounded-t-md border-b border-line px-1.5 group-hover:bg-fill">
                       {amount > 0 && <span className="w-full rounded-t-[3px] bg-red" style={{ height: `${Math.max(8, (amount / largest) * 100)}%` }} />}
                     </span>
