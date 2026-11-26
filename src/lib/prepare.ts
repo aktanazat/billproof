@@ -145,24 +145,46 @@ function peaksOf(samples: Float32Array): number[] {
   return peaks.map((p) => Math.round((p / top) * 100) / 100);
 }
 
+function tooLong(duration: number, maxSeconds: number): PrepareError {
+  // Whole minutes would round 4:20 down to "4 minutes long" beside a 4-minute limit; past an hour it reads 2:00:01.
+  const seconds = Math.ceil(duration);
+  const two = (n: number) => String(n).padStart(2, "0");
+  const hours = Math.floor(seconds / 3600);
+  const length = hours > 0 ? `${hours}:${two(Math.floor(seconds / 60) % 60)}:${two(seconds % 60)}` : `${Math.floor(seconds / 60)}:${two(seconds % 60)}`;
+  return new PrepareError(`This recording is ${length} long. Trim it to the part with the promise, up to ${maxSeconds / 60} minutes.`);
+}
+
+// The length a recording's file declares, read without decoding it, or null when the browser can't say.
+function declaredSeconds(file: File): Promise<number | null> {
+  return new Promise((resolve) => {
+    const audio = new Audio();
+    const url = URL.createObjectURL(file);
+    const done = (seconds: number | null) => {
+      clearTimeout(timer);
+      URL.revokeObjectURL(url);
+      resolve(seconds);
+    };
+    const timer = setTimeout(() => done(null), DEADLINE_MS);
+    audio.onloadedmetadata = () => done(Number.isFinite(audio.duration) ? audio.duration : null);
+    audio.onerror = () => done(null);
+    audio.preload = "metadata";
+    audio.src = url;
+  });
+}
+
 export async function prepareCall(file: File, maxSeconds: number): Promise<PreparedCall> {
   const context = new AudioContext();
   let decoded: AudioBuffer;
   try {
     decoded = await context.decodeAudioData(await file.arrayBuffer());
   } catch {
-    throw new PrepareError("This recording could not be opened. Use M4A, MP3 or WAV.");
+    // Safari won't decode an hour-long call at all; its file still says how long it is.
+    const declared = await declaredSeconds(file);
+    throw declared !== null && declared > maxSeconds ? tooLong(declared, maxSeconds) : new PrepareError("This recording could not be opened. Use M4A, MP3 or WAV.");
   } finally {
     void context.close();
   }
-  if (decoded.duration > maxSeconds) {
-    // Whole minutes would round 4:20 down to "4 minutes long" beside a 4-minute limit; past an hour it reads 2:00:01.
-    const seconds = Math.ceil(decoded.duration);
-    const two = (n: number) => String(n).padStart(2, "0");
-    const hours = Math.floor(seconds / 3600);
-    const length = hours > 0 ? `${hours}:${two(Math.floor(seconds / 60) % 60)}:${two(seconds % 60)}` : `${Math.floor(seconds / 60)}:${two(seconds % 60)}`;
-    throw new PrepareError(`This recording is ${length} long. Trim it to the part with the promise, up to ${maxSeconds / 60} minutes.`);
-  }
+  if (decoded.duration > maxSeconds) throw tooLong(decoded.duration, maxSeconds);
   const offline = new OfflineAudioContext(1, Math.ceil(decoded.duration * CALL_SAMPLE_RATE), CALL_SAMPLE_RATE);
   const source = offline.createBufferSource();
   source.buffer = decoded;

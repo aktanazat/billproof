@@ -70,3 +70,24 @@ test("a recording over the limit is told its length as a clock reads it, hours i
   await expect(lasting(7200.4)).rejects.toThrow(new PrepareError("This recording is 2:00:01 long. Trim it to the part with the promise, up to 4 minutes."));
   await expect(lasting(259.2)).rejects.toThrow(new PrepareError("This recording is 4:20 long. Trim it to the part with the promise, up to 4 minutes."));
 });
+
+// Safari won't decode an hour-long recording at all (measured: a 60-minute WAV failed to decode while a 30-minute one
+// took 375 ms), and the person was told to use M4A, MP3 or WAV, for a WAV. The length the file declares says why.
+test("a recording too long for the browser to decode is told its length, not that it can't be opened", async () => {
+  const refusing = (declared: number | null) => {
+    vi.stubGlobal("AudioContext", class { decodeAudioData = async () => { throw new DOMException("Unable to decode.", "EncodingError"); }; close = async () => {}; });
+    vi.stubGlobal("URL", { createObjectURL: () => "blob:call", revokeObjectURL: () => {} });
+    vi.stubGlobal("Audio", class {
+      duration = Number.NaN;
+      onloadedmetadata: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+      preload = "";
+      set src(_: string) {
+        queueMicrotask(() => (declared === null ? this.onerror?.() : ((this.duration = declared), this.onloadedmetadata?.())));
+      }
+    });
+    return prepareCall(new File(["call"], "call.wav", { type: "audio/wav" }), 240);
+  };
+  await expect(refusing(3600)).rejects.toThrow(new PrepareError("This recording is 1:00:00 long. Trim it to the part with the promise, up to 4 minutes."));
+  await expect(refusing(null)).rejects.toThrow(new PrepareError("This recording could not be opened. Use M4A, MP3 or WAV."));
+});
