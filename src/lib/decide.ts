@@ -86,7 +86,8 @@ export function lineIsEvidenced(line: LineItem, bill: Source): boolean {
 }
 
 // "About $20", "approximately $269": a guess at a price is not a promise of it.
-const APPROXIMATE = /(\b(approximately|approx\.?|around|roughly|about|supposedly|estimated)\s+|~\s*)\$?\d/i;
+// "like" marks a guess only before an amount ("like $50"), not in "a plan like Fiber 500".
+const APPROXIMATE = /(\b(approximately|approx\.?|around|roughly|about|supposedly|estimated|almost|nearly)\s+|\blike\s+(?=\$)|~\s*)\$?\d|\d\s?(-?ish|or so)\b/i;
 
 function promiseEvidenceProblem(promise: PromiseTerm, proof: Source): UnusedReason | null {
   if (proof.kind !== "image" && !quoteFoundIn(promise.quote, proof.text)) return "quote_not_in_offer";

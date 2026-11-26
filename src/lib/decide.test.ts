@@ -505,6 +505,18 @@ describe("promises read from a person's own words", () => {
     expect(decide(internet, [{ ...guess, quote: "they said it would be $55/mo" }], photo, photo).claims.map((c) => c.kind)).toEqual(["price_above_promise"]);
   });
 
+  // How the real posts say a figure is rough: "like $50" in 15 of them, "almost" or "nearly" in 12, and "-ish" or "or
+  // so" in a few. Taken as exact, each became a claim the poster never stated.
+  test("a price said casually as rough is not a promise either", () => {
+    for (const quote of ["it was supposed to be like $55/mo", "they said almost $55 a month", "nearly $55/mo with autopay", "$55ish a month", "about $55-ish a month", "$55 or so a month"]) {
+      const guess = promise({ kind: "monthly_price", amount_cents: 5500, quote, covers_line_ids: plan });
+      expect(decide(internet, [guess], photo, photo).unused, quote).toEqual([{ promiseId: "P1", reason: "amount_approximate" }]);
+    }
+    // "like" is rough only before an amount: here it names what the plan is like.
+    const like = promise({ kind: "monthly_price", amount_cents: 5500, quote: "a plan like Fiber 500 for $55/mo", covers_line_ids: plan });
+    expect(decide(internet, [like], photo, photo).claims.map((c) => c.kind)).toEqual(["price_above_promise"]);
+  });
+
   test("a price for some months or \"a year\" with no end date read is a question", () => {
     for (const quote of ["$55/mo. for 12 mos.", "$55 a month for a year"]) {
       const limited = promise({ kind: "monthly_price", amount_cents: 5500, quote, covers_line_ids: plan });
