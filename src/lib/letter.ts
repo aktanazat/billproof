@@ -16,19 +16,24 @@ export function shortDate(iso: string): string {
   return month && d >= 1 && d <= 31 ? `${month} ${d}, ${y}` : iso;
 }
 
-// A bill is named by its whole period, else the statement date the company prints, else the start date alone.
+// A bill is named by its whole period, else the statement date the company prints, else the start date alone, else
+// the due date or the charges it prints, either of which the company can find it by.
 function periodText(result: Checked): string {
-  const { period_start, period_end, statement_date } = result.reading;
+  const { period_start, period_end, statement_date, due_date, printed } = result.reading;
   if (period_start && period_end) return `${shortDate(period_start)} to ${shortDate(period_end)}`;
   if (statement_date) return `the statement dated ${shortDate(statement_date)}`;
-  return period_start ? `the bill starting ${shortDate(period_start)}` : "this bill";
+  if (period_start) return `the bill starting ${shortDate(period_start)}`;
+  if (due_date) return `the bill due ${shortDate(due_date)}`;
+  const charges = printed.current_charges ?? printed.total_due;
+  return charges ? `the ${usd(charges.cents)} bill` : "this bill";
 }
 
 function aboutText(result: Checked, account: string): string {
   const { period_start, period_end, statement_date } = result.reading;
   if (period_start && period_end) return `${account}, bill for ${shortDate(period_start)} to ${shortDate(period_end)}`;
   if (statement_date) return `${account}, statement dated ${shortDate(statement_date)}`;
-  return period_start ? `${account}, bill starting ${shortDate(period_start)}` : `${account} and my latest bill`;
+  const named = periodText(result);
+  return named === "this bill" ? `${account} and my latest bill` : `${account}, ${named.replace(/^the bill /, "bill ")}`;
 }
 
 function names(lines: LineItem[]): string {

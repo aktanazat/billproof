@@ -282,4 +282,19 @@ describe("the complaint a regulator receives", () => {
     // Where to file is advice for the person, shown beside the complaint, not text the regulator receives.
     expect(complaint).not.toContain("consumercomplaints.fcc.gov");
   });
+
+  // A photo can lose a statement's period and date yet keep its due date or its total, either of which the company
+  // can find the statement by; "this bill" twice in one message tells it nothing.
+  test("statements whose dates weren't read are named by their due date, else their total", () => {
+    const undated = (m: number, reading: Partial<Checked["reading"]>) => {
+      const base = month(m, [priceClaim]);
+      return { ...base, reading: { ...base.reading, period_start: null, period_end: null, statement_date: null, ...reading } };
+    };
+    const due = undated(10, { due_date: "2026-11-05" });
+    const total = undated(11, { printed: { ...due.reading.printed, current_charges: { cents: 9249, quote: "Current charges $92.49" } } });
+    const { chat } = buildYearMessage([due, total]);
+    expect(chat).toContain("For the bill due Nov 5, 2026, Fiber 500 Internet");
+    expect(chat).toContain("For the $92.49 bill, Fiber 500 Internet");
+    expect(buildMessage(due, new Set(["C1"]), new Set()).chat).toContain("I'm writing about account ending 4415, bill due Nov 5, 2026.");
+  });
 });
