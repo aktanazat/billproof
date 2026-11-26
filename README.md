@@ -57,7 +57,7 @@ MODEL_API_KEY=… pnpm dev
 
 Checks: `pnpm typecheck`, `pnpm lint`, `pnpm test`.
 
-Deploy: `deploy/compose.yml` runs the app behind Caddy on one server. Pull the repo there, then `docker compose -p billproof up -d --build` in `deploy/`. A change to `deploy/Caddyfile` also needs `docker compose -p billproof restart caddy`: Caddy reads its config through a bind mount of the file, and `git pull` replaces the file rather than editing it, so a reload alone still sees the old one. Validate a Caddyfile first with `caddy validate --adapter caddyfile`, since a bad one takes the site down.
+Deploy: `deploy/compose.yml` runs the app behind Caddy on one server. On the server, run `deploy/deploy.sh`: it appends the running app's log to `logs/app.log` (a rebuild replaces the container, and Docker deletes its log with it), pulls the repo and runs `docker compose -p billproof up -d --build` in `deploy/`. A change to `deploy/Caddyfile` also needs `docker compose -p billproof restart caddy`: Caddy reads its config through a bind mount of the file, and `git pull` replaces the file rather than editing it, so a reload alone still sees the old one. Validate a Caddyfile first with `caddy validate --adapter caddyfile`, since a bad one takes the site down.
 
 ## Evaluation
 
