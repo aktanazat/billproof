@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { formatMicros } from "@/lib/cost";
 import { usd } from "@/lib/letter";
-import type { LiveEvent } from "@/lib/real-bills";
+import { LIVE_PAUSED, type LiveEvent } from "@/lib/real-bills";
 import type { SingleResult, Stage } from "@/lib/result";
 import { Thumbnail } from "../bill-page";
 
@@ -131,7 +131,7 @@ export function LiveRun({ paused }: { paused: boolean }) {
           {state === "running" ? "Running" : state === "done" ? "Run again" : "Run it live"}
         </button>
       </div>
-      {paused && <p className="mt-3 text-[13px] text-text-2">Live checks are paused: this demo has used its budget. Every saved result is below.</p>}
+      {paused && <p className="mt-3 text-[13px] text-text-2">{LIVE_PAUSED}</p>}
       {state === "refused" && (
         <p className="mt-3 text-[13px] text-red" role="alert">
           {message}

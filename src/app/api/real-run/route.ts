@@ -1,8 +1,8 @@
 import { realRun } from "@/data/real-bills";
 import { postPages } from "@/data/real-pages";
 import { runCheck } from "@/lib/pipeline";
-import { postNotes, unagreedFees, type LiveEvent } from "@/lib/real-bills";
-import { clientKey, fromOwnPage, serverLedger } from "@/lib/server-ledger";
+import { LIVE_PAUSED, postNotes, unagreedFees, type LiveEvent } from "@/lib/real-bills";
+import { clientKey, fromOwnPage, livePaused, serverLedger } from "@/lib/server-ledger";
 
 const BATCH = 24;
 const LANES = 8;
@@ -33,6 +33,7 @@ const inMinutes = (ms: number) => {
 
 export async function POST(request: Request) {
   if (!fromOwnPage(request)) return refusal("Start a live run from the Billproof page.", 403);
+  if (livePaused()) return refusal(LIVE_PAUSED, 503);
   const now = Date.now();
   const client = clientKey(request);
   while (startedRuns.length > 0 && now - startedRuns[0] > HOUR_MS) startedRuns.shift();
