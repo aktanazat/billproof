@@ -630,6 +630,8 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
     const docId = id();
     if (!isRecording(file)) {
       dispatch({ type: "offer_file_added", id: docId, name: file.name });
+      // The file opener's refusal is worded for a bill; an offer it can't read (a Word file, a text file) can be pasted.
+      if (!isPdf(file) && !isPicture(file)) return dispatch({ type: "prep_failed", id: docId, message: "This file can't be read. Remove it and paste the offer's words instead, or add it as a PDF, a screenshot or a call recording." });
       return prepareDoc(docId, file, MAX_OFFER_PAGES);
     }
     dispatch({ type: "call_added", id: docId, name: file.name });
