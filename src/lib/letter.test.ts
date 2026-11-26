@@ -71,6 +71,7 @@ describe("a message with no dollar claim", () => {
     expect(message.complaint).not.toContain("billed above the price I was promised");
     expect(message.email).toContain("Please reply with an explanation of these charges and anything you will correct on my bill.");
     expect(`${message.email}\n${message.call}`).not.toContain("the date the credit will post");
+    expect(message.email).toMatch(/^Subject: Questions about the charges on my account\n/);
   });
 
   test("the complaint states the fees as facts for the regulator, while the email asks the company", () => {
@@ -103,6 +104,7 @@ describe("a missing autopay credit on a bill with no company name", () => {
     expect(message.complaint).not.toContain("Please");
     expect(message.chat).toContain("Please apply the missing $7.50.");
     expect(message.chat).not.toContain("In total");
+    expect(message.email).toMatch(/^Subject: Billing correction for my account\n/);
   });
 
   test("a missing credit mentions autopay only when the promise depends on it", () => {

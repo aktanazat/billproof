@@ -188,7 +188,7 @@ export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<stri
   const about = aboutText(result, account);
   const chat = [`Hi, I'm writing about ${about}.`, ...body, ask].filter(Boolean).join("\n\n");
   const email = [
-    `Subject: Billing correction for ${account}`,
+    totalCents > 0 ? `Subject: Billing correction for ${account}` : `Subject: Questions about the charges on ${account}`,
     "",
     provider ? `Hello ${provider} billing team,` : "Hello billing team,",
     "",
