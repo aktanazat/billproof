@@ -46,7 +46,7 @@ function claimTitle(claim: Claim, lines: LineItem[]): string {
   }
 }
 
-const CONDITION_NAMES: Record<string, string> = { autopay: "autopay", paperless: "paperless billing", bundle: "a bundle", contract: "a contract", other: "a condition" };
+const CONDITION_NAMES: Record<string, string> = { autopay: "autopay", paperless: "paperless billing", bundle: "a bundle", contract: "a contract" };
 
 function questionTitle(question: Question, lines: LineItem[], result: Checked): string {
   const promise = result.promises.find((p) => p.id === question.promiseId);
@@ -57,8 +57,10 @@ function questionTitle(question: Question, lines: LineItem[], result: Checked): 
       return `${listNames(lines)} is charged ${lines.length} times`;
     case "partial_period":
       return "Your offer starts or ends during this bill";
-    case "conditions_unproven":
-      return `The bill doesn't show ${(promise?.conditions ?? ["other"]).map((c) => CONDITION_NAMES[c]).join(" or ")}, which your price depends on`;
+    case "conditions_unproven": {
+      const named = (promise?.conditions ?? []).filter((c) => c !== "other").map((c) => CONDITION_NAMES[c]);
+      return named.length > 0 ? `The bill doesn't show ${named.join(" or ")}, which your price depends on` : "The bill doesn't show that you meet your offer's conditions";
+    }
     case "price_gap":
       return `${listNames(lines)} is too far from the promised amount to claim`;
     case "provider_mismatch":
