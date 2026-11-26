@@ -33,14 +33,20 @@ export function pageRows(content: TextContent, viewport: PageViewport): TextRow[
 }
 
 // Joins a page's text items into lines the way they were drawn. Quotes are later matched against this text
-// with reorder tolerance, so cell order inside a table row does not need to follow the visual order.
+// with reorder tolerance, so cell order inside a table row does not need to follow the visual order. An item that
+// starts where the one before it ends on the same baseline continues it: pdf.js starts a new item where the font
+// changes, even inside a word, and puts its own space item across a real gap.
 export function pageText(content: TextContent): string {
   let text = "";
+  let end: { x: number; y: number } | null = null;
   for (const item of content.items) {
     if (!("str" in item)) continue;
     const textItem: TextItem = item;
+    const [x, y] = [textItem.transform[4], textItem.transform[5]];
+    if (end && text.endsWith(" ") && Math.abs(end.y - y) < 0.5 && Math.abs(end.x - x) < 0.5 && /\S$/.test(text.slice(0, -1)) && /^\S/.test(textItem.str)) text = text.slice(0, -1);
     text += textItem.str;
     text += textItem.hasEOL ? "\n" : " ";
+    end = textItem.hasEOL ? null : { x: x + textItem.width, y };
   }
   return text.replace(/[ \t]+/g, " ").replace(/ ?\n ?/g, "\n").trim();
 }
