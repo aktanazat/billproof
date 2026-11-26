@@ -29,7 +29,13 @@ describe("ledger", () => {
   test("the event cap holds across checks and clients", () => {
     const ledger = openLedger(":memory:", 25_000);
     ledger.reserve(ledger.admitCheck("a"), 20_000, CHECK_CAP_MICROS);
-    expect(() => ledger.reserve(ledger.admitCheck("b"), 6_000, CHECK_CAP_MICROS)).toThrow("The demo's model budget is used up");
+    expect(() => ledger.reserve(ledger.admitCheck("b"), 6_000, CHECK_CAP_MICROS)).toThrow(new LedgerRefusal("budget_spent", "This demo has used its budget for live checks. Every saved result is still on the Real bills page."));
+    // The demo's total cap and one check's own limit are told apart, so a refused check says which it hit.
+    try {
+      ledger.reserve(ledger.admitCheck("c"), 6_000, CHECK_CAP_MICROS);
+    } catch (error) {
+      expect(error).toMatchObject({ kind: "budget_spent" });
+    }
   });
 
   test("a client gets a fixed number of checks an hour", () => {

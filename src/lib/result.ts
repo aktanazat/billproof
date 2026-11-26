@@ -76,6 +76,8 @@ export type CallRecord = {
 
 export type CheckFailure =
   | "over_budget"
+  // The whole demo's spending cap is reached, as opposed to one check's own limit.
+  | "budget_spent"
   | "rate_limited"
   | "upstream"
   | "truncated"

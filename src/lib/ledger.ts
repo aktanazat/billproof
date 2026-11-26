@@ -10,7 +10,7 @@ export const CHECKS_PER_CLIENT_PER_HOUR = 30;
 const HOUR_MS = 3_600_000;
 
 export class LedgerRefusal extends Error {
-  constructor(readonly kind: "over_budget" | "too_many_checks", message: string) {
+  constructor(readonly kind: "over_budget" | "budget_spent" | "too_many_checks", message: string) {
     super(message);
   }
 }
@@ -99,7 +99,7 @@ export function openLedger(file: string, eventCapMicros: number): Ledger {
           throw new LedgerRefusal("over_budget", `This check would pass its ${formatMicros(capMicros)} limit. Use fewer pages.`);
         }
         if (micros(eventSpent.get()) + amount > eventCapMicros) {
-          throw new LedgerRefusal("over_budget", "The demo's model budget is used up");
+          throw new LedgerRefusal("budget_spent", "This demo has used its budget for live checks. Every saved result is still on the Real bills page.");
         }
         const id = randomUUID();
         insertAttempt.run(id, checkId, amount, Date.now());

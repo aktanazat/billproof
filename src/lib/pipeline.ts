@@ -489,6 +489,7 @@ const RETRYABLE: Record<CheckFailure, boolean> = {
   truncated: false,
   refused: false,
   over_budget: false,
+  budget_spent: false,
   config: false,
   too_many_checks: false,
   bad_input: false,
