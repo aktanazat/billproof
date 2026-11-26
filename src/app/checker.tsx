@@ -493,8 +493,14 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
           return { id: `sample-${token}-${i}`, name, status: "ready", pages: await prepareFile(await fetchFile(url, name, "application/pdf"), MAX_BILL_PAGES) };
         }),
       );
+      // A real post's picture can be gone from Reddit; the check reads the ones still there, as the server does.
+      const postPicture = async (url: string, i: number) => {
+        const response = await fetch(url);
+        if (!response.ok) return [];
+        return prepareFile(new File([await response.blob()], `picture-${i + 1}.jpg`, { type: "image/jpeg" }), 1).catch(() => []);
+      };
       const pile = sample.pictures
-        ? [{ id: `sample-${token}-pile`, name: `${sample.pictures.length} pictures from the post`, status: "ready" as const, pages: (await Promise.all(sample.pictures.slice(0, MAX_BILL_PAGES).map(async (url, i) => prepareFile(await fetchFile(url, `picture-${i + 1}.jpg`, "image/jpeg"), 1)))).flat() }]
+        ? [{ id: `sample-${token}-pile`, name: `${sample.pictures.length} pictures from the post`, status: "ready" as const, pages: (await Promise.all(sample.pictures.slice(0, MAX_BILL_PAGES).map(postPicture))).flat() }]
         : [];
       const bills: Doc[] = [...pdfs, ...pile];
       const offer: Inputs["offer"] =

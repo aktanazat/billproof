@@ -1,7 +1,7 @@
 {
   "ranAt": "2026-11-26T01:23:28.124Z",
   "seconds": 1331.95443675,
-  "spentMicros": 1520339,
+  "spentMicros": 1559879,
   "posts": 1517,
   "results": [
     {
@@ -2722,20 +2722,22 @@
         "https://preview.redd.it/pi0d783u4a0e1.jpg?width=1080&format=pjpg&auto=webp&s=b69f27d08093d693591e9abf7895672ad6e5a37a",
         "https://preview.redd.it/rlm21x8u4a0e1.jpg?width=1080&format=pjpg&auto=webp&s=f66608679661900b4d862e859762c63ab6cc95d5"
       ],
-      "ms": 25775,
+      "ms": 57470,
+      "spentMicros": 10165,
       "outcome": "checked",
-      "provider": null,
+      "provider": "US Cellular",
       "period": [
         null,
         null
       ],
       "lines": 13,
-      "lineSum": "not_printed",
+      "lineSum": "mismatch",
       "billPages": [
         1,
         3,
         5
       ],
+      "change": null,
       "claims": [],
       "dropped": [],
       "questions": [
@@ -2794,12 +2796,7 @@
       ],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 0,
-      "spentMicros": 5285,
-      "change": {
-        "earlierCents": 11204,
-        "currentCents": 10979
-      }
+      "matchedPromises": 0
     },
     {
       "id": "1i8yls5",
@@ -8053,7 +8050,8 @@
         "https://preview.redd.it/gxf1x4v49dag1.png?width=849&format=png&auto=webp&s=ceb83ddf016e579ed426fa7adcd52fc9a6220f3c",
         "https://preview.redd.it/prt400gk9dag1.png?width=791&format=png&auto=webp&s=fafc08c6bfd3e11f5d28bd43de3eec50e9fdba8a"
       ],
-      "ms": 29170,
+      "ms": 29679,
+      "spentMicros": 6589,
       "outcome": "checked",
       "provider": null,
       "period": [
@@ -8061,21 +8059,20 @@
         null
       ],
       "lines": 2,
-      "lineSum": "not_printed",
+      "lineSum": "mismatch",
       "billPages": [
-        1
+        2
       ],
+      "change": {
+        "earlierCents": 8956,
+        "currentCents": 9045
+      },
       "claims": [],
       "dropped": [],
       "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 0,
-      "spentMicros": 6220,
-      "change": {
-        "earlierCents": 8956,
-        "currentCents": 9045
-      }
+      "matchedPromises": 0
     },
     {
       "id": "1qc6sxi",
@@ -10624,7 +10621,8 @@
       "images": [
         "https://external-preview.redd.it/-ns4IzJHZ_vucmIuugJkdJ-_ni6iQQioaWoEy3893QE.png?auto=webp&s=a3b8de1a5e20ffec2d66fe01260a15a36290ad85"
       ],
-      "ms": 15215,
+      "ms": 17652,
+      "spentMicros": 3810,
       "outcome": "checked",
       "provider": null,
       "period": [
@@ -10632,7 +10630,7 @@
         null
       ],
       "lines": 1,
-      "lineSum": "not_printed",
+      "lineSum": "ok",
       "billPages": [
         0
       ],
@@ -10654,8 +10652,7 @@
       "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 2,
-      "spentMicros": 2995
+      "matchedPromises": 2
     },
     {
       "id": "1tptj3u",
@@ -15629,7 +15626,8 @@
       "images": [
         "https://i.redd.it/qblxkwy2kknh1.jpeg"
       ],
-      "ms": 23410,
+      "ms": 26597,
+      "spentMicros": 5785,
       "outcome": "checked",
       "provider": null,
       "period": [
@@ -15637,18 +15635,17 @@
         null
       ],
       "lines": 3,
-      "lineSum": "not_printed",
+      "lineSum": "mismatch",
       "billPages": [
         0
       ],
+      "change": null,
       "claims": [],
       "dropped": [],
       "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 0,
-      "spentMicros": 4625,
-      "change": null
+      "matchedPromises": 0
     },
     {
       "id": "1wahnu1",
@@ -21074,7 +21071,8 @@
         "https://i.redd.it/l4o4h7lcguwh1.jpeg",
         "https://i.redd.it/mj6ze7lcguwh1.jpeg"
       ],
-      "ms": 36095,
+      "ms": 56073,
+      "spentMicros": 13191,
       "outcome": "checked",
       "provider": "AT&T",
       "period": [
@@ -21082,12 +21080,13 @@
         "2026-10-13"
       ],
       "lines": 18,
-      "lineSum": "not_printed",
+      "lineSum": "subtotal",
       "billPages": [
         1,
         2,
         3
       ],
+      "change": null,
       "claims": [],
       "dropped": [],
       "questions": [
@@ -21162,9 +21161,7 @@
       ],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 1,
-      "spentMicros": 7702,
-      "change": null
+      "matchedPromises": 2
     },
     {
       "id": "1xjjvb5",
@@ -23816,7 +23813,7 @@
       "lines": 1,
       "lineSum": "ok",
       "billPages": [
-        0
+        1
       ],
       "claims": [],
       "dropped": [],

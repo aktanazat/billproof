@@ -61,7 +61,7 @@ export async function POST(request: Request) {
           while (next < batch.length && !request.signal.aborted) {
             const i = next++;
             const post = batch[i];
-            const pages = await postPages(post.images);
+            const { pages } = await postPages(post.images);
             if (pages.length === 0) {
               send({ type: "post", i, event: { type: "error", failure: "bad_input", message: "The pictures are no longer online.", spentMicros: 0, retryable: false } });
               continue;

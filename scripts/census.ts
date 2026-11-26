@@ -16,7 +16,7 @@ type Post = { id: string; sub: string; title: string; text: string; images: stri
 const CONCURRENCY = 8;
 
 // Only what a reader of the results page needs: no names, account numbers or addresses.
-function summary(post: Post, result: CheckResult | null, error: string | null, ms: number): RealBill {
+function summary(post: Post, result: CheckResult | null, error: string | null, ms: number, positions: number[]): RealBill {
   const base = { id: post.id, sub: post.sub, permalink: post.permalink, created: post.created, title: post.title, text: post.text, images: post.images.slice(0, MAX_POST_PICTURES), ms };
   if (!result) return { ...base, outcome: "error", error, spentMicros: 0 };
   if (result.outcome === "year") throw new Error("A post is one bill");
@@ -30,7 +30,8 @@ function summary(post: Post, result: CheckResult | null, error: string | null, m
     period: [result.reading.period_start, result.reading.period_end],
     lines: result.reading.line_items.length,
     lineSum: result.totals.lineSum,
-    billPages: result.billPages,
+    // Page numbers count loaded pictures; the site shows pictures by their place in the post.
+    billPages: result.billPages.map((i) => positions[i] ?? i),
     change: result.change && { earlierCents: result.change.earlierCents, currentCents: result.change.currentCents },
     claims: result.claims.map((claim) => ({
       kind: claim.kind,
@@ -66,9 +67,9 @@ let next = 0;
 async function lane() {
   while (next < posts.length) {
     const post = posts[next++];
-    const pages = await postPages(post.images);
+    const { pages, positions } = await postPages(post.images);
     if (pages.length === 0) {
-      results.push(summary(post, null, "images unavailable", 0));
+      results.push(summary(post, null, "images unavailable", 0, positions));
       continue;
     }
     const input: CheckInput = { bills: [{ pages }], offer: { kind: "text", text: postNotes(post) } };
@@ -79,7 +80,7 @@ async function lane() {
     const terminal = events.at(-1);
     const result = terminal?.type === "result" ? terminal.result : null;
     const error = terminal?.type === "error" ? `${terminal.failure}: ${terminal.message}` : null;
-    const bill = summary(post, result, error, ms);
+    const bill = summary(post, result, error, ms, positions);
     results.push(bill);
     raw.push({ id: post.id, events });
     const found = claimedCents(bill);

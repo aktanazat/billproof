@@ -414,6 +414,9 @@ describe("decide refuses claims the evidence does not carry", () => {
     // A total that repeats the totals right under it (an outer section over an inner one) is their parent.
     expect(checkTotals(onlyParts([part(first), part(rest), part(rest)]), { kind: "image" }).lineSum).toBe("sections");
     expect(checkTotals(onlyParts([part(first + rest), part(first), part(rest)]), { kind: "image" }).lineSum).toBe("sections");
+    // A printed total the charges miss is a mismatch, even though the part totals agree with them.
+    const disagreeing: Reading = { ...onlyParts([part(first), part(rest)]), printed: { ...onlyParts([part(first), part(rest)]).printed, current_charges: part(first + rest + 37) } };
+    expect(checkTotals(disagreeing, { kind: "image" }).lineSum).toBe("mismatch");
   });
 
   test("a heading read as a charge is dropped when that makes the bill add up, and a real double charge stays", () => {

@@ -6,9 +6,10 @@ const LONG_SIDE = 1600;
 export const MAX_POST_PICTURES = 6;
 
 // A post's pictures as the check reads them: fetched from Reddit, turned upright, scaled like an upload. A picture
-// that is gone or unreadable is skipped.
-export async function postPages(images: string[]): Promise<PreparedPage[]> {
-  const pages = await Promise.all(
+// that is gone or unreadable is skipped; `positions` holds each loaded page's place among the post's pictures, so a
+// page number from the check still points at the right picture.
+export async function postPages(images: string[]): Promise<{ pages: PreparedPage[]; positions: number[] }> {
+  const loaded = await Promise.all(
     images.slice(0, MAX_POST_PICTURES).map(async (url) => {
       try {
         const response = await fetch(url, { headers: { "User-Agent": "billproof/0.1" }, signal: AbortSignal.timeout(30_000) });
@@ -24,5 +25,6 @@ export async function postPages(images: string[]): Promise<PreparedPage[]> {
       }
     }),
   );
-  return pages.flatMap((page) => (page ? [page] : []));
+  const positions = loaded.flatMap((page, i) => (page ? [i] : []));
+  return { pages: positions.map((i) => loaded[i]).filter((page) => page !== null), positions };
 }

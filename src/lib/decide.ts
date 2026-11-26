@@ -186,15 +186,16 @@ export function checkTotals(reading: Reading, bill: Source): Totals {
   const parts = (reading.printed.section_totals ?? []).map((part) => printedValue(part, bill));
   const printedParts = parts.filter((part) => part !== null);
   const partsMatch = printedParts.length === parts.length && (splitsIntoParts(lines, printedParts) || splitsIntoParts(lines, innermostParts(printedParts)));
-  // A bill that shows only its totals has no charges for them to check. Checks that cover every charge come first.
+  // A bill that shows only its totals has no charges for them to check. A printed total the charges miss is a
+  // mismatch even when part totals agree: something the parts don't show is on the bill.
   const lineSum: LineSum =
     lines.length === 0 ? "not_printed"
     : currentMatches ? "ok"
     : due !== null && near(carriedCents + lineSumCents, due) ? "due"
-    : partsMatch ? "sections"
     : subtotalLines !== null ? "subtotal"
-    : current === null ? "not_printed"
-    : "mismatch";
+    : current !== null ? "mismatch"
+    : partsMatch ? "sections"
+    : "not_printed";
   const newCharges = lineSum === "subtotal" ? lineSumCents : current;
   let balance: Equation = "not_printed";
   if (previous !== null && payments !== null && newCharges !== null && due !== null) {
