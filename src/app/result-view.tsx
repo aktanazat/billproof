@@ -191,10 +191,10 @@ export function MessageBox({ message }: { message: Message }) {
     <section className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-[17px] font-semibold">Message</h2>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <div role="tablist" aria-label="Message format" className="inline-flex rounded-lg bg-fill p-0.5">
             {formats.map(([value, label]) => (
-              <button key={value} role="tab" type="button" aria-selected={format === value} onClick={() => setFormat(value)} className={`h-7 rounded-md px-3 text-[13px] ${format === value ? "bg-white font-medium shadow-[0_1px_2px_rgb(0_0_0/0.12)]" : "text-text-2 hover:text-text"}`}>
+              <button key={value} role="tab" type="button" aria-selected={format === value} onClick={() => setFormat(value)} className={`h-7 whitespace-nowrap rounded-md px-2.5 text-[13px] sm:px-3 ${format === value ? "bg-white font-medium shadow-[0_1px_2px_rgb(0_0_0/0.12)]" : "text-text-2 hover:text-text"}`}>
                 {label}
               </button>
             ))}
