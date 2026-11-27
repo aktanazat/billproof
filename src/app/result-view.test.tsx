@@ -298,6 +298,22 @@ describe("the result page's wording", () => {
     expect(page(result, { claims: { C1: "needs_confirmation" }, questions: {} })).toContain("once you confirm the marked line<");
   });
 
+  // A claim waits on what couldn't be checked against printed text. On a PDF bill that is the offer (a screenshot of
+  // it), not the bill line, which the PDF's own text already confirms; the button asked about the bill either way.
+  test("the confirm button asks about the bill when it's a photo, and about the offer when the bill is a PDF", () => {
+    const waiting: Checked = {
+      ...checked([line("L1", "Internet 1000", 8000, "plan")], []),
+      claims: [{ id: "C1", kind: "price_above_promise", lineIds: ["L1"], promiseId: "P1", actualCents: 8000, expectedCents: 7000, amountCents: 1000, needsConfirmation: true, lookedFor: null }],
+    };
+    const selection = { claims: { C1: "needs_confirmation" as const }, questions: {} };
+    expect(page(waiting, selection)).toContain(">The marked line matches my bill</button>");
+    const pdf = page({ ...waiting, billIsImage: false }, selection);
+    expect(pdf).toContain(">The offer says this, use it</button>");
+    expect(pdf).toContain(", once you confirm what the offer says");
+    expect(pdf).not.toContain("The marked line matches my bill");
+    expect(pdf).not.toContain("once you confirm the marked line");
+  });
+
   test("an offer with no price or promise in it is headed so, not as a failed match", () => {
     const html = page(checked([line("L1", "Internet 1000", 4479, "plan")], []));
     expect(html).toContain("No price or promise found to check the bill against");

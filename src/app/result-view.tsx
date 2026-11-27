@@ -137,7 +137,9 @@ function ClaimRow({ claim, index, result, callUrl, mark, onToggle, onConfirm, on
   const focusIds = [...claim.lineIds];
   // A charge's controls are spoken with its title after the words shown, so a list of them tells the charges apart.
   const title = claimTitle(claim, lines);
-  const confirmLabel = result.transcript ? "I heard it, use this" : "The marked line matches my bill";
+  // What the person confirms is what couldn't be checked against printed text: what was said on a call, a bill line read
+  // from a photo, or else the offer, read from a screenshot while the PDF's own text confirms the bill line.
+  const confirmLabel = result.transcript ? "I heard it, use this" : result.billIsImage ? "The marked line matches my bill" : "The offer says this, use it";
   // The confirm button gives way to the "In message" box; focus follows it there, or it would drop to the page with the
   // removed button, and a screen reader would hear nothing to say the charge went into the message.
   const confirming = useRef(false);
@@ -479,7 +481,7 @@ export function ResultView({
               <span className="block text-[40px] font-semibold leading-none tracking-[-0.02em] tabular-nums max-[320px]:text-[28px]">{usd(askTotal)}</span>{" "}
               <span className="mt-2 block text-[17px] text-text-2">
                 to ask back{provider ? ` from ${provider}` : ""}
-                {waiting ? (result.transcript ? ", once you confirm what you heard" : `, once you confirm the marked ${markedLines === 1 ? "line" : "lines"}`) : ""}
+                {waiting ? (result.transcript ? ", once you confirm what you heard" : result.billIsImage ? `, once you confirm the marked ${markedLines === 1 ? "line" : "lines"}` : ", once you confirm what the offer says") : ""}
               </span>
             </h1>
           )}
