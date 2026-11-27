@@ -30,10 +30,12 @@ export function LiveRun({ paused }: { paused: boolean }) {
   const [elapsed, setElapsed] = useState(0);
   const [total, setTotal] = useState<{ seconds: number; spentMicros: number } | null>(null);
   const started = useRef(0);
-  // A run in which no bill was checked, every one stopped by the service rather than by its post, is a stopped run
-  // with the service's reason, not "Checked" with 24 bills done and $0.00 found.
+  // A run in which no bill was checked is a stopped run with the reason, not "Checked" with $0.00 found: the service's
+  // reason when it stopped them, otherwise the posts' own. Posts finish in any order, so a reason worth retrying
+  // (Reddit's pictures not loading just now) is kept over one that isn't.
   const checked = useRef(0);
   const serviceFailure = useRef<string | null>(null);
+  const postFailure = useRef<{ message: string; retryable: boolean } | null>(null);
 
   useEffect(() => {
     if (state !== "running") return;
@@ -60,6 +62,7 @@ export function LiveRun({ paused }: { paused: boolean }) {
     started.current = performance.now();
     checked.current = 0;
     serviceFailure.current = null;
+    postFailure.current = null;
     const response = await fetch("/api/real-run", { method: "POST" }).catch(() => null);
     if (!response?.body) {
       setState("refused");
@@ -95,16 +98,20 @@ export function LiveRun({ paused }: { paused: boolean }) {
           } else if (event.type === "done") {
             ended = true;
             setTotal({ seconds: event.seconds, spentMicros: event.spentMicros });
-            if (checked.current === 0 && serviceFailure.current) {
+            const reason = serviceFailure.current ?? (postFailure.current && `No bill was checked. ${postFailure.current.message}`);
+            if (checked.current === 0 && reason) {
               setState("refused");
-              setMessage(serviceFailure.current);
+              setMessage(reason);
             } else {
               setState("done");
             }
           } else {
             const inner = event.event;
-            if (inner.type === "result") checked.current += 1;
-            if (inner.type === "error" && inner.failure !== "bad_input") serviceFailure.current = inner.message;
+            if (inner.type === "result" && inner.result.outcome === "checked") checked.current += 1;
+            if (inner.type === "error") {
+              if (inner.failure !== "bad_input") serviceFailure.current = inner.message;
+              else if (!postFailure.current?.retryable) postFailure.current = { message: inner.message, retryable: inner.retryable };
+            }
             setTiles((all) =>
               all.map((tile, i) => {
                 if (i !== event.i) return tile;
