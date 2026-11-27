@@ -8,11 +8,12 @@ export type ShownPage = PreparedPage & { rows: TextRow[] | null };
 const JPEG_QUALITY = 0.85;
 const DEADLINE_MS = 20_000;
 
-// `reload`: only reloading the page can fix it, so a sample, which adds no file of the person's, says so in its own words.
+// `reader`: the PDF reader didn't load, and what fixes it; a sample, which adds no file of the person's, says so in its
+// own words.
 export class PrepareError extends Error {
   constructor(
     message: string,
-    readonly reload = false,
+    readonly reader: "reload" | "connection" | null = null,
   ) {
     super(message);
   }
@@ -31,7 +32,9 @@ export type Prepared = { pages: ShownPage[]; omitted: number };
 async function readerUnavailable(): Promise<PrepareError> {
   // Any reply, an error page included, means the connection works.
   const online = await fetch("/robots.txt", { cache: "no-store" }).then(() => true, () => false);
-  return online ? new PrepareError("Billproof couldn't load its PDF reader. Reload the page, then add your files again.", true) : new PrepareError("Billproof couldn't load its PDF reader. Check the connection, then remove the file and add it again.");
+  return online
+    ? new PrepareError("Billproof couldn't load its PDF reader. Reload the page, then add your files again.", "reload")
+    : new PrepareError("Billproof couldn't load its PDF reader. Check the connection, then remove the file and add it again.", "connection");
 }
 
 // A cloud file not on the device, or one moved or changed since it was chosen, can't be read at all; the advice for

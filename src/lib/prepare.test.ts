@@ -142,10 +142,10 @@ test("a PDF that can't be opened is told why: the reader didn't load, it has a p
   vi.stubGlobal("fetch", async () => {
     throw new TypeError("Failed to fetch");
   });
-  await expect(prepareFile(pdf(), 6)).rejects.toThrow(new PrepareError("Billproof couldn't load its PDF reader. Check the connection, then remove the file and add it again."));
+  await expect(prepareFile(pdf(), 6)).rejects.toThrow(new PrepareError("Billproof couldn't load its PDF reader. Check the connection, then remove the file and add it again.", "connection"));
   // Any reply from the site, an error page included, means the connection works.
   vi.stubGlobal("fetch", async () => new Response("Bad gateway", { status: 502 }));
-  await expect(prepareFile(pdf(), 6)).rejects.toThrow(new PrepareError("Billproof couldn't load its PDF reader. Reload the page, then add your files again.", true));
+  await expect(prepareFile(pdf(), 6)).rejects.toThrow(new PrepareError("Billproof couldn't load its PDF reader. Reload the page, then add your files again.", "reload"));
   pdfjs.open = failing("PasswordException", "No password given");
   await expect(prepareFile(pdf(), 6)).rejects.toThrow(new PrepareError("This PDF has a password. Save an unlocked copy and add that instead."));
   pdfjs.open = failing("InvalidPDFException", "Invalid PDF structure.");
