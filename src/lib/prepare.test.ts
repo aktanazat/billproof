@@ -1,6 +1,18 @@
 import { afterEach, expect, test, vi } from "vitest";
 import { isRecording, prepareCall, PrepareError, prepareFile } from "./prepare";
 
+// pdf.js stands in here: each test says how opening the PDF fails, as the real reader reports it.
+const pdfjs = vi.hoisted(() => ({ open: (): Promise<unknown> => Promise.reject(new Error("not set")) }));
+vi.mock("pdfjs-dist/legacy/build/pdf.mjs", () => ({
+  GlobalWorkerOptions: {},
+  getDocument: () => ({ promise: pdfjs.open(), destroy: async () => {} }),
+}));
+const failing = (name: string, message: string) => () => {
+  const error = new Error(message);
+  error.name = name;
+  return Promise.reject(error);
+};
+
 const withResolvers = Promise.withResolvers;
 afterEach(() => {
   Promise.withResolvers = withResolvers;
@@ -90,4 +102,16 @@ test("a recording too long for the browser to decode is told its length, not tha
   };
   await expect(refusing(3600)).rejects.toThrow(new PrepareError("This recording is 1:00:00 long. Trim it to the part with the promise, up to 4 minutes."));
   await expect(refusing(null)).rejects.toThrow(new PrepareError("This recording could not be opened. Use M4A, MP3 or WAV."));
+});
+
+// pdf.js loads its reader the first time a PDF is added. When that download fails (a phone off its Wi-Fi), the file
+// is fine, and the visitor is told so, not to look for a password the PDF doesn't have.
+test("a PDF that can't be opened is told why: the reader didn't load, it has a password, or it's damaged", async () => {
+  const pdf = () => new File(["%PDF-1.7"], "bill.pdf", { type: "application/pdf" });
+  pdfjs.open = failing("Error", "Setting up fake worker failed: \"Failed to fetch dynamically imported module\".");
+  await expect(prepareFile(pdf(), 6)).rejects.toThrow(new PrepareError("Billproof couldn't load its PDF reader. Check the connection, then remove the file and add it again."));
+  pdfjs.open = failing("PasswordException", "No password given");
+  await expect(prepareFile(pdf(), 6)).rejects.toThrow(new PrepareError("This PDF has a password. Save an unlocked copy and add that instead."));
+  pdfjs.open = failing("InvalidPDFException", "Invalid PDF structure.");
+  await expect(prepareFile(pdf(), 6)).rejects.toThrow(new PrepareError("This PDF could not be opened. Download it again, or add screenshots of the bill instead."));
 });

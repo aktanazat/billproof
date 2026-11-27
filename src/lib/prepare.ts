@@ -17,6 +17,8 @@ function canvasToJpeg(canvas: HTMLCanvasElement): string {
 // A file ready to read: its pages, and how many pages past the limit were left out.
 export type Prepared = { pages: ShownPage[]; omitted: number };
 
+const READER_UNAVAILABLE = "Billproof couldn't load its PDF reader. Check the connection, then remove the file and add it again.";
+
 // A long bill keeps its charges at the front, so a PDF past the limit is read from its first pages and the rest are
 // counted as left out, rather than refused: few people can cut pages out of a PDF.
 async function preparePdf(file: File, maxPages: number): Promise<Prepared> {
@@ -25,9 +27,12 @@ async function preparePdf(file: File, maxPages: number): Promise<Prepared> {
   // pdf.js is browser-only and large; it loads when the first PDF is opened, never during server rendering. pdf.js
   // supports Safari only through its legacy build (Safari 18+, per its FAQ); the standard build targets the latest
   // Firefox and Chrome and calls features older Safari lacks.
-  const { getDocument, GlobalWorkerOptions } = await import("pdfjs-dist/legacy/build/pdf.mjs");
-  GlobalWorkerOptions.workerSrc = "/pdfjs/pdf.worker.min.mjs";
-  const task = getDocument({ data: new Uint8Array(await file.arrayBuffer()), standardFontDataUrl: "/pdfjs/standard_fonts/" });
+  // Fetched when the first PDF is added; on a dropped connection that fails, and the file itself is fine.
+  const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs").catch(() => {
+    throw new PrepareError(READER_UNAVAILABLE);
+  });
+  pdfjs.GlobalWorkerOptions.workerSrc = "/pdfjs/pdf.worker.min.mjs";
+  const task = pdfjs.getDocument({ data: new Uint8Array(await file.arrayBuffer()), standardFontDataUrl: "/pdfjs/standard_fonts/" });
   try {
     const doc = await task.promise;
     const read = Math.min(doc.numPages, maxPages);
@@ -54,7 +59,11 @@ async function preparePdf(file: File, maxPages: number): Promise<Prepared> {
     return { pages, omitted: doc.numPages - read };
   } catch (error) {
     if (error instanceof PrepareError) throw error;
-    throw new PrepareError("This PDF could not be opened. If it has a password, save an unlocked copy.");
+    // pdf.js names a password and a damaged file; a worker it couldn't download ends its setup with this message.
+    const name = error instanceof Error ? error.name : "";
+    if (name === "PasswordException") throw new PrepareError("This PDF has a password. Save an unlocked copy and add that instead.");
+    if (error instanceof Error && error.message.startsWith("Setting up fake worker failed")) throw new PrepareError(READER_UNAVAILABLE);
+    throw new PrepareError("This PDF could not be opened. Download it again, or add screenshots of the bill instead.");
   } finally {
     await task.destroy();
   }
