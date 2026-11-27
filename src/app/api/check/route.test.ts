@@ -1,5 +1,16 @@
-import { expect, test } from "vitest";
+import { expect, test, vi } from "vitest";
 import { POST } from "./route";
+
+// The check itself (Muse Ember's calls) is stood in by one that runs until the test lets it finish, so checks can be
+// held open; no test here reaches Muse Ember.
+const pipeline = vi.hoisted(() => {
+  let release = () => {};
+  const held = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  return { held, release: () => release() };
+});
+vi.mock("@/lib/pipeline", () => ({ runCheck: () => pipeline.held }));
 
 const post = (site: string | null, body: string) =>
   POST(new Request("https://billproof.aktan.us/api/check", { method: "POST", body, headers: { "Content-Type": "text/plain", ...(site ? { "Sec-Fetch-Site": site } : {}) } }));
@@ -22,4 +33,26 @@ test("an older browser that sends no Sec-Fetch-Site is let through only when its
   expect((await fromOrigin("https://billproof.aktan.us")).status).toBe(400);
   expect((await fromOrigin("https://evil.example")).status).toBe(403);
   expect((await fromOrigin(null)).status).toBe(403);
+});
+
+// A body past the 40 MB a check takes was read and parsed whole, then refused as "The upload was incomplete": a reason
+// that sends the person to retry the same files.
+test("an upload past the size a check takes is refused as too large, not as broken", async () => {
+  const refused = await post("same-origin", "x".repeat(40_000_001));
+  expect(refused.status).toBe(413);
+  expect(await refused.text()).toContain("These files are too large.");
+});
+
+// The server is small and each check holds its files in memory while it's read, so a fifth at once waits its turn.
+test("past four checks running at once, another is told Billproof is busy, and taken once one ends", async () => {
+  vi.stubEnv("LEDGER_PATH", ":memory:");
+  const body = JSON.stringify({ bills: [{ pages: [{ image: "data:image/png;base64,AAAA", text: null }] }], offer: null });
+  const running = await Promise.all([1, 2, 3, 4].map(() => post("same-origin", body)));
+  expect(running.map((response) => response.status)).toEqual([200, 200, 200, 200]);
+  const busy = await post("same-origin", body);
+  expect(busy.status).toBe(503);
+  expect(await busy.text()).toContain("Billproof is busy with other checks.");
+  pipeline.release();
+  await Promise.all(running.map((response) => response.text()));
+  expect((await post("same-origin", body)).status).toBe(200);
 });
