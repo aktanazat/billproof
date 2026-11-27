@@ -3,9 +3,9 @@ import { openLedger, type Ledger } from "@/lib/ledger";
 import type { LiveEvent } from "@/lib/real-bills";
 
 // Posts' pictures come from Reddit; here each post has one ready picture, so a run needs no network.
-vi.mock("@/data/real-pages", () => ({
-  postPages: async () => ({ pages: [{ image: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=", text: null }], positions: [0] }),
-}));
+const ready = vi.hoisted(() => async () => ({ pages: [{ image: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=", text: null }], positions: [0], unavailable: 0 }));
+vi.mock("@/data/real-pages", () => ({ postPages: vi.fn(ready) }));
+const { postPages } = await import("@/data/real-pages");
 // Checks run for real unless a test makes them report a cost.
 vi.mock("@/lib/pipeline", async (actual) => {
   const pipeline = await actual<typeof import("@/lib/pipeline")>();
@@ -57,6 +57,26 @@ test("a live run that spent nothing leaves the visitor and the site free to run 
   expect(first.at(-1)).toMatchObject({ type: "done", spentMicros: 0 });
   expect((await run("203.0.113.7"))[0]).toMatchObject({ type: "batch" });
   for (let n = 0; n < 7; n++) expect((await run(`203.0.113.${20 + n}`))[0], `visitor ${n}`).toMatchObject({ type: "batch" });
+});
+
+// A post's pictures can be deleted from Reddit after the census, or fail to arrive for a moment. Its tile says which,
+// and no check is started for a post with nothing to read.
+test("a post whose pictures are gone, or don't arrive, says which, and nothing is checked for it", async () => {
+  useLedger(1_000_000);
+  const messages = async (unavailable: number, visitor: string) => {
+    vi.mocked(postPages).mockImplementation(async () => ({ pages: [], positions: [], unavailable }));
+    try {
+      return (await run(visitor)).flatMap((event) => (event.type === "post" && event.event.type === "error" ? [event.event.message] : []));
+    } finally {
+      vi.mocked(postPages).mockImplementation(ready);
+    }
+  };
+  vi.mocked(runCheck).mockClear();
+  const gone = await messages(0, "198.51.100.1");
+  const away = await messages(1, "198.51.100.2");
+  expect(gone).toEqual(Array(24).fill("The pictures are no longer online."));
+  expect(away).toEqual(Array(24).fill("The pictures couldn't be loaded just now."));
+  expect(runCheck).not.toHaveBeenCalled();
 });
 
 test("a live run that spent anything still takes the visitor's run for the hour", async () => {

@@ -32,3 +32,23 @@ test("a photo from Reddit is served as it came", async () => {
   expect(response.headers.get("content-type")).toBe("image/jpeg");
   expect(new Uint8Array(await response.arrayBuffer())).toEqual(new Uint8Array([0xff, 0xd8, 0xff, 0xe0]));
 });
+
+// The page tells a picture the poster deleted ("no longer online") from one that failed to arrive ("couldn't be loaded
+// just now") by this answer.
+test("a picture Reddit says is deleted is not found; one that fails for a moment is unavailable", async () => {
+  expect((await picture(async () => new Response("", { status: 404 }))).status).toBe(404);
+  expect((await picture(async () => new Response("", { status: 503 }))).status).toBe(502);
+});
+
+test("a picture over 12 MB isn't served", async () => {
+  const response = await picture(async () => new Response(new Uint8Array(12_000_001), { headers: { "Content-Type": "image/jpeg" } }));
+  expect(response.status).toBe(502);
+});
+
+test("a post that isn't in the saved run is not found, and nothing is fetched", async () => {
+  const fetched = vi.fn();
+  vi.stubGlobal("fetch", fetched);
+  const response = await GET(new Request("http://localhost/api/real-image/nope/0"), { params: Promise.resolve({ id: "nope", n: "0" }) });
+  expect(response.status).toBe(404);
+  expect(fetched).not.toHaveBeenCalled();
+});
