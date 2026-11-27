@@ -207,7 +207,7 @@ describe("a missing autopay credit on a bill with no company name", () => {
   test("the complaint names a missing credit as the problem and states it without asking the regulator for it", () => {
     expect(message.complaint).toContain("Problem: a credit I was promised is missing from my bill.");
     expect(message.complaint).toContain("Resolution I'm asking for: a credit of $7.50 and the promised credit on future bills.");
-    expect(message.complaint).toContain('- This bill has no $7.50 monthly credit I was promised ("50% discount that showed -$7.50 per line").\n');
+    expect(message.complaint).toContain('- My latest bill has no $7.50 monthly credit I was promised ("50% discount that showed -$7.50 per line").\n');
     expect(message.chat).not.toContain("autopay");
     expect(message.complaint).not.toContain("Please");
     expect(message.chat).toContain("Please apply the missing $7.50.");
@@ -218,6 +218,15 @@ describe("a missing autopay credit on a bill with no company name", () => {
   test("a missing credit mentions autopay only when the promise depends on it", () => {
     const onAutopay = buildMessage({ ...result, promises: [{ ...promise, conditions: ["autopay"] }] }, new Set(["C1"]), new Set());
     expect(onAutopay.chat).toContain('My account is on autopay, but this bill has no $7.50 monthly credit I was promised ("50% discount that showed -$7.50 per line"). Please apply the missing $7.50.');
+  });
+
+  // In a year message, a month with no date or total read is "one bill"; the missing credit read "the bill for one
+  // bill", as if "one bill" were a period of dates.
+  test("a year's missing credit on a month with nothing read names it 'one bill'", () => {
+    const dated: Checked = { ...result, reading: { ...result.reading, period_start: "2026-09-01", period_end: "2026-09-30" } };
+    const { chat } = buildYearMessage([result, dated]);
+    expect(chat).toContain("One bill has no $7.50 monthly credit I was promised");
+    expect(chat).not.toContain("bill for one bill");
   });
 
   test("an unread company name or account number is left for the person to fill in, never written as 'your company' or 'my account' to a regulator", () => {
@@ -393,6 +402,17 @@ describe("the complaint a regulator receives", () => {
     const dated = { ...base, reading: { ...base.reading, period_start: null, period_end: null, statement_date: "2026-11-12", printed: { ...base.reading.printed, current_charges: { cents: 9249, quote: "Current charges $92.49" } } } };
     expect(buildMessage(dated, new Set(["C1"]), new Set()).chat).toContain("I'm writing about account ending 4415, statement dated Nov 12, 2026.");
     expect(buildYearMessage([month(10, [priceClaim]), dated]).chat).toContain("For the statement dated Nov 12, 2026, Fiber 500 Internet");
+  });
+
+  // The chat opens on "my latest bill" and then says "this bill"; the complaint has no such opening, so a bill with
+  // neither a date nor a total read is named as the chat names it, not "this bill", which a regulator can't place.
+  test("a bill with no date or total read is 'my latest bill' in the complaint, as in the chat's opening", () => {
+    const base = month(11, [priceClaim]);
+    const bare = { ...base, reading: { ...base.reading, period_start: null, period_end: null, statement_date: null, due_date: null, printed: { ...base.reading.printed, current_charges: null, total_due: null } } };
+    const { chat, complaint } = buildMessage(bare, new Set(["C1"]), new Set());
+    expect(chat).toContain("I'm writing about account ending 4415 and my latest bill.");
+    expect(complaint).toContain("- For my latest bill, Fiber 500 Internet");
+    expect(complaint).not.toContain("this bill");
   });
 });
 

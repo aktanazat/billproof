@@ -77,7 +77,9 @@ function claimParts(claim: Claim, lines: LineItem[], promise: PromiseTerm, quote
         request: `Please remove ${several ? "them" : "it"} and credit ${usd(claim.amountCents)}.`,
       };
     case "credit_missing": {
-      const bill = dated ? (period.startsWith("the ") ? period : `the bill for ${period}`) : "this bill";
+      // Only a period of dates needs "the bill for" before it; "the $92.49 bill", "my latest bill" and a year's "one
+      // bill" are names already.
+      const bill = dated ? (/^(the|my|one) /.test(period) ? period : `the bill for ${period}`) : "this bill";
       const missing = `${claim.actualCents === 0 ? "no" : `only ${usd(claim.actualCents)} of the`} ${usd(claim.expectedCents)} monthly credit I was promised (${quoted})`;
       return {
         fact: promise.conditions.includes("autopay") ? `My account is on autopay, but ${bill} has ${missing}.` : `${capitalized(bill)} has ${missing}.`,
@@ -283,7 +285,10 @@ export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<stri
   const increase = increaseSentence(result.change);
   const asked = [...(increase ? [increase] : []), ...questionText];
   const risen = increaseFact(result.change);
-  const regulatorBody = [...claimPartsFor(`${provider ?? "the company"}'s representative`, periodText(result)).map(({ fact }) => fact), ...(risen ? [risen] : []), ...questionFacts];
+  // The complaint has no opening that names the bill, so one with no date or total read is "my latest bill", as the
+  // chat's opening calls it, rather than "this bill".
+  const complaintPeriod = periodText(result) === "this bill" ? "my latest bill" : periodText(result);
+  const regulatorBody = [...claimPartsFor(`${provider ?? "the company"}'s representative`, complaintPeriod).map(({ fact }) => fact), ...(risen ? [risen] : []), ...questionFacts];
 
   const about = aboutText(result, account);
   const chat = [`Hi, I'm writing about ${about}.`, ...totalAfter(claimText, ask, asked)].join("\n\n");
@@ -308,7 +313,7 @@ export function buildMessage(result: Checked, selectedClaimIds: ReadonlySet<stri
     .filter(Boolean)
     .join("\n\n");
   const problem = problemLine(claims, fees.length > 0, offerCovers, risen !== null);
-  const shortFacts = [...(claims.length > 0 ? [`For ${periodText(result)}: ${claims.map((claim) => shortClaim(claim, linesOf(claim.lineIds))).join("; ")}.`] : []), ...(risen ? [risen] : []), ...questionFacts];
+  const shortFacts = [...(claims.length > 0 ? [`For ${complaintPeriod}: ${claims.map((claim) => shortClaim(claim, linesOf(claim.lineIds))).join("; ")}.`] : []), ...(risen ? [risen] : []), ...questionFacts];
   return { totalCents, chat, email, call, complaint: complaintText(provider, result.reading.account_last4, problem, [regulatorBody, shortFacts], claims, questionFacts.length > 0 || risen !== null) };
 }
 
