@@ -510,7 +510,7 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
   const pasteQueue = useRef(Promise.resolve());
   // Which bills have their files kept, for showing "Add a screenshot to this bill" (the files themselves stay off-render).
   const [withFiles, setWithFiles] = useState<ReadonlySet<string>>(() => new Set());
-  const [pasteNote, setPasteNote] = useState<string | null>(null);
+  const [billNote, setBillNote] = useState<string | null>(null);
   // A screenshot pasted alone into an offer already written isn't added, so the words aren't replaced unasked; this says so.
   const [offerNote, setOfferNote] = useState<string | null>(null);
   // The offer takes one file; a drop of several keeps the first and says where the rest belong.
@@ -520,7 +520,7 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
   const forgetNotes = () => {
     setLeftOut([]);
     setAlreadyAdded([]);
-    setPasteNote(null);
+    setBillNote(null);
     setOfferNote(null);
     setOfferExtra(0);
   };
@@ -667,12 +667,14 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
   // repeats, since its own files come back in the drop, and is removed only once they have been read again; if they
   // can't be (the file changed on disk since), it stays as it was.
   const addBills = async (dropped: File[], replacing?: string) => {
+    setBillNote(null);
     let digests: Map<File, string>;
     try {
       digests = new Map(await Promise.all(dropped.map(async (file) => [file, await digestOf(file)] as const)));
-    } catch (error) {
-      if (!replacing) throw error;
-      setPasteNote("The screenshot wasn't added: the bill's own files can no longer be read. Add the screenshot and the bill's files again together.");
+    } catch {
+      setBillNote(replacing
+        ? "The screenshot wasn't added: the bill's own files can no longer be read. Add the screenshot and the bill's files again together."
+        : "A file couldn't be read, so nothing was added. Save the files to this device, then add them again.");
       return;
     }
     if (replacing) dispatch({ type: "removed", id: replacing });
@@ -740,15 +742,14 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
     const files = last ? billFiles.current.get(last.id) : undefined;
     if (!last || !files || last.status === "failed" || files.some((file) => !isPdf(file) && !isPicture(file))) return addBills(pictures);
     if (files.length + pictures.length > MAX_BILL_PAGES) {
-      setPasteNote(`The screenshot wasn't added: a bill takes up to ${MAX_BILL_PAGES} pictures, and this one is full. For another month, use “Add another month”.`);
+      setBillNote(`The screenshot wasn't added: a bill takes up to ${MAX_BILL_PAGES} pictures, and this one is full. For another month, use “Add another month”.`);
       return;
     }
-    setPasteNote(null);
     return addBills([...files, ...pictures], last.id);
   };
   // Pasted and chosen screenshots join in turn, each from the bill as the one before left it.
   const joinPictures = (pictures: File[]) => {
-    pasteQueue.current = pasteQueue.current.then(() => pasteBills(pictures)).catch(() => setPasteNote("The screenshot couldn't be added. Try adding it again."));
+    pasteQueue.current = pasteQueue.current.then(() => pasteBills(pictures)).catch(() => setBillNote("The screenshot couldn't be added. Try adding it again."));
   };
 
   const preparePile = async (docId: string, group: File[]) => {
@@ -993,9 +994,9 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
               Already added, so not added again: {listed(alreadyAdded)}.
             </p>
           )}
-          {pasteNote && (
-            <p role="status" className="mt-2 px-2 text-[13px] text-text-2 break-words">
-              {pasteNote}
+          {billNote && (
+            <p role="alert" className="mt-2 px-2 text-[13px] text-text-2 break-words">
+              {billNote}
             </p>
           )}
         </div>
