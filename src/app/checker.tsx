@@ -874,9 +874,11 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
           <p className="text-[15px] font-semibold">Bill</p>
           {bills.length > 0 ? (
             <>
-              {/* The padding, taken back by the margins, keeps the focus ring of a button at the list's edge inside the
-                  scrolling box, which would cut it off. */}
-              <div className="-mx-1 -mb-1 mt-1 max-h-[208px] overflow-y-auto p-1">
+              {/* Scrolls on its own only beside the offer, to keep the two columns level. On a phone the rows wrap to
+                  about 100px each, so a short box showed two and hid the rest without a cut-off row to say so; the
+                  list grows with the page instead. The padding, taken back by the margins, keeps the focus ring of a
+                  button at the list's edge inside the scrolling box, which would cut it off. */}
+              <div className="-mx-1 -mb-1 mt-1 p-1 lg:max-h-[208px] lg:overflow-y-auto">
                 {bills.map((doc) => (
                   <DocRow
                     key={doc.id}
