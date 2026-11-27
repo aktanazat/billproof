@@ -214,10 +214,11 @@ function increaseFact(change: BillChange | null, bill = "This bill"): string | n
   return `${bill} is ${usd(change.currentCents - change.earlierCents)} higher than the one before${named}.`;
 }
 
-// The same rise as a request to the company: the message asks why.
+// The same rise as a request to the company: the message asks why. Several rises are asked about once, after the last.
+const explainIncrease = (rises: number) => `Please explain ${rises > 1 ? "these increases" : "the increase"} and correct anything I didn't agree to.`;
 export function increaseSentence(change: BillChange | null, bill?: string): string | null {
   const fact = increaseFact(change, bill);
-  return fact && `${fact} Please explain the increase and correct anything I didn't agree to.`;
+  return fact && `${fact} ${explainIncrease(1)}`;
 }
 
 // A call script's points are numbered only when there are several: read aloud, a lone "1." promises a point 2.
@@ -397,7 +398,8 @@ export function buildYearMessage(months: Checked[]): Message {
     const period = periodOf(month);
     return period === "one bill" ? "One of the bills" : period.startsWith("the ") ? capitalized(period) : `The bill for ${period}`;
   };
-  const riseText = months.flatMap((month) => increaseSentence(month.change, billName(month)) ?? []);
+  const riseFacts = months.flatMap((month) => increaseFact(month.change, billName(month)) ?? []);
+  const riseText = riseFacts.map((fact, i) => (i === riseFacts.length - 1 ? `${fact} ${explainIncrease(riseFacts.length)}` : fact));
   const asked = [...riseText, ...feeText];
   const ask = withClaims.flatMap((month) => month.claims).length > 1 ? `In total, please credit ${usd(totalCents)} to ${account}.` : "";
   // Only an offer from this company is a plan the statements were checked against.
@@ -443,7 +445,6 @@ export function buildYearMessage(months: Checked[]): Message {
     return `For ${periodOf(month)}: ${month.claims.map((claim) => shortClaim(claim, claim.lineIds.flatMap((id) => lines.get(id) ?? []))).join("; ")}.`;
   });
   const amounts = withClaims.map((month) => `${capitalized(periodOf(month))}: ${usd(month.claims.reduce((t, claim) => t + claim.amountCents, 0))} more than I was promised.`);
-  const riseFacts = months.flatMap((month) => increaseFact(month.change, billName(month)) ?? []);
   const rises = months.flatMap((month) => (month.change && month.change.currentCents > month.change.earlierCents ? [`${periodOf(month)} (${usd(month.change.currentCents - month.change.earlierCents)} more)`] : []));
   const shortRiseFacts = rises.length > 0 ? [`Higher than the statement before: ${rises.join("; ")}.`] : [];
   const feeFacts = fees.length > 0 ? [feeFact(fees, offerCovers, "My statements charge")] : [];

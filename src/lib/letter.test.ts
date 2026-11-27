@@ -405,6 +405,16 @@ describe("the complaint a regulator receives", () => {
     expect(complaint).toContain("a credit of $180.00");
   });
 
+  // Each rise is its own fact, but asking the company to explain after every one repeated the same request.
+  test("a year whose price rose on several statements names each rise and asks once to explain them", () => {
+    const rose = (cents: number) => ({ earlierCents: 8500, currentCents: 8500 + cents, lines: [{ label: "Fiber 500 Internet", beforeCents: 5500, afterCents: 5500 + cents }] });
+    const year = [2, 3, 4].map((m, i) => ({ ...month(m, []), change: rose(500 * (i + 1)) }));
+    const { chat } = buildYearMessage(year);
+    for (const m of ["Feb 12, 2026", "Mar 12, 2026", "Apr 12, 2026"]) expect(chat).toContain(`The bill for ${m} to`);
+    expect(chat.match(/Please explain/g)).toHaveLength(1);
+    expect(chat).toContain("Please explain these increases");
+  });
+
   test("a month whose only claim is an included charge says which statement it is", () => {
     const { chat, complaint } = buildYearMessage([month(10, [priceClaim]), month(11, [gatewayClaim])]);
     expect(chat).toContain("For Nov 12, 2026 to Dec 11, 2026, I was charged $15.00 for Wi-Fi Gateway Rental");
