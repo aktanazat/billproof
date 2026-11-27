@@ -868,38 +868,41 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
         </p>
       </div>
 
-      {/* One column on a phone may not grow to a long file name, or the page scrolls sideways instead of the name truncating. */}
+      {/* One column on a phone may not grow to a long file name, or the page scrolls sideways instead of the name wrapping. */}
       <div className="mt-10 grid grid-cols-[minmax(0,1fr)] gap-3 lg:grid-cols-2">
         <div className="flex min-h-[180px] flex-col rounded-xl bg-fill p-4">
           <p className="text-[15px] font-semibold">Bill</p>
           {bills.length > 0 ? (
-            // The padding, taken back by the margins, keeps the focus ring of a button at the list's edge inside the
-            // scrolling box, which would cut it off.
-            <div className="-mx-1 -mb-1 mt-1 max-h-[208px] overflow-y-auto p-1">
-              {bills.map((doc) => (
-                <DocRow
-                  key={doc.id}
-                  doc={doc}
-                  onRemove={() => {
-                    billFiles.current.delete(doc.id);
-                    setWithFiles((ids) => new Set([...ids].filter((docId) => docId !== doc.id)));
-                    billHashes.current.delete(doc.id);
-                    dispatch({ type: "removed", id: doc.id });
-                  }}
-                />
-              ))}
-              <div className="flex flex-wrap gap-x-1">
-                {takesPicture && (
-                  <FileTarget label="Add a screenshot to this bill" accept="image/*,.heic,.heif" multiple onFiles={(files) => joinPictures(files.filter(isPicture))} className="mt-1 h-8 rounded-lg px-2 text-[13px] text-text-2 hover:bg-fill-2 hover:text-text data-[over]:bg-fill-2 data-[over]:text-text">
-                    Add a screenshot to this bill
-                  </FileTarget>
-                )}
-                {bills.length < MAX_BILLS && (
-                  <FileTarget label="Add more bills" accept={BILL_ACCEPT} multiple onFiles={addBills} className="mt-1 h-8 rounded-lg px-2 text-[13px] text-text-2 hover:bg-fill-2 hover:text-text data-[over]:bg-fill-2 data-[over]:text-text">
-                    Add another month
-                  </FileTarget>
-                )}
+            <>
+              {/* The padding, taken back by the margins, keeps the focus ring of a button at the list's edge inside the
+                  scrolling box, which would cut it off. */}
+              <div className="-mx-1 -mb-1 mt-1 max-h-[208px] overflow-y-auto p-1">
+                {bills.map((doc) => (
+                  <DocRow
+                    key={doc.id}
+                    doc={doc}
+                    onRemove={() => {
+                      billFiles.current.delete(doc.id);
+                      setWithFiles((ids) => new Set([...ids].filter((docId) => docId !== doc.id)));
+                      billHashes.current.delete(doc.id);
+                      dispatch({ type: "removed", id: doc.id });
+                    }}
+                  />
+                ))}
+                <div className="flex flex-wrap gap-x-1">
+                  {takesPicture && (
+                    <FileTarget label="Add a screenshot to this bill" accept="image/*,.heic,.heif" multiple onFiles={(files) => joinPictures(files.filter(isPicture))} className="mt-1 h-8 rounded-lg px-2 text-[13px] text-text-2 hover:bg-fill-2 hover:text-text data-[over]:bg-fill-2 data-[over]:text-text">
+                      Add a screenshot to this bill
+                    </FileTarget>
+                  )}
+                  {bills.length < MAX_BILLS && (
+                    <FileTarget label="Add more bills" accept={BILL_ACCEPT} multiple onFiles={addBills} className="mt-1 h-8 rounded-lg px-2 text-[13px] text-text-2 hover:bg-fill-2 hover:text-text data-[over]:bg-fill-2 data-[over]:text-text">
+                      Add another month
+                    </FileTarget>
+                  )}
+                </div>
               </div>
+              {/* Below the list, not at its end: with twelve rows, a note there is out of sight until the list is scrolled. */}
               {leftOut.length > 0 && (
                 <p role="status" className="mt-2 px-2 text-[13px] text-text-2 break-words">
                   Left out, as a check reads up to {MAX_BILLS} bills: {listed(leftOut)}.
@@ -915,7 +918,7 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
                   {pasteNote}
                 </p>
               )}
-            </div>
+            </>
           ) : (
             <FileTarget label="Choose the bill" accept={BILL_ACCEPT} multiple onFiles={addBills} className="mt-3 flex h-[112px] w-full flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-text-2/40 text-center hover:bg-white data-[over]:bg-white">
               <span className="px-2 text-[15px] text-balance">
