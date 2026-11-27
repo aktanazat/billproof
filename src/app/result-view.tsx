@@ -279,17 +279,20 @@ export function MessageBox({ message }: { message: Message }) {
           <button
             type="button"
             onClick={() => {
-              navigator.clipboard.writeText(text).then(
-                () => {
-                  setCopied("yes");
-                  setTimeout(() => setCopied("no"), 1600);
-                },
-                // A browser that blocks the clipboard (an embedded page, a denied permission) gets the text selected to copy by hand.
-                () => {
-                  box.current?.select();
-                  setCopied("failed");
-                },
-              );
+              Promise.resolve()
+                .then(() => navigator.clipboard.writeText(text))
+                .then(
+                  () => {
+                    setCopied("yes");
+                    setTimeout(() => setCopied("no"), 1600);
+                  },
+                  // A browser that blocks the clipboard (an embedded page, a denied permission) or has none (an older or
+                  // in-app browser) gets the text selected to copy by hand.
+                  () => {
+                    box.current?.select();
+                    setCopied("failed");
+                  },
+                );
             }}
             className="h-8 min-w-[72px] rounded-lg bg-text px-3 text-[13px] font-medium text-white hover:bg-black"
           >
