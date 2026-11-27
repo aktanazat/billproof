@@ -3,7 +3,7 @@ import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { decide, type Source } from "../src/lib/decide";
-import type { CheckInput, CheckResult, Checked } from "../src/lib/result";
+import type { CheckEvent, CheckInput, CheckResult, Checked } from "../src/lib/result";
 import { evalBills } from "./samples/eval-specs";
 import { jpegDataUrl, photoOf, rasterize } from "./samples/raster";
 import { renderBillPdf } from "./samples/render";
@@ -41,6 +41,25 @@ export const cases: Case[] = [
   { id: "call-first-year", variant: "call", specs: [internetExpired], bills: [internetGuaranteed], offer: null, input: async () => ({ bills: [await billPage(internetGuaranteed)], offer: { kind: "audio", ...wavOf(path.join(samples, "call-first-year.m4a")) } }) },
   { id: "year-12", variant: "year", specs: yearBills, bills: yearBills, offer: internetGuaranteed.proof, input: async () => ({ bills: await Promise.all(yearBills.map(billPage)), offer: { kind: "text", text: internetGuaranteed.proof } }) },
 ];
+
+// Each sample on the start screen, by its id in public/samples/index.json, and the eval case that checked it. Their
+// saved checks (public/samples/saved) stand in when a live one is refused.
+export const SAMPLE_CASES: Record<string, { id: string; variant: Variant }> = {
+  "internet-guaranteed": { id: "internet-guaranteed", variant: "pdf" },
+  "internet-expired": { id: "internet-expired", variant: "pdf" },
+  "mobile-autopay": { id: "mobile-autopay", variant: "pdf" },
+  "call-two-years": { id: "call-two-years", variant: "call" },
+  "call-first-year": { id: "call-first-year", variant: "call" },
+  year: { id: "year-12", variant: "year" },
+};
+
+// A sample's saved check: the eval run's result for its case, decided again by today's rules.
+export async function savedSampleResult(sample: string, run: { raw: { id: string; variant: Variant; events: CheckEvent[] }[] }): Promise<CheckResult | null> {
+  const target = SAMPLE_CASES[sample];
+  const c = target && cases.find((each) => each.id === target.id && each.variant === target.variant);
+  const terminal = target && run.raw.find((each) => each.id === target.id && each.variant === target.variant)?.events.at(-1);
+  return c && terminal?.type === "result" ? replayed(c, terminal.result) : null;
+}
 
 // A saved check decided again by today's rules: Muse Ember's readings and promises as saved, the bill's text rendered
 // again, and the claims the company-side step struck out last time struck out again (a year has no such step).

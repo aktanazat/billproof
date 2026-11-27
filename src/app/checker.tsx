@@ -8,7 +8,7 @@ import { formatMicros } from "@/lib/cost";
 import { usd } from "@/lib/letter";
 import { isPdf, isPicture, isRecording, prepareCall, prepareFile, PrepareError } from "@/lib/prepare";
 import { MAX_BILL_PAGES, MAX_BILLS, MAX_CALL_SECONDS, MAX_OFFER_PAGES } from "@/lib/limits";
-import type { CheckEvent, CheckInput, PageKind, Stage } from "@/lib/result";
+import type { CheckEvent, CheckFailure, CheckInput, CheckResult, PageKind, Stage } from "@/lib/result";
 import { BillPage, snapBox, Thumbnail, type Mark } from "./bill-page";
 import { formatClock, inPlainWords, Waveform } from "./evidence";
 import { focusOnShow, ResultView } from "./result-view";
@@ -34,7 +34,20 @@ function isCheckEvent(value: unknown): value is CheckEvent {
   return typeof value === "object" && value !== null && "type" in value && typeof value.type === "string";
 }
 
-async function streamCheck(input: CheckInput, attempt: number, signal: AbortSignal, dispatch: (action: CheckAction) => void) {
+// Refusals a sample's saved check stands in for: the demo's budget is used, or the visitor's hour.
+const SHOWS_SAVED = new Set<CheckFailure>(["budget_spent", "too_many_checks"]);
+
+// A bundled sample's last check, saved with the site, with why it is shown and from when; null when there is none.
+async function savedSample(id: string, refusal: { failure: CheckFailure; message: string }): Promise<{ result: CheckResult; note: string } | null> {
+  const response = await fetch(`/samples/saved/${id}.json`).catch(() => null);
+  const saved = response?.ok ? ((await response.json().catch(() => null)) as { savedOn: string; result: CheckResult } | null) : null;
+  if (!saved) return null;
+  const when = new Date(`${saved.savedOn}T12:00:00Z`).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" });
+  const why = refusal.failure === "budget_spent" ? "Live checks are paused: this demo has used its budget." : refusal.message;
+  return { result: saved.result, note: `${why} Shown instead: this sample's saved check from ${when}.` };
+}
+
+async function streamCheck(input: CheckInput, attempt: number, signal: AbortSignal, dispatch: (action: CheckAction) => void, sample: string | null) {
   const fail = (message: string, spentMicros: number | null) => dispatch({ type: "errored", attempt, failure: "network", message, spentMicros, retryable: true });
   let response: Response;
   try {
@@ -100,10 +113,13 @@ async function streamCheck(input: CheckInput, attempt: number, signal: AbortSign
             terminal = true;
             dispatch({ type: "finished", attempt, result: event.result });
             break;
-          case "error":
+          case "error": {
             terminal = true;
-            dispatch({ type: "errored", attempt, failure: event.failure, message: event.message, spentMicros: event.spentMicros, retryable: event.retryable, bill: event.bill });
+            // Only a check refused before it spent anything: one stopped part way keeps its cost and its finished months.
+            const saved = sample && SHOWS_SAVED.has(event.failure) && event.spentMicros === 0 ? await savedSample(sample, event) : null;
+            dispatch(saved ? { type: "finished", attempt, result: saved.result, saved: saved.note } : { type: "errored", attempt, failure: event.failure, message: event.message, spentMicros: event.spentMicros, retryable: event.retryable, bill: event.bill });
             break;
+          }
         }
       }
     }
@@ -525,6 +541,8 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
     setOfferExtra(0);
   };
   const controllers = useRef(new Map<number, AbortController>());
+  // The bundled sample whose files are being checked, with those files: its saved check stands in for a refused one.
+  const sampleRun = useRef<{ id: string; inputs: Inputs } | null>(null);
   const nextId = useRef(0);
   const id = () => `doc-${++nextId.current}`;
 
@@ -643,7 +661,7 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
     if (!input) return;
     const controller = new AbortController();
     controllers.current.set(runningAttempt, controller);
-    void streamCheck(input, runningAttempt, controller.signal, dispatch);
+    void streamCheck(input, runningAttempt, controller.signal, dispatch, sampleRun.current?.inputs === state.inputs ? sampleRun.current.id : null);
   }, [runningAttempt, state.inputs]);
 
   const cancel = () => {
@@ -884,7 +902,9 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
           ? { kind: "text", text: sample.offer.text }
           : { kind: "call", call: { id: `sample-${token}-call`, name: "Sales call.m4a", status: "ready", ...(await prepareCall(await fetchFile(sample.offer.url, "Sales call.m4a", "audio/mp4"), MAX_CALL_SECONDS)) } };
       if (token !== sampleToken.current) return;
-      dispatch({ type: "sample_ready", inputs: { bills, offer } });
+      const inputs = { bills, offer };
+      sampleRun.current = sample.pictures ? null : { id: sample.id, inputs };
+      dispatch({ type: "sample_ready", inputs });
     } catch (error) {
       // A failed download or a file that won't open stays on the start screen with the reason on its row.
       if (token !== sampleToken.current) return;
@@ -924,6 +944,7 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
         dispatch={dispatch}
         backLabel={state.result.outcome === "checked" ? "Check another bill" : "Change files"}
         onBack={() => dispatch({ type: "edit" })}
+        saved={state.saved}
       />
     );
   }

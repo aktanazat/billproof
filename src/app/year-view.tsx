@@ -5,7 +5,7 @@ import { offerOmitted, type CheckAction, type CheckState } from "@/lib/check-mac
 import { buildYearMessage, MONTHS, usd } from "@/lib/letter";
 import type { CallRecord, Checked, YearResult } from "@/lib/result";
 import { inPlainWords } from "./evidence";
-import { focusOnShow, MessageBox, ResultView, SHOWN_QUESTIONS, Trace } from "./result-view";
+import { focusOnShow, MessageBox, ResultView, SavedNote, SHOWN_QUESTIONS, Trace } from "./result-view";
 
 type Done = Extract<CheckState, { s: "done" }>;
 
@@ -142,7 +142,7 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
     const doc = state.inputs.bills[open];
     const selection = state.selections[open];
     if (month && doc?.status === "ready" && selection) {
-      return <ResultView result={month.result} bill={open} pages={doc.pages} omittedPages={{ bill: doc.omitted, offer: offerOmitted(state.inputs.offer) }} callUrl={callUrl} selection={selection} dispatch={dispatch} backLabel="Back to the year" onBack={() => { setCameBackFrom(open); setOpen(null); }} />;
+      return <ResultView result={month.result} bill={open} pages={doc.pages} omittedPages={{ bill: doc.omitted, offer: offerOmitted(state.inputs.offer) }} callUrl={callUrl} selection={selection} dispatch={dispatch} backLabel="Back to the year" onBack={() => { setCameBackFrom(open); setOpen(null); }} saved={state.saved} />;
     }
   }
 
@@ -175,6 +175,7 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
     <section className="mx-auto w-full max-w-[1120px] px-6 pb-24 pt-6">
       <header className="flex flex-wrap items-end justify-between gap-4 pb-8">
         <div ref={cameBackFrom === null ? focusOnShow : undefined} tabIndex={-1} className="outline-none">
+          {state.saved && <SavedNote note={state.saved} />}
           <h1 className={firstBad >= 0 ? undefined : "text-[28px] font-semibold leading-[1.2] tracking-[-0.02em]"}>
             {firstBad >= 0 ? (
               <>

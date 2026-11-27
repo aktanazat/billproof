@@ -39,7 +39,8 @@ export type Live = {
 export type CheckState =
   | { s: "composing"; inputs: Inputs; attempts: number }
   | { s: "running"; inputs: Inputs; attempts: number; attempt: number; stage: Stage | null; spentMicros: number; live: Live }
-  | { s: "done"; inputs: Inputs; attempts: number; result: CheckResult; selections: Selection[] }
+  // `saved` is set when a sample's live check was refused and its saved result is shown instead: why, and from when.
+  | { s: "done"; inputs: Inputs; attempts: number; result: CheckResult; selections: Selection[]; saved: string | null }
   // `spentFinal` is false when the connection dropped mid-check: only the server knows the final cost, so the amount
   // shown is what had been reported so far, a lower bound. A stopped check keeps `live`, so the months a year check
   // finished before it stopped stay on screen.
@@ -69,7 +70,7 @@ export type CheckAction =
   | { type: "challenged"; attempt: number; challenge: SeenChallenge }
   | { type: "pages_sorted"; attempt: number; bill: number; kinds: PageKind[] }
   | { type: "month_done"; attempt: number; bill: number; result: SingleResult }
-  | { type: "finished"; attempt: number; result: CheckResult }
+  | { type: "finished"; attempt: number; result: CheckResult; saved?: string }
   // `spentMicros` is null when the server's own account of the cost never arrived.
   | { type: "errored"; attempt: number; failure: CheckFailure; message: string; spentMicros: number | null; retryable: boolean; bill?: number }
   | { type: "cancel" }
@@ -243,7 +244,7 @@ function running(state: Extract<CheckState, { s: "running" }>, action: CheckActi
     case "month_done":
       return { ...state, live: { ...live, months: { ...live.months, [action.bill]: action.result } } };
     case "finished":
-      return { s: "done", inputs: state.inputs, attempts: state.attempts, result: action.result, selections: initialSelections(action.result) };
+      return { s: "done", inputs: state.inputs, attempts: state.attempts, result: action.result, selections: initialSelections(action.result), saved: action.saved ?? null };
     case "errored": {
       // A failure that belongs to one bill of a year is told by that bill's file, which the person can find and fix.
       const named = action.bill === undefined ? undefined : state.inputs.bills[action.bill]?.name;

@@ -46,6 +46,8 @@ Before each model call the server counts the exact input tokens with `POST /v1/r
 
 The whole project, local runs and the live site together, is held under $10 of Meta spend. Local runs used $8.33, so the live server's event cap is $1.60 (`deploy/compose.yml`), a combined worst case of $9.93. Once the cap can't cover one more check, the start screen and the real-bills page say live checks are paused and the live-run button turns off, and a check or run asked for anyway is refused before anything is sent; every saved result stays on the real-bills page. The site's robots.txt keeps crawlers off the "Check it live" links, which start a paid check when their page runs, and each address gets 30 bills checked an hour that cost something, a year of statements counting as twelve, since it costs about as much: a sample answered from the last 15 minutes' results, or a check Meta turned away before charging, doesn't count.
 
+A sample on the start screen whose live check is refused, because the budget is used or the address's hour is, shows the check saved with the site instead, headed by the reason and the day it ran. The six are the eval run's results for the same files, decided again by today's rules (`pnpm saved-samples eval/run-….json` writes them to `public/samples/saved`), and a test fails if today's rules would decide any of them differently.
+
 ## Run it
 
 ```bash
