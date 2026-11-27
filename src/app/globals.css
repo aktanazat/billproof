@@ -38,7 +38,9 @@ h3 {
   text-wrap: balance;
 }
 
-:focus-visible {
+/* Not on what only a script focuses (tabindex -1: a screen's heading as it appears, so screen readers start there).
+   This rule sits outside Tailwind's layers, where an element's own outline-none can't override it. */
+:focus-visible:not([tabindex="-1"]) {
   outline: 2px solid var(--text);
   outline-offset: 2px;
 }
