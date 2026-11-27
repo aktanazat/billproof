@@ -217,7 +217,8 @@ function Check() {
   );
 }
 
-type Step = { key: "sort" | "bill" | "offer" | "compare" | "challenge"; stages: Stage[]; label: string };
+// `starting` is shown under the heading until the step's first reasoning arrives; the comparison is code, with none.
+type Step = { key: "sort" | "bill" | "offer" | "compare" | "challenge"; stages: Stage[]; label: string; starting: string };
 const STAGE_ORDER: Stage[] = ["sorting", "reading_bill", "rereading_bill", "reading_offer", "comparing", "challenging"];
 const KIND_NAMES: Record<PageKind, string> = { bill: "Bill", older_bill: "Earlier bill", promise: "Promise", other: "Not used" };
 
@@ -353,11 +354,11 @@ function Working({ state, onCancel, dispatch }: { state: Exclude<CheckState, { s
   // Offer pictures found among the bill's screenshots are read as the offer, as one the person added would be.
   const promised = offer.kind !== "none" || (kinds?.includes("promise") ?? false);
   const steps: Step[] = [
-    ...(kinds || stage === "sorting" ? [{ key: "sort" as const, stages: ["sorting"] as Stage[], label: "Sorting your pictures" }] : []),
-    { key: "bill", stages: ["reading_bill", "rereading_bill"], label: stage === "rereading_bill" ? "Reading the bill again" : "Reading the bill" },
-    ...(promised ? [{ key: "offer" as const, stages: ["reading_offer"] as Stage[], label: isCall ? "Listening to the call" : "Reading the offer" }] : []),
-    { key: "compare", stages: ["comparing"], label: promised ? "Comparing charges with the promise" : "Checking the charges" },
-    ...(promised ? [{ key: "challenge" as const, stages: ["challenging"] as Stage[], label: "Checking the company's side" }] : []),
+    ...(kinds || stage === "sorting" ? [{ key: "sort" as const, stages: ["sorting"] as Stage[], label: "Sorting your pictures", starting: "Muse Ember is starting on your pictures." }] : []),
+    { key: "bill", stages: ["reading_bill", "rereading_bill"], label: stage === "rereading_bill" ? "Reading the bill again" : "Reading the bill", starting: "Muse Ember is starting on the bill." },
+    ...(promised ? [{ key: "offer" as const, stages: ["reading_offer"] as Stage[], label: isCall ? "Listening to the call" : "Reading the offer", starting: isCall ? "Muse Ember is starting on the call." : "Muse Ember is starting on the offer." }] : []),
+    { key: "compare", stages: ["comparing"], label: promised ? "Comparing charges with the promise" : "Checking the charges", starting: "" },
+    ...(promised ? [{ key: "challenge" as const, stages: ["challenging"] as Stage[], label: "Checking the company's side", starting: "Muse Ember is starting on the company's side." }] : []),
   ];
   const current = steps.find((step) => stepStatus(step, stage, running) === "now");
   const latest = current ? (live?.thoughts ?? []).filter((t) => current.stages.includes(t.stage)).at(-1)?.text.split("\n\n").at(-1) : undefined;
@@ -379,7 +380,7 @@ function Working({ state, onCancel, dispatch }: { state: Exclude<CheckState, { s
         </div>
         {/* Stopped, the reason takes the place of the thinking text, under the heading: below the steps it sat past a
             phone's first screen. */}
-        {state.s === "running" ? <p className="min-h-[44px] text-[15px] leading-[22px] text-text-2">{latestThought ?? "Muse Ember is starting on the bill."}</p> : <StopReason state={state} />}
+        {state.s === "running" ? <p className="min-h-[44px] text-[15px] leading-[22px] text-text-2">{latestThought ?? current?.starting ?? "Muse Ember is starting on the bill."}</p> : <StopReason state={state} />}
 
         <ol className="flex flex-col border-t border-line">
           {steps.map((step) => {
