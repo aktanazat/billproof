@@ -498,10 +498,14 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
   // Each bill's own files, so a pasted screenshot can join the bill as if it had been dropped with them.
   const billFiles = useRef(new Map<string, File[]>());
   const pastedCount = useRef(0);
+  // Pasted screenshots get made-up names; a repeat one is called what the person did, not a name they never saw.
+  const pasted = useRef(new WeakSet<File>());
   const pasteQueue = useRef(Promise.resolve());
   // Which bills have their files kept, for showing "Add a screenshot to this bill" (the files themselves stay off-render).
   const [withFiles, setWithFiles] = useState<ReadonlySet<string>>(() => new Set());
   const [pasteNote, setPasteNote] = useState<string | null>(null);
+  // A screenshot pasted alone into an offer already written isn't added, so the words aren't replaced unasked; this says so.
+  const [offerNote, setOfferNote] = useState<string | null>(null);
   // The offer takes one file; a drop of several keeps the first and says where the rest belong.
   const [offerExtra, setOfferExtra] = useState(0);
   const controllers = useRef(new Map<number, AbortController>());
@@ -665,7 +669,7 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
     const repeated: string[] = [];
     for (const file of dropped) {
       const hash = digests.get(file) ?? "";
-      if (seen.has(hash)) repeated.push(file.name);
+      if (seen.has(hash)) repeated.push(pasted.current.has(file) ? "the pasted screenshot" : file.name);
       else {
         seen.add(hash);
         hashes.set(file, hash);
@@ -760,8 +764,9 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
   };
 
   // A screenshot pasted (Cmd+V, or Paste on a phone) is added like a chosen file: into the offer box when the cursor is
-  // there and it's empty, otherwise to the bill. Pasted words are left to the page: a picture pasted into an offer
-  // already written is ignored, and so is one that comes with words (a document's copy can carry a picture of itself).
+  // there and it's empty, otherwise to the bill. Pasted words are left to the page: a picture that comes with words is
+  // ignored (a document's copy can carry a picture of itself), and one pasted into an offer already written is refused
+  // with a note under the box.
   useEffect(() => {
     if (state.s !== "composing") return;
     const offerEmpty = state.inputs.offer.kind === "none";
@@ -769,10 +774,17 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
       const files = [...(event.clipboardData?.files ?? [])].filter(isPicture);
       if (files.length === 0) return;
       const inOffer = event.target instanceof HTMLTextAreaElement && event.target.getAttribute("aria-label") === "What you were promised";
-      if (inOffer && (!offerEmpty || event.clipboardData?.getData("text/plain").trim())) return;
+      const words = event.clipboardData?.getData("text/plain").trim();
+      if (inOffer && words) return;
+      if (inOffer && !offerEmpty) {
+        event.preventDefault();
+        setOfferNote("The screenshot wasn't added: this box already has the offer's words. To use the screenshot instead, clear the box first.");
+        return;
+      }
       event.preventDefault();
       // An untyped picture is known by its name (an iPhone's .heic), so the new name keeps its extension.
       const pictures = files.map((file) => new File([file], `Pasted screenshot ${++pastedCount.current}.${file.type ? file.type.split("/")[1] : file.name.split(".").pop()}`, { type: file.type }));
+      for (const picture of pictures) pasted.current.add(picture);
       if (inOffer) void addOffer(pictures);
       else joinPictures(pictures);
     };
@@ -964,13 +976,21 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
             <>
               <textarea
                 value={offer.kind === "text" ? offer.text : ""}
-                onChange={(event) => dispatch({ type: "offer_text", text: event.target.value })}
+                onChange={(event) => {
+                  setOfferNote(null);
+                  dispatch({ type: "offer_text", text: event.target.value });
+                }}
                 placeholder="Paste the order confirmation or plan details"
                 aria-label="What you were promised"
                 // 16 px on a phone: iPhone Safari zooms the page into a box with smaller text when it's tapped. It grows
                 // with a pasted offer, up to half the screen, so what was pasted can be read and trimmed in place.
                 className="mt-2 block min-h-[88px] max-h-[50vh] w-full flex-1 resize-none rounded-lg bg-white p-3 text-[16px] leading-[22px] field-sizing-content shadow-[inset_0_0_0_1px_var(--line)] placeholder:text-text-2 focus:outline-none focus-visible:shadow-[inset_0_0_0_2px_var(--text)] sm:text-[15px]"
               />
+              {offerNote && (
+                <p role="status" className="mt-2 px-2 text-[13px] text-text-2">
+                  {offerNote}
+                </p>
+              )}
               <FileTarget label="Add the offer as a file or recording" accept={OFFER_ACCEPT} onFiles={(files) => void addOffer(files)} className="mt-2 min-h-8 rounded-lg px-2 py-1 text-[13px] text-text-2 hover:bg-fill-2 hover:text-text data-[over]:bg-fill-2 data-[over]:text-text">
                 Add a screenshot, PDF or call recording instead
               </FileTarget>
