@@ -4,7 +4,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { expect, test } from "vitest";
 import { initialState, reduce, type CheckAction, type CheckState } from "@/lib/check-machine";
-import type { CheckEvent, YearResult } from "@/lib/result";
+import type { CheckEvent, Checked, YearResult } from "@/lib/result";
 import { YearView } from "./year-view";
 
 // The year sample as the real pipeline returned it in the 2026-11-26 test-set run: twelve statements, the price rising
@@ -310,6 +310,22 @@ test("a year of statements is headed with its total and the month the overcharge
   expect(html).toContain("$70.00");
   expect(html).toContain("to ask back from Bayline Fiber across 12 statements");
   expect(html).toContain("Overcharged from August 2026");
+});
+
+// While claims wait, the heading says what to confirm, as each month's page does: what was said on a call, the offer
+// when every waiting statement is a PDF (its own text confirms the lines), else the lines marked on photos.
+test("a year waiting on confirmation says what to confirm: the call, the offer, or the marked lines", () => {
+  if (!year) throw new Error("the saved run has no year result");
+  const headingOf = (change: (result: Checked) => Checked) => {
+    const result: YearResult = { ...year, months: year.months.map((month) => (month.result.outcome === "checked" ? { ...month, result: change({ ...month.result, claims: month.result.claims.map((claim) => ({ ...claim, needsConfirmation: true })) }) } : month)) };
+    const running = { s: "running", inputs: initialState.inputs, attempts: 1, attempt: 1, stage: null, spentMicros: 0, live: {} } as unknown as CheckState;
+    const done = reduce(running, { type: "finished", attempt: 1, result });
+    if (done.s !== "done") throw new Error("the finished year did not become a done state");
+    return heading(renderToStaticMarkup(createElement(YearView, { state: done, result, dispatch: () => {} })));
+  };
+  expect(headingOf((r) => ({ ...r, transcript: [{ speaker: "company", text: "Fiber 500 is $55 a month", start_seconds: 11 }] }))).toMatch(/, once you confirm what you heard$/);
+  expect(headingOf((r) => ({ ...r, billIsImage: false }))).toMatch(/, once you confirm what the offer says$/);
+  expect(headingOf((r) => ({ ...r, billIsImage: true }))).toMatch(/, once you confirm the marked lines$/);
 });
 
 test("a month missing its statement date stays in its place by billing period, so the overcharge still begins in August", () => {

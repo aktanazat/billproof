@@ -97,7 +97,11 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
 
   const markOf = (bill: number, id: string) => state.selections[bill]?.claims[id];
   const asked = (month: (typeof read)[number]) => month.result.claims.reduce((t, claim) => t + (markOf(month.bill, claim.id) === "unselected" ? 0 : claim.amountCents), 0);
-  const waiting = checked.some((month) => month.result.claims.some((claim) => markOf(month.bill, claim.id) === "needs_confirmation"));
+  const waitingMonths = checked.filter((month) => month.result.claims.some((claim) => markOf(month.bill, claim.id) === "needs_confirmation"));
+  const waiting = waitingMonths.length > 0;
+  // What to confirm, as each month's page says it: what was said on a call, the offer when every waiting statement is a
+  // PDF (its own text confirms the lines), else the lines marked on photos.
+  const toConfirm = waitingMonths.some((month) => month.result.transcript) ? "what you heard" : waitingMonths.every((month) => !month.result.billIsImage) ? "what the offer says" : "the marked lines";
   const firstBad = checked.findIndex((month) => claimed(month.result) > 0);
   const total = checked.reduce((t, month) => t + asked(month), 0);
   const provider = checked.find((month) => month.result.reading.provider)?.result.reading.provider ?? null;
@@ -177,7 +181,7 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
                 <span className="block text-[40px] font-semibold leading-none tracking-[-0.02em] tabular-nums max-[320px]:text-[28px]">{usd(total)}</span>{" "}
                 <span className="mt-2 block max-w-[44rem] text-[17px] text-text-2">
                   to ask back{provider ? ` from ${provider}` : ""} across {statements}
-                  {waiting ? ", once you confirm the marked lines" : ""}
+                  {waiting ? `, once you confirm ${toConfirm}` : ""}
                 </span>
               </>
             ) : (
