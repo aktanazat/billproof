@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { BRANDS, brandOf } from "./decide";
+import { MAX_OFFER_TEXT } from "./limits";
 import type { CheckEvent } from "./result";
 
 // One live run over real posts, streamed: each post's check events tagged by its place in the batch, then the total.
@@ -64,9 +65,10 @@ export const claimedCents = (bill: RealBill) => (bill.outcome === "checked" ? bi
 export const unagreedFees = (bill: RealBill) => (bill.outcome === "checked" ? bill.questions.filter((q) => q.kind === "unagreed_fee") : []);
 export const unagreedCents = (bill: RealBill) => unagreedFees(bill).reduce((t, fee) => t + fee.cents, 0);
 
-// What the poster wrote is the only record of the promise; it is passed as the customer's own notes.
+// What the poster wrote is the only record of the promise; it is passed as the customer's own notes, within what a
+// check takes as a written offer.
 export function postNotes(post: Pick<RealBill, "title" | "text">): string {
-  return `What the customer wrote publicly about this bill:\n${post.title}\n\n${post.text}`.slice(0, 20_000);
+  return `What the customer wrote publicly about this bill:\n${post.title}\n\n${post.text}`.slice(0, MAX_OFFER_TEXT);
 }
 
 const SMALL_WORDS = new Set(["by", "of", "and", "the", "for"]);
