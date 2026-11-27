@@ -17,7 +17,14 @@ function canvasToJpeg(canvas: HTMLCanvasElement): string {
 // A file ready to read: its pages, and how many pages past the limit were left out.
 export type Prepared = { pages: ShownPage[]; omitted: number };
 
-const READER_UNAVAILABLE = "Billproof couldn't load its PDF reader. Check the connection, then remove the file and add it again.";
+// The reader's files are named for each build, so a page opened before the site was updated asks for ones that are
+// gone, and adding the file again asks for them again; only a reload brings the new names. When the site itself
+// answers, the connection is fine, so a reload is the advice; otherwise the connection is.
+async function readerUnavailable(): Promise<PrepareError> {
+  // Any reply, an error page included, means the connection works.
+  const online = await fetch("/robots.txt", { cache: "no-store" }).then(() => true, () => false);
+  return new PrepareError(online ? "Billproof couldn't load its PDF reader. Reload the page, then add your files again." : "Billproof couldn't load its PDF reader. Check the connection, then remove the file and add it again.");
+}
 
 // A cloud file not on the device, or one moved or changed since it was chosen, can't be read at all; the advice for
 // a file in the wrong format would send the person to convert a file that is fine. A decoder's failure doesn't say
@@ -34,9 +41,10 @@ async function preparePdf(file: File, maxPages: number): Promise<Prepared> {
   // pdf.js is browser-only and large; it loads when the first PDF is opened, never during server rendering. pdf.js
   // supports Safari only through its legacy build (Safari 18+, per its FAQ); the standard build targets the latest
   // Firefox and Chrome and calls features older Safari lacks.
-  // Fetched when the first PDF is added; on a dropped connection that fails, and the file itself is fine.
-  const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs").catch(() => {
-    throw new PrepareError(READER_UNAVAILABLE);
+  // Fetched when the first PDF is added; on a dropped connection, or a page older than the site, that fails, and the
+  // file itself is fine.
+  const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs").catch(async () => {
+    throw await readerUnavailable();
   });
   pdfjs.GlobalWorkerOptions.workerSrc = "/pdfjs/pdf.worker.min.mjs";
   const bytes = await file.arrayBuffer().catch(() => {
@@ -72,7 +80,7 @@ async function preparePdf(file: File, maxPages: number): Promise<Prepared> {
     // pdf.js names a password and a damaged file; a worker it couldn't download ends its setup with this message.
     const name = error instanceof Error ? error.name : "";
     if (name === "PasswordException") throw new PrepareError("This PDF has a password. Save an unlocked copy and add that instead.");
-    if (error instanceof Error && error.message.startsWith("Setting up fake worker failed")) throw new PrepareError(READER_UNAVAILABLE);
+    if (error instanceof Error && error.message.startsWith("Setting up fake worker failed")) throw await readerUnavailable();
     throw new PrepareError("This PDF could not be opened. Download it again, or add screenshots of it instead.");
   } finally {
     await task.destroy();

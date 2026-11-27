@@ -134,15 +134,38 @@ test("a silent recording is refused with what to use instead; a quiet one is rea
 });
 
 // pdf.js loads its reader the first time a PDF is added. When that download fails (a phone off its Wi-Fi), the file
-// is fine, and the visitor is told so, not to look for a password the PDF doesn't have.
+// is fine, and the visitor is told so, not to look for a password the PDF doesn't have. When the site still answers,
+// the page is older than the site (its reader's files were replaced by an update) and only a reload fetches the new ones.
 test("a PDF that can't be opened is told why: the reader didn't load, it has a password, or it's damaged", async () => {
   const pdf = () => new File(["%PDF-1.7"], "bill.pdf", { type: "application/pdf" });
   pdfjs.open = failing("Error", "Setting up fake worker failed: \"Failed to fetch dynamically imported module\".");
+  vi.stubGlobal("fetch", async () => {
+    throw new TypeError("Failed to fetch");
+  });
   await expect(prepareFile(pdf(), 6)).rejects.toThrow(new PrepareError("Billproof couldn't load its PDF reader. Check the connection, then remove the file and add it again."));
+  // Any reply from the site, an error page included, means the connection works.
+  vi.stubGlobal("fetch", async () => new Response("Bad gateway", { status: 502 }));
+  await expect(prepareFile(pdf(), 6)).rejects.toThrow(new PrepareError("Billproof couldn't load its PDF reader. Reload the page, then add your files again."));
   pdfjs.open = failing("PasswordException", "No password given");
   await expect(prepareFile(pdf(), 6)).rejects.toThrow(new PrepareError("This PDF has a password. Save an unlocked copy and add that instead."));
   pdfjs.open = failing("InvalidPDFException", "Invalid PDF structure.");
   await expect(prepareFile(pdf(), 6)).rejects.toThrow(new PrepareError("This PDF could not be opened. Download it again, or add screenshots of it instead."));
+});
+
+// After an update, a page opened before it asks for a reader file the site no longer has: the download itself fails.
+test("a page older than the site is told to reload when its PDF reader can't be downloaded", async () => {
+  vi.resetModules();
+  vi.doMock("pdfjs-dist/legacy/build/pdf.mjs", () => {
+    throw new TypeError("Failed to fetch dynamically imported module");
+  });
+  try {
+    const stale = await import("./prepare");
+    vi.stubGlobal("fetch", async () => new Response("User-agent: *"));
+    await expect(stale.prepareFile(new File(["%PDF-1.7"], "bill.pdf", { type: "application/pdf" }), 6)).rejects.toThrow("Billproof couldn't load its PDF reader. Reload the page, then add your files again.");
+  } finally {
+    vi.doUnmock("pdfjs-dist/legacy/build/pdf.mjs");
+    vi.resetModules();
+  }
 });
 
 // A file the browser can no longer read (a cloud file not on the device, or one moved since it was chosen) fails every
