@@ -967,8 +967,9 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
                 onChange={(event) => dispatch({ type: "offer_text", text: event.target.value })}
                 placeholder="Paste the order confirmation or plan details"
                 aria-label="What you were promised"
-                // 16 px on a phone: iPhone Safari zooms the page into a box with smaller text when it's tapped.
-                className="mt-2 block min-h-[88px] w-full flex-1 resize-none rounded-lg bg-white p-3 text-[16px] leading-[22px] shadow-[inset_0_0_0_1px_var(--line)] placeholder:text-text-2 focus:outline-none focus-visible:shadow-[inset_0_0_0_2px_var(--text)] sm:text-[15px]"
+                // 16 px on a phone: iPhone Safari zooms the page into a box with smaller text when it's tapped. It grows
+                // with a pasted offer, up to half the screen, so what was pasted can be read and trimmed in place.
+                className="mt-2 block min-h-[88px] max-h-[50vh] w-full flex-1 resize-none rounded-lg bg-white p-3 text-[16px] leading-[22px] field-sizing-content shadow-[inset_0_0_0_1px_var(--line)] placeholder:text-text-2 focus:outline-none focus-visible:shadow-[inset_0_0_0_2px_var(--text)] sm:text-[15px]"
               />
               <FileTarget label="Add the offer as a file or recording" accept={OFFER_ACCEPT} onFiles={(files) => void addOffer(files)} className="mt-2 h-8 rounded-lg px-2 text-[13px] text-text-2 hover:bg-fill-2 hover:text-text data-[over]:bg-fill-2 data-[over]:text-text">
                 Add a screenshot, PDF or call recording instead
