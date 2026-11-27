@@ -8,17 +8,23 @@ import type { CheckEvent } from "./result";
 // Muse Ember is replaced by fixed answers so whole checks run offline; this file holds only tests that need that,
 // since the mock applies to every test in it. `scenario` sets what the bill charges and prints, what a second reading
 // returns, what the company's side quotes, and the size of each request.
-const COST = { read_bill: 1000, reread_bill: 2000, read_terms: 500, challenge: 700 } as const;
+const COST = { sort_pages: 200, read_bill: 1000, reread_bill: 2000, read_terms: 500, challenge: 700 } as const;
 const scenario = {
   billedCents: 5500,
   printedCents: null as number | null,
   reread: null as { billedCents: number; printedCents: number } | null,
   outcome: "bill" as "bill" | "not_a_bill" | "unreadable",
   inputTokens: 1000,
+  // What each picture is, in order, when several are sent to be sorted.
+  sorted: [] as ("bill" | "older_bill" | "promise" | "other")[],
   counterQuote: null as string | null,
   tooLong: null as string | null,
   declined: null as string | null,
+  // A month whose pictures Muse Ember reads as not a bill.
+  notBillMonth: null as string | null,
 };
+// The pictures the last offer reading was sent, so a test can see which pictures were read as the offer.
+const seen = { offerPictures: 0 };
 // A failure thrown here is built from the same module copy the pipeline is given, so it is recognised as Muse Ember's.
 vi.mock("./ember", async (actual) => {
   const real = await actual<typeof Ember>();
@@ -32,6 +38,8 @@ vi.mock("./ember", async (actual) => {
     // Too long for both readings, the first and the second with twice the room.
     if ((name === "read_bill" || (name as string) === "reread_bill") && month === scenario.tooLong) throw new real.EmberError("truncated", "max_output_tokens", 900);
     if (name === "read_bill" && month === scenario.declined) throw new real.EmberError("refused", "refusal", 900);
+    if (name === "sort_pages") return { output: { pages: scenario.sorted.map((kind, i) => ({ page: i + 1, kind })) }, usage: { inputTokens: 1000, cachedTokens: 0, outputTokens: 50 }, costMicros: COST.sort_pages };
+    if (name === "read_terms") seen.offerPictures = content.filter((part) => part.image_url).length;
     if (name === "challenge") {
       const ids = content.flatMap((part) => [...(part.text ?? "").matchAll(/^Claim (\S+) \(/gm)].map((m) => m[1]));
       const challenges = ids.map((id) => ({ claim_id: id, looked_for: "A later price in the offer.", verdict: scenario.counterQuote ? "refuted" : "stands", counter_quote: scenario.counterQuote, counter_source: scenario.counterQuote ? "offer" : null }));
@@ -43,7 +51,7 @@ vi.mock("./ember", async (actual) => {
     const output =
       name === "read_bill" || name === "reread_bill"
         ? {
-            outcome: scenario.outcome,
+            outcome: month === scenario.notBillMonth ? "not_a_bill" : scenario.outcome,
             unreadable_reason: scenario.outcome === "unreadable" ? "The picture is too blurry to read the amounts." : null,
             provider: "Bayline Fiber",
             account_last4: "4415",
@@ -183,4 +191,69 @@ test("files too large to read in one check are refused before anything is spent"
   const { last } = await checkOneBill("TL");
   scenario.inputTokens = 1000;
   expect(last).toMatchObject({ type: "error", failure: "bad_input", message: "These files are too large to read in one check.", spentMicros: 0 });
+});
+
+// Several pictures dropped as one bill, sorted as `kinds`; the tags keep each test's pictures its own. Returns the last
+// event, the Muse Ember steps taken, and how many pictures the offer reading was sent.
+const checkPictures = async (tag: string, kinds: typeof scenario.sorted, offer: { kind: "text"; text: string } | null) => {
+  scenario.sorted = kinds;
+  seen.offerPictures = 0;
+  const events: CheckEvent[] = [];
+  const pages = kinds.map((_, i) => ({ image: `data:image/png;base64,iVBORw0KGgo${tag}${i}`, text: null }));
+  await runCheck({ bills: [{ pages }], offer }, { ledger: openLedger(":memory:", 1_000_000), client: "test", signal: new AbortController().signal, emit: (event) => events.push(event) });
+  scenario.sorted = [];
+  const last = events.at(-1);
+  const checked = last?.type === "result" && last.result.outcome === "checked" ? last.result : null;
+  return { last, steps: checked?.calls.map((call) => call.name) ?? [], hadOffer: checked?.hadOffer ?? null, offerPictures: seen.offerPictures };
+};
+
+// Pictures that turn out to hold no current bill (an earlier statement, a chat) are no bill to check, and nothing more
+// is paid for: the bill isn't read.
+test("pictures sorted as holding no current bill end as not a bill, without reading one", async () => {
+  const { last } = await checkPictures("SN", ["older_bill", "other"], null);
+  expect(last).toMatchObject({ type: "result", result: { outcome: "not_a_bill", spentMicros: COST.sort_pages } });
+});
+
+// A screenshot of the offer dropped with the bill is the offer when none was given, read with the bill; pictures that
+// are all bill leave the check with no offer, so nothing is held to a promise nobody gave.
+test("an offer picture among the bill's pictures is read as the offer; with none, the check has no offer", async () => {
+  const withPromise = await checkPictures("SP", ["bill", "promise"], null);
+  expect(withPromise).toMatchObject({ hadOffer: true, offerPictures: 1 });
+  expect(withPromise.steps).toContain("read_terms");
+  const billOnly = await checkPictures("SQ", ["bill", "bill"], null);
+  expect(billOnly.hadOffer).toBe(false);
+  expect(billOnly.steps).not.toContain("read_terms");
+});
+
+// The person's own words about the offer and a screenshot of it among the bill's pictures are read together, so a
+// promise only the screenshot shows still counts.
+test("an offer picture among the bill's pictures is read together with the offer the person wrote", async () => {
+  const { offerPictures, steps } = await checkPictures("SW", ["bill", "promise"], { kind: "text", text: "They said $55 a month" });
+  expect(steps).toContain("read_terms");
+  expect(offerPictures).toBe(1);
+});
+
+// A bill (January) with an earlier statement (February, by its picture's name) among its pictures, which shows only
+// what moved since and never makes a claim.
+const checkWithEarlier = async (tag: string) => {
+  scenario.sorted = ["bill", "older_bill"];
+  const events: CheckEvent[] = [];
+  const pages = [`${tag}A`, `${tag}B`].map((name) => ({ image: `data:image/png;base64,iVBORw0KGgo${name}`, text: null }));
+  await runCheck({ bills: [{ pages }], offer: { kind: "text", text: "Fiber 500 for $55 a month" } }, { ledger: openLedger(":memory:", 1_000_000), client: "test", signal: new AbortController().signal, emit: (event) => events.push(event) });
+  scenario.sorted = [];
+  return events.at(-1);
+};
+
+// An earlier statement that can't be read (too long, or not a bill after all) leaves the comparison out; the check of
+// the current bill goes on, and nothing is compared against charges never read.
+test("an earlier statement that can't be read leaves out the comparison, never the check", async () => {
+  scenario.tooLong = "February";
+  const cutOff = await checkWithEarlier("EC");
+  scenario.tooLong = null;
+  scenario.notBillMonth = "February";
+  const notABill = await checkWithEarlier("ED");
+  scenario.notBillMonth = null;
+  const readable = await checkWithEarlier("EE");
+  for (const last of [cutOff, notABill]) expect(last).toMatchObject({ type: "result", result: { outcome: "checked", change: null } });
+  expect(readable).toMatchObject({ type: "result", result: { outcome: "checked", change: { earlierCents: 5500, currentCents: 5500 } } });
 });
