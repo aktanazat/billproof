@@ -518,6 +518,17 @@ describe("decide refuses claims the evidence does not carry", () => {
     expect(checkTotals(bill({ current_charges: amount(lines + 500), total_due: amount(lines + 500) }), { kind: "image" }).lineSum).toBe("mismatch");
   });
 
+  // The result says so when the bill's own balance doesn't work out: what was owed, less what was paid, plus the new
+  // charges, should come to the amount due.
+  test("a previous balance, payments and new charges that don't come to the amount due are flagged; ones that do aren't", () => {
+    const reading = readingOf(internetGuaranteed);
+    const lines = reading.line_items.reduce((t, line) => t + line.amount_cents, 0);
+    const amount = (cents: number) => ({ cents, quote: `Amount ${usd(cents)}` });
+    const bill = (due: number): Reading => ({ ...reading, printed: { previous_balance: amount(4000), payments: amount(-4000), current_charges: amount(lines), total_due: amount(due), section_totals: [] } });
+    expect(checkTotals(bill(lines), { kind: "image" }).balance).toBe("ok");
+    expect(checkTotals(bill(lines + 700), { kind: "image" }).balance).toBe("mismatch");
+  });
+
   test("charges that split, in order, into each printed part total are checked against them", () => {
     const reading = readingOf(internetGuaranteed);
     const amounts = reading.line_items.map((line) => line.amount_cents);
@@ -534,6 +545,10 @@ describe("decide refuses claims the evidence does not carry", () => {
     // A printed total the charges miss is a mismatch, even though the part totals agree with them.
     const disagreeing: Reading = { ...onlyParts([part(first), part(rest)]), printed: { ...onlyParts([part(first), part(rest)]).printed, current_charges: part(first + rest + 37) } };
     expect(checkTotals(disagreeing, { kind: "image" }).lineSum).toBe("mismatch");
+    // A part total whose words aren't on the bill wasn't printed there; the parts that are don't stand in for it.
+    const billText: Source = { kind: "text", text: `Subtotal ${usd(first)}\nSubtotal ${usd(rest)}` };
+    expect(checkTotals(onlyParts([part(first), part(rest)]), billText).lineSum).toBe("sections");
+    expect(checkTotals(onlyParts([part(first), part(rest), { cents: 999, quote: "Other charges $9.99" }]), billText).lineSum).toBe("not_printed");
   });
 
   test("a heading read as a charge is dropped when that makes the bill add up, and a real double charge stays", () => {
@@ -548,6 +563,16 @@ describe("decide refuses claims the evidence does not carry", () => {
     const current = withHeading.line_items.reduce((t, line) => t + line.amount_cents, 0);
     const billedTwice: Reading = { ...withHeading, printed: { ...withHeading.printed, current_charges: { cents: current, quote: `Current charges ${usd(current)}` } } };
     expect(withoutHeadings(billedTwice, photo)).toBeNull();
+  });
+
+  // A heading shares its first word with what it heads ("Wi-Fi Gateway" over "Wi-Fi Gateway Rental"). Two charges that
+  // merely cost the same are both kept, even when dropping one would match a printed total the reading may have missed.
+  test("a charge is taken for a heading only over lines that start with the same word", () => {
+    const reading = readingOf(internetGuaranteed);
+    const gateway = reading.line_items.findIndex((line) => line.label === "Wi-Fi Gateway Rental");
+    const lateFee = { ...reading.line_items[gateway], id: "X", label: "Late Fee", kind: "late_fee" as const, quote: "Late Fee $15.00" };
+    const withLateFee: Reading = { ...reading, line_items: [...reading.line_items.slice(0, gateway), lateFee, ...reading.line_items.slice(gateway)] };
+    expect(withoutHeadings(withLateFee, { kind: "image" })).toBeNull();
   });
 });
 
@@ -572,6 +597,17 @@ describe("compare with an earlier bill", () => {
     const longer: Reading = { ...current, line_items: current.line_items.map((line) => (line.id === discount.id ? { ...line, label: "Autopay & Paperless Discount (-$5.00) Requires bank autopay", amount_cents: line.amount_cents - 500 } : line)) };
     const change = compareBills(current, longer);
     expect(change.lines).toEqual([{ label: "Autopay & Paperless Discount (-$5.00) Requires bank autopay", beforeCents: discount.amount_cents, afterCents: discount.amount_cents - 500 }]);
+  });
+
+  // A line renamed between months is followed only when one line fits: with two, either could be it, so neither is
+  // shown as its new price.
+  test("a line whose old name could be either of two new lines isn't matched to one", () => {
+    const current = readingOf(internetGuaranteed);
+    const plan = current.line_items.find((line) => line.label === "Fiber 500 Internet")!;
+    const earlier: Reading = { ...current, line_items: current.line_items.map((line) => (line.id === plan.id ? { ...line, label: "Fiber", amount_cents: plan.amount_cents - 1000 } : line)) };
+    const later: Reading = { ...current, line_items: [...current.line_items, { ...plan, id: "L9", label: "Fiber Modem", amount_cents: 1000, quote: "Fiber Modem $10.00" }] };
+    const change = compareBills(earlier, later);
+    expect(change.lines.find((line) => line.beforeCents === plan.amount_cents - 1000 && line.afterCents !== null)).toBeUndefined();
   });
 
   test("an earlier statement whose charges miss its own printed total is cut off, so nothing is compared", () => {
@@ -765,6 +801,8 @@ describe("a company that goes by two names", () => {
     expect(providersDiffer("Google Fiber", "Google Fi")).toBe(true);
     expect(providersDiffer("Bayline Fiber", "Westline Fiber")).toBe(true);
     expect(providersDiffer("Bayline Fiber", "Bayline")).toBe(false);
+    // A name read as only common words ("Fiber Internet") can't show the offer is another company's.
+    expect(providersDiffer("Fiber Internet", "Bayline Fiber")).toBe(false);
     // A brand is its whole name: Metronet is a fiber company of its own, not Metro by T-Mobile.
     expect(providersDiffer("T-Mobile", "Metronet")).toBe(true);
     expect(providersDiffer("AT&T", "Attention Wireless")).toBe(true);
