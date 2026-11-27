@@ -107,6 +107,28 @@ test("copies of another account's statement don't outvote this account's stateme
   expect(html).toContain("Not counted: 3 statements are from another account (check them on their own)");
 });
 
+// A phone bill dropped beside the internet statements, its account number not read: a different company's bill can't
+// be this account's. Counted with the year, it turned the heading into "The offer is from Bayline Fiber, not Bayline
+// Fiber".
+test("another company's statement among the offer company's is set aside, even with no account number read", () => {
+  if (!year) throw new Error("the saved run has no year result");
+  const start = (prefix: string) => year.months.find((month) => month.result.outcome === "checked" && month.result.reading.period_start?.startsWith(prefix));
+  const [mar, apr, may] = ["2026-03", "2026-04", "2026-05"].map(start);
+  if (mar?.result.outcome !== "checked" || apr?.result.outcome !== "checked" || may?.result.outcome !== "checked") throw new Error("the sample has no March, April or May statement");
+  const phone = { ...may.result, providerMismatch: true, offerProvider: "Bayline Fiber", reading: { ...may.result.reading, provider: "Northstar Wireless", account_last4: null } };
+  const mixed: YearResult = {
+    ...year,
+    months: [{ bill: 0, result: mar.result }, { bill: 1, result: apr.result }, { bill: 2, result: phone }, { bill: 3, result: { outcome: "could_not_check", reason: "The amounts on this bill could not be read.", spentMicros: 0 } }],
+  };
+  const bills = ["March.pdf", "April.pdf", "Phone.pdf", "Blurry.jpg"].map((name, i) => ({ id: `b${i}`, name, status: "preparing" as const }));
+  const running = { s: "running", inputs: { ...initialState.inputs, bills }, attempts: 1, attempt: 1, stage: null, spentMicros: 0, live: {} } as unknown as CheckState;
+  const done = reduce(running, { type: "finished", attempt: 1, result: mixed });
+  if (done.s !== "done") throw new Error("the finished year did not become a done state");
+  const html = renderToStaticMarkup(createElement(YearView, { state: done, result: mixed, dispatch: () => {} }));
+  expect(heading(html)).toBe("All 2 statements match the offer");
+  expect(html).toContain("Not counted: Blurry.jpg couldn&#x27;t be read, Phone.pdf is from another account (check it on its own)");
+});
+
 test("a statement whose account number couldn't be read counts with the year's account, and the message keeps the number", () => {
   if (!year) throw new Error("the saved run has no year result");
   const august = year.months.find((month) => month.result.outcome === "checked" && month.result.reading.period_start?.startsWith("2026-08"));

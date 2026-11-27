@@ -55,8 +55,9 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
   };
 
   // Statements are counted once, and only for the account most of them show; on a tie, the one the offer is about (a
-  // phone bill dropped beside the internet bill being checked). One whose number couldn't be read is counted with it:
-  // only a different number printed on the bill makes it another account's.
+  // phone bill dropped beside the internet bill being checked). One whose number couldn't be read is counted with it,
+  // unless its company isn't the offer's while the offer's company's statements are counted: a different company's
+  // bill can't be this account's. Otherwise only a different number printed on the bill makes it another account's.
   // A statement with no date read can't be shown to repeat another, so it is always counted.
   const dates = ({ result }: (typeof read)[number]) => {
     const { period_start, period_end, statement_date } = result.reading;
@@ -73,7 +74,9 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
     tally.set(number, { count: (tally.get(number)?.count ?? 0) + 1, offered: offered || (tally.get(number)?.offered ?? false) });
   }
   const account = [...tally.entries()].sort(([, a], [, b]) => b.count - a.count || Number(b.offered) - Number(a.offered))[0]?.[0] ?? null;
-  const anotherAccount = (month: (typeof read)[number]) => Boolean(account && month.result.reading.account_last4 && month.result.reading.account_last4 !== account);
+  const otherNumber = (month: (typeof read)[number]) => Boolean(account && month.result.reading.account_last4 && month.result.reading.account_last4 !== account);
+  const offerCompanyCounted = read.some((month) => !otherNumber(month) && month.result.hadOffer && !month.result.providerMismatch);
+  const anotherAccount = (month: (typeof read)[number]) => otherNumber(month) || (!month.result.reading.account_last4 && month.result.providerMismatch && offerCompanyCounted);
   const seen = new Set<string>();
   const checked: typeof read = [];
   const skippedMonths = { duplicates: 0, otherAccount: [] as string[] };
