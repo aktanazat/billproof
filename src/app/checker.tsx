@@ -28,6 +28,7 @@ export type Sample = {
 const BILL_ACCEPT = "application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif";
 const OFFER_ACCEPT = "application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif,audio/*,video/*,.m4a,.mp3,.wav,.3gp";
 const LEAVE_QUESTION = "Leave this page? The files you added, and any check or result, will be lost.";
+const digestOf = async (file: File) => Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", await file.arrayBuffer())), (byte) => byte.toString(16).padStart(2, "0")).join("");
 
 function isCheckEvent(value: unknown): value is CheckEvent {
   return typeof value === "object" && value !== null && "type" in value && typeof value.type === "string";
@@ -497,6 +498,9 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
   // told apart by their contents, and a repeat is named instead of added.
   const [alreadyAdded, setAlreadyAdded] = useState<string[]>([]);
   const billHashes = useRef(new Map<string, string[]>());
+  // The offer file's contents, so the bill added again as the offer (or the offer again as a bill) is caught: the check
+  // would compare the bill with itself, paid for, and find no promise.
+  const offerHash = useRef<{ id: string; hash: string } | null>(null);
   // Each bill's own files, so a pasted screenshot can join the bill as if it had been dropped with them.
   const billFiles = useRef(new Map<string, File[]>());
   const pastedCount = useRef(0);
@@ -653,10 +657,9 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
   // repeats, since its own files come back in the drop, and is removed only once they have been read again; if they
   // can't be (the file changed on disk since), it stays as it was.
   const addBills = async (dropped: File[], replacing?: string) => {
-    const digest = async (file: File) => Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", await file.arrayBuffer())), (byte) => byte.toString(16).padStart(2, "0")).join("");
     let digests: Map<File, string>;
     try {
-      digests = new Map(await Promise.all(dropped.map(async (file) => [file, await digest(file)] as const)));
+      digests = new Map(await Promise.all(dropped.map(async (file) => [file, await digestOf(file)] as const)));
     } catch (error) {
       if (!replacing) throw error;
       setPasteNote("The screenshot wasn't added: the bill's own files can no longer be read. Add the screenshot and the bill's files again together.");
@@ -666,10 +669,11 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
     const current = shown.current;
     const existing = (current.s === "composing" ? current.inputs.bills : []).filter((doc) => doc.id !== replacing);
     const seen = new Set(existing.flatMap((doc) => billHashes.current.get(doc.id) ?? []));
+    const asOffer = current.s === "composing" && current.inputs.offer.kind === "file" && offerHash.current?.id === current.inputs.offer.doc.id ? offerHash.current.hash : null;
     // A statement added on its own and dropped again with new screenshots, as the offer box advises, means them to go
     // with it: its bill is replaced by one holding both, rather than the screenshots becoming a bill of their own.
     const droppedPdfs = dropped.filter(isPdf);
-    const newPictures = dropped.filter((file) => isPicture(file) && !seen.has(digests.get(file) ?? ""));
+    const newPictures = dropped.filter((file) => isPicture(file) && !seen.has(digests.get(file) ?? "") && digests.get(file) !== asOffer);
     const statementHash = droppedPdfs.length === 1 && newPictures.length > 0 ? digests.get(droppedPdfs[0]) : undefined;
     const joined = statementHash === undefined ? undefined : existing.find((doc) => billHashes.current.get(doc.id)?.join() === statementHash);
     if (joined && statementHash) {
@@ -681,7 +685,9 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
     const repeated: string[] = [];
     for (const file of dropped) {
       const hash = digests.get(file) ?? "";
-      if (seen.has(hash)) repeated.push(pasted.current.has(file) ? "the pasted screenshot" : file.name);
+      const name = pasted.current.has(file) ? "the pasted screenshot" : file.name;
+      if (hash === asOffer) repeated.push(`${name} (as the offer)`);
+      else if (seen.has(hash)) repeated.push(name);
       else {
         seen.add(hash);
         hashes.set(file, hash);
@@ -765,6 +771,14 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
       dispatch({ type: "offer_file_added", id: docId, name: file.name });
       // The file opener's refusal is worded for a bill; an offer it can't read (a Word file, a text file) can be pasted.
       if (!isPdf(file) && !isPicture(file)) return dispatch({ type: "prep_failed", id: docId, message: "This file can't be read. Remove it and paste the offer's words instead, or add it as a PDF, a screenshot or a call recording." });
+      // A file that can't be read for its contents is left to the opener, which says why.
+      const hash = await digestOf(file).catch(() => null);
+      offerHash.current = hash === null ? null : { id: docId, hash };
+      const current = shown.current;
+      const bills = current.s === "composing" ? current.inputs.bills : [];
+      if (hash !== null && bills.some((doc) => billHashes.current.get(doc.id)?.includes(hash))) {
+        return dispatch({ type: "prep_failed", id: docId, message: "This file is already added with the bill. Add the offer here: the confirmation email, a screenshot of the plan, or the sales call." });
+      }
       return prepareDoc(docId, file, MAX_OFFER_PAGES);
     }
     dispatch({ type: "call_added", id: docId, name: file.name });
@@ -943,22 +957,6 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
                   )}
                 </div>
               </div>
-              {/* Below the list, not at its end: with twelve rows, a note there is out of sight until the list is scrolled. */}
-              {leftOut.length > 0 && (
-                <p role="status" className="mt-2 px-2 text-[13px] text-text-2 break-words">
-                  Left out, as a check reads up to {MAX_BILLS} bills: {listed(leftOut)}.
-                </p>
-              )}
-              {alreadyAdded.length > 0 && (
-                <p role="status" className="mt-2 px-2 text-[13px] text-text-2 break-words">
-                  Already added, so not added again: {listed(alreadyAdded)}.
-                </p>
-              )}
-              {pasteNote && (
-                <p role="status" className="mt-2 px-2 text-[13px] text-text-2 break-words">
-                  {pasteNote}
-                </p>
-              )}
             </>
           ) : (
             <FileTarget label="Choose the bill" accept={BILL_ACCEPT} multiple onFiles={addBills} className="mt-3 flex min-h-[112px] w-full flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-text-2/40 py-2 text-center hover:bg-white data-[over]:bg-white">
@@ -971,6 +969,23 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
                 PDFs, photos, chats with the company<span className="hidden sm:inline">, or paste a screenshot</span>. Up to 12 months of bills at once.
               </span>
             </FileTarget>
+          )}
+          {/* Below the list, not at its end: with twelve rows, a note there is out of sight until the list is scrolled. With
+              no bill listed, one refused as the offer again is still explained. */}
+          {leftOut.length > 0 && (
+            <p role="status" className="mt-2 px-2 text-[13px] text-text-2 break-words">
+              Left out, as a check reads up to {MAX_BILLS} bills: {listed(leftOut)}.
+            </p>
+          )}
+          {alreadyAdded.length > 0 && (
+            <p role="status" className="mt-2 px-2 text-[13px] text-text-2 break-words">
+              Already added, so not added again: {listed(alreadyAdded)}.
+            </p>
+          )}
+          {pasteNote && (
+            <p role="status" className="mt-2 px-2 text-[13px] text-text-2 break-words">
+              {pasteNote}
+            </p>
           )}
         </div>
 
