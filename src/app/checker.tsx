@@ -10,7 +10,7 @@ import { isPdf, isPicture, isRecording, prepareCall, prepareFile, PrepareError }
 import { MAX_BILL_PAGES, MAX_BILLS, MAX_CALL_SECONDS, MAX_OFFER_PAGES } from "@/lib/limits";
 import type { CheckEvent, CheckFailure, CheckInput, CheckResult, PageKind, Stage } from "@/lib/result";
 import { BillPage, snapBox, Thumbnail, type Mark } from "./bill-page";
-import { formatClock, inPlainWords, Waveform } from "./evidence";
+import { formatClock, inPlainWords, PlayIcon, useClip, Waveform } from "./evidence";
 import { focusOnShow, ResultView } from "./result-view";
 import { YearView } from "./year-view";
 
@@ -201,12 +201,17 @@ function DocRow({ doc, onRemove }: { doc: Doc; onRemove: () => void }) {
 }
 
 function CallRow({ call, onRemove }: { call: Call; onRemove: () => void }) {
+  // Heard before the check, so a wrong recording (another call, a voicemail) is caught before it is paid for.
+  const { play, playing } = useClip(call.status === "ready" ? call.url : null);
   return (
     <div className="flex items-center gap-3 py-1.5 max-[320px]:flex-col max-[320px]:items-start max-[320px]:gap-1">
       <div className="min-w-0 flex-1 max-[320px]:self-stretch">
         <div className="text-[15px] wrap-anywhere">{call.name}</div>
         {call.status === "ready" ? (
           <div className="mt-1 flex items-center gap-3">
+            <button type="button" onClick={() => play(0, null)} aria-label={`Play ${call.name}`} aria-pressed={playing !== null} className="grid size-7 shrink-0 place-items-center rounded-full bg-white text-text hover:bg-fill-2">
+              <PlayIcon playing={playing !== null} />
+            </button>
             <Waveform peaks={call.peaks} className="h-6 flex-1" />
             <span className="text-[13px] text-text-2 tabular-nums">{formatClock(call.seconds)}</span>
           </div>
