@@ -227,14 +227,20 @@ describe("check machine", () => {
   });
 
   // A year's failure that belongs to one bill comes with that bill's place; the person sees its file named, and the
-  // progress screen marks it, rather than "Bill 2" to count out among twelve.
-  test("a year's failure that belongs to one bill names its file and marks it", () => {
+  // progress screen marks it, rather than "Bill 2" to count out among twelve. Back on the start screen to fix it, the
+  // file's own row says what went wrong; the named reason went with the stopped screen.
+  test("a year's failure that belongs to one bill names its file, marks it, and marks its row to fix", () => {
     const bills: CheckAction[] = [
       { type: "bills_added", docs: [{ id: "a", name: "october.pdf" }, { id: "b", name: "november.pdf" }] },
       { type: "doc_prepared", id: "a", pages: [page], omitted: 0 },
       { type: "doc_prepared", id: "b", pages: [page], omitted: 0 },
     ];
     const state = play([...bills, { type: "start" }, { type: "errored", attempt: 1, failure: "truncated", message: "This bill is too long for Muse Ember to read in one check.", spentMicros: 900, retryable: false, bill: 1 }]);
-    expect(state).toMatchObject({ s: "failed", message: "november.pdf: This bill is too long for Muse Ember to read in one check.", bill: 1 });
+    expect(state).toMatchObject({ s: "failed", message: "november.pdf: This bill is too long for Muse Ember to read in one check.", bill: { index: 1 } });
+    const back = play([{ type: "edit" }], state);
+    if (back.s !== "composing") throw new Error("going back did not return to the start screen");
+    expect(back.inputs.bills).toMatchObject([{ id: "a", status: "ready" }, { id: "b", name: "november.pdf", status: "failed", message: "This bill is too long for Muse Ember to read in one check." }]);
+    expect(startBlocker(back.inputs)).toBe("Remove the file that can't be checked to continue.");
+    expect(play([{ type: "removed", id: "b" }, { type: "start" }], back).s).toBe("running");
   });
 });

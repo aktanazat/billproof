@@ -301,7 +301,7 @@ function WorkingYear({ state, onCancel, dispatch }: { state: Exclude<CheckState,
           });
           const over = month?.outcome === "checked" ? month.claims.reduce((t, c) => t + c.amountCents, 0) : 0;
           // The bill a stopped year stopped on is marked, so the person sees which statement to fix.
-          const stoppedHere = state.s === "failed" && state.bill === i;
+          const stoppedHere = state.s === "failed" && state.bill?.index === i;
           return (
             <li key={doc.id} className="flex flex-col gap-2">
               {doc.status === "ready" && <BillPage image={doc.pages[0].image} alt={`Bill ${i + 1}`} marks={marks} visibleAspect="1000 / 900" />}
