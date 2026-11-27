@@ -175,6 +175,16 @@ describe("decide on the internet bill with an active price guarantee", () => {
     expect(settled.claims[0].needsConfirmation).toBe(true);
   });
 
+  // Muse Ember, arguing the company's side, can let a claim stand and still quote the offer's words it checked. Only a
+  // refutation drops a claim; a quote beside "stands" would otherwise drop money the bill owes.
+  test("a claim the company's side lets stand is kept, even when the answer quotes the offer", () => {
+    const { claims } = decide(reading, promises, billText.get(internetGuaranteed.id)!, offer(internetGuaranteed));
+    const stands = { claim_id: claims[0].id, looked_for: "an exclusion", verdict: "stands" as const, counter_quote: "Price excludes taxes and government fees.", counter_source: "offer" as const };
+    const settled = settleChallenges(claims, [stands], reading, billText.get(internetGuaranteed.id)!, offer(internetGuaranteed));
+    expect(settled.dropped).toEqual([]);
+    expect(settled.claims.find((c) => c.id === claims[0].id)).toMatchObject({ amountCents: claims[0].amountCents, needsConfirmation: false });
+  });
+
   test("a price and its discount on the same line, both with an unread end date, raise the question once", () => {
     const line = idOf(reading, "Fiber 500 Internet");
     const price = promise({ id: "P1", kind: "monthly_price", amount_cents: 5500, quote: "Fiber 500 for $55.00 a month for 24 months", covers_line_ids: line });
@@ -405,6 +415,26 @@ describe("decide refuses claims the evidence does not carry", () => {
     const decision = decide(mobileReading, [misread], billText.get(mobile.id)!, offer(mobile));
     expect(decision.claims).toEqual([]);
     expect(decision.questions.map((q) => q.kind)).toContain("price_gap");
+  });
+
+  // A credit worth more than half the plan is more likely a misreading (a one-time credit, a yearly sum) than a monthly
+  // credit the bill left out: it is asked about, never claimed.
+  test("a promised credit over half the plan price becomes a question, not a $40 claim", () => {
+    const quote = "Get $40 off every month on Unlimited Plus";
+    const large = promise({ kind: "recurring_credit", amount_cents: 4000, quote, covers_line_ids: mobilePlans });
+    const decision = decide(mobileReading, [large], billText.get(mobile.id)!, { kind: "text", text: quote });
+    expect(decision.claims).toEqual([]);
+    expect(decision.questions.map((q) => q.kind)).toContain("price_gap");
+  });
+
+  // A plan named without a price ("Unlimited Plus on both lines") can't be held to one: $0 against the plan's cost read
+  // as a gap to ask about.
+  test("a plan promise with no price claims nothing and asks nothing", () => {
+    const quote = "Unlimited Plus on both lines";
+    const unpriced = promise({ kind: "monthly_price", amount_cents: null, quote, covers_line_ids: mobilePlans });
+    const decision = decide(mobileReading, [unpriced], billText.get(mobile.id)!, { kind: "text", text: quote });
+    expect(decision.claims).toEqual([]);
+    expect(decision.questions.filter((q) => q.promiseId)).toEqual([]);
   });
 
   test("an offer from another company yields a question, even when the names share a word", () => {
