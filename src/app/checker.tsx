@@ -167,9 +167,11 @@ function DocRow({ doc, onRemove }: { doc: Doc; onRemove: () => void }) {
   const pagesText = (doc: Extract<Doc, { status: "ready" }>) => (doc.omitted > 0 ? `First ${doc.pages.length} of ${doc.pages.length + doc.omitted} pages` : doc.pages.length === 1 ? "1 page" : `${doc.pages.length} pages`);
   const detail = doc.status === "preparing" ? "Opening" : doc.status === "failed" ? doc.message : pagesText(doc);
   return (
-    <div className="flex items-center gap-3 py-1.5">
+    // Below 320 px (a phone zoomed in) the row stacks: beside the thumbnail and Remove, the name had a column of a few
+    // pixels and showed a letter a line.
+    <div className="flex items-center gap-3 py-1.5 max-[320px]:flex-col max-[320px]:items-start max-[320px]:gap-1">
       <div className="h-10 w-8 shrink-0 overflow-hidden rounded-[4px] bg-white outline-1 -outline-offset-1 outline-line">{doc.status === "ready" && <Thumbnail src={doc.pages[0].image} />}</div>
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 max-[320px]:self-stretch">
         {/* Wrapped, not cut off: statements often share a long name up to the month, the part that tells them apart. */}
         <div className="text-[15px] wrap-anywhere">{doc.name}</div>
         <div className={`text-[13px] ${doc.status === "failed" ? "text-red" : "text-text-2"}`} role={doc.status === "failed" ? "alert" : undefined}>
@@ -183,8 +185,8 @@ function DocRow({ doc, onRemove }: { doc: Doc; onRemove: () => void }) {
 
 function CallRow({ call, onRemove }: { call: Call; onRemove: () => void }) {
   return (
-    <div className="flex items-center gap-3 py-1.5">
-      <div className="min-w-0 flex-1">
+    <div className="flex items-center gap-3 py-1.5 max-[320px]:flex-col max-[320px]:items-start max-[320px]:gap-1">
+      <div className="min-w-0 flex-1 max-[320px]:self-stretch">
         <div className="text-[15px] wrap-anywhere">{call.name}</div>
         {call.status === "ready" ? (
           <div className="mt-1 flex items-center gap-3">
