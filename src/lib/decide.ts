@@ -307,13 +307,16 @@ export const BRANDS: [RegExp, string][] = [
   [/verizon|fios/i, "Verizon"],
   [/at&t|\batt(\b|fiber)/i, "AT&T"],
   [/spectrum|charter/i, "Spectrum"],
-  // Metro, MetroPCS and Metro by T-Mobile; Metronet is another company.
-  [/\bt[- ]?mobile|\bmetro(\s?pcs)?\b/i, "T-Mobile"],
+  // Metro, MetroPCS, Metro by T-Mobile and its app's name on bills, MYmetro; Metronet is another company.
+  [/\bt[- ]?mobile|\b(my)?metro(\s?pcs)?\b/i, "T-Mobile"],
   [/google ?fiber/i, "Google Fiber"],
-  [/google/i, "Google Fi"],
+  // Google Fi's bill can read only "Google", and posters call it "Fi".
+  [/google|^\s*fi\s*$/i, "Google Fi"],
   [/directv/i, "DirecTV"],
   [/starlink/i, "Starlink"],
-  [/optimum/i, "Optimum"],
+  // Optimum is Altice's service; Xtream is Mediacom's.
+  [/optimum|altice/i, "Optimum"],
+  [/mediacom|xtream/i, "Mediacom"],
   [/boost/i, "Boost Mobile"],
   [/u\.?s\.? ?cellular/i, "US Cellular"],
   [/centurylink/i, "CenturyLink"],

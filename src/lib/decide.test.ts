@@ -722,5 +722,11 @@ describe("a company that goes by two names", () => {
     expect(providersDiffer("AT&T", "ATT Fiber")).toBe(false);
     // r/ATTFiber, 90 of the posts, is named AT&T when its bill prints no company.
     expect(providersDiffer("AT&T", "ATTFiber")).toBe(false);
+    // Names the census read off real bills: Google Fi's bill as "Google" beside a post saying "Fi", Metro by T-Mobile's
+    // as "MYmetro", Mediacom's as "XTREAM", and Optimum, which Altice sells.
+    for (const [bill, offer] of [["Google", "Fi"], ["MYmetro", "Metro by T-Mobile"], ["XTREAM", "Mediacom"], ["Optimum Fiber", "Altice"]]) {
+      expect(providersDiffer(bill, offer), `${bill} / ${offer}`).toBe(false);
+    }
+    expect(providersDiffer("Xfinity WiFi", "Google Fi")).toBe(true);
   });
 });
