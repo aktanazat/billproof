@@ -37,6 +37,23 @@ test("a missing credit is described as missing, never as a charge above a promis
   expect(text.filter((part) => /above the promise: billed \$0\.00|1 post had a charge above a promise/.test(part))).toEqual([]);
 });
 
+// A bill's fees nobody agreed to are what the page's headline counts; under each such bill in the list of every bill
+// they are named as that, with their total, not folded into a list of things "worth asking about".
+test("every bill with fees nobody agreed to says so under it, with the fees' total", () => {
+  const withFees = realRun.results.filter((bill) => bill.outcome === "checked" && bill.claims.length === 0 && unagreedFees(bill).length > 0);
+  const everyBill = text.slice(text.indexOf("Every bill"));
+  expect(withFees.length).toBeGreaterThan(0);
+  expect(everyBill.filter((part) => part === "Company fees the poster never mentions agreeing to:")).toHaveLength(withFees.length);
+});
+
+// Readings copy a company's name as printed, often in capitals ("KINETIC BY WINDSTREAM", "DIRECTV"); the page writes it
+// as the company does, small words and its own capitals included.
+test("a company read in capitals is written as the company writes it", () => {
+  expect(text).toContain("Kinetic by Windstream");
+  expect(text.filter((part) => /^DirecTV(,|$)/.test(part)).length).toBeGreaterThan(0);
+  expect(text.filter((part) => /KINETIC|Kinetic By|^Directv|^DIRECTV/.test(part))).toEqual([]);
+});
+
 test("every post read is accounted for: real bills, not bills, and bills that couldn't be read", () => {
   const count = (outcome: string) => realRun.results.filter((bill) => bill.outcome === outcome).length;
   const read = count("checked") + count("not_a_bill") + count("could_not_check");
