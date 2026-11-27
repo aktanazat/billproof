@@ -162,11 +162,12 @@ function ClaimRow({ claim, index, result, callUrl, mark, onToggle, onConfirm, on
         </dd>
         <dt className="text-text-2">Promised</dt>
         <dd className="tabular-nums sm:text-right">{usd(claim.expectedCents)}</dd>
-        <dd className="col-span-2 flex items-start gap-2 text-text-2 sm:col-span-1">
+        {/* The play button sits beside the quote from 320 px, above it when narrower (a phone zoomed in). */}
+        <dd className="col-span-2 flex flex-col items-start gap-1 text-text-2 min-[320px]:flex-row min-[320px]:gap-2 sm:col-span-1">
           {heard !== null && <PlayButton url={callUrl} from={heard} to={turnEnd(result.transcript, heard)} label={`Play what was said at ${formatClock(heard)}`} />}
           {/* Quotes are the visitor's words, which can hold a long address with no spaces; they break anywhere, or one
               would widen a phone's page. */}
-          <span className={`wrap-anywhere ${heard !== null ? "pt-[5px]" : ""}`}>“{promise?.quote}”</span>
+          <span className={`wrap-anywhere ${heard !== null ? "min-[320px]:pt-[5px]" : ""}`}>“{promise?.quote}”</span>
         </dd>
       </dl>
 
@@ -216,9 +217,11 @@ function Transcript({ transcript, provider, callUrl }: { transcript: TranscriptT
       </summary>
       <ol className="flex flex-col gap-2 pb-4">
         {transcript.map((turn, i) => (
-          <li key={i} className="grid grid-cols-[4.5rem_minmax(0,1fr)] items-start gap-3 text-[13px] leading-[18px]">
+          // Beside its line from 320 px; narrower (a phone zoomed in) the button sits above it, or the line's column
+          // shrinks to a word or two a row.
+          <li key={i} className="flex flex-col items-start gap-1 text-[13px] leading-[18px] min-[320px]:grid min-[320px]:grid-cols-[4.5rem_minmax(0,1fr)] min-[320px]:gap-3">
             <PlayButton url={callUrl} from={turn.start_seconds} to={transcript[i + 1]?.start_seconds ?? null} label={`Play from ${formatClock(turn.start_seconds)}`} />
-            <p className="pt-[5px]">
+            <p className="min-[320px]:pt-[5px]">
               <span className="text-text-2">{turn.speaker === "company" ? (provider ?? "Company") : turn.speaker === "customer" ? "You" : "Other"}: </span>
               {turn.text}
             </p>
