@@ -26,11 +26,12 @@ export default function PageError({ error, reset }: { error: Error & { digest?: 
         {/* What broke took focus with it; the heading takes it, so a screen reader says what happened. */}
         <h1 ref={focusOnShow} tabIndex={-1} className="text-[28px] font-semibold leading-[1.2] tracking-[-0.02em] outline-none">Something went wrong showing this page</h1>
         <p className="text-[17px] text-text-2">Try again, or start a new check.</p>
-        <div className="mt-2 flex gap-2">
-          <button type="button" onClick={reset} className="inline-flex h-9 items-center rounded-lg bg-text px-4 text-[15px] font-medium text-white hover:bg-black">
+        <div className="mt-2 flex flex-wrap gap-2">
+          <button type="button" onClick={reset} className="inline-flex h-9 items-center whitespace-nowrap rounded-lg bg-text px-4 text-[15px] font-medium text-white hover:bg-black">
             Try again
           </button>
-          <Link href="/" className="inline-flex h-9 items-center rounded-lg bg-fill px-4 text-[15px] hover:bg-fill-2">
+          {/* Clears the error as well: on the start page itself a link to "/" changes nothing, and this page would stay. */}
+          <Link href="/" onClick={reset} className="inline-flex h-9 items-center whitespace-nowrap rounded-lg bg-fill px-4 text-[15px] hover:bg-fill-2">
             Check a bill
           </Link>
         </div>

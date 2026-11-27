@@ -903,12 +903,12 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
                 ))}
                 <div className="flex flex-wrap gap-x-1">
                   {takesPicture && (
-                    <FileTarget label="Add a screenshot to this bill" accept="image/*,.heic,.heif" multiple onFiles={(files) => joinPictures(files.filter(isPicture))} className="mt-1 h-8 rounded-lg px-2 text-[13px] text-text-2 hover:bg-fill-2 hover:text-text data-[over]:bg-fill-2 data-[over]:text-text">
+                    <FileTarget label="Add a screenshot to this bill" accept="image/*,.heic,.heif" multiple onFiles={(files) => joinPictures(files.filter(isPicture))} className="mt-1 min-h-8 rounded-lg px-2 py-1 text-[13px] text-text-2 hover:bg-fill-2 hover:text-text data-[over]:bg-fill-2 data-[over]:text-text">
                       Add a screenshot to this bill
                     </FileTarget>
                   )}
                   {bills.length < MAX_BILLS && (
-                    <FileTarget label="Add more bills" accept={BILL_ACCEPT} multiple onFiles={addBills} className="mt-1 h-8 rounded-lg px-2 text-[13px] text-text-2 hover:bg-fill-2 hover:text-text data-[over]:bg-fill-2 data-[over]:text-text">
+                    <FileTarget label="Add more bills" accept={BILL_ACCEPT} multiple onFiles={addBills} className="mt-1 min-h-8 rounded-lg px-2 py-1 text-[13px] text-text-2 hover:bg-fill-2 hover:text-text data-[over]:bg-fill-2 data-[over]:text-text">
                       Add another month
                     </FileTarget>
                   )}
@@ -932,7 +932,7 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
               )}
             </>
           ) : (
-            <FileTarget label="Choose the bill" accept={BILL_ACCEPT} multiple onFiles={addBills} className="mt-3 flex h-[112px] w-full flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-text-2/40 text-center hover:bg-white data-[over]:bg-white">
+            <FileTarget label="Choose the bill" accept={BILL_ACCEPT} multiple onFiles={addBills} className="mt-3 flex min-h-[112px] w-full flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-text-2/40 py-2 text-center hover:bg-white data-[over]:bg-white">
               <span className="px-2 text-[15px] text-balance">
                 <span className="sm:hidden">Choose</span>
                 <span className="hidden sm:inline">Drop</span> the bill, or every screenshot you have
@@ -971,7 +971,7 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
                 // with a pasted offer, up to half the screen, so what was pasted can be read and trimmed in place.
                 className="mt-2 block min-h-[88px] max-h-[50vh] w-full flex-1 resize-none rounded-lg bg-white p-3 text-[16px] leading-[22px] field-sizing-content shadow-[inset_0_0_0_1px_var(--line)] placeholder:text-text-2 focus:outline-none focus-visible:shadow-[inset_0_0_0_2px_var(--text)] sm:text-[15px]"
               />
-              <FileTarget label="Add the offer as a file or recording" accept={OFFER_ACCEPT} onFiles={(files) => void addOffer(files)} className="mt-2 h-8 rounded-lg px-2 text-[13px] text-text-2 hover:bg-fill-2 hover:text-text data-[over]:bg-fill-2 data-[over]:text-text">
+              <FileTarget label="Add the offer as a file or recording" accept={OFFER_ACCEPT} onFiles={(files) => void addOffer(files)} className="mt-2 min-h-8 rounded-lg px-2 py-1 text-[13px] text-text-2 hover:bg-fill-2 hover:text-text data-[over]:bg-fill-2 data-[over]:text-text">
                 Add a screenshot, PDF or call recording instead
               </FileTarget>
             </>

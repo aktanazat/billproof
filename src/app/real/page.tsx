@@ -252,10 +252,10 @@ export default function RealBills() {
                   <Change bill={bill} />
                   <div className="mt-1 flex flex-wrap gap-2">
                     {/* Spoken names start with the words shown, for voice control, then name the post, so a list of the page's links tells them apart. */}
-                    <Link href={`/?post=${id}`} rel="nofollow" prefetch={false} aria-label={`Check it live: ${bill.title}`} className="inline-flex h-8 items-center rounded-lg bg-text px-3 text-[13px] font-medium text-white hover:bg-black">
+                    <Link href={`/?post=${id}`} rel="nofollow" prefetch={false} aria-label={`Check it live: ${bill.title}`} className="inline-flex min-h-8 items-center rounded-lg bg-text px-3 py-1 text-[13px] font-medium text-white hover:bg-black">
                       Check it live
                     </Link>
-                    <a href={bill.permalink} aria-label={`Original post: ${bill.title}`} className="inline-flex h-8 items-center rounded-lg px-2 text-[13px] text-text-2 hover:bg-fill hover:text-text">
+                    <a href={bill.permalink} aria-label={`Original post: ${bill.title}`} className="inline-flex min-h-8 items-center rounded-lg px-2 py-1 text-[13px] text-text-2 hover:bg-fill hover:text-text">
                       Original post
                     </a>
                   </div>
@@ -340,10 +340,10 @@ export default function RealBills() {
                   <Change bill={bill} />
                 </div>
                 <div className="col-start-2 flex flex-wrap items-center gap-2 sm:col-start-3 sm:flex-col sm:items-end">
-                  <Link href={`/?post=${bill.id}`} rel="nofollow" prefetch={false} aria-label={`Check it live: ${bill.title}`} className="inline-flex h-8 items-center rounded-lg bg-text px-3 text-[13px] font-medium text-white hover:bg-black">
+                  <Link href={`/?post=${bill.id}`} rel="nofollow" prefetch={false} aria-label={`Check it live: ${bill.title}`} className="inline-flex min-h-8 items-center rounded-lg bg-text px-3 py-1 text-[13px] font-medium text-white hover:bg-black">
                     Check it live
                   </Link>
-                  <a href={bill.permalink} aria-label={`Original post: ${bill.title}`} className="inline-flex h-8 items-center rounded-lg px-2 text-[13px] text-text-2 hover:bg-fill hover:text-text">
+                  <a href={bill.permalink} aria-label={`Original post: ${bill.title}`} className="inline-flex min-h-8 items-center rounded-lg px-2 py-1 text-[13px] text-text-2 hover:bg-fill hover:text-text">
                     Original post
                   </a>
                 </div>
