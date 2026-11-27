@@ -21,3 +21,12 @@ test("a short charge name is matched as whole words", () => {
   expect(snapBox(box(400), "TV Box", rows)).toEqual(box(500));
   expect(snapBox(null, "TV", rows)).toEqual(box(500));
 });
+
+// A name Muse Ember read differently from the printed row stays where Muse Ember marked it; with no place of its own
+// and two rows printing the name (one per phone line), the mark isn't put on either by guess.
+test("a charge whose name no row prints keeps its own mark; one with no mark and two matching rows gets none", () => {
+  const rows = [{ text: "Unlimited Plus - Line 1 $45.00", box: box(400) }, { text: "Unlimited Plus - Line 2 $45.00", box: box(440) }];
+  expect(snapBox(box(600), "Device Protection", rows)).toEqual(box(600));
+  expect(snapBox(null, "Device Protection", rows)).toBeNull();
+  expect(snapBox(null, "Unlimited Plus", rows)).toBeNull();
+});
