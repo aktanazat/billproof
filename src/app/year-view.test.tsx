@@ -176,6 +176,26 @@ test("two statements whose dates couldn't be read are both counted, not taken fo
   expect(html).not.toContain("duplicate");
 });
 
+// Statements with no date read come first in the chart. Named "Unknown", the chart's heading read "Overcharged from
+// Unknown" and two bars sounded the same to a screen reader; each now says "No date" and gives its file.
+test("a statement with no date read is labeled as such, by its file, and never names the month an overcharge began", () => {
+  if (!year) throw new Error("the saved run has no year result");
+  const at = (start: string) => year.months.find((month) => month.result.outcome === "checked" && month.result.reading.period_start?.startsWith(start))?.result;
+  const [jan, oct, mar] = [at("2026-01"), at("2026-10"), at("2026-03")];
+  if (jan?.outcome !== "checked" || oct?.outcome !== "checked" || mar?.outcome !== "checked") throw new Error("the sample has no January, October or March statement");
+  const undated = (result: typeof jan) => ({ ...result, reading: { ...result.reading, period_start: null, period_end: null, statement_date: null } });
+  const mixed: YearResult = { ...year, months: [{ bill: 0, result: undated(jan) }, { bill: 1, result: undated(oct) }, { bill: 2, result: mar }] };
+  const bills = ["scan-1.jpg", "scan-2.jpg", "march.pdf"].map((name, i) => ({ id: `b${i}`, name, status: "preparing" as const }));
+  const running = { s: "running", inputs: { ...initialState.inputs, bills }, attempts: 1, attempt: 1, stage: null, spentMicros: 0, live: {} } as unknown as CheckState;
+  const done = reduce(running, { type: "finished", attempt: 1, result: mixed });
+  if (done.s !== "done") throw new Error("the finished year did not become a done state");
+  const html = renderToStaticMarkup(createElement(YearView, { state: done, result: mixed, dispatch: () => {} }));
+  expect(html).not.toContain("Unknown");
+  expect(html).toContain(">Overcharge by month</h2>");
+  expect(html).toContain('aria-label="No date $30.00, scan-2.jpg: overcharged"');
+  expect(html).toContain('aria-label="No date, scan-1.jpg: matches the offer"');
+});
+
 test("a year with nothing owed shows no $0.00, and says plainly when there was no offer to check against", () => {
   if (!year) throw new Error("the saved run has no year result");
   const clean = (hadOffer: boolean): YearResult => ({ ...year, months: year.months.map((month) => (month.result.outcome === "checked" ? { ...month, result: { ...month.result, claims: [], hadOffer, promises: hadOffer ? month.result.promises : [], matchedPromiseIds: hadOffer ? month.result.matchedPromiseIds : [] } } : month)) });

@@ -16,7 +16,7 @@ const dateOf = (result: Checked) => result.reading.period_start ?? result.readin
 
 function monthOf(result: Checked, long = false): string {
   const iso = dateOf(result);
-  if (!iso) return "Unknown";
+  if (!iso) return "No date";
   const [y, m] = iso.split("-").map(Number);
   // A month the reading got wrong (13) is shown as written rather than as "undefined".
   if (!MONTHS[m - 1]) return iso;
@@ -198,7 +198,8 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
 
       {checked.length > 0 && (
         <section className="flex flex-col gap-4">
-          <h2 className="text-[17px] font-semibold">{firstBad > 0 ? `Overcharged from ${monthOf(checked[firstBad].result, true)}` : "Overcharge by month"}</h2>
+          {/* The month an overcharge began is named only when that statement's date was read. */}
+          <h2 className="text-[17px] font-semibold">{firstBad > 0 && dateOf(checked[firstBad].result) ? `Overcharged from ${monthOf(checked[firstBad].result, true)}` : "Overcharge by month"}</h2>
           {/* Four months a row on a phone, fewer when it's zoomed in, so an amount never runs into the next month's. */}
           <ol className="grid grid-cols-[repeat(auto-fill,minmax(4.5rem,1fr))] gap-x-2 gap-y-6 sm:grid-cols-6 lg:grid-cols-12" aria-label="Overcharge by month">
             {checked.map((month) => {
@@ -207,7 +208,8 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
               // The spoken name starts with the words shown on the button ("Aug 26 $5.00 to confirm"), so voice control
               // can reach it, then says the month in full and what it found.
               const shown = monthOf(month.result);
-              const full = monthOf(month.result, true);
+              // With no date read, the file tells two such statements apart.
+              const full = dateOf(month.result) ? monthOf(month.result, true) : (state.inputs.bills[month.bill]?.name ?? shown);
               const visible = [shown, ...(amount > 0 ? [usd(amount)] : []), ...(unconfirmed ? ["To confirm"] : [])].join(" ");
               const status = amount > 0 ? "overcharged" : asks(month) ? "charges worth asking about" : rose(month) ? "higher than the bill before" : !hadOffer ? "no offer to compare" : compared(month) ? "matches the offer" : "not compared with the offer";
               return (
