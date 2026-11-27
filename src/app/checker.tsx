@@ -817,27 +817,31 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
   // A screenshot pasted (Cmd+V, or Paste on a phone) is added like a chosen file: into the offer box when the cursor is
   // there and it's empty, otherwise to the bill. Pasted words are left to the page: a picture that comes with words is
   // ignored (a document's copy can carry a picture of itself), and one pasted into an offer already written is refused
-  // with a note under the box.
+  // with a note under the box. A PDF copied as a file is added as if dropped: as the offer, or as a bill of its own
+  // (with any screenshots pasted beside it), not joined to the last bill as a screenshot is.
   useEffect(() => {
     if (state.s !== "composing") return;
     const offerEmpty = state.inputs.offer.kind === "none";
     const paste = (event: ClipboardEvent) => {
-      const files = [...(event.clipboardData?.files ?? [])].filter(isPicture);
+      const files = [...(event.clipboardData?.files ?? [])].filter((file) => isPicture(file) || isPdf(file));
       if (files.length === 0) return;
       const inOffer = event.target instanceof HTMLTextAreaElement && event.target.getAttribute("aria-label") === "What you were promised";
+      // A file copied in Finder brings its name as text; that is the file's label, not words of a document.
       const words = event.clipboardData?.getData("text/plain").trim();
-      if (inOffer && words) return;
+      if (inOffer && words && !files.some((file) => file.name === words)) return;
       if (inOffer && !offerEmpty) {
         event.preventDefault();
-        setOfferNote("The screenshot wasn't added: this box already has the offer's words. To use the screenshot instead, clear the box first.");
+        const what = files[0] && isPdf(files[0]) ? "PDF" : "screenshot";
+        setOfferNote(`The ${what} wasn't added: this box already has the offer's words. To use the ${what} instead, clear the box first.`);
         return;
       }
       event.preventDefault();
       // An untyped picture is known by its name (an iPhone's .heic), so the new name keeps its extension.
-      const pictures = files.map((file) => new File([file], `Pasted screenshot ${++pastedCount.current}.${file.type ? file.type.split("/")[1] : file.name.split(".").pop()}`, { type: file.type }));
-      for (const picture of pictures) pasted.current.add(picture);
-      if (inOffer) void addOffer(pictures);
-      else joinLastBill(pictures);
+      const named = files.map((file) => (isPdf(file) ? file : new File([file], `Pasted screenshot ${++pastedCount.current}.${file.type ? file.type.split("/")[1] : file.name.split(".").pop()}`, { type: file.type })));
+      for (const file of named) if (!isPdf(file)) pasted.current.add(file);
+      if (inOffer) void addOffer(named);
+      else if (named.some(isPdf)) pasteQueue.current = pasteQueue.current.then(() => addBills(named)).catch(() => setBillNote("The PDF couldn't be added. Try adding it again."));
+      else joinLastBill(named);
     };
     document.addEventListener("paste", paste);
     return () => document.removeEventListener("paste", paste);
