@@ -436,9 +436,13 @@ export function buildYearMessage(months: Checked[]): Message {
   });
   const amounts = withClaims.map((month) => `${capitalized(periodOf(month))}: ${usd(month.claims.reduce((t, claim) => t + claim.amountCents, 0))} more than I was promised.`);
   const riseFacts = months.flatMap((month) => increaseFact(month.change, billName(month)) ?? []);
-  const feeFacts = [...riseFacts, ...(fees.length > 0 ? [feeFact(fees, offerCovers, "My statements charge")] : []), ...repeats.map(({ month, lines }) => repeatOn(month, lines, repeatFact))];
+  const rises = months.flatMap((month) => (month.change && month.change.currentCents > month.change.earlierCents ? [`${periodOf(month)} (${usd(month.change.currentCents - month.change.earlierCents)} more)`] : []));
+  const shortRiseFacts = rises.length > 0 ? [`Higher than the statement before: ${rises.join("; ")}.`] : [];
+  const otherFacts = [...(fees.length > 0 ? [feeFact(fees, offerCovers, "My statements charge")] : []), ...repeats.map(({ month, lines }) => repeatOn(month, lines, repeatFact))];
   const problem = problemLine(claims, fees.length > 0, offerCovers, riseFacts.length > 0);
   const versions = claims.length > 0 ? [sectionsFor(regulator, false, "as quoted above"), [promisedLine, ...byMonth], [promisedLine, ...amounts], amounts] : [[]];
-  const complaint = complaintText(provider, last4, problem, versions.map((facts) => [...facts, ...feeFacts]), claims, feeFacts.length > 0);
+  // Past the fullest wordings, every rise goes on one line, by its statement and amount alone.
+  const fitted = [...versions.map((facts) => [...facts, ...riseFacts, ...otherFacts]), ...versions.map((facts) => [...facts, ...shortRiseFacts, ...otherFacts])];
+  const complaint = complaintText(provider, last4, problem, fitted, claims, riseFacts.length + otherFacts.length > 0);
   return { totalCents, chat, email, call, complaint };
 }

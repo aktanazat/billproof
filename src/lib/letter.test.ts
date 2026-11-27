@@ -368,6 +368,26 @@ describe("the complaint a regulator receives", () => {
     expect(complaint).toContain("a credit of $360.00");
   });
 
+  // Each rise names up to three changed charges; on six statements those alone ran the complaint past the box, so the
+  // regulator lost the resolution at its end.
+  test("a year with a rise naming three charges on half its statements still fits, naming each rise's month", () => {
+    const rose = (m: number) => ({
+      earlierCents: 8500,
+      currentCents: 9450 + m * 50,
+      lines: [
+        { label: "Energy Charge, Tier 2 usage above baseline", beforeCents: 6012, afterCents: 6740 },
+        { label: "Delivery Charge, Transmission and Distribution", beforeCents: 2210, afterCents: 2455 },
+        { label: "Public Purpose Programs Surcharge", beforeCents: 312, afterCents: 377 },
+      ],
+    });
+    const year = Array.from({ length: 12 }, (_, i) => ({ ...month(i + 1, [priceClaim]), change: i >= 1 && i <= 6 ? rose(i) : null }));
+    const { complaint } = buildYearMessage(year);
+    expect(complaint.length).toBeLessThanOrEqual(1_700);
+    for (const m of ["Feb 12, 2026", "Jul 12, 2026"]) expect(complaint).toContain(m);
+    for (const rise of ["$10.00", "$12.50"]) expect(complaint).toContain(rise);
+    expect(complaint).toContain("a credit of $180.00");
+  });
+
   test("a month whose only claim is an included charge says which statement it is", () => {
     const { chat, complaint } = buildYearMessage([month(10, [priceClaim]), month(11, [gatewayClaim])]);
     expect(chat).toContain("For Nov 12, 2026 to Dec 11, 2026, I was charged $15.00 for Wi-Fi Gateway Rental");
