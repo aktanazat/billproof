@@ -17,3 +17,12 @@ test("a transparent picture from a post reaches the check on white", async () =>
   expect(at(5, 5).every((channel) => channel > 240)).toBe(true);
   expect(at(40, 30).every((channel) => channel < 15)).toBe(true);
 });
+
+// Reddit answers a deleted picture with 403, 404 or 410; anything else (a timeout, a 5xx) is a passing failure, and the
+// live run says to try again rather than that the post's pictures are gone.
+test("pictures Reddit says are gone are told apart from pictures that failed to load just now", async () => {
+  vi.stubGlobal("fetch", vi.fn(async () => new Response("down", { status: 503 })));
+  expect(await postPages(["https://i.redd.it/a.png", "https://i.redd.it/b.png"])).toMatchObject({ pages: [], unavailable: 2 });
+  vi.stubGlobal("fetch", vi.fn(async () => new Response("gone", { status: 404 })));
+  expect(await postPages(["https://i.redd.it/a.png", "https://i.redd.it/b.png"])).toMatchObject({ pages: [], unavailable: 0 });
+});

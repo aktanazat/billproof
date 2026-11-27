@@ -817,18 +817,22 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
           return { id: `sample-${token}-${i}`, name, status: "ready", ...(await prepareFile(await fetchFile(url, name, "application/pdf"), MAX_BILL_PAGES)) };
         }),
       );
-      // A real post's picture can be gone from Reddit; the check reads the ones still there, as the server does.
+      // A real post's picture can be gone from Reddit; the check reads the ones still there, as the server does. Not
+      // found means the poster deleted it; any other failure (Reddit slow, a dropped connection) may pass.
       const postPicture = async (url: string, i: number) => {
-        const response = await fetch(url);
-        if (!response.ok) return [];
-        return prepareFile(new File([await response.blob()], `picture-${i + 1}.jpg`, { type: "image/jpeg" }), 1).then((prepared) => prepared.pages, () => []);
+        const response = await fetch(url).catch(() => null);
+        if (!response?.ok) return { pages: [], passing: response?.status !== 404 };
+        const pages = await prepareFile(new File([await response.blob()], `picture-${i + 1}.jpg`, { type: "image/jpeg" }), 1).then((prepared) => prepared.pages, () => []);
+        return { pages, passing: false };
       };
       const pile = async (pictures: string[]): Promise<Doc> => {
         // Named by the pictures read: past the page limit, or with some gone from Reddit, it says how many of the post's.
-        const pages = (await Promise.all(pictures.slice(0, MAX_BILL_PAGES).map(postPicture))).flat();
+        const loaded = await Promise.all(pictures.slice(0, MAX_BILL_PAGES).map(postPicture));
+        const pages = loaded.flatMap((picture) => picture.pages);
         const name = pages.length > 0 && pages.length < pictures.length ? `${pages.length} of ${pictures.length} pictures from the post` : pictures.length === 1 ? "The picture from the post" : `${pictures.length} pictures from the post`;
-        const gone = pictures.length === 1 ? "The picture from this post is no longer online." : "The pictures from this post are no longer online.";
-        return pages.length > 0 ? { id: `sample-${token}-pile`, name, status: "ready", pages, omitted: 0 } : { id: `sample-${token}-pile`, name, status: "failed", message: gone };
+        const which = pictures.length === 1 ? "The picture from this post" : "The pictures from this post";
+        const message = loaded.some((picture) => picture.passing) ? `${which} couldn't be loaded just now. Try again in a minute.` : `${which} ${pictures.length === 1 ? "is" : "are"} no longer online.`;
+        return pages.length > 0 ? { id: `sample-${token}-pile`, name, status: "ready", pages, omitted: 0 } : { id: `sample-${token}-pile`, name, status: "failed", message };
       };
       const bills: Doc[] = [...pdfs, ...(sample.pictures ? [await pile(sample.pictures)] : [])];
       const offer: Inputs["offer"] =

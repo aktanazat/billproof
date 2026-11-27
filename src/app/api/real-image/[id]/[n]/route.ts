@@ -1,4 +1,5 @@
 import { realRun } from "@/data/real-bills";
+import { GONE_STATUSES } from "@/data/real-pages";
 
 const MAX_BYTES = 12_000_000;
 // Served from Billproof's own address, so only photo formats: an SVG could carry script.
@@ -11,6 +12,8 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   const url = realRun.results.find((bill) => bill.id === id)?.images[Number(n)];
   if (!url) return new Response("Not found", { status: 404 });
   const upstream = await fetch(url, { headers: { "User-Agent": "billproof/0.1" }, signal: AbortSignal.timeout(15_000) }).catch(() => null);
+  // A deleted picture is not found here too, so the page can say it's gone; anything else may pass, and says so.
+  if (upstream && GONE_STATUSES.has(upstream.status)) return new Response("Picture gone", { status: 404 });
   const type = upstream?.headers.get("content-type")?.split(";")[0].trim() ?? "";
   if (!upstream?.ok || !PHOTO_TYPE.test(type)) return new Response("Picture unavailable", { status: 502 });
   // The time limit still runs while the picture arrives, so reading it can fail too.
