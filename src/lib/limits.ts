@@ -6,6 +6,8 @@ export const MAX_BILL_PAGES = 6;
 export const MAX_OFFER_PAGES = 4;
 // Characters of written offer a check reads; a page past this is held back on the start screen with the reason.
 export const MAX_OFFER_TEXT = 20_000;
+// Characters of a PDF page's own text a check takes; a page past this is read from its picture, like a photo.
+export const MAX_PAGE_TEXT = 60_000;
 export const MAX_CALL_SECONDS = 240;
 export const CALL_SAMPLE_RATE = 16_000;
 // The long side pages are scaled to: by the browser for uploads, and by the server for a real post's pictures.

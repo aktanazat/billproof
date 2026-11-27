@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { BillChange, DroppedClaim, Explained, Question, TestedClaim, Totals, Unused } from "./decide";
-import { CALL_SAMPLE_RATE, MAX_BILL_PAGES, MAX_BILLS, MAX_CALL_SECONDS, MAX_OFFER_PAGES, MAX_OFFER_TEXT } from "./limits";
+import { CALL_SAMPLE_RATE, MAX_BILL_PAGES, MAX_BILLS, MAX_CALL_SECONDS, MAX_OFFER_PAGES, MAX_OFFER_TEXT, MAX_PAGE_TEXT } from "./limits";
 import type { PromiseTerm, Reading, TranscriptTurn } from "./schemas";
 
 const page = z.object({
@@ -8,7 +8,7 @@ const page = z.object({
     .string()
     .regex(/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/)
     .max(4_000_000),
-  text: z.string().max(60_000).nullable(),
+  text: z.string().max(MAX_PAGE_TEXT).nullable(),
 });
 export type PreparedPage = z.infer<typeof page>;
 

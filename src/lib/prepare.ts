@@ -1,5 +1,5 @@
 import { pageRows, pageText, type TextRow } from "./pdf-text";
-import { CALL_SAMPLE_RATE, PAGE_LONG_SIDE } from "./limits";
+import { CALL_SAMPLE_RATE, MAX_PAGE_TEXT, PAGE_LONG_SIDE } from "./limits";
 import type { PreparedPage } from "./result";
 
 // A page as the browser keeps it: what is sent to the check, plus the printed rows used to place marks exactly.
@@ -46,7 +46,10 @@ async function preparePdf(file: File, maxPages: number): Promise<Prepared> {
       await page.render({ canvas, canvasContext: context, viewport }).promise;
       const content = await page.getTextContent();
       const text = pageText(content);
-      pages.push({ image: canvasToJpeg(canvas), text: text.length > 0 ? text : null, rows: text.length > 0 ? pageRows(content, base) : null });
+      // A page whose text is past what a check takes (small print, a doubled hidden layer) goes without it, and is read
+      // from its picture; sent whole, the server refused the check as files it couldn't prepare.
+      const sentText = text.length > 0 && [...text].length <= MAX_PAGE_TEXT ? text : null;
+      pages.push({ image: canvasToJpeg(canvas), text: sentText, rows: text.length > 0 ? pageRows(content, base) : null });
     }
     return { pages, omitted: doc.numPages - read };
   } catch (error) {
