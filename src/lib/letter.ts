@@ -438,11 +438,16 @@ export function buildYearMessage(months: Checked[]): Message {
   const riseFacts = months.flatMap((month) => increaseFact(month.change, billName(month)) ?? []);
   const rises = months.flatMap((month) => (month.change && month.change.currentCents > month.change.earlierCents ? [`${periodOf(month)} (${usd(month.change.currentCents - month.change.earlierCents)} more)`] : []));
   const shortRiseFacts = rises.length > 0 ? [`Higher than the statement before: ${rises.join("; ")}.`] : [];
-  const otherFacts = [...(fees.length > 0 ? [feeFact(fees, offerCovers, "My statements charge")] : []), ...repeats.map(({ month, lines }) => repeatOn(month, lines, repeatFact))];
+  const feeFacts = fees.length > 0 ? [feeFact(fees, offerCovers, "My statements charge")] : [];
+  const otherFacts = [...feeFacts, ...repeats.map(({ month, lines }) => repeatOn(month, lines, repeatFact))];
+  const sameRepeat = new Map<string, typeof repeats>();
+  for (const repeat of repeats) sameRepeat.set(repeatFact(repeat.lines, null), [...(sameRepeat.get(repeatFact(repeat.lines, null)) ?? []), repeat]);
+  const shortOtherFacts = [...feeFacts, ...[...sameRepeat].map(([fact, list]) => (list.length === 1 ? repeatOn(list[0].month, list[0].lines, repeatFact) : `On the bills for ${list.map(({ month }) => periodOf(month)).join("; ")}, ${fact}`))];
   const problem = problemLine(claims, fees.length > 0, offerCovers, riseFacts.length > 0);
   const versions = claims.length > 0 ? [sectionsFor(regulator, false, "as quoted above"), [promisedLine, ...byMonth], [promisedLine, ...amounts], amounts] : [[]];
-  // Past the fullest wordings, every rise goes on one line, by its statement and amount alone.
-  const fitted = [...versions.map((facts) => [...facts, ...riseFacts, ...otherFacts]), ...versions.map((facts) => [...facts, ...shortRiseFacts, ...otherFacts])];
+  // Past the fullest wordings, every rise goes on one line, by its statement and amount alone, and a charge repeated
+  // on several statements is told once, naming them.
+  const fitted = [...versions.map((facts) => [...facts, ...riseFacts, ...otherFacts]), ...versions.map((facts) => [...facts, ...shortRiseFacts, ...shortOtherFacts])];
   const complaint = complaintText(provider, last4, problem, fitted, claims, riseFacts.length + otherFacts.length > 0);
   return { totalCents, chat, email, call, complaint };
 }
