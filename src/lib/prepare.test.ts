@@ -144,3 +144,51 @@ test("a PDF that can't be opened is told why: the reader didn't load, it has a p
   pdfjs.open = failing("InvalidPDFException", "Invalid PDF structure.");
   await expect(prepareFile(pdf(), 6)).rejects.toThrow(new PrepareError("This PDF could not be opened. Download it again, or add screenshots of it instead."));
 });
+
+// A file the browser can no longer read (a cloud file not on the device, or one moved since it was chosen) fails every
+// read, the first byte included. The offer box opens it here directly, without the bill box's check first.
+const unreadable = (name: string, type: string) => {
+  const file = new File(["bytes"], name, { type });
+  const fail = () => Promise.reject(new DOMException("The requested file could not be read.", "NotReadableError"));
+  file.arrayBuffer = fail;
+  file.slice = () => Object.assign(new Blob(["b"]), { arrayBuffer: fail });
+  return file;
+};
+const cantRead = new PrepareError("This file couldn't be read. Save it to this device, then add it again.");
+const declaring = (seconds: number | null) => {
+  vi.stubGlobal("URL", { createObjectURL: () => "blob:call", revokeObjectURL: () => {} });
+  vi.stubGlobal("Audio", class {
+    duration = Number.NaN;
+    onloadedmetadata: (() => void) | null = null;
+    onerror: (() => void) | null = null;
+    preload = "";
+    set src(_: string) {
+      queueMicrotask(() => (seconds === null ? this.onerror?.() : ((this.duration = seconds), this.onloadedmetadata?.())));
+    }
+  });
+};
+
+// It was told "This file could not be opened" for a PDF, and to "Use a JPEG, PNG or WebP" for a JPEG.
+test("an offer PDF or photo that can't be read is told to be saved to the device and added again", async () => {
+  vi.stubGlobal("createImageBitmap", async () => {
+    throw new DOMException("The source image could not be decoded.", "InvalidStateError");
+  });
+  await expect(prepareFile(unreadable("offer.pdf", "application/pdf"), 4)).rejects.toThrow(cantRead);
+  await expect(prepareFile(unreadable("offer.jpg", "image/jpeg"), 4)).rejects.toThrow(cantRead);
+});
+
+// It was told to "Use M4A, MP3 or WAV" for an M4A.
+test("a call recording that can't be read is told to be saved to the device, not to use another format", async () => {
+  vi.stubGlobal("AudioContext", class { decodeAudioData = async () => ({ duration: 10 }); close = async () => {}; });
+  declaring(null);
+  await expect(prepareCall(unreadable("Sales call.m4a", "audio/mp4"), 240)).rejects.toThrow(cantRead);
+});
+
+// A recording too large to read whole (a long screen recording) is still on the device: its length is the reason.
+test("a recording too large to read whole is told its length, not to save it again", async () => {
+  vi.stubGlobal("AudioContext", class { decodeAudioData = async () => ({ duration: 10 }); close = async () => {}; });
+  declaring(3600);
+  const huge = new File(["call"], "ScreenRecording.mov", { type: "video/quicktime" });
+  huge.arrayBuffer = () => Promise.reject(new DOMException("The requested file could not be read.", "NotReadableError"));
+  await expect(prepareCall(huge, 240)).rejects.toThrow(new PrepareError("This recording is 1:00:00 long. Trim it to the part with the promise, up to 4 minutes."));
+});
