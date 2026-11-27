@@ -66,6 +66,16 @@ describe("check machine", () => {
     expect(trimmed.s).toBe("running");
   });
 
+  // The server counts characters as people see them, an emoji as one; counted in JavaScript's units, an emoji is two,
+  // and an offer the server takes was held back on the start screen.
+  test("an offer at the length limit with an emoji starts, as the server takes it", () => {
+    const atLimit = play([...readyBill, { type: "offer_text", text: `${"a".repeat(19_999)}\u{1F642}` }, { type: "start" }]);
+    expect(atLimit.s).toBe("running");
+    const over = play([...readyBill, { type: "offer_text", text: `${"a".repeat(20_000)}\u{1F642}` }, { type: "start" }]);
+    if (over.s !== "composing") throw new Error("an overlong offer started the check");
+    expect(startBlocker(over.inputs)).toBe("The offer is 20,001 characters; a check reads up to 20,000. Keep the part with the prices and what's included.");
+  });
+
   test("a real post whose pictures are gone waits on the start screen with the reason instead of starting", () => {
     const offer = { kind: "text" as const, text: "$55 a month" };
     const gone = play([{ type: "sample_ready", inputs: { bills: [{ id: "p", name: "3 pictures from the post", status: "failed", message: "The pictures from this post are no longer online." }], offer } }]);

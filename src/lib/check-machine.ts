@@ -103,6 +103,9 @@ function prepared<T extends { id: string; name: string; status: string }>(item: 
   return item.id === id && item.status === "preparing" ? next(item) : item;
 }
 
+// Characters as the server's limit counts them, and as people see them: an emoji is one, not JavaScript's two units.
+const offerLength = (text: string) => [...text.trim()].length;
+
 // The request body for a check, or null when the inputs cannot start one.
 export function checkInput(inputs: Inputs): CheckInput | null {
   if (inputs.bills.length === 0 || inputs.bills.some((doc) => doc.status !== "ready")) return null;
@@ -115,7 +118,7 @@ export function checkInput(inputs: Inputs): CheckInput | null {
       return { bills, offer: null };
     case "text": {
       const text = offer.text.trim();
-      if (text.length > MAX_OFFER_TEXT) return null;
+      if (offerLength(text) > MAX_OFFER_TEXT) return null;
       return { bills, offer: text ? { kind: "text", text } : null };
     }
     case "file":
@@ -132,7 +135,7 @@ export function checkInput(inputs: Inputs): CheckInput | null {
 export function startBlocker(inputs: Inputs): string | null {
   const offerFailed = (inputs.offer.kind === "file" && inputs.offer.doc.status === "failed") || (inputs.offer.kind === "call" && inputs.offer.call.status === "failed");
   if (offerFailed || inputs.bills.some((doc) => doc.status === "failed")) return "Remove the file that can't be checked to continue.";
-  const written = inputs.offer.kind === "text" ? inputs.offer.text.trim().length : 0;
+  const written = inputs.offer.kind === "text" ? offerLength(inputs.offer.text) : 0;
   return written > MAX_OFFER_TEXT ? `The offer is ${written.toLocaleString("en-US")} characters; a check reads up to ${MAX_OFFER_TEXT.toLocaleString("en-US")}. Keep the part with the prices and what's included.` : null;
 }
 
