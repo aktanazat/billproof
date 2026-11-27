@@ -104,6 +104,26 @@ test("a recording too long for the browser to decode is told its length, not tha
   await expect(refusing(null)).rejects.toThrow(new PrepareError("This recording could not be opened. Use M4A, MP3 or WAV."));
 });
 
+// An iPhone screen recording of a phone call keeps the picture but not the call's sound. Sent on, the silent recording
+// would be paid for and could come back with words nobody said; the person is told before the check.
+test("a silent recording is refused with what to use instead; a quiet one is read", async () => {
+  const recording = (level: number) => {
+    const samples = Float32Array.from({ length: 16_000 * 10 }, (_, i) => level * Math.sin((2 * Math.PI * 220 * i) / 16_000));
+    vi.stubGlobal("AudioContext", class { decodeAudioData = async () => ({ duration: 10 }); close = async () => {}; });
+    vi.stubGlobal("OfflineAudioContext", class {
+      destination = {};
+      createBufferSource = () => ({ buffer: null, connect: () => {}, start: () => {} });
+      startRendering = async () => ({ getChannelData: () => samples });
+    });
+    vi.stubGlobal("URL", { createObjectURL: () => "blob:call", revokeObjectURL: () => {} });
+    return prepareCall(new File(["call"], "call.mov", { type: "video/quicktime" }), 240);
+  };
+  await expect(recording(0)).rejects.toThrow(new PrepareError("This recording has no sound. A screen recording doesn't capture a phone call's sound: add the call recording itself, or type what they promised."));
+  const quiet = await recording(0.02);
+  expect(quiet.seconds).toBe(10);
+  expect(Math.max(...quiet.peaks)).toBe(1);
+});
+
 // pdf.js loads its reader the first time a PDF is added. When that download fails (a phone off its Wi-Fi), the file
 // is fine, and the visitor is told so, not to look for a password the PDF doesn't have.
 test("a PDF that can't be opened is told why: the reader didn't load, it has a password, or it's damaged", async () => {

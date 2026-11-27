@@ -146,6 +146,8 @@ function wavBase64(samples: Float32Array, sampleRate: number): string {
 export type PreparedCall = { wav: string; seconds: number; url: string; peaks: number[] };
 
 const PEAKS = 96;
+// 60 dB under full scale: below a whisper, where speech on a call peaks far above it.
+const SILENCE = 0.001;
 
 function peaksOf(samples: Float32Array): number[] {
   const size = Math.max(1, Math.floor(samples.length / PEAKS));
@@ -155,8 +157,7 @@ function peaksOf(samples: Float32Array): number[] {
     for (let j = i * size; j < Math.min(samples.length, (i + 1) * size); j++) max = Math.max(max, Math.abs(samples[j]));
     peaks.push(max);
   }
-  const top = Math.max(...peaks, 0.0001);
-  return peaks.map((p) => Math.round((p / top) * 100) / 100);
+  return peaks;
 }
 
 function tooLong(duration: number, maxSeconds: number): PrepareError {
@@ -206,5 +207,9 @@ export async function prepareCall(file: File, maxSeconds: number): Promise<Prepa
   source.start();
   const mono = await offline.startRendering();
   const samples = mono.getChannelData(0);
-  return { wav: wavBase64(samples, CALL_SAMPLE_RATE), seconds: decoded.duration, url: URL.createObjectURL(file), peaks: peaksOf(samples) };
+  const peaks = peaksOf(samples);
+  const loudest = Math.max(...peaks);
+  // An iPhone screen recording of a call keeps the picture but not the call's sound.
+  if (loudest < SILENCE) throw new PrepareError("This recording has no sound. A screen recording doesn't capture a phone call's sound: add the call recording itself, or type what they promised.");
+  return { wav: wavBase64(samples, CALL_SAMPLE_RATE), seconds: decoded.duration, url: URL.createObjectURL(file), peaks: peaks.map((p) => Math.round((p / loudest) * 100) / 100) };
 }
