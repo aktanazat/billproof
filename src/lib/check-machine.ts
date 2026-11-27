@@ -1,6 +1,6 @@
 import type { PreparedCall, ShownPage } from "./prepare";
 import type { TranscriptTurn } from "./schemas";
-import { MAX_BILLS, MAX_OFFER_TEXT } from "./limits";
+import { MAX_BILLS, MAX_OFFER_TEXT, MAX_UPLOAD_BYTES } from "./limits";
 import type { CheckFailure, CheckInput, CheckResult, PageKind, PreparedPage, SeenChallenge, SeenLine, SeenPromise, SingleResult, Stage } from "./result";
 
 export type Doc =
@@ -109,8 +109,8 @@ const offerLength = (text: string) => [...text.trim()].length;
 // be set apart by spaces, so the pattern can't backtrack over a long run of joined links.
 const onlyLinks = (text: string) => /^\s*(?:https?:\/\/|www\.)\S*(?:\s+(?:https?:\/\/|www\.)\S*)*\s*$/i.test(text);
 
-// The request body for a check, or null when the inputs cannot start one.
-export function checkInput(inputs: Inputs): CheckInput | null {
+// The request body for a check, before its size is weighed.
+function requestOf(inputs: Inputs): CheckInput | null {
   if (inputs.bills.length === 0 || inputs.bills.some((doc) => doc.status !== "ready")) return null;
   // Printed rows only place marks on screen; the check gets the image and text.
   const sent = (pages: ShownPage[]): PreparedPage[] => pages.map(({ image, text }) => ({ image, text }));
@@ -131,17 +131,41 @@ export function checkInput(inputs: Inputs): CheckInput | null {
   }
 }
 
+// The bytes `JSON.stringify(input)` sends, without building it: page pictures and a call's sound are most of it, plain
+// ASCII counted by length, and the rest is encoded as sent.
+function uploadBytes(input: CheckInput): number {
+  let media = 0;
+  const rest = JSON.stringify(input, (key, value: unknown) => {
+    if ((key === "image" || key === "wav") && typeof value === "string") {
+      media += value.length;
+      return "";
+    }
+    return value;
+  });
+  return media + new TextEncoder().encode(rest).length;
+}
+
+// The request body for a check, or null when the inputs cannot start one.
+export function checkInput(inputs: Inputs): CheckInput | null {
+  const input = requestOf(inputs);
+  return input && uploadBytes(input) <= MAX_UPLOAD_BYTES ? input : null;
+}
+
 // Why a check can't start, for beside the disabled button. A file that failed (it didn't open, isn't a kind a check
 // reads, or is a recording past the length limit) holds it back until removed, and its row says only what went wrong
-// with it; so does an offer longer than a check reads, or one that is only links, which the check can't open. A file
-// still opening says so on its row, and an empty screen is plain.
+// with it; so does an offer longer than a check reads, or one that is only links, which the check can't open, and
+// files that together are more than a check takes. A file still opening says so on its row, and an empty screen is
+// plain.
 export function startBlocker(inputs: Inputs): string | null {
   const offerFailed = (inputs.offer.kind === "file" && inputs.offer.doc.status === "failed") || (inputs.offer.kind === "call" && inputs.offer.call.status === "failed");
   if (offerFailed || inputs.bills.some((doc) => doc.status === "failed")) return "Remove the file that can't be checked to continue.";
   const text = inputs.offer.kind === "text" ? inputs.offer.text : "";
   if (onlyLinks(text)) return "Billproof can't open links. Paste the offer's words, or add a screenshot or PDF of the page.";
   const written = offerLength(text);
-  return written > MAX_OFFER_TEXT ? `The offer is ${written.toLocaleString("en-US")} characters; a check reads up to ${MAX_OFFER_TEXT.toLocaleString("en-US")}. Keep the part with the prices and what's included.` : null;
+  if (written > MAX_OFFER_TEXT) return `The offer is ${written.toLocaleString("en-US")} characters; a check reads up to ${MAX_OFFER_TEXT.toLocaleString("en-US")}. Keep the part with the prices and what's included.`;
+  const input = requestOf(inputs);
+  const bytes = input ? uploadBytes(input) : 0;
+  return bytes > MAX_UPLOAD_BYTES ? `These files add up to ${Math.ceil(bytes / 1e6)} MB; a check takes up to ${MAX_UPLOAD_BYTES / 1e6} MB. Check fewer months at once, or fewer pictures of each bill.` : null;
 }
 
 function run(state: CheckState): CheckState {

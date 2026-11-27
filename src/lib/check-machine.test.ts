@@ -88,6 +88,20 @@ describe("check machine", () => {
     expect(withWords.s).toBe("running");
   });
 
+  // Twelve months of photographed bills measured 53 MB as sent; the server refused it only after the whole upload, which
+  // on a phone's data can take minutes, with advice ("fewer pages or a smaller photo") that doesn't fit a year.
+  test("bills too large to send hold the check back with their size and what to do; just under the limit starts", () => {
+    const months = (imageChars: number): CheckAction[] => {
+      const big = { image: `data:image/jpeg;base64,${"A".repeat(imageChars)}`, text: null, rows: null };
+      const ids = Array.from({ length: 12 }, (_, i) => `m${i}`);
+      return [{ type: "bills_added", docs: ids.map((id) => ({ id, name: `${id}.jpg` })) }, ...ids.map((id): CheckAction => ({ type: "doc_prepared", id, pages: [big], omitted: 0 }))];
+    };
+    const over = play([...months(3_400_000), { type: "start" }]);
+    if (over.s !== "composing") throw new Error("a check too large to send started");
+    expect(startBlocker(over.inputs)).toBe("These files add up to 41 MB; a check takes up to 40 MB. Check fewer months at once, or fewer pictures of each bill.");
+    expect(play([...months(3_300_000), { type: "start" }]).s).toBe("running");
+  });
+
   test("a real post whose pictures are gone waits on the start screen with the reason instead of starting", () => {
     const offer = { kind: "text" as const, text: "$55 a month" };
     const gone = play([{ type: "sample_ready", inputs: { bills: [{ id: "p", name: "3 pictures from the post", status: "failed", message: "The pictures from this post are no longer online." }], offer } }]);

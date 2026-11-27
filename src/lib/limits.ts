@@ -12,6 +12,9 @@ export const MAX_CALL_SECONDS = 240;
 export const CALL_SAMPLE_RATE = 16_000;
 // The long side pages are scaled to: by the browser for uploads, and by the server for a real post's pictures.
 export const PAGE_LONG_SIDE = 1600;
+// Bytes of request a check takes. The browser measures what it would send and holds a larger check back with the
+// reason, rather than uploading it whole to be refused.
+export const MAX_UPLOAD_BYTES = 40_000_000;
 
 // Shown on the demo when its budget is used, and sent back to a run asked for from a page loaded before that.
 export const LIVE_PAUSED = "Live checks are paused: this demo has used its budget. Every saved result is below.";

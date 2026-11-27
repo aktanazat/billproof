@@ -50,7 +50,6 @@ export const checkInputSchema = z.object({
 });
 export type CheckInput = z.infer<typeof checkInputSchema>;
 export type OfferInput = NonNullable<CheckInput["offer"]>;
-export const MAX_UPLOAD_BYTES = 40_000_000;
 
 export type Stage = "sorting" | "reading_bill" | "rereading_bill" | "reading_offer" | "comparing" | "challenging";
 

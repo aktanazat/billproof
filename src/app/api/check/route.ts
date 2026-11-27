@@ -1,5 +1,6 @@
 import { runCheck } from "@/lib/pipeline";
-import { checkInputSchema, MAX_UPLOAD_BYTES, type CheckEvent, type CheckFailure } from "@/lib/result";
+import { MAX_UPLOAD_BYTES } from "@/lib/limits";
+import { checkInputSchema, type CheckEvent, type CheckFailure } from "@/lib/result";
 import { clientKey, fromOwnPage, serverLedger } from "@/lib/server-ledger";
 
 function refuse(status: number, message: string, failure: CheckFailure = "bad_input", retryable = false) {
