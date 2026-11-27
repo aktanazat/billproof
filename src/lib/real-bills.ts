@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { BRANDS, brandOf } from "./decide";
 import type { CheckEvent } from "./result";
 
 // One live run over real posts, streamed: each post's check events tagged by its place in the batch, then the total.
@@ -66,4 +67,31 @@ export const unagreedCents = (bill: RealBill) => unagreedFees(bill).reduce((t, f
 // What the poster wrote is the only record of the promise; it is passed as the customer's own notes.
 export function postNotes(post: Pick<RealBill, "title" | "text">): string {
   return `What the customer wrote publicly about this bill:\n${post.title}\n\n${post.text}`.slice(0, 20_000);
+}
+
+const SMALL_WORDS = new Set(["by", "of", "and", "the", "for"]);
+
+// The name as printed, unless the reading lowercased it ("optimum") or wrote it in capitals ("KINETIC BY WINDSTREAM");
+// short capitals such as "DISH" are how the company writes itself and stay.
+export function cased(name: string): string {
+  const brand = BRANDS.find(([, canonical]) => canonical.toLowerCase() === name.toLowerCase())?.[1];
+  if (brand) return brand;
+  const words = name.split(" ").map((word, i) => {
+    const lower = word.toLowerCase();
+    if (i > 0 && SMALL_WORDS.has(lower)) return lower;
+    return word === lower || (word === word.toUpperCase() && word.length > 4) ? lower.charAt(0).toUpperCase() + lower.slice(1) : word;
+  });
+  return words.join(" ").replace(/\bT[- ]?Mobile\b/gi, "T-Mobile");
+}
+
+// Subreddits whose company goes by a longer name than some bills print ("Google", "Metro").
+const FULL_NAMES: Record<string, string> = { GoogleFi: "Google Fi", GoogleFiber: "Google Fiber", MetroPCS: "Metro by T-Mobile" };
+
+// A bill whose company name wasn't read is named by the company of its subreddit, when the subreddit is one company's;
+// a printed name that is the start of its subreddit's company name gets the whole name.
+export function displayName(bill: Extract<RealBill, { outcome: "checked" }>): string | null {
+  if (!bill.provider) return brandOf(bill.sub);
+  const name = cased(bill.provider);
+  const full = FULL_NAMES[bill.sub];
+  return full && full.toLowerCase().startsWith(`${name.toLowerCase()} `) ? full : name;
 }

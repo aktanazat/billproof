@@ -4,9 +4,9 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { realRun } from "@/data/real-bills";
 import { formatMicros } from "@/lib/cost";
-import { BRANDS, brandOf } from "@/lib/decide";
+import { brandOf } from "@/lib/decide";
 import { usd } from "@/lib/letter";
-import { claimedCents, unagreedCents, unagreedFees, type RealBill } from "@/lib/real-bills";
+import { cased, claimedCents, displayName, unagreedCents, unagreedFees, type RealBill } from "@/lib/real-bills";
 import { livePaused } from "@/lib/server-ledger";
 import { Thumbnail } from "../bill-page";
 import { alt as cardAlt, size as cardSize } from "../opengraph-image";
@@ -42,34 +42,8 @@ const monthName = (iso: string | null) => {
 const feeKey = (label: string) =>
   label.toLowerCase().replace(/\bcalifornia\b/, "ca").replace(/[^a-z ]/g, "").replace(/\s+/g, " ").trim().replace(/ (fee|charge|surcharge)$/, "");
 
-const SMALL_WORDS = new Set(["by", "of", "and", "the", "for"]);
-
-// The name as printed, unless the reading lowercased it ("optimum") or wrote it in capitals ("KINETIC BY WINDSTREAM");
-// short capitals such as "DISH" are how the company writes itself and stay.
-function cased(name: string): string {
-  const brand = BRANDS.find(([, canonical]) => canonical.toLowerCase() === name.toLowerCase())?.[1];
-  if (brand) return brand;
-  const words = name.split(" ").map((word, i) => {
-    const lower = word.toLowerCase();
-    if (i > 0 && SMALL_WORDS.has(lower)) return lower;
-    return word === lower || (word === word.toUpperCase() && word.length > 4) ? lower.charAt(0).toUpperCase() + lower.slice(1) : word;
-  });
-  return words.join(" ").replace(/\bT[- ]?Mobile\b/gi, "T-Mobile");
-}
 // Bills name the same company many ways ("xfinity", "Comcast", "Verizon Fios"); the table groups them by brand.
 const companyOf = (provider: string | null) => (provider ? (brandOf(provider) ?? cased(provider)) : "Unknown");
-
-// Subreddits whose company goes by a longer name than some bills print ("Google", "Metro").
-const FULL_NAMES: Record<string, string> = { GoogleFi: "Google Fi", GoogleFiber: "Google Fiber", MetroPCS: "Metro by T-Mobile" };
-
-// A bill whose company name wasn't read is named by the company of its subreddit, when the subreddit is one company's;
-// a printed name that is the start of its subreddit's company name gets the whole name.
-function displayName(bill: Checked): string | null {
-  if (!bill.provider) return brandOf(bill.sub);
-  const name = cased(bill.provider);
-  const full = FULL_NAMES[bill.sub];
-  return full && full.toLowerCase().startsWith(`${name.toLowerCase()} `) ? full : name;
-}
 
 // Every real post whose author later wrote in the thread that the company paid them back for a charge Billproof
 // checks, in their own words. Found by reading the posters' own comments on every bill in the run; a roaming fee,

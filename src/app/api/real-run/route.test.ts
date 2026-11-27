@@ -101,6 +101,18 @@ test("a live run can be started only from Billproof's own page", async () => {
   expect(await firstEvent("203.0.113.60", "cross-site")).toEqual({ status: 403, event: { type: "refused", message: "Start a live run from the Billproof page." } });
 });
 
+// The run's tiles name each post's company as the list under them does: "DirecTV", not the "DIRECTV" read off the bill,
+// and a post whose bill printed no company by its subreddit's company.
+test("a live run names each post's company the way the real-bills list does", async () => {
+  useLedger(1_000_000);
+  const { event } = await firstEvent("203.0.113.63");
+  if (event.type !== "batch") throw new Error(`expected the batch, got ${event.type}`);
+  const names = event.posts.map((post) => post.provider);
+  expect(names).toContain("DirecTV");
+  expect(names).not.toContain("DIRECTV");
+  expect(names.filter((name) => name === null)).toEqual([]);
+});
+
 // Two runs at once would check the same posts twice, at twice the cost; the second waits for the first.
 test("while a live run is going, another visitor's run is refused until it ends", async () => {
   useLedger(1_000_000);

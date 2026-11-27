@@ -19,7 +19,8 @@ function finish(tile: Tile, result: SingleResult): Tile {
   const feeCents = result.questions.filter((q) => q.kind === "unagreed_fee").reduce((t, q) => t + q.lineIds.reduce((s, id) => s + line(id), 0), 0);
   const claimCents = result.claims.reduce((t, claim) => t + claim.amountCents, 0);
   const claimNote = result.claims.every((claim) => claim.kind === "credit_missing") ? "credit missing" : "above the promise";
-  return { ...tile, stage: "done", provider: result.reading.provider ?? tile.provider, feeCents, claimCents, note: claimCents > 0 ? `${usd(claimCents)} ${claimNote}` : feeCents > 0 ? `${usd(feeCents)} in fees` : "No fees or claims" };
+  // The tile keeps the name the list under it shows; a fresh reading names it only when the saved run had no name.
+  return { ...tile, stage: "done", provider: tile.provider ?? result.reading.provider, feeCents, claimCents, note: claimCents > 0 ? `${usd(claimCents)} ${claimNote}` : feeCents > 0 ? `${usd(feeCents)} in fees` : "No fees or claims" };
 }
 
 export function LiveRun({ paused }: { paused: boolean }) {

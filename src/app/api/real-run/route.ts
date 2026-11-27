@@ -2,7 +2,7 @@ import { realRun } from "@/data/real-bills";
 import { postPages } from "@/data/real-pages";
 import { runCheck } from "@/lib/pipeline";
 import { LIVE_PAUSED } from "@/lib/limits";
-import { postNotes, unagreedCents, type LiveEvent } from "@/lib/real-bills";
+import { displayName, postNotes, unagreedCents, type LiveEvent, type RealBill } from "@/lib/real-bills";
 import { clientKey, fromOwnPage, livePaused, serverLedger } from "@/lib/server-ledger";
 
 const BATCH = 24;
@@ -12,7 +12,7 @@ const RUNS_PER_HOUR = 6;
 
 // The real bills with the most to show come first: fees nobody agreed to, then any other bill.
 const batch = realRun.results
-  .filter((bill) => bill.outcome === "checked")
+  .filter((bill): bill is Extract<RealBill, { outcome: "checked" }> => bill.outcome === "checked")
   .sort((a, b) => unagreedCents(b) - unagreedCents(a))
   .slice(0, BATCH);
 
@@ -63,7 +63,8 @@ export async function POST(request: Request) {
         }
       };
       try {
-        send({ type: "batch", posts: batch.map((bill) => ({ id: bill.id, title: bill.title, provider: bill.outcome === "checked" ? bill.provider : null, picture: `/api/real-image/${bill.id}/${bill.outcome === "checked" ? (bill.billPages[0] ?? 0) : 0}` })) });
+        // Named as the list under the run names them, so a tile and its row agree.
+        send({ type: "batch", posts: batch.map((bill) => ({ id: bill.id, title: bill.title, provider: displayName(bill), picture: `/api/real-image/${bill.id}/${bill.billPages[0] ?? 0}` })) });
         let next = 0;
         const lane = async () => {
           while (next < batch.length && !request.signal.aborted) {
