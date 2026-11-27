@@ -30,15 +30,23 @@ describe("check machine", () => {
   });
 
   // The failed file's row says what went wrong with it, not that it holds the check back; one bad photo among twelve
-  // statements would otherwise leave the button disabled with no reason given.
-  test("a file that failed to open is named as what holds the check back, until it's removed", () => {
+  // statements would otherwise leave the button disabled with no reason given. The reason fits every failure, including
+  // a recording that opened but runs past what a check reads.
+  test("a file that can't be checked is named as what holds the check back, until it's removed", () => {
+    const tooLong = play([
+      ...readyBill,
+      { type: "call_added", id: "c", name: "sales-call.wav" },
+      { type: "prep_failed", id: "c", message: "This recording is 5:00 long. Trim it to the part with the promise, up to 4 minutes." },
+    ]);
+    if (tooLong.s !== "composing") throw new Error("adding a recording left the start screen");
+    expect(startBlocker(tooLong.inputs)).toBe("Remove the file that can't be checked to continue.");
     const failed = play([
       ...readyBill,
       { type: "bills_added", docs: [{ id: "b2", name: "december.heic" }] },
       { type: "prep_failed", id: "b2", message: "HEIC photos can't be read here." },
     ]);
     if (failed.s !== "composing") throw new Error("adding files left the start screen");
-    expect(startBlocker(failed.inputs)).toBe("Remove the file that couldn't be opened to continue.");
+    expect(startBlocker(failed.inputs)).toBe("Remove the file that can't be checked to continue.");
     const removed = play([{ type: "removed", id: "b2" }], failed);
     if (removed.s !== "composing") throw new Error("removing a file left the start screen");
     expect(startBlocker(removed.inputs)).toBeNull();

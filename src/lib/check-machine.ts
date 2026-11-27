@@ -125,12 +125,13 @@ export function checkInput(inputs: Inputs): CheckInput | null {
   }
 }
 
-// Why a check can't start, for beside the disabled button. A file that failed to open holds it back until removed, and
-// its row says only what went wrong with it; so does an offer longer than a check reads. A file still opening says so
-// on its row, and an empty screen is plain.
+// Why a check can't start, for beside the disabled button. A file that failed (it didn't open, isn't a kind a check
+// reads, or is a recording past the length limit) holds it back until removed, and its row says only what went wrong
+// with it; so does an offer longer than a check reads. A file still opening says so on its row, and an empty screen is
+// plain.
 export function startBlocker(inputs: Inputs): string | null {
   const offerFailed = (inputs.offer.kind === "file" && inputs.offer.doc.status === "failed") || (inputs.offer.kind === "call" && inputs.offer.call.status === "failed");
-  if (offerFailed || inputs.bills.some((doc) => doc.status === "failed")) return "Remove the file that couldn't be opened to continue.";
+  if (offerFailed || inputs.bills.some((doc) => doc.status === "failed")) return "Remove the file that can't be checked to continue.";
   const written = inputs.offer.kind === "text" ? inputs.offer.text.trim().length : 0;
   return written > MAX_OFFER_TEXT ? `The offer is ${written.toLocaleString("en-US")} characters; a check reads up to ${MAX_OFFER_TEXT.toLocaleString("en-US")}. Keep the part with the prices and what's included.` : null;
 }
