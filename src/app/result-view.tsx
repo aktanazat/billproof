@@ -144,7 +144,7 @@ function ClaimRow({ claim, index, result, callUrl, mark, onToggle, onConfirm, on
   // removed button, and a screen reader would hear nothing to say the charge went into the message.
   const confirming = useRef(false);
   return (
-    <li tabIndex={0} onMouseEnter={() => onFocus(focusIds)} onMouseLeave={() => onFocus(null)} onFocus={() => onFocus(focusIds)} onBlur={() => onFocus(null)} className="flex flex-col gap-3 border-b border-line py-4 outline-none focus-visible:bg-fill">
+    <li tabIndex={0} onMouseEnter={() => onFocus(focusIds)} onMouseLeave={() => onFocus(null)} onFocus={() => onFocus(focusIds)} onBlur={() => onFocus(null)} className="flex flex-col gap-3 border-b border-line py-4 focus-visible:bg-fill">
       <div className="flex items-start gap-3">
         <span className="mt-0.5 grid size-[18px] shrink-0 place-items-center rounded-full bg-red text-[11px] font-semibold text-white tabular-nums [print-color-adjust:exact]">{index + 1}</span>
         <h3 className="flex-1 text-[15px] font-semibold leading-snug">{title}</h3>
@@ -306,7 +306,7 @@ export function MessageBox({ message }: { message: Message }) {
       <div role="tabpanel" id={`${ids}-panel`} aria-labelledby={`${ids}-${format}`}>
         {/* Grown to the whole message where the browser can size a text box to its content: the message is what gets
             sent, and at 280 px a phone showed a quarter of a year's email. Elsewhere it keeps its height and scrolls. */}
-        <textarea ref={box} readOnly value={text} aria-label="Message to send" className="block h-[280px] w-full resize-none rounded-xl bg-fill p-4 text-[15px] leading-[22px] field-sizing-content supports-[field-sizing:content]:h-auto focus:outline-none focus-visible:shadow-[inset_0_0_0_2px_var(--text)] print:hidden" />
+        <textarea ref={box} readOnly value={text} aria-label="Message to send" className="block h-[280px] w-full resize-none rounded-xl bg-fill p-4 text-[15px] leading-[22px] field-sizing-content supports-[field-sizing:content]:h-auto print:hidden" />
         {/* A printed text box shows only what fits its height on screen; on paper the whole message prints instead. */}
         <p className="hidden whitespace-pre-wrap text-[13px] leading-[19px] print:block">{text}</p>
       </div>
@@ -586,7 +586,7 @@ export function ResultView({
                   const judgedAgainst = question.promiseId ? promises.get(question.promiseId) : undefined;
                   const heard = heardAt(result, judgedAgainst);
                   return (
-                    <li key={question.id} tabIndex={0} onMouseEnter={() => setFocus(question.lineIds)} onMouseLeave={() => setFocus(null)} onFocus={() => setFocus(question.lineIds)} onBlur={() => setFocus(null)} className="flex flex-col gap-2 border-b border-line py-3 outline-none focus-visible:bg-fill">
+                    <li key={question.id} tabIndex={0} onMouseEnter={() => setFocus(question.lineIds)} onMouseLeave={() => setFocus(null)} onFocus={() => setFocus(question.lineIds)} onBlur={() => setFocus(null)} className="flex flex-col gap-2 border-b border-line py-3 focus-visible:bg-fill">
                       <div className="flex items-baseline justify-between gap-4 text-[15px]">
                         <p>{questionTitle(question, questionLines, result)}</p>
                         {questionLines[0] && (
