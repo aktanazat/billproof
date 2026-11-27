@@ -19,6 +19,12 @@ export type Prepared = { pages: ShownPage[]; omitted: number };
 
 const READER_UNAVAILABLE = "Billproof couldn't load its PDF reader. Check the connection, then remove the file and add it again.";
 
+// A cloud file not on the device, or one moved or changed since it was chosen, can't be read at all; the advice for
+// a file in the wrong format would send the person to convert a file that is fine. A decoder's failure doesn't say
+// which it was, and a file too large to read whole is still on the device, so one byte decides.
+const UNREADABLE = "This file couldn't be read. Save it to this device, then add it again.";
+const readable = (file: File) => file.slice(0, 1).arrayBuffer().then(() => true, () => false);
+
 // A long bill keeps its charges at the front, so a PDF past the limit is read from its first pages and the rest are
 // counted as left out, rather than refused: few people can cut pages out of a PDF.
 async function preparePdf(file: File, maxPages: number): Promise<Prepared> {
@@ -33,7 +39,10 @@ async function preparePdf(file: File, maxPages: number): Promise<Prepared> {
     throw new PrepareError(READER_UNAVAILABLE);
   });
   pdfjs.GlobalWorkerOptions.workerSrc = "/pdfjs/pdf.worker.min.mjs";
-  const task = pdfjs.getDocument({ data: new Uint8Array(await file.arrayBuffer()), standardFontDataUrl: "/pdfjs/standard_fonts/" });
+  const bytes = await file.arrayBuffer().catch(() => {
+    throw new PrepareError(UNREADABLE);
+  });
+  const task = pdfjs.getDocument({ data: new Uint8Array(bytes), standardFontDataUrl: "/pdfjs/standard_fonts/" });
   try {
     const doc = await task.promise;
     const read = Math.min(doc.numPages, maxPages);
@@ -83,6 +92,7 @@ async function prepareImage(file: File): Promise<Prepared> {
   try {
     bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
   } catch {
+    if (!(await readable(file))) throw new PrepareError(UNREADABLE);
     throw new PrepareError(isHeic(file) ? "HEIC photos can't be read in this browser. Export the photo as JPEG, or open Billproof in Safari." : "This image could not be opened. Use a JPEG, PNG or WebP.");
   }
   const scale = Math.min(1, PAGE_LONG_SIDE / Math.max(bitmap.width, bitmap.height));
@@ -197,6 +207,7 @@ export async function prepareCall(file: File, maxSeconds: number): Promise<Prepa
   try {
     decoded = await context.decodeAudioData(await file.arrayBuffer());
   } catch {
+    if (!(await readable(file))) throw new PrepareError(UNREADABLE);
     // Safari won't decode an hour-long call at all; its file still says how long it is.
     const declared = await declaredSeconds(file);
     throw declared !== null && declared > maxSeconds ? tooLong(declared, maxSeconds) : new PrepareError("This recording could not be opened. Use M4A, MP3 or WAV.");
