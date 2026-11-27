@@ -12,14 +12,20 @@ export type Mark = { id: string; box: Box; tone: "claim" | "ask" | "read"; n?: n
 // wide strip (a cropped screenshot of a few lines) is shown whole, since its top corner alone is blank. Pictures served
 // by the site (the real posts') are resized on the server for the box, since a full Reddit picture can weigh 1.8 MB;
 // the person's own uploads are already in the browser and are shown as they are.
+// A real post's picture can be gone from Reddit by the time it's shown; its box is left empty rather than showing the
+// browser's broken-picture icon, and the words beside it say why.
 export function Thumbnail({ src, lazy = false }: { src: string; lazy?: boolean }) {
   const ref = useRef<HTMLImageElement>(null);
   const [wide, setWide] = useState(false);
+  const [broken, setBroken] = useState(false);
   const measure = (img: HTMLImageElement) => setWide(img.naturalWidth > img.naturalHeight * 1.5);
-  // A picture the server page already loaded before this code ran gets no load event, so it is measured here once.
+  // A picture the server page loaded, or failed to load, before this code ran gets no event, so it's checked here once.
   useEffect(() => {
-    if (ref.current?.complete && ref.current.naturalWidth > 0) measure(ref.current);
+    if (!ref.current?.complete) return;
+    if (ref.current.naturalWidth > 0) measure(ref.current);
+    else setBroken(true);
   }, []);
+  if (broken) return null;
   return (
     <Image
       ref={ref}
@@ -31,6 +37,7 @@ export function Thumbnail({ src, lazy = false }: { src: string; lazy?: boolean }
       unoptimized={!src.startsWith("/")}
       loading={lazy ? "lazy" : "eager"}
       onLoad={(event) => measure(event.currentTarget)}
+      onError={() => setBroken(true)}
       className={`h-full w-full ${wide ? "object-contain" : "object-cover object-top"}`}
     />
   );
