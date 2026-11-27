@@ -65,12 +65,12 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
   const anotherAccount = (month: (typeof read)[number]) => Boolean(account && month.result.reading.account_last4 && month.result.reading.account_last4 !== account);
   const seen = new Set<string>();
   const checked: typeof read = [];
-  const skippedMonths = { duplicates: 0, otherAccount: 0 };
+  const skippedMonths = { duplicates: 0, otherAccount: [] as string[] };
   for (const month of read) {
     const { period_start, period_end, statement_date } = month.result.reading;
     // A statement with no date read can't be shown to repeat another, so it is always counted.
     const key = period_start || period_end || statement_date ? [period_start, period_end, statement_date].join("|") : null;
-    if (anotherAccount(month)) skippedMonths.otherAccount += 1;
+    if (anotherAccount(month)) skippedMonths.otherAccount.push(state.inputs.bills[month.bill]?.name ?? `Bill ${month.bill + 1}`);
     else if (key !== null && seen.has(key)) skippedMonths.duplicates += 1;
     else {
       if (key !== null) seen.add(key);
@@ -137,7 +137,12 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
     leftOut("could_not_check", "couldn't be read", "couldn't be read"),
     leftOut("not_a_bill", "isn't a bill", "aren't bills"),
     duplicates > 0 ? `${duplicates} duplicate ${duplicates === 1 ? "statement" : "statements"}` : null,
-    otherAccount > 0 ? `${otherAccount} from another account` : null,
+    // Named, with what to do: added beside this account's (a phone bill with an internet bill), its finding is unseen.
+    otherAccount.length === 1
+      ? `${otherAccount[0]} is from another account (check it on its own)`
+      : otherAccount.length > 0
+        ? `${otherAccount.length === 2 ? otherAccount.join(" and ") : `${otherAccount.length} statements`} are from another account (check them on their own)`
+        : null,
   ].filter(Boolean);
   // A month that couldn't be read can't be opened from the year, so its reason is given here, by file, or the person
   // can't tell what to replace it with.

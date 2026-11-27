@@ -56,7 +56,9 @@ test("a duplicate, another account's bill and an unreadable one are named as not
   const done = reduce(running, { type: "finished", attempt: 1, result: extra });
   if (done.s !== "done") throw new Error("the finished year did not become a done state");
   const html = renderToStaticMarkup(createElement(YearView, { state: done, result: extra, dispatch: () => {} }));
-  expect(html).toContain("Not counted: december.jpg couldn&#x27;t be read, 1 duplicate statement, 1 from another account");
+  // Another account's statement is named by file with what to do, as an unreadable one is: added together with this
+  // account's (a phone bill beside an internet bill), its own finding would otherwise go unseen.
+  expect(html).toContain("Not counted: december.jpg couldn&#x27;t be read, 1 duplicate statement, bill-14.pdf is from another account (check it on its own)");
   // The month can't be opened from the year, so its reason is shown here, or the person can't tell what to fix.
   expect(html).toContain("december.jpg: The page image is entirely black.");
   expect(heading(html)).toMatch(/^\$70\.00 to ask back from Bayline Fiber across 12 statements/);
