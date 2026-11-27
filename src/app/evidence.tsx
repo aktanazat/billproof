@@ -66,10 +66,16 @@ export function PlayButton({ url, from, to, label }: { url: string | null; from:
   return (
     // A toggle: pressed while its moment plays, when pressing it stops. The icon alone showed that only to sight.
     <button type="button" onClick={() => play(from, to)} disabled={!url} aria-label={label} aria-pressed={playing !== null} className="inline-flex h-7 shrink-0 items-center gap-1.5 rounded-full bg-fill px-2.5 text-[13px] text-text tabular-nums hover:bg-fill-2 disabled:opacity-40">
-      <svg aria-hidden width="10" height="10" viewBox="0 0 12 12">
-        {playing !== null ? <path d="M3 2h2v8H3zM7 2h2v8H7z" fill="currentColor" /> : <path d="M3 1.5v9l7.5-4.5z" fill="currentColor" />}
-      </svg>
+      <PlayIcon playing={playing !== null} />
       {formatClock(from)}
     </button>
+  );
+}
+
+export function PlayIcon({ playing }: { playing: boolean }) {
+  return (
+    <svg aria-hidden width="10" height="10" viewBox="0 0 12 12">
+      {playing ? <path d="M3 2h2v8H3zM7 2h2v8H7z" fill="currentColor" /> : <path d="M3 1.5v9l7.5-4.5z" fill="currentColor" />}
+    </svg>
   );
 }
