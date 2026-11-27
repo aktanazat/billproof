@@ -87,6 +87,26 @@ test("with one statement per account, the account the offer is about is counted"
   expect(html).toContain("Not counted: Phone-August.pdf is from another account (check it on its own)");
 });
 
+// Copies of one statement are one statement: three copies of another account's bill used to outvote this account's two,
+// setting both of them aside and checking the copy.
+test("copies of another account's statement don't outvote this account's statements", () => {
+  if (!year) throw new Error("the saved run has no year result");
+  const start = (prefix: string) => year.months.find((month) => month.result.outcome === "checked" && month.result.reading.period_start?.startsWith(prefix));
+  const oct = start("2026-10");
+  const nov = start("2026-11");
+  const aug = start("2026-08");
+  if (oct?.result.outcome !== "checked" || nov?.result.outcome !== "checked" || aug?.result.outcome !== "checked") throw new Error("the sample has no August, October or November statement");
+  const other = { ...aug.result, reading: { ...aug.result.reading, account_last4: "9999" } };
+  const mixed: YearResult = { ...year, months: [{ bill: 0, result: oct.result }, { bill: 1, result: nov.result }, { bill: 2, result: other }, { bill: 3, result: other }, { bill: 4, result: other }] };
+  const bills = ["October.pdf", "November.pdf", "Other.pdf", "Other (1).pdf", "Other (2).pdf"].map((name, i) => ({ id: `b${i}`, name, status: "preparing" as const }));
+  const running = { s: "running", inputs: { ...initialState.inputs, bills }, attempts: 1, attempt: 1, stage: null, spentMicros: 0, live: {} } as unknown as CheckState;
+  const done = reduce(running, { type: "finished", attempt: 1, result: mixed });
+  if (done.s !== "done") throw new Error("the finished year did not become a done state");
+  const html = renderToStaticMarkup(createElement(YearView, { state: done, result: mixed, dispatch: () => {} }));
+  expect(heading(html)).toMatch(/^\$60\.00 to ask back from Bayline Fiber across 2 statements/);
+  expect(html).toContain("Not counted: 3 statements are from another account (check them on their own)");
+});
+
 test("a statement whose account number couldn't be read counts with the year's account, and the message keeps the number", () => {
   if (!year) throw new Error("the saved run has no year result");
   const august = year.months.find((month) => month.result.outcome === "checked" && month.result.reading.period_start?.startsWith("2026-08"));
