@@ -129,8 +129,7 @@ export default function RealBills() {
   const fees = bills.flatMap(unagreedFees);
   const feeCents = fees.reduce((t, fee) => t + fee.cents, 0);
   const billsWithFees = bills.filter((bill) => unagreedFees(bill).length > 0).length;
-  // The run's totals also count the partial re-runs made while the checks improved; each post keeps its own final cost.
-  const minutes = Math.max(1, Math.round(realRun.seconds / 60));
+  // realRun.spentMicros is every census pass, partial re-runs included; each post keeps only its own final cost.
   const checksCost = results.reduce((t, bill) => t + bill.spentMicros, 0);
   const perBill = checksCost / Math.max(1, results.length);
   // The bill's own arithmetic is the accuracy check on real data: the charges read must add up to its printed total.
@@ -190,7 +189,7 @@ export default function RealBills() {
         <div className="max-w-[46rem] pt-12">
           <h1 className="text-[40px] font-semibold leading-[1.1] tracking-[-0.025em] max-[320px]:text-[28px]">Real bills people posted, checked</h1>
           <p className="mt-4 text-[17px] leading-[26px] text-text-2 text-pretty">
-            {results.length.toLocaleString("en-US")} public Reddit posts about phone, internet and TV bills, from Xfinity, Spectrum, AT&amp;T, Verizon and others. Muse Ember sorted every picture, read each real bill line by line, and checked it against what the poster wrote they were promised. Those checks cost {formatMicros(checksCost)}; with the re-reads as the checks were improved, the census took {minutes} {minutes === 1 ? "minute" : "minutes"} and {formatMicros(realRun.spentMicros)} in all.
+            {results.length.toLocaleString("en-US")} public Reddit posts about phone, internet and TV bills, from Xfinity, Spectrum, AT&amp;T, Verizon and others. Muse Ember sorted every picture, read each real bill line by line, and checked it against what the poster wrote they were promised. Those checks cost {formatMicros(checksCost)}; with every earlier pass and re-read as the checks were improved, the census cost {formatMicros(realRun.spentMicros)} in all.
           </p>
         </div>
 

@@ -97,8 +97,8 @@ test("a fee printed two ways is one fee on the most-common list", () => {
   expect(list).not.toContain("California Cost Recovery Charge");
 });
 
-// The run's total kept adding the partial re-runs made while the checks improved ($1.56 against $0.93 across the
-// posts' own costs), so "the whole run cost $1.56" and a cost per post divided from it overstated what checking costs.
+// The posts' own costs are only each post's final check; the census total adds every earlier pass and re-read, so
+// a cost per post divided from that total would overstate what checking costs.
 test("the cost per post is what the posts' checks cost, and the census total is said to include its re-reads", () => {
   const read = realRun.results.filter((bill) => !(bill.outcome === "error" && bill.error === "images unavailable"));
   const perPost = read.reduce((t, bill) => t + bill.spentMicros, 0) / read.length;

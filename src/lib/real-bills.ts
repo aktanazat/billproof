@@ -58,7 +58,7 @@ export const realBillSchema = z.discriminatedUnion("outcome", [
 ]);
 export type RealBill = z.infer<typeof realBillSchema>;
 
-export const realRunSchema = z.object({ ranAt: z.string(), seconds: z.number(), spentMicros: z.number(), posts: z.number(), results: z.array(realBillSchema) });
+export const realRunSchema = z.object({ ranAt: z.string(), spentMicros: z.number(), posts: z.number(), results: z.array(realBillSchema) });
 export type RealRun = z.infer<typeof realRunSchema>;
 
 export const claimedCents = (bill: RealBill) => (bill.outcome === "checked" ? bill.claims.reduce((t, claim) => t + claim.amountCents, 0) : 0);

@@ -143,7 +143,7 @@ const spent = results.reduce((t, r) => t + r.spentMicros, 0);
 console.log(`\n${posts.length} posts, ${checked.length} read as bills, ${withClaims.length} with a charge above what the poster says was promised, $${(totalCents / 100).toFixed(2)} in total, ${formatMicros(spent)} spent, ${seconds.toFixed(0)}s`);
 
 // The site's real-bills page reads the summary; every event of every check stays local under eval/census.
-const run: RealRun = { ranAt: new Date().toISOString(), seconds, spentMicros: spent, posts: posts.length, results };
+const run: RealRun = { ranAt: new Date().toISOString(), spentMicros: spent, posts: posts.length, results };
 await mkdir(path.dirname(site), { recursive: true });
 await mkdir(rawDir, { recursive: true });
 await writeFile(site, JSON.stringify(run, null, 2));
