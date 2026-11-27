@@ -6,15 +6,25 @@ import { runCheck } from "./pipeline";
 import type { CheckEvent } from "./result";
 
 // Muse Ember is replaced by fixed answers so whole checks run offline; this file holds only tests that need that,
-// since the mock applies to every test in it. `scenario` sets what the bill charges and what the company's side quotes.
-const COST = { read_bill: 1000, read_terms: 500, challenge: 700 } as const;
-const scenario = { billedCents: 5500, counterQuote: null as string | null, tooLong: null as string | null, declined: null as string | null };
+// since the mock applies to every test in it. `scenario` sets what the bill charges and prints, what a second reading
+// returns, what the company's side quotes, and the size of each request.
+const COST = { read_bill: 1000, reread_bill: 2000, read_terms: 500, challenge: 700 } as const;
+const scenario = {
+  billedCents: 5500,
+  printedCents: null as number | null,
+  reread: null as { billedCents: number; printedCents: number } | null,
+  outcome: "bill" as "bill" | "not_a_bill" | "unreadable",
+  inputTokens: 1000,
+  counterQuote: null as string | null,
+  tooLong: null as string | null,
+  declined: null as string | null,
+};
 // A failure thrown here is built from the same module copy the pipeline is given, so it is recognised as Muse Ember's.
 vi.mock("./ember", async (actual) => {
   const real = await actual<typeof Ember>();
   return {
   ...real,
-  countInputTokens: async () => 1000,
+  countInputTokens: async () => scenario.inputTokens,
   send: async (request: { call: { name: string }; body: { input: { content: { type: string; image_url?: string; text?: string }[] }[] } }) => {
     const name = request.call.name as keyof typeof COST;
     const content = request.body.input[0].content;
@@ -27,19 +37,22 @@ vi.mock("./ember", async (actual) => {
       const challenges = ids.map((id) => ({ claim_id: id, looked_for: "A later price in the offer.", verdict: scenario.counterQuote ? "refuted" : "stands", counter_quote: scenario.counterQuote, counter_source: scenario.counterQuote ? "offer" : null }));
       return { output: { challenges }, usage: { inputTokens: 1000, cachedTokens: 0, outputTokens: 100 }, costMicros: COST.challenge };
     }
+    const second = name === "reread_bill" && scenario.reread;
+    const billed = second ? second.billedCents : scenario.billedCents;
+    const printed = second ? second.printedCents : (scenario.printedCents ?? scenario.billedCents);
     const output =
-      name === "read_bill"
+      name === "read_bill" || name === "reread_bill"
         ? {
-            outcome: "bill",
-            unreadable_reason: null,
+            outcome: scenario.outcome,
+            unreadable_reason: scenario.outcome === "unreadable" ? "The picture is too blurry to read the amounts." : null,
             provider: "Bayline Fiber",
             account_last4: "4415",
             statement_date: null,
             period_start: month === "January" ? "2026-01-12" : "2026-02-12",
             period_end: null,
             due_date: null,
-            printed: { previous_balance: null, payments: null, current_charges: { cents: scenario.billedCents, quote: `Current charges $${(scenario.billedCents / 100).toFixed(2)}` }, total_due: null, section_totals: [] },
-            line_items: [{ label: `Fiber 500 Internet, ${month}`, amount_cents: scenario.billedCents, kind: "plan", page: 1, box: { x0: 100, y0: 400, x1: 900, y1: 430 }, quote: `Fiber 500 Internet $${(scenario.billedCents / 100).toFixed(2)}`, prorated: false }],
+            printed: { previous_balance: null, payments: null, current_charges: { cents: printed, quote: `Current charges $${(printed / 100).toFixed(2)}` }, total_due: null, section_totals: [] },
+            line_items: [{ label: `Fiber 500 Internet, ${month}`, amount_cents: billed, kind: "plan", page: 1, box: { x0: 100, y0: 400, x1: 900, y1: 430 }, quote: `Fiber 500 Internet $${(billed / 100).toFixed(2)}`, prorated: false }],
             autopay: { enrolled: null, quote: null },
           }
         : {
@@ -126,4 +139,48 @@ test("a declined bill in a year is told as that bill; a declined single check ke
   scenario.declined = null;
   expect(year).toMatchObject({ type: "error", failure: "refused", message: "Muse Ember declined to read this bill.", bill: 1 });
   expect(single).toMatchObject({ type: "error", failure: "refused", message: "Muse Ember declined to read these files." });
+});
+
+// One bill checked against the $55 offer, the pages named by `tag` so no reading from another test is reused; returns
+// the last event and the Muse Ember steps taken.
+const checkOneBill = async (tag: string) => {
+  const events: CheckEvent[] = [];
+  await runCheck({ bills: [{ pages: [{ image: `data:image/png;base64,iVBORw0KGgo${tag}`, text: null }] }], offer: { kind: "text", text: "Fiber 500 for $55 a month" } }, { ledger: openLedger(":memory:", 1_000_000), client: "test", signal: new AbortController().signal, emit: (event) => events.push(event) });
+  const last = events.at(-1);
+  return { last, steps: last?.type === "result" && last.result.outcome === "checked" ? last.result.calls.map((call) => call.name) : [] };
+};
+
+// A reading whose charges don't add up to the bill's printed total is read again; two readings that still disagree
+// end the check rather than claim from either, and a second reading that adds up is the one used.
+test("charges that don't add up are read again: two disagreeing readings stop the check, an agreeing one is used", async () => {
+  scenario.printedCents = 7000;
+  scenario.reread = { billedCents: 6000, printedCents: 7000 };
+  const disagree = await checkOneBill("RA");
+  scenario.reread = { billedCents: 7000, printedCents: 7000 };
+  const agree = await checkOneBill("RB");
+  scenario.printedCents = null;
+  scenario.reread = null;
+  expect(disagree.last).toMatchObject({ type: "result", result: { outcome: "could_not_check", reason: "The charges on this bill could not be read the same way twice." } });
+  expect(agree.steps).toEqual(["read_bill", "reread_bill", "read_terms", "challenge"]);
+  expect(agree.last).toMatchObject({ type: "result", result: { outcome: "checked", claims: [{ kind: "price_above_promise", amountCents: 1500 }] } });
+});
+
+// A picture Muse Ember finds isn't a bill, or can't read, ends there with that outcome and its reason, before the
+// offer is read for nothing.
+test("a picture that isn't a bill, or can't be read, ends with that outcome before the offer is read", async () => {
+  scenario.outcome = "not_a_bill";
+  const notABill = await checkOneBill("NA");
+  scenario.outcome = "unreadable";
+  const unreadable = await checkOneBill("NB");
+  scenario.outcome = "bill";
+  expect(notABill.last).toMatchObject({ type: "result", result: { outcome: "not_a_bill", spentMicros: COST.read_bill } });
+  expect(unreadable.last).toMatchObject({ type: "result", result: { outcome: "could_not_check", reason: "The picture is too blurry to read the amounts.", spentMicros: COST.read_bill } });
+});
+
+// Past Muse Ember's long-context threshold every token costs more; such files are refused before anything is sent.
+test("files too large to read in one check are refused before anything is spent", async () => {
+  scenario.inputTokens = 250_000;
+  const { last } = await checkOneBill("TL");
+  scenario.inputTokens = 1000;
+  expect(last).toMatchObject({ type: "error", failure: "bad_input", message: "These files are too large to read in one check.", spentMicros: 0 });
 });

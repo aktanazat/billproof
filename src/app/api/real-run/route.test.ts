@@ -65,3 +65,44 @@ test("a live run that spent anything still takes the visitor's run for the hour"
   expect((await run("203.0.113.50")).at(-1)).toMatchObject({ type: "done", spentMicros: 24 * 40 });
   expect(await run("203.0.113.50")).toEqual([{ type: "refused", message: "You can start one live run an hour. Try again in 60 minutes." }]);
 });
+
+// The first event a run answers with, without waiting for the run itself.
+const firstEvent = async (visitor: string, site = "same-origin"): Promise<{ status: number; event: LiveEvent }> => {
+  const response = await POST(new Request("https://billproof.aktan.us/api/real-run", { method: "POST", headers: { "Sec-Fetch-Site": site, "X-Forwarded-For": visitor } }));
+  const reader = response.body!.pipeThrough(new TextDecoderStream()).getReader();
+  const { value } = await reader.read();
+  await reader.cancel();
+  return { status: response.status, event: JSON.parse((value ?? "").split("\n")[0]) as LiveEvent };
+};
+
+// A run is 24 paid checks: another site's page could otherwise start them from its visitors' browsers.
+test("a live run can be started only from Billproof's own page", async () => {
+  useLedger(1_000_000);
+  expect(await firstEvent("203.0.113.60", "cross-site")).toEqual({ status: 403, event: { type: "refused", message: "Start a live run from the Billproof page." } });
+});
+
+// Two runs at once would check the same posts twice, at twice the cost; the second waits for the first.
+test("while a live run is going, another visitor's run is refused until it ends", async () => {
+  useLedger(1_000_000);
+  let finish = () => {};
+  const held = new Promise<void>((resolve) => {
+    finish = resolve;
+  });
+  vi.mocked(runCheck).mockImplementation(() => held);
+  const first = await POST(new Request("https://billproof.aktan.us/api/real-run", { method: "POST", headers: { "Sec-Fetch-Site": "same-origin", "X-Forwarded-For": "203.0.113.61" } }));
+  expect((await firstEvent("203.0.113.62")).event).toEqual({ type: "refused", message: "A live run is already going. Try again in a minute." });
+  finish();
+  await first.text();
+});
+
+// Each visitor gets one run an hour, so the site's own cap is what bounds many visitors together. Last in the file: it
+// uses up the site's runs for the hour.
+test("after six live runs that spent money this hour, a new visitor is told to come back later", async () => {
+  useLedger(1_000_000);
+  vi.mocked(runCheck).mockImplementation(async (_input, deps) => deps.emit({ type: "error", failure: "network", message: "The connection to Muse Ember dropped. Try again.", spentMicros: 40, retryable: true }));
+  const answers: LiveEvent[] = [];
+  for (let n = 0; n < 7; n++) answers.push((await run(`203.0.113.${70 + n}`))[0]);
+  const refused = answers.filter((event) => event.type === "refused");
+  expect(refused.length).toBeGreaterThan(0);
+  expect(refused[0]).toMatchObject({ message: expect.stringMatching(/^The live run has been used a lot this hour\. Try again in \d+ minutes?\.$/) });
+});
