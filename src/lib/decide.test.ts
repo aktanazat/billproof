@@ -319,6 +319,15 @@ describe("decide on the same bill after a 12-month promotion ended", () => {
     expect(decision.questions.filter((q) => q.kind === "partial_period")).toHaveLength(2);
   });
 
+  // A price that starts with a later bill ("from your January bill, $55") says nothing about this one: held to it, the
+  // bill would be asked about as if the promise covered part of its period.
+  test("a promise that starts after the bill period claims nothing and asks nothing", () => {
+    const later = promises.map((p) => ({ ...p, applies_from: "2027-06-01", applies_until: null }));
+    const decision = decide(reading, later, billText.get(internetExpired.id)!, { kind: "text", text: internetExpired.proof });
+    expect(decision.claims).toEqual([]);
+    expect(decision.questions.filter((q) => q.promiseId)).toEqual([]);
+  });
+
   test("a time-limited promise whose end date was not read raises a question, never a $15 claim", () => {
     const undated = promises.map((p) => ({ ...p, applies_until: null }));
     const decision = decide(reading, undated, billText.get(internetExpired.id)!, offer(internetExpired));
