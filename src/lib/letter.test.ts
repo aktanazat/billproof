@@ -388,14 +388,17 @@ describe("the complaint a regulator receives", () => {
     expect(complaint).toContain("a credit of $180.00");
   });
 
-  // A charge billed twice keeps being billed twice: one line per statement ran twelve of them past the box.
-  test("a year with the same charge billed twice on every statement still fits, naming it once", () => {
+  // A charge billed twice keeps being billed twice: one line per statement ran twelve of them past the box, and asked
+  // the company the same question twelve times over.
+  test("a year with the same charge billed twice on every statement still fits, and asks about it once", () => {
     const twice = [0, 1].map((k): LineItem => ({ id: `R${k}`, label: "Unlimited Premium Device Protection Plus", amount_cents: 1700, kind: "company_fee", page: 2, box: { x0: 80, y0: 600 + k * 20, x1: 920, y1: 615 + k * 20 }, quote: "Unlimited Premium Device Protection Plus $17.00", prorated: false }));
     const year = Array.from({ length: 12 }, (_, i) => {
       const m = month(i + 1, [priceClaim]);
       return { ...m, reading: { ...m.reading, line_items: [...m.reading.line_items, ...twice] }, questions: [{ id: "Q1", kind: "repeated_charge" as const, lineIds: ["R0", "R1"], promiseId: null }] };
     });
-    const { complaint } = buildYearMessage(year);
+    const { chat, complaint } = buildYearMessage(year);
+    expect(chat.match(/Please confirm whether this is a duplicate/g)).toHaveLength(1);
+    for (const m of ["Jan 12, 2026", "Dec 12, 2026"]) expect(chat).toContain(m);
     expect(complaint.length).toBeLessThanOrEqual(1_700);
     expect(complaint).toContain("Unlimited Premium Device Protection Plus appears 2 times");
     for (const m of ["Jan 12, 2026", "Dec 12, 2026"]) expect(complaint).toContain(m);

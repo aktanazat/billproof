@@ -383,7 +383,15 @@ export function buildYearMessage(months: Checked[]): Message {
       return lines.length > 0 ? [{ month, lines }] : [];
     }),
   );
-  const feeText = [...(fees.length > 0 ? [feeSentence(fees, offerCovers)] : []), ...repeats.map(({ month, lines }) => repeatOn(month, lines, repeatSentence))];
+  // The same charge printed twice on several statements is told once, naming them all.
+  const sameRepeat = new Map<string, typeof repeats>();
+  for (const repeat of repeats) {
+    const key = repeatFact(repeat.lines, null);
+    sameRepeat.set(key, [...(sameRepeat.get(key) ?? []), repeat]);
+  }
+  const repeatsTold = (sentence: typeof repeatFact) =>
+    [...sameRepeat.values()].map((list) => (list.length === 1 ? repeatOn(list[0].month, list[0].lines, sentence) : `On the bills for ${list.map(({ month }) => periodOf(month)).join("; ")}, ${sentence(list[0].lines, "each")}`));
+  const feeText = [...(fees.length > 0 ? [feeSentence(fees, offerCovers)] : []), ...repeatsTold(repeatSentence)];
   // A month whose pictures held an earlier statement and rose is asked about under that month's name.
   const billName = (month: Checked) => {
     const period = periodOf(month);
@@ -439,15 +447,11 @@ export function buildYearMessage(months: Checked[]): Message {
   const rises = months.flatMap((month) => (month.change && month.change.currentCents > month.change.earlierCents ? [`${periodOf(month)} (${usd(month.change.currentCents - month.change.earlierCents)} more)`] : []));
   const shortRiseFacts = rises.length > 0 ? [`Higher than the statement before: ${rises.join("; ")}.`] : [];
   const feeFacts = fees.length > 0 ? [feeFact(fees, offerCovers, "My statements charge")] : [];
-  const otherFacts = [...feeFacts, ...repeats.map(({ month, lines }) => repeatOn(month, lines, repeatFact))];
-  const sameRepeat = new Map<string, typeof repeats>();
-  for (const repeat of repeats) sameRepeat.set(repeatFact(repeat.lines, null), [...(sameRepeat.get(repeatFact(repeat.lines, null)) ?? []), repeat]);
-  const shortOtherFacts = [...feeFacts, ...[...sameRepeat].map(([fact, list]) => (list.length === 1 ? repeatOn(list[0].month, list[0].lines, repeatFact) : `On the bills for ${list.map(({ month }) => periodOf(month)).join("; ")}, ${fact}`))];
+  const otherFacts = [...feeFacts, ...repeatsTold(repeatFact)];
   const problem = problemLine(claims, fees.length > 0, offerCovers, riseFacts.length > 0);
   const versions = claims.length > 0 ? [sectionsFor(regulator, false, "as quoted above"), [promisedLine, ...byMonth], [promisedLine, ...amounts], amounts] : [[]];
-  // Past the fullest wordings, every rise goes on one line, by its statement and amount alone, and a charge repeated
-  // on several statements is told once, naming them.
-  const fitted = [...versions.map((facts) => [...facts, ...riseFacts, ...otherFacts]), ...versions.map((facts) => [...facts, ...shortRiseFacts, ...shortOtherFacts])];
+  // Past the fullest wordings, every rise goes on one line, by its statement and amount alone.
+  const fitted = [...versions.map((facts) => [...facts, ...riseFacts, ...otherFacts]), ...versions.map((facts) => [...facts, ...shortRiseFacts, ...otherFacts])];
   const complaint = complaintText(provider, last4, problem, fitted, claims, riseFacts.length + otherFacts.length > 0);
   return { totalCents, chat, email, call, complaint };
 }
