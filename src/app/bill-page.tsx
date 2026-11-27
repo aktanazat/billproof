@@ -54,7 +54,8 @@ const TONE_CLASS: Record<Mark["tone"], string> = { claim: "mark-claim", ask: "ma
 export function BillPage({ image, alt, marks = [], focus, visibleAspect, children }: { image: string; alt: string; marks?: Mark[]; focus?: ReadonlySet<string>; visibleAspect?: string; children?: ReactNode }) {
   return (
     // The edge is an outline: it is drawn over the picture, where an inset shadow is hidden beneath it.
-    <div className="relative overflow-hidden rounded-lg bg-white outline-1 -outline-offset-1 outline-line" style={visibleAspect ? { aspectRatio: visibleAspect } : undefined}>
+    // A size container: a mark's number is placed against the picture's width (cqw) so it never falls off its edge.
+    <div className="@container relative overflow-hidden rounded-lg bg-white outline-1 -outline-offset-1 outline-line" style={visibleAspect ? { aspectRatio: visibleAspect } : undefined}>
       <img src={image} alt={alt} className="block w-full select-none" draggable={false} />
       {marks.map((mark) => {
         const dimmed = focus && focus.size > 0 && !focus.has(mark.id);
@@ -69,7 +70,9 @@ export function BillPage({ image, alt, marks = [], focus, visibleAspect, childre
             className={`absolute transition-opacity duration-150 ${TONE_CLASS[mark.tone]} ${dimmed ? "opacity-30" : ""}`}
             style={{ left: `${left}%`, top: `${top}%`, width: `${width}%`, height: `${height}%` }}
           >
-            {mark.n !== undefined && <span className="absolute top-1/2 right-[calc(100%+4px)] grid size-[18px] -translate-y-1/2 place-items-center rounded-full bg-red text-[11px] font-semibold text-white tabular-nums [print-color-adjust:exact]">{mark.n}</span>}
+            {/* Beside the line, or as far left as the picture allows: a line near the edge (a phone screenshot, a small
+                picture) would otherwise leave its number cut off. 22px is the number's 18 plus a 4px gap. */}
+            {mark.n !== undefined && <span className="absolute top-1/2 grid size-[18px] -translate-y-1/2 place-items-center rounded-full bg-red text-[11px] font-semibold text-white tabular-nums [print-color-adjust:exact]" style={{ left: `max(-22px, -${left}cqw)` }}>{mark.n}</span>}
           </div>
         );
       })}
