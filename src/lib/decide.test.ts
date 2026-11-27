@@ -328,6 +328,17 @@ describe("decide on the same bill after a 12-month promotion ended", () => {
     expect(decision.questions.filter((q) => q.promiseId)).toEqual([]);
   });
 
+  // An offer for more than this bill holds ("Ultimate TV for $40/mo" beside an internet-only bill) has a promise no
+  // charge here answers to. Counted as checked against this bill, the result read as matching the offer, when nothing
+  // on it was held to any promise.
+  test("a promise no charge on the bill answers to claims nothing, asks nothing and isn't counted as checked", () => {
+    const tv = promise({ id: "P9", kind: "monthly_price", amount_cents: 4000, quote: "Ultimate TV for $40/mo", covers_line_ids: [] });
+    const decision = decide(reading, [tv], billText.get(internetExpired.id)!, { kind: "text", text: `${internetExpired.proof}\nUltimate TV for $40/mo` });
+    expect(decision.claims).toEqual([]);
+    expect(decision.questions.filter((q) => q.promiseId === "P9")).toEqual([]);
+    expect(decision.matchedPromiseIds).not.toContain("P9");
+  });
+
   test("a time-limited promise whose end date was not read raises a question, never a $15 claim", () => {
     const undated = promises.map((p) => ({ ...p, applies_until: null }));
     const decision = decide(reading, undated, billText.get(internetExpired.id)!, offer(internetExpired));
