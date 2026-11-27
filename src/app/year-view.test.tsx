@@ -65,6 +65,28 @@ test("a duplicate, another account's bill and an unreadable one are named as not
   expect([...html.matchAll(/aria-label="Aug 26 \$5\.00, August 2026: /g)]).toHaveLength(1);
 });
 
+// A phone bill dropped beside the internet bill being checked: one statement each, so neither account has more. The one
+// the offer is about is the one being checked; the earlier statement used to win, setting the internet bill aside.
+test("with one statement per account, the account the offer is about is counted", () => {
+  if (!year) throw new Error("the saved run has no year result");
+  const months = year.months.filter((month) => month.result.outcome === "checked");
+  const oct = months.find((month) => month.result.outcome === "checked" && month.result.reading.period_start?.startsWith("2026-10"));
+  const aug = months.find((month) => month.result.outcome === "checked" && month.result.reading.period_start?.startsWith("2026-08"));
+  if (oct?.result.outcome !== "checked" || aug?.result.outcome !== "checked") throw new Error("the sample has no August or October statement");
+  const phone = { ...aug.result, providerMismatch: true, offerProvider: "Bayline Fiber", reading: { ...aug.result.reading, provider: "Northstar Wireless", account_last4: "0937" } };
+  const mixed: YearResult = { ...year, months: [{ bill: 0, result: phone }, { bill: 1, result: oct.result }] };
+  const bills = [
+    { id: "p", name: "Phone-August.pdf", status: "preparing" as const },
+    { id: "i", name: "Internet-October.pdf", status: "preparing" as const },
+  ];
+  const running = { s: "running", inputs: { ...initialState.inputs, bills }, attempts: 1, attempt: 1, stage: null, spentMicros: 0, live: {} } as unknown as CheckState;
+  const done = reduce(running, { type: "finished", attempt: 1, result: mixed });
+  if (done.s !== "done") throw new Error("the finished year did not become a done state");
+  const html = renderToStaticMarkup(createElement(YearView, { state: done, result: mixed, dispatch: () => {} }));
+  expect(heading(html)).toMatch(/^\$30\.00 to ask back from Bayline Fiber across 1 statement/);
+  expect(html).toContain("Not counted: Phone-August.pdf is from another account (check it on its own)");
+});
+
 test("a statement whose account number couldn't be read counts with the year's account, and the message keeps the number", () => {
   if (!year) throw new Error("the saved run has no year result");
   const august = year.months.find((month) => month.result.outcome === "checked" && month.result.reading.period_start?.startsWith("2026-08"));
