@@ -23,7 +23,8 @@ const READER_UNAVAILABLE = "Billproof couldn't load its PDF reader. Check the co
 // counted as left out, rather than refused: few people can cut pages out of a PDF.
 async function preparePdf(file: File, maxPages: number): Promise<Prepared> {
   // pdf.js's legacy build still needs Promise.withResolvers (Safari 17.4+); without it every PDF fails, so say what works.
-  if (typeof Promise.withResolvers !== "function") throw new PrepareError("This browser can't read PDFs. Update Safari, or add photos or screenshots of the bill instead.");
+  // The bill and the offer are opened here alike, so the advice names neither.
+  if (typeof Promise.withResolvers !== "function") throw new PrepareError("This browser can't read PDFs. Update Safari, or add photos or screenshots of it instead.");
   // pdf.js is browser-only and large; it loads when the first PDF is opened, never during server rendering. pdf.js
   // supports Safari only through its legacy build (Safari 18+, per its FAQ); the standard build targets the latest
   // Firefox and Chrome and calls features older Safari lacks.
@@ -63,7 +64,7 @@ async function preparePdf(file: File, maxPages: number): Promise<Prepared> {
     const name = error instanceof Error ? error.name : "";
     if (name === "PasswordException") throw new PrepareError("This PDF has a password. Save an unlocked copy and add that instead.");
     if (error instanceof Error && error.message.startsWith("Setting up fake worker failed")) throw new PrepareError(READER_UNAVAILABLE);
-    throw new PrepareError("This PDF could not be opened. Download it again, or add screenshots of the bill instead.");
+    throw new PrepareError("This PDF could not be opened. Download it again, or add screenshots of it instead.");
   } finally {
     await task.destroy();
   }

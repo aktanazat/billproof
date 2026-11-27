@@ -29,7 +29,8 @@ test("opening a file works in Safari 16.4 to 17.3, which lack Promise.withResolv
 test("a PDF on a browser too old for pdf.js says to update or use photos, never to unlock the file", async () => {
   Promise.withResolvers = undefined as unknown as typeof Promise.withResolvers;
   const pdf = new File(["%PDF-1.7"], "bill.pdf", { type: "application/pdf" });
-  await expect(prepareFile(pdf, 6)).rejects.toThrow(new PrepareError("This browser can't read PDFs. Update Safari, or add photos or screenshots of the bill instead."));
+  // The same reader opens the offer, so the advice names neither the bill nor the offer.
+  await expect(prepareFile(pdf, 6)).rejects.toThrow(new PrepareError("This browser can't read PDFs. Update Safari, or add photos or screenshots of it instead."));
 });
 
 test("an iPhone HEIC photo is read where the browser can decode it, and refused with a reason where it can't", async () => {
@@ -141,5 +142,5 @@ test("a PDF that can't be opened is told why: the reader didn't load, it has a p
   pdfjs.open = failing("PasswordException", "No password given");
   await expect(prepareFile(pdf(), 6)).rejects.toThrow(new PrepareError("This PDF has a password. Save an unlocked copy and add that instead."));
   pdfjs.open = failing("InvalidPDFException", "Invalid PDF structure.");
-  await expect(prepareFile(pdf(), 6)).rejects.toThrow(new PrepareError("This PDF could not be opened. Download it again, or add screenshots of the bill instead."));
+  await expect(prepareFile(pdf(), 6)).rejects.toThrow(new PrepareError("This PDF could not be opened. Download it again, or add screenshots of it instead."));
 });
