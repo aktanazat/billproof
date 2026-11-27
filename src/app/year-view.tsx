@@ -169,6 +169,7 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
   // can't tell what to replace it with.
   const unreadable = result.months.flatMap((month) => (month.result.outcome === "could_not_check" ? [{ bill: month.bill, name: state.inputs.bills[month.bill]?.name ?? `Bill ${month.bill + 1}`, reason: month.result.reason }] : []));
   const largest = Math.max(1, ...checked.map((month) => claimed(month.result)));
+  const chartTitle = firstBad < 0 ? "Statements by month" : firstBad > 0 && dateOf(checked[firstBad].result) ? `Overcharged from ${monthOf(checked[firstBad].result, true)}` : "Overcharge by month";
 
   return (
     <section className="mx-auto w-full max-w-[1120px] px-6 pb-24 pt-6">
@@ -202,10 +203,11 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
 
       {checked.length > 0 && (
         <section className="flex flex-col gap-4">
-          {/* The month an overcharge began is named only when that statement's date was read. */}
-          <h2 className="text-[17px] font-semibold">{firstBad > 0 && dateOf(checked[firstBad].result) ? `Overcharged from ${monthOf(checked[firstBad].result, true)}` : "Overcharge by month"}</h2>
+          {/* The month an overcharge began is named only when that statement's date was read; with nothing overcharged the
+              chart is each statement, to open. */}
+          <h2 className="text-[17px] font-semibold">{chartTitle}</h2>
           {/* Four months a row on a phone, fewer when it's zoomed in, so an amount never runs into the next month's. */}
-          <ol className="grid grid-cols-[repeat(auto-fill,minmax(4.5rem,1fr))] gap-x-2 gap-y-6 sm:grid-cols-6 lg:grid-cols-12" aria-label="Overcharge by month">
+          <ol className="grid grid-cols-[repeat(auto-fill,minmax(4.5rem,1fr))] gap-x-2 gap-y-6 sm:grid-cols-6 lg:grid-cols-12" aria-label={firstBad < 0 ? "Statements by month" : "Overcharge by month"}>
             {checked.map((month) => {
               const amount = claimed(month.result);
               const unconfirmed = month.result.claims.some((claim) => markOf(month.bill, claim.id) === "needs_confirmation");

@@ -286,6 +286,9 @@ test("a year with no claims but fees worth asking about says so, not that every 
   expect(html).not.toContain("All 12 statements match the offer");
   expect(html).toContain("August 2026: charges worth asking about");
   expect(html).toContain("July 2026: matches the offer");
+  // With nothing overcharged, the month chart is titled for what it is: each statement, to open.
+  expect(html).toContain(">Statements by month</h2>");
+  expect(html).not.toContain("Overcharge by month");
 });
 
 // With one statement counted, "on 1 of 1 statement" read as a form; it says "the 1 statement", as a match does.
