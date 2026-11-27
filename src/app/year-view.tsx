@@ -119,9 +119,9 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
       : otherCompany
         ? `The offer is from ${otherCompany}, not ${provider ?? "this company"}`
         : asking > 0
-          ? `Charges worth asking about on ${asking} of ${statements}`
+          ? `Charges worth asking about on ${one ? "the 1 statement" : `${asking} of ${statements}`}`
           : rising > 0
-            ? `Higher than the bill before on ${rising} of ${statements}`
+            ? `Higher than the bill before on ${one ? "the 1 statement" : `${rising} of ${statements}`}`
           : !hadOffer
             ? `Read ${statements}; there was no offer to check ${one ? "it" : "them"} against`
             : !checked.some((month) => month.result.promises.length > 0)

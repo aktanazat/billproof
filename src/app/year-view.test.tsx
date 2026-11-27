@@ -288,6 +288,23 @@ test("a year with no claims but fees worth asking about says so, not that every 
   expect(html).toContain("July 2026: matches the offer");
 });
 
+// With one statement counted, "on 1 of 1 statement" read as a form; it says "the 1 statement", as a match does.
+test("one statement counted with fees, or higher than before, is 'the 1 statement', not '1 of 1'", () => {
+  if (!year) throw new Error("the saved run has no year result");
+  const august = year.months.find((month) => month.result.outcome === "checked" && month.result.reading.period_start?.startsWith("2026-08"))?.result;
+  if (august?.outcome !== "checked") throw new Error("the sample has no August statement");
+  const headingOf = (only: typeof august) => {
+    const result: YearResult = { ...year, months: [{ bill: 0, result: only }, { bill: 1, result: { outcome: "could_not_check", reason: "The page is blank.", spentMicros: 0 } }] };
+    const running = { s: "running", inputs: initialState.inputs, attempts: 1, attempt: 1, stage: null, spentMicros: 0, live: {} } as unknown as CheckState;
+    const done = reduce(running, { type: "finished", attempt: 1, result });
+    if (done.s !== "done") throw new Error("the finished year did not become a done state");
+    return heading(renderToStaticMarkup(createElement(YearView, { state: done, result, dispatch: () => {} })));
+  };
+  const quiet = { ...august, claims: [], dropped: [] };
+  expect(headingOf({ ...quiet, questions: [{ id: "Q1", kind: "unagreed_fee", lineIds: [august.reading.line_items[0].id], promiseId: null }] })).toBe("Charges worth asking about on the 1 statement");
+  expect(headingOf({ ...quiet, questions: [], change: { earlierCents: 5000, currentCents: 6000, lines: [] } })).toBe("Higher than the bill before on the 1 statement");
+});
+
 test("a year of statements is headed with its total and the month the overcharge began", () => {
   const html = yearPage();
   expect(html).toContain("$70.00");
