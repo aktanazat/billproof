@@ -317,11 +317,11 @@ function WorkingYear({ state, onCancel, dispatch }: { state: Exclude<CheckState,
                       : "Couldn't read"
                   : stoppedHere
                     ? "Couldn't read"
-                    : lines.length > 0
-                    ? `${lines.length} ${lines.length === 1 ? "line" : "lines"}`
-                    : state.s === "running"
-                      ? "Waiting"
-                      : "Stopped"}
+                    : state.s !== "running"
+                      ? "Stopped"
+                      : lines.length > 0
+                        ? `${lines.length} ${lines.length === 1 ? "line" : "lines"}`
+                        : "Waiting"}
               </p>
             </li>
           );
