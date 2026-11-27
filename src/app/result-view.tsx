@@ -156,7 +156,8 @@ function ClaimRow({ claim, index, result, callUrl, mark, onToggle, onConfirm, on
           {lines.map((line) => (
             <span key={line.id} className="flex justify-between gap-3">
               <span>{line.label}</span>
-              <span className="tabular-nums">{usd(line.amount_cents)}</span>
+              {/* Kept whole: split after its minus sign, a discount ("-$5.00") read as a $5.00 charge on a narrow printout. */}
+              <span className="shrink-0 tabular-nums">{usd(line.amount_cents)}</span>
             </span>
           ))}
         </dd>
