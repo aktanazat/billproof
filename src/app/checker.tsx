@@ -917,7 +917,9 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
     } catch (error) {
       // A failed download or a file that won't open stays on the start screen with the reason on its row.
       if (token !== sampleToken.current) return;
-      const message = error instanceof PrepareError ? (error.reload ? "Billproof couldn't load its PDF reader. Reload the page, then choose the sample again." : error.message) : "This sample couldn't be opened. Try again.";
+      // A sample's files aren't the person's: its reader failures say to choose the sample again, not to add files.
+      const readerFix = error instanceof PrepareError && error.reader ? { reload: "Reload the page", connection: "Check the connection" }[error.reader] : null;
+      const message = readerFix ? `Billproof couldn't load its PDF reader. ${readerFix}, then choose the sample again.` : error instanceof PrepareError ? error.message : "This sample couldn't be opened. Try again.";
       dispatch({ type: "sample_ready", inputs: { bills: [{ id: `sample-${token}-failed`, name: sample.title, status: "failed", message }], offer: { kind: "none" } } });
       setShowBills((n) => n + 1);
     } finally {
