@@ -99,7 +99,10 @@ async function prepareImage(file: File): Promise<Prepared> {
 }
 
 export async function prepareFile(file: File, maxPages: number): Promise<Prepared> {
-  if (!isPdf(file) && !isPicture(file)) throw new PrepareError("Add a PDF or a photo of the bill.");
+  if (!isPdf(file) && !isPicture(file)) {
+    // Recordings reach here only from the bill side: the offer side opens them as calls.
+    throw new PrepareError(isRecording(file) ? "This is a call recording. Remove it here and add it under What you were promised." : "Add a PDF or a photo of the bill.");
+  }
 
   const work = isPdf(file) ? preparePdf(file, maxPages) : prepareImage(file);
   // A plain promise rather than Promise.withResolvers, which Safari lacks before 17.4.
