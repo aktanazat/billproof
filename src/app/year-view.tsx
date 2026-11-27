@@ -25,6 +25,10 @@ function monthOf(result: Checked, long = false): string {
 
 const claimed = (result: Checked) => result.claims.reduce((t, claim) => t + claim.amountCents, 0);
 
+// Files named in one group of the "Not counted" note: "a.jpg and b.jpg", "a.jpg, b.jpg and c.jpg", so the note shows
+// where one group ends and the next begins.
+const listed = (names: string[]) => (names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names.at(-1)}` : (names[0] ?? ""));
+
 function summarize(calls: CallRecord[]): CallRecord[] {
   const byName = new Map<string, CallRecord>();
   for (const call of calls) {
@@ -49,9 +53,9 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
   const leftOut = (outcome: "not_a_bill" | "could_not_check", one: string, many: string) => {
     const months = result.months.filter((month) => month.result.outcome === outcome);
     if (months.length === 0) return null;
-    const names = months.map((month) => state.inputs.bills[month.bill]?.name);
+    const names = months.flatMap((month) => state.inputs.bills[month.bill]?.name ?? []);
     const verb = months.length === 1 ? one : many;
-    return names.every(Boolean) ? `${names.join(", ")} ${verb}` : `${months.length} ${months.length === 1 ? "file" : "files"} ${verb}`;
+    return names.length === months.length ? `${listed(names)} ${verb}` : `${months.length} ${months.length === 1 ? "file" : "files"} ${verb}`;
   };
 
   // Statements are counted once, and only for the account most of them show; on a tie, the one the offer is about (a
@@ -154,7 +158,7 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
     otherAccount.length === 1
       ? `${otherAccount[0]} is from another account (check it on its own)`
       : otherAccount.length > 0
-        ? `${otherAccount.slice(0, -1).join(", ")} and ${otherAccount.at(-1)} are from another account (check them on their own)`
+        ? `${listed(otherAccount)} are from another account (check them on their own)`
         : null,
   ].filter(Boolean);
   // A month that couldn't be read can't be opened from the year, so its reason is given here, by file, or the person

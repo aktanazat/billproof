@@ -65,6 +65,22 @@ test("a duplicate, another account's bill and an unreadable one are named as not
   expect([...html.matchAll(/aria-label="Aug 26 \$5\.00, August 2026: /g)]).toHaveLength(1);
 });
 
+// Each group of files set aside is joined with "and", so the note says where one group ends and the next begins; with
+// commas alone, "a.jpg, b.jpg couldn't be read, c.png, d.png aren't bills" ran the groups together.
+test("several files set aside for each reason are listed group by group", () => {
+  if (!year) throw new Error("the saved run has no year result");
+  const unreadable = { outcome: "could_not_check" as const, reason: "The page image is entirely black.", spentMicros: 0 };
+  const notABill = { outcome: "not_a_bill" as const, spentMicros: 0 };
+  const extra: YearResult = { ...year, months: [...year.months, { bill: 12, result: unreadable }, { bill: 13, result: unreadable }, { bill: 14, result: notABill }, { bill: 15, result: notABill }] };
+  const names = ["a.jpg", "b.jpg", "c.png", "d.png"];
+  const bills = Array.from({ length: 16 }, (_, i) => ({ id: `b${i}`, name: i >= 12 ? names[i - 12] : `bill-${i + 1}.pdf`, status: "preparing" as const }));
+  const running = { s: "running", inputs: { ...initialState.inputs, bills }, attempts: 1, attempt: 1, stage: null, spentMicros: 0, live: {} } as unknown as CheckState;
+  const done = reduce(running, { type: "finished", attempt: 1, result: extra });
+  if (done.s !== "done") throw new Error("the finished year did not become a done state");
+  const html = renderToStaticMarkup(createElement(YearView, { state: done, result: extra, dispatch: () => {} }));
+  expect(html).toContain("Not counted: a.jpg and b.jpg couldn&#x27;t be read, c.png and d.png aren&#x27;t bills");
+});
+
 // A phone bill dropped beside the internet bill being checked: one statement each, so neither account has more. The one
 // the offer is about is the one being checked; the earlier statement used to win, setting the internet bill aside.
 test("with one statement per account, the account the offer is about is counted", () => {
