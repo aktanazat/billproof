@@ -169,7 +169,7 @@ export function LiveRun({ paused }: { paused: boolean }) {
 
       {tiles.length > 0 && (
         <>
-          <dl className="mt-5 grid grid-cols-2 rounded-xl bg-fill sm:grid-cols-5 sm:divide-x sm:divide-line">
+          <dl className="mt-5 grid grid-cols-[repeat(auto-fill,minmax(7.5rem,1fr))] rounded-xl bg-fill sm:grid-cols-5 sm:divide-x sm:divide-line">
             {[
               ["Bills checked", `${checkedCount} of ${tiles.length}`],
               ["Fees found, per month", usd(fees)],

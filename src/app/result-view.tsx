@@ -255,7 +255,7 @@ export function MessageBox({ message }: { message: Message }) {
           <div
             role="tablist"
             aria-label="Message format"
-            className="inline-flex rounded-lg bg-fill p-0.5"
+            className="inline-flex flex-wrap rounded-lg bg-fill p-0.5"
             onKeyDown={(event) => {
               const at = formats.findIndex(([value]) => value === format);
               const to = { ArrowRight: at + 1, ArrowLeft: at - 1, Home: 0, End: formats.length - 1 }[event.key];
@@ -322,6 +322,8 @@ export function Trace({ calls, spentMicros, notes }: { calls: CallRecord[]; spen
         {notes.map((note, i) => (
           <p key={i}>{note}</p>
         ))}
+        {/* Scrolls on its own when the screen is too narrow for its columns (a phone zoomed in), not the whole page. */}
+        <div className="overflow-x-auto">
         <table className="w-full text-left tabular-nums">
           <thead>
             <tr>
@@ -345,6 +347,7 @@ export function Trace({ calls, spentMicros, notes }: { calls: CallRecord[]; spen
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </details>
   );

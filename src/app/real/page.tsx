@@ -220,7 +220,8 @@ export default function RealBills() {
           </p>
         </div>
 
-        <dl className="mt-10 grid grid-cols-2 divide-line rounded-xl bg-fill sm:grid-cols-5 sm:divide-x">
+        {/* As many columns as fit: two on a phone, one when it's zoomed in, so a figure never runs into the next. */}
+        <dl className="mt-10 grid grid-cols-[repeat(auto-fill,minmax(7.5rem,1fr))] divide-line rounded-xl bg-fill sm:grid-cols-5 sm:divide-x">
           {stats.map(([label, value]) => (
             <div key={label} className="flex flex-col gap-1 p-4">
               <dt className="text-[13px] text-text-2">{label}</dt>
@@ -249,7 +250,7 @@ export default function RealBills() {
                   <p className="text-[15px] leading-snug wrap-anywhere">“{said}”</p>
                   <Finding bill={bill} />
                   <Change bill={bill} />
-                  <div className="mt-1 flex gap-2">
+                  <div className="mt-1 flex flex-wrap gap-2">
                     {/* Spoken names start with the words shown, for voice control, then name the post, so a list of the page's links tells them apart. */}
                     <Link href={`/?post=${id}`} rel="nofollow" prefetch={false} aria-label={`Check it live: ${bill.title}`} className="inline-flex h-8 items-center rounded-lg bg-text px-3 text-[13px] font-medium text-white hover:bg-black">
                       Check it live
@@ -283,11 +284,13 @@ export default function RealBills() {
           </section>
         )}
 
-        <section className="mt-14 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+        <section className="mt-14 grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
           <div>
             <h2 className="text-[17px] font-semibold">By company</h2>
             <p className="mt-1 text-[13px] leading-[18px] text-text-2">Real bills from each company, and the fees on them the poster never mentions agreeing to.</p>
           </div>
+          {/* Scrolls on its own when the screen is too narrow for its columns (a phone zoomed in), not the whole page. */}
+          <div className="overflow-x-auto">
           <table className="w-full text-left text-[15px] tabular-nums">
             <thead>
               <tr className="text-[13px] text-text-2">
@@ -316,6 +319,7 @@ export default function RealBills() {
               )}
             </tbody>
           </table>
+          </div>
         </section>
 
         <section className="mt-14">
@@ -326,7 +330,8 @@ export default function RealBills() {
                 <div className="h-[88px] w-[72px] overflow-hidden rounded-[4px] bg-white outline-1 -outline-offset-1 outline-line">
                   <Thumbnail src={`/api/real-image/${bill.id}/${bill.billPages[0] ?? 0}`} lazy />
                 </div>
-                <div className="flex min-w-0 flex-col gap-1">
+                {/* Beside the thumbnail on a phone zoomed in, this column can be narrower than a fee's longest word. */}
+                <div className="flex min-w-0 flex-col gap-1 wrap-break-word">
                   <p className="text-[13px] text-text-2">
                     {[displayName(bill), monthName(bill.period[0])].filter(Boolean).join(", ") || "Bill"}
                   </p>
@@ -334,7 +339,7 @@ export default function RealBills() {
                   <Finding bill={bill} />
                   <Change bill={bill} />
                 </div>
-                <div className="col-start-2 flex items-center gap-2 sm:col-start-3 sm:flex-col sm:items-end">
+                <div className="col-start-2 flex flex-wrap items-center gap-2 sm:col-start-3 sm:flex-col sm:items-end">
                   <Link href={`/?post=${bill.id}`} rel="nofollow" prefetch={false} aria-label={`Check it live: ${bill.title}`} className="inline-flex h-8 items-center rounded-lg bg-text px-3 text-[13px] font-medium text-white hover:bg-black">
                     Check it live
                   </Link>
