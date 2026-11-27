@@ -733,23 +733,32 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
   // Screenshots are pasted one at a time, and each is a page of the same bill: a pasted picture joins the bill added
   // last, read again with its files as one bill (the owner's request, 2026-11-27). Pastes are taken in turn, each from
   // the bills as shown once the one before it is on the page. A bill without its files at hand (a sample's), or one
-  // that failed, is left as it is and the picture starts a bill of its own; a full one keeps its pictures.
-  const pasteBills = async (pictures: File[]) => {
+  // that failed, is left as it is and the picture starts a bill of its own; a full one keeps its pictures. A drop on
+  // "Add a screenshot to this bill" ignores the picker's file types, so a PDF joins as if dropped with the bill's
+  // pictures; a second PDF or another kind of file adds nothing.
+  const pasteBills = async (added: File[]) => {
     await new Promise((resolve) => requestAnimationFrame(resolve));
     const current = shown.current;
     if (current.s !== "composing") return;
     const last = current.inputs.bills.at(-1);
     const files = last ? billFiles.current.get(last.id) : undefined;
-    if (!last || !files || last.status === "failed" || files.some((file) => !isPdf(file) && !isPicture(file))) return addBills(pictures);
-    if (files.length + pictures.length > MAX_BILL_PAGES) {
+    if (!last || !files || last.status === "failed" || files.some((file) => !isPdf(file) && !isPicture(file))) return addBills(added);
+    const joined = [...files, ...added];
+    if (joined.some((file) => !isPdf(file) && !isPicture(file)) || joined.filter(isPdf).length > 1) {
+      setLeftOut([]);
+      setAlreadyAdded([]);
+      setBillNote("Nothing was added: a bill holds one PDF with its screenshots or photos.");
+      return;
+    }
+    if (joined.length > MAX_BILL_PAGES) {
       setBillNote(`The screenshot wasn't added: a bill takes up to ${MAX_BILL_PAGES} pictures, and this one is full. For another month, use “Add another month”.`);
       return;
     }
-    return addBills([...files, ...pictures], last.id);
+    return addBills(joined, last.id);
   };
   // Pasted and chosen screenshots join in turn, each from the bill as the one before left it.
-  const joinPictures = (pictures: File[]) => {
-    pasteQueue.current = pasteQueue.current.then(() => pasteBills(pictures)).catch(() => setBillNote("The screenshot couldn't be added. Try adding it again."));
+  const joinLastBill = (added: File[]) => {
+    pasteQueue.current = pasteQueue.current.then(() => pasteBills(added)).catch(() => setBillNote("The screenshot couldn't be added. Try adding it again."));
   };
 
   const preparePile = async (docId: string, group: File[]) => {
@@ -823,7 +832,7 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
       const pictures = files.map((file) => new File([file], `Pasted screenshot ${++pastedCount.current}.${file.type ? file.type.split("/")[1] : file.name.split(".").pop()}`, { type: file.type }));
       for (const picture of pictures) pasted.current.add(picture);
       if (inOffer) void addOffer(pictures);
-      else joinPictures(pictures);
+      else joinLastBill(pictures);
     };
     document.addEventListener("paste", paste);
     return () => document.removeEventListener("paste", paste);
@@ -958,7 +967,7 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
                 ))}
                 <div className="flex flex-wrap gap-x-1">
                   {takesPicture && (
-                    <FileTarget label="Add a screenshot to this bill" accept="image/*,.heic,.heif" multiple onFiles={(files) => joinPictures(files.filter(isPicture))} className="mt-1 min-h-8 rounded-lg px-2 py-1 text-[13px] text-text-2 hover:bg-fill-2 hover:text-text data-[over]:bg-fill-2 data-[over]:text-text">
+                    <FileTarget label="Add a screenshot to this bill" accept="image/*,.heic,.heif" multiple onFiles={joinLastBill} className="mt-1 min-h-8 rounded-lg px-2 py-1 text-[13px] text-text-2 hover:bg-fill-2 hover:text-text data-[over]:bg-fill-2 data-[over]:text-text">
                       Add a screenshot to this bill
                     </FileTarget>
                   )}
