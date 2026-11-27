@@ -104,7 +104,8 @@ test("copies of another account's statement don't outvote this account's stateme
   if (done.s !== "done") throw new Error("the finished year did not become a done state");
   const html = renderToStaticMarkup(createElement(YearView, { state: done, result: mixed, dispatch: () => {} }));
   expect(heading(html)).toMatch(/^\$60\.00 to ask back from Bayline Fiber across 2 statements/);
-  expect(html).toContain("Not counted: 3 statements are from another account (check them on their own)");
+  // Each is named, however many: told to check them on their own, the person has to know which files they are.
+  expect(html).toContain("Not counted: Other.pdf, Other (1).pdf and Other (2).pdf are from another account (check them on their own)");
 });
 
 // A phone bill dropped beside the internet statements, its account number not read: a different company's bill can't

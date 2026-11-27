@@ -149,11 +149,12 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
     leftOut("could_not_check", "couldn't be read", "couldn't be read"),
     leftOut("not_a_bill", "isn't a bill", "aren't bills"),
     duplicates > 0 ? `${duplicates} duplicate ${duplicates === 1 ? "statement" : "statements"}` : null,
-    // Named, with what to do: added beside this account's (a phone bill with an internet bill), its finding is unseen.
+    // Named, however many, with what to do: added beside this account's (a phone bill with an internet bill), its
+    // finding is unseen, and "check them on their own" needs to say which files they are.
     otherAccount.length === 1
       ? `${otherAccount[0]} is from another account (check it on its own)`
       : otherAccount.length > 0
-        ? `${otherAccount.length === 2 ? otherAccount.join(" and ") : `${otherAccount.length} statements`} are from another account (check them on their own)`
+        ? `${otherAccount.slice(0, -1).join(", ")} and ${otherAccount.at(-1)} are from another account (check them on their own)`
         : null,
   ].filter(Boolean);
   // A month that couldn't be read can't be opened from the year, so its reason is given here, by file, or the person
