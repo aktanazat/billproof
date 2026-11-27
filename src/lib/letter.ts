@@ -330,11 +330,11 @@ export function buildYearMessage(months: Checked[]): Message {
   // A statement is named by its dates. Several with none read that share a total, or have none read either, are told
   // apart by their place ("the second $70.00 bill"); a lone one with nothing read is "one bill", since "this bill"
   // doesn't say which of the year's.
-  const names = months.map((month) => (periodText(month) === "this bill" ? "the bill" : periodText(month)));
+  const billNames = months.map((month) => (periodText(month) === "this bill" ? "the bill" : periodText(month)));
   const periodOf = (month: Checked) => {
     const i = months.indexOf(month);
-    const name = names[i];
-    if (name.startsWith("the ") && names.filter((n) => n === name).length > 1) return `the ${ORDINALS[names.slice(0, i).filter((n) => n === name).length]} ${name.slice(4)}`;
+    const name = billNames[i];
+    if (name.startsWith("the ") && billNames.filter((n) => n === name).length > 1) return `the ${ORDINALS[billNames.slice(0, i).filter((n) => n === name).length]} ${name.slice(4)}`;
     return name === "the bill" ? "one bill" : name;
   };
   // A promise already quoted for an earlier month is referred back to, not quoted again in full; a month names its
@@ -457,8 +457,19 @@ export function buildYearMessage(months: Checked[]): Message {
   const otherFacts = [...feeFacts, ...repeatsTold(repeatFact)];
   const problem = problemLine(claims, fees.length > 0, offerCovers, riseFacts.length > 0);
   const versions = claims.length > 0 ? [sectionsFor(regulator, false, "as quoted above"), [promisedLine, ...byMonth], [promisedLine, ...amounts], amounts] : [[]];
+  const repeatPrices = new Map<string, typeof repeats>();
+  for (const repeat of repeats) {
+    const key = JSON.stringify([names(repeat.lines), repeat.lines.length]);
+    const group = repeatPrices.get(key);
+    if (group) group.push(repeat);
+    else repeatPrices.set(key, [repeat]);
+  }
+  const compactRepeats = [...repeatPrices.values()].map((list) =>
+    `${names(list[0].lines)} appears ${list[0].lines.length} times per statement: ${list.map(({ month, lines }) => `${periodOf(month)} (${lines.map((line) => usd(line.amount_cents)).join(" and ")})`).join("; ")}.`,
+  );
+  const compactAmounts = withClaims.length > 0 ? [`Credit requested by statement: ${withClaims.map((month) => `${periodOf(month)} (${usd(month.claims.reduce((total, claim) => total + claim.amountCents, 0))})`).join("; ")}.`] : [];
   // Past the fullest wordings, every rise goes on one line, by its statement and amount alone.
-  const fitted = [...versions.map((facts) => [...facts, ...riseFacts, ...otherFacts]), ...versions.map((facts) => [...facts, ...shortRiseFacts, ...otherFacts])];
+  const fitted = [...versions.map((facts) => [...facts, ...riseFacts, ...otherFacts]), ...versions.map((facts) => [...facts, ...shortRiseFacts, ...otherFacts]), [...compactAmounts, ...shortRiseFacts, ...feeFacts, ...compactRepeats]];
   const complaint = complaintText(provider, last4, problem, fitted, claims, riseFacts.length + otherFacts.length > 0);
   return { totalCents, chat, email, call, complaint };
 }

@@ -405,6 +405,40 @@ describe("the complaint a regulator receives", () => {
     expect(complaint).toContain("a credit of $180.00");
   });
 
+  test("changing duplicate-charge prices keep every statement and amount in a complaint that fits", () => {
+    const months = Array.from({ length: 12 }, (_, i) => {
+      const checked = month(i + 1, [priceClaim, gatewayClaim]);
+      const cents = 1700 + i * 100;
+      const repeated: LineItem[] = [0, 1].map((copy) => ({
+        ...plan, id: `R${copy}`, label: "International Roaming Data Usage", amount_cents: cents, kind: "usage",
+        quote: `International Roaming Data Usage $${(cents / 100).toFixed(2)}`,
+      }));
+      return {
+        ...checked,
+        reading: { ...checked.reading, period_end: i === 11 ? "2027-01-11" : checked.reading.period_end, line_items: [...checked.reading.line_items, ...repeated] },
+        questions: [{ id: "QR", kind: "repeated_charge" as const, lineIds: ["R0", "R1"], promiseId: null }],
+      };
+    });
+    const { complaint } = buildYearMessage(months);
+    expect(complaint.length).toBeLessThanOrEqual(1_700);
+    expect(complaint).toContain("International Roaming Data Usage appears 2 times");
+    for (const [period, amounts] of [
+      ["Jan 12, 2026 to Feb 11, 2026", "$17.00 and $17.00"],
+      ["Feb 12, 2026 to Mar 11, 2026", "$18.00 and $18.00"],
+      ["Mar 12, 2026 to Apr 11, 2026", "$19.00 and $19.00"],
+      ["Apr 12, 2026 to May 11, 2026", "$20.00 and $20.00"],
+      ["May 12, 2026 to Jun 11, 2026", "$21.00 and $21.00"],
+      ["Jun 12, 2026 to Jul 11, 2026", "$22.00 and $22.00"],
+      ["Jul 12, 2026 to Aug 11, 2026", "$23.00 and $23.00"],
+      ["Aug 12, 2026 to Sep 11, 2026", "$24.00 and $24.00"],
+      ["Sep 12, 2026 to Oct 11, 2026", "$25.00 and $25.00"],
+      ["Oct 12, 2026 to Nov 11, 2026", "$26.00 and $26.00"],
+      ["Nov 12, 2026 to Dec 11, 2026", "$27.00 and $27.00"],
+      ["Dec 12, 2026 to Jan 11, 2027", "$28.00 and $28.00"],
+    ]) expect(complaint).toContain(`${period} (${amounts})`);
+    expect(complaint).toContain("Resolution I'm asking for: a credit of $360.00");
+  });
+
   // Each rise is its own fact, but asking the company to explain after every one repeated the same request.
   test("a year whose price rose on several statements names each rise and asks once to explain them", () => {
     const rose = (cents: number) => ({ earlierCents: 8500, currentCents: 8500 + cents, lines: [{ label: "Fiber 500 Internet", beforeCents: 5500, afterCents: 5500 + cents }] });
