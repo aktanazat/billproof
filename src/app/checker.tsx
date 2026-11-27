@@ -751,7 +751,9 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
       return;
     }
     if (joined.length > MAX_BILL_PAGES) {
-      setBillNote(`The screenshot wasn't added: a bill takes up to ${MAX_BILL_PAGES} pictures, and this one is full. For another month, use “Add another month”.`);
+      const refused = added.length === 1 ? "The screenshot wasn't added" : "The screenshots weren't added";
+      const room = files.length >= MAX_BILL_PAGES ? "this one is full" : `this one has room for ${MAX_BILL_PAGES - files.length} more`;
+      setBillNote(`${refused}: a bill takes up to ${MAX_BILL_PAGES} pictures, and ${room}. For another month, use “Add another month”.`);
       return;
     }
     return addBills(joined, last.id);
@@ -769,9 +771,12 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
     // keeps at least its first page beside them.
     const room = MAX_BILL_PAGES - (pdf ? 1 : 0);
     if (pictures.length > room) {
+      // With another bill on the list, "Add a screenshot to this bill" joins that bill instead, so the way back is named.
+      const current = shown.current;
+      const where = current.s === "composing" && current.inputs.bills.some((doc) => doc.id !== docId) ? " with “Add another month”" : "";
       const message = pdf
-        ? `${pictures.length} pictures added with ${pdf.name} are read as one bill with it, which takes up to ${room} besides its first page: keep the ones with the offer or the charges.`
-        : `${pictures.length} pictures added together are read as one bill, which takes up to ${MAX_BILL_PAGES}: keep the ones with the charges and the offer. For more than one month, add each month's pictures separately.`;
+        ? `${pictures.length} pictures added with ${pdf.name} are read as one bill with it, which takes up to ${room} besides its first page. Remove this, then add ${pdf.name} again${where} with up to ${room} pictures: the ones with the offer or the charges.`
+        : `${pictures.length} pictures added together are read as one bill, which takes up to ${MAX_BILL_PAGES}. Remove this, then add up to ${MAX_BILL_PAGES} of them again${where}: the ones with the charges and the offer. For more than one month, add each month's pictures separately.`;
       dispatch({ type: "prep_failed", id: docId, message });
       return;
     }
