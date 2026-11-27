@@ -528,6 +528,16 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
     };
   }, []);
 
+  // A recording plays from a link to the file in memory, which holds the whole file until released; once another
+  // recording or none takes its place, nothing shows it again, so its link is let go. Compared with the last link
+  // rather than released on cleanup, which React's development mode runs an extra time while the link is still shown.
+  const callUrl = state.inputs.offer.kind === "call" && state.inputs.offer.call.status === "ready" ? state.inputs.offer.call.url : null;
+  const lastCallUrl = useRef<string | null>(null);
+  useEffect(() => {
+    if (lastCallUrl.current && lastCallUrl.current !== callUrl) URL.revokeObjectURL(lastCallUrl.current);
+    lastCallUrl.current = callUrl;
+  }, [callUrl]);
+
   // Closing or reloading the tab loses everything here: added files, a check already being paid for, a drafted message.
   // While there's any of that, the browser asks before leaving; a page with nothing added leaves freely. A link to
   // another Billproof page moves without a reload, which the browser doesn't ask about, so the page asks itself.
