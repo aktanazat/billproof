@@ -865,6 +865,14 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
     return () => document.removeEventListener("paste", paste);
   });
 
+  // A sample that didn't start leaves its reason on its row in the bill box, which a click on the samples, further down
+  // the page, left out of sight.
+  const billBox = useRef<HTMLDivElement>(null);
+  const [showBills, setShowBills] = useState(0);
+  useEffect(() => {
+    if (showBills > 0) billBox.current?.scrollIntoView({ block: "nearest" });
+  }, [showBills]);
+
   // A sample's bills and offer enter the check together; a later sample click wins over one still loading.
   const sampleToken = useRef(0);
   const [loadingSample, setLoadingSample] = useState<string | null>(null);
@@ -905,11 +913,13 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
       const inputs = { bills, offer };
       sampleRun.current = sample.pictures ? null : { id: sample.id, inputs };
       dispatch({ type: "sample_ready", inputs });
+      if (!checkInput(inputs)) setShowBills((n) => n + 1);
     } catch (error) {
       // A failed download or a file that won't open stays on the start screen with the reason on its row.
       if (token !== sampleToken.current) return;
-      const message = error instanceof PrepareError ? error.message : "This sample couldn't be opened. Try again.";
+      const message = error instanceof PrepareError ? (error.reload ? "Billproof couldn't load its PDF reader. Reload the page, then choose the sample again." : error.message) : "This sample couldn't be opened. Try again.";
       dispatch({ type: "sample_ready", inputs: { bills: [{ id: `sample-${token}-failed`, name: sample.title, status: "failed", message }], offer: { kind: "none" } } });
+      setShowBills((n) => n + 1);
     } finally {
       if (token === sampleToken.current) setLoadingSample(null);
     }
@@ -974,7 +984,7 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
 
       {/* One column on a phone may not grow to a long file name, or the page scrolls sideways instead of the name wrapping. */}
       <div className="mt-10 grid grid-cols-[minmax(0,1fr)] gap-3 lg:grid-cols-2">
-        <div className="flex min-h-[180px] flex-col rounded-xl bg-fill p-4">
+        <div ref={billBox} className="flex min-h-[180px] flex-col rounded-xl bg-fill p-4">
           <p className="text-[15px] font-semibold">Bill</p>
           {bills.length > 0 ? (
             <>
