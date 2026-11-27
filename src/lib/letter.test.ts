@@ -315,6 +315,24 @@ describe("a claim on a promise heard on a call", () => {
     expect(chat).toContain("For the bill starting Oct 12, 2026, Fiber 500 Internet");
     expect(email).not.toContain("For this bill");
   });
+
+  // Two months with no date read were both "the $70.00 bill", or both "this bill" with no total read either: the
+  // company couldn't tell which bills were meant. A name more than one month shares is told apart by its place.
+  test("months with no date read are told apart in a year message, by total or by place", () => {
+    const undated = (total: boolean): Checked => {
+      const base = month("2026-10-12", "2026-11-11");
+      const current_charges = total ? { cents: 7000, quote: "Current charges $70.00" } : null;
+      return { ...base, reading: { ...base.reading, period_start: null, period_end: null, statement_date: null, due_date: null, printed: { ...base.reading.printed, current_charges, total_due: null } } };
+    };
+    const totalled = buildYearMessage([undated(true), undated(true)]);
+    expect(totalled.chat).toContain("For the first $70.00 bill,");
+    expect(totalled.chat).toContain("For the second $70.00 bill,");
+    expect(totalled.complaint).toContain("- For the second $70.00 bill,");
+    const bare = buildYearMessage([undated(false), undated(false)]);
+    expect(bare.chat).toContain("For the first bill,");
+    expect(bare.chat).toContain("For the second bill,");
+    expect(bare.chat).not.toContain("this bill");
+  });
 });
 
 describe("the complaint a regulator receives", () => {

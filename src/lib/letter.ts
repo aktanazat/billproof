@@ -16,6 +16,9 @@ export function shortDate(iso: string): string {
   return month && d >= 1 && d <= 31 ? `${month} ${d}, ${y}` : iso;
 }
 
+// A year holds at most twelve statements.
+const ORDINALS = ["first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "ninth", "tenth", "eleventh", "twelfth"];
+
 // A bill is named by its whole period, else the statement date the company prints, else the start date alone, else
 // the due date or the charges it prints, either of which the company can find it by.
 function periodText(result: Checked): string {
@@ -318,6 +321,16 @@ export function buildYearMessage(months: Checked[]): Message {
   // value doesn't hide it.
   const last4 = months.find((month) => month.reading.account_last4)?.reading.account_last4 ?? null;
   const account = last4 ? `account ending ${last4}` : "my account";
+  // A statement is named by its dates. Several with none read that share a total, or have none read either, are told
+  // apart by their place ("the second $70.00 bill"); a lone one with nothing read is "one bill", since "this bill"
+  // doesn't say which of the year's.
+  const names = months.map((month) => (periodText(month) === "this bill" ? "the bill" : periodText(month)));
+  const periodOf = (month: Checked) => {
+    const i = months.indexOf(month);
+    const name = names[i];
+    if (name.startsWith("the ") && names.filter((n) => n === name).length > 1) return `the ${ORDINALS[names.slice(0, i).filter((n) => n === name).length]} ${name.slice(4)}`;
+    return name === "the bill" ? "one bill" : name;
+  };
   // A promise already quoted for an earlier month is referred back to, not quoted again in full; a month names its
   // statement once, on its first claim. Read aloud, a call script refers back to what was said, not to "above".
   const sectionsFor = (speaker: string, asking: boolean, quotedBefore: string, call?: string) => {
@@ -332,7 +345,7 @@ export function buildYearMessage(months: Checked[]): Message {
         const key = promise.quote.trim();
         const cite = quoted.has(key) ? quotedBefore : citation(promise, month.transcript !== null, speaker, call);
         quoted.add(key);
-        const { fact, request } = claimParts(claim, claim.lineIds.flatMap((id) => lines.get(id) ?? []), promise, cite, named ? null : periodText(month));
+        const { fact, request } = claimParts(claim, claim.lineIds.flatMap((id) => lines.get(id) ?? []), promise, cite, named ? null : periodOf(month));
         named = true;
         return [asking ? `${fact} ${request}` : fact];
       });
@@ -353,11 +366,10 @@ export function buildYearMessage(months: Checked[]): Message {
   }
   const fees = [...latestFee.values()];
   const offerCovers = months.some((month) => month.hadOffer && !month.providerMismatch);
-  // A charge printed twice is one statement's, so it is asked about under that statement; one that can't be named by
-  // dates, due date or total is just "one bill".
+  // A charge printed twice is one statement's, so it is asked about under that statement.
   const repeatOn = (month: Checked, lines: LineItem[], sentence: typeof repeatFact) => {
-    const period = periodText(month);
-    if (period === "this bill") return sentence(lines, "one bill");
+    const period = periodOf(month);
+    if (period === "one bill") return sentence(lines, "one bill");
     return `${period.startsWith("the ") ? `On ${period}` : `On the bill for ${period}`}, ${sentence(lines, null)}`;
   };
   const repeats = months.flatMap((month) =>
@@ -369,8 +381,8 @@ export function buildYearMessage(months: Checked[]): Message {
   const feeText = [...(fees.length > 0 ? [feeSentence(fees, offerCovers)] : []), ...repeats.map(({ month, lines }) => repeatOn(month, lines, repeatSentence))];
   // A month whose pictures held an earlier statement and rose is asked about under that month's name.
   const billName = (month: Checked) => {
-    const period = periodText(month);
-    return period === "this bill" ? "One of the bills" : period.startsWith("the ") ? capitalized(period) : `The bill for ${period}`;
+    const period = periodOf(month);
+    return period === "one bill" ? "One of the bills" : period.startsWith("the ") ? capitalized(period) : `The bill for ${period}`;
   };
   const riseText = months.flatMap((month) => increaseSentence(month.change, billName(month)) ?? []);
   const asked = [...riseText, ...feeText];
@@ -415,9 +427,9 @@ export function buildYearMessage(months: Checked[]): Message {
   const promisedLine = `What I was promised: ${promised.join("; ")}.`;
   const byMonth = withClaims.map((month) => {
     const lines = new Map(month.reading.line_items.map((line) => [line.id, line]));
-    return `For ${periodText(month)}: ${month.claims.map((claim) => shortClaim(claim, claim.lineIds.flatMap((id) => lines.get(id) ?? []))).join("; ")}.`;
+    return `For ${periodOf(month)}: ${month.claims.map((claim) => shortClaim(claim, claim.lineIds.flatMap((id) => lines.get(id) ?? []))).join("; ")}.`;
   });
-  const amounts = withClaims.map((month) => `${capitalized(periodText(month))}: ${usd(month.claims.reduce((t, claim) => t + claim.amountCents, 0))} more than I was promised.`);
+  const amounts = withClaims.map((month) => `${capitalized(periodOf(month))}: ${usd(month.claims.reduce((t, claim) => t + claim.amountCents, 0))} more than I was promised.`);
   const riseFacts = months.flatMap((month) => increaseFact(month.change, billName(month)) ?? []);
   const feeFacts = [...riseFacts, ...(fees.length > 0 ? [feeFact(fees, offerCovers, "My statements charge")] : []), ...repeats.map(({ month, lines }) => repeatOn(month, lines, repeatFact))];
   const problem = problemLine(claims, fees.length > 0, offerCovers, riseFacts.length > 0);
