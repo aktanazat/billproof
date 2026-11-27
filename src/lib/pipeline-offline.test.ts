@@ -20,21 +20,28 @@ const scenario = {
   counterQuote: null as string | null,
   tooLong: null as string | null,
   declined: null as string | null,
+  // A month whose files are past Muse Ember's long-context threshold.
+  tooLarge: null as string | null,
+  // A month whose bill reading arrives a turn of the event loop later, as a real reading takes longer than a refusal.
+  slowMonth: null as string | null,
   // A month whose pictures Muse Ember reads as not a bill.
   notBillMonth: null as string | null,
 };
 // The pictures the last offer reading was sent, so a test can see which pictures were read as the offer.
 const seen = { offerPictures: 0 };
 // A failure thrown here is built from the same module copy the pipeline is given, so it is recognised as Muse Ember's.
+type Sent = { call: { name: string }; body: { input: { content: { type: string; image_url?: string; text?: string }[] }[] } };
+const monthOf = (request: Sent) => (request.body.input[0].content.some((part) => part.image_url?.endsWith("B") || part.text?.includes("February")) ? "February" : "January");
 vi.mock("./ember", async (actual) => {
   const real = await actual<typeof Ember>();
   return {
   ...real,
-  countInputTokens: async () => scenario.inputTokens,
-  send: async (request: { call: { name: string }; body: { input: { content: { type: string; image_url?: string; text?: string }[] }[] } }) => {
+  countInputTokens: async (request: Sent) => (monthOf(request) === scenario.tooLarge ? 250_000 : scenario.inputTokens),
+  send: async (request: Sent) => {
     const name = request.call.name as keyof typeof COST;
     const content = request.body.input[0].content;
-    const month = content.some((part) => part.image_url?.endsWith("B") || part.text?.includes("February")) ? "February" : "January";
+    const month = monthOf(request);
+    if (name === "read_bill" && month === scenario.slowMonth) await new Promise((resolve) => setImmediate(resolve));
     // Too long for both readings, the first and the second with twice the room.
     if ((name === "read_bill" || (name as string) === "reread_bill") && month === scenario.tooLong) throw new real.EmberError("truncated", "max_output_tokens", 900);
     if (name === "read_bill" && month === scenario.declined) throw new real.EmberError("refused", "refusal", 900);
@@ -147,6 +154,30 @@ test("a declined bill in a year is told as that bill; a declined single check ke
   scenario.declined = null;
   expect(year).toMatchObject({ type: "error", failure: "refused", message: "Muse Ember declined to read this bill.", bill: 1 });
   expect(single).toMatchObject({ type: "error", failure: "refused", message: "Muse Ember declined to read these files." });
+});
+
+// One month too large to read, among twelve, says which, as one too long or declined does.
+test("a year stopped by one bill too large to read names that bill", async () => {
+  scenario.tooLarge = "February";
+  const events: CheckEvent[] = [];
+  const page = (tag: string) => ({ image: `data:image/png;base64,iVBORw0KGgo${tag}`, text: null });
+  await runCheck({ bills: [{ pages: [page("GA")] }, { pages: [page("GB")] }], offer: { kind: "text", text: "Fiber 500 for $55 a month" } }, { ledger: openLedger(":memory:", 1_000_000), client: "test", signal: new AbortController().signal, emit: (event) => events.push(event) });
+  scenario.tooLarge = null;
+  expect(events.at(-1)).toMatchObject({ type: "error", failure: "bad_input", message: "These files are too large to read in one check.", bill: 1 });
+});
+
+// Once one month fails the year is over, so the months still running send nothing more to be paid for: here February's
+// offer reading, after January's bill was declined. The offer's wording is this test's own, so no remembered reading
+// stands in for that step.
+test("after one month of a year fails, the other months start no more paid steps", async () => {
+  scenario.declined = "January";
+  scenario.slowMonth = "February";
+  const events: CheckEvent[] = [];
+  const page = (tag: string) => ({ image: `data:image/png;base64,iVBORw0KGgo${tag}`, text: null });
+  await runCheck({ bills: [{ pages: [page("HA")] }, { pages: [page("HB")] }], offer: { kind: "text", text: "Fiber 500 for $55 a month, as the rep said" } }, { ledger: openLedger(":memory:", 1_000_000), client: "test", signal: new AbortController().signal, emit: (event) => events.push(event) });
+  scenario.declined = null;
+  scenario.slowMonth = null;
+  expect(events.at(-1)).toMatchObject({ type: "error", failure: "refused", bill: 0, spentMicros: 900 + COST.read_bill });
 });
 
 // One bill checked against the $55 offer, the pages named by `tag` so no reading from another test is reused; returns
