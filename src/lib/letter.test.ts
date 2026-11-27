@@ -451,6 +451,18 @@ describe("the complaint a regulator receives", () => {
     expect(buildYearMessage([month(10, [priceClaim]), dated]).chat).toContain("For the statement dated Nov 12, 2026, Fiber 500 Internet");
   });
 
+  // "On the bills for" fits dates ("On the bills for Oct 12 … ; Nov 12 …") but not statements already named as bills.
+  test("a charge repeated on a dated and an undated statement names each as a bill once", () => {
+    const twice = [0, 1].map((k): LineItem => ({ id: `R${k}`, label: "Device Protection", amount_cents: 1700, kind: "company_fee", page: 2, box: { x0: 80, y0: 600 + k * 20, x1: 920, y1: 615 + k * 20 }, quote: "Device Protection $17.00", prorated: false }));
+    const repeated = (m: Checked): Checked => ({ ...m, reading: { ...m.reading, line_items: [...m.reading.line_items, ...twice] }, questions: [{ id: "Q1", kind: "repeated_charge", lineIds: ["R0", "R1"], promiseId: null }] });
+    const base = month(11, []);
+    const undated = { ...base, reading: { ...base.reading, period_start: null, period_end: null, statement_date: null, printed: { ...base.reading.printed, current_charges: { cents: 9249, quote: "Current charges $92.49" } } } };
+    const { chat } = buildYearMessage([repeated(month(10, [])), repeated(undated)]);
+    expect(chat).toContain("On the bill for Oct 12, 2026 to Nov 11, 2026; the $92.49 bill, Device Protection appears 2 times on each");
+    const dated = buildYearMessage([repeated(month(10, [])), repeated(month(11, []))]).chat;
+    expect(dated).toContain("On the bills for Oct 12, 2026 to Nov 11, 2026; Nov 12, 2026 to Dec 11, 2026, Device Protection appears 2 times on each");
+  });
+
   // The chat opens on "my latest bill" and then says "this bill"; the complaint has no such opening, so a bill with
   // neither a date nor a total read is named as the chat names it, not "this bill", which a regulator can't place.
   test("a bill with no date or total read is 'my latest bill' in the complaint, as in the chat's opening", () => {

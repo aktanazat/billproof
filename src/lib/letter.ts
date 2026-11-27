@@ -390,8 +390,14 @@ export function buildYearMessage(months: Checked[]): Message {
     const key = repeatFact(repeat.lines, null);
     sameRepeat.set(key, [...(sameRepeat.get(key) ?? []), repeat]);
   }
+  // Dates share one "the bills for"; a statement already named as a bill ("the $92.49 bill") keeps its own name.
+  const onBills = (list: typeof repeats) => {
+    const periods = list.map(({ month }) => periodOf(month));
+    const named = (period: string) => period.startsWith("the ") || period === "one bill";
+    return periods.some(named) ? `On ${periods.map((period) => (named(period) ? period : `the bill for ${period}`)).join("; ")}` : `On the bills for ${periods.join("; ")}`;
+  };
   const repeatsTold = (sentence: typeof repeatFact) =>
-    [...sameRepeat.values()].map((list) => (list.length === 1 ? repeatOn(list[0].month, list[0].lines, sentence) : `On the bills for ${list.map(({ month }) => periodOf(month)).join("; ")}, ${sentence(list[0].lines, "each")}`));
+    [...sameRepeat.values()].map((list) => (list.length === 1 ? repeatOn(list[0].month, list[0].lines, sentence) : `${onBills(list)}, ${sentence(list[0].lines, "each")}`));
   const feeText = [...(fees.length > 0 ? [feeSentence(fees, offerCovers)] : []), ...repeatsTold(repeatSentence)];
   // A month whose pictures held an earlier statement and rose is asked about under that month's name.
   const billName = (month: Checked) => {
