@@ -273,7 +273,9 @@ export function MessageBox({ message }: { message: Message }) {
         </div>
       </div>
       <div role="tabpanel" id={`${ids}-panel`} aria-labelledby={`${ids}-${format}`}>
-        <textarea ref={box} readOnly value={text} aria-label="Message to send" className="block h-[280px] w-full resize-none rounded-xl bg-fill p-4 text-[15px] leading-[22px] focus:outline-none focus-visible:shadow-[inset_0_0_0_2px_var(--text)] print:hidden" />
+        {/* Grown to the whole message where the browser can size a text box to its content: the message is what gets
+            sent, and at 280 px a phone showed a quarter of a year's email. Elsewhere it keeps its height and scrolls. */}
+        <textarea ref={box} readOnly value={text} aria-label="Message to send" className="block h-[280px] w-full resize-none rounded-xl bg-fill p-4 text-[15px] leading-[22px] field-sizing-content supports-[field-sizing:content]:h-auto focus:outline-none focus-visible:shadow-[inset_0_0_0_2px_var(--text)] print:hidden" />
         {/* A printed text box shows only what fits its height on screen; on paper the whole message prints instead. */}
         <p className="hidden whitespace-pre-wrap text-[13px] leading-[19px] print:block">{text}</p>
       </div>
