@@ -506,9 +506,10 @@ async function check(input: CheckInput, checkId: string, capMicros: number, deps
 
 // A year stops at its first failure. One that belongs to a single bill (too long to read, declined, too large) carries
 // that bill's place, so the page names its file and the person can fix that statement rather than guess among twelve
-// and pay to try again.
+// and pay to try again. Declined is told of that one bill: the general wording covers a single check's bill and offer.
 function ofBill(error: unknown, bill: number): unknown {
-  if (error instanceof EmberError && (error.kind === "truncated" || error.kind === "refused")) return new CheckStop(error.kind, PLAIN[error.kind], false, bill);
+  if (error instanceof EmberError && error.kind === "truncated") return new CheckStop(error.kind, PLAIN.truncated, false, bill);
+  if (error instanceof EmberError && error.kind === "refused") return new CheckStop(error.kind, "Muse Ember declined to read this bill.", false, bill);
   if (error instanceof CheckStop && error.failure === "bad_input") return new CheckStop(error.failure, error.message, error.retryable, bill);
   return error;
 }

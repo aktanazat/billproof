@@ -8,7 +8,7 @@ import type { CheckEvent } from "./result";
 // Muse Ember is replaced by fixed answers so whole checks run offline; this file holds only tests that need that,
 // since the mock applies to every test in it. `scenario` sets what the bill charges and what the company's side quotes.
 const COST = { read_bill: 1000, read_terms: 500, challenge: 700 } as const;
-const scenario = { billedCents: 5500, counterQuote: null as string | null, tooLong: null as string | null };
+const scenario = { billedCents: 5500, counterQuote: null as string | null, tooLong: null as string | null, declined: null as string | null };
 // A failure thrown here is built from the same module copy the pipeline is given, so it is recognised as Muse Ember's.
 vi.mock("./ember", async (actual) => {
   const real = await actual<typeof Ember>();
@@ -21,6 +21,7 @@ vi.mock("./ember", async (actual) => {
     const month = content.some((part) => part.image_url?.endsWith("B") || part.text?.includes("February")) ? "February" : "January";
     // Too long for both readings, the first and the second with twice the room.
     if ((name === "read_bill" || (name as string) === "reread_bill") && month === scenario.tooLong) throw new real.EmberError("truncated", "max_output_tokens", 900);
+    if (name === "read_bill" && month === scenario.declined) throw new real.EmberError("refused", "refusal", 900);
     if (name === "challenge") {
       const ids = content.flatMap((part) => [...(part.text ?? "").matchAll(/^Claim (\S+) \(/gm)].map((m) => m[1]));
       const challenges = ids.map((id) => ({ claim_id: id, looked_for: "A later price in the offer.", verdict: scenario.counterQuote ? "refuted" : "stands", counter_quote: scenario.counterQuote, counter_source: scenario.counterQuote ? "offer" : null }));
@@ -108,4 +109,21 @@ test("a year stopped by one bill's failure names that bill by its place in the l
   );
   scenario.tooLong = null;
   expect(events.at(-1)).toMatchObject({ type: "error", failure: "truncated", message: "This bill is too long for Muse Ember to read in one check. Use the pages with the charges.", bill: 1, retryable: false });
+});
+
+// A year names the bill Muse Ember declined; "declined to read these files" beside one file's name read as if every
+// file had been declined. A single bill's check sends the bill and the offer together, where "these files" is right.
+test("a declined bill in a year is told as that bill; a declined single check keeps the files", async () => {
+  scenario.declined = "February";
+  const page = (tag: string) => ({ image: `data:image/png;base64,iVBORw0KGgo${tag}`, text: null });
+  const run = async (bills: { pages: ReturnType<typeof page>[] }[]) => {
+    const events: CheckEvent[] = [];
+    await runCheck({ bills, offer: { kind: "text", text: "Fiber 500 for $55 a month" } }, { ledger: openLedger(":memory:", 1_000_000), client: "test", signal: new AbortController().signal, emit: (event) => events.push(event) });
+    return events.at(-1);
+  };
+  const year = await run([{ pages: [page("CC")] }, { pages: [page("DB")] }]);
+  const single = await run([{ pages: [page("EEB")] }]);
+  scenario.declined = null;
+  expect(year).toMatchObject({ type: "error", failure: "refused", message: "Muse Ember declined to read this bill.", bill: 1 });
+  expect(single).toMatchObject({ type: "error", failure: "refused", message: "Muse Ember declined to read these files." });
 });
