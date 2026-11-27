@@ -514,6 +514,15 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
   const [offerNote, setOfferNote] = useState<string | null>(null);
   // The offer takes one file; a drop of several keeps the first and says where the rest belong.
   const [offerExtra, setOfferExtra] = useState(0);
+  // Notes on the files last added describe that screen: once a check starts or a sample is chosen they no longer do,
+  // and the empty screen after "Check another bill" would still show them.
+  const forgetNotes = () => {
+    setLeftOut([]);
+    setAlreadyAdded([]);
+    setPasteNote(null);
+    setOfferNote(null);
+    setOfferExtra(0);
+  };
   const controllers = useRef(new Map<number, AbortController>());
   const nextId = useRef(0);
   const id = () => `doc-${++nextId.current}`;
@@ -824,6 +833,7 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
   const runSample = async (sample: Sample) => {
     const token = ++sampleToken.current;
     setLoadingSample(sample.id);
+    forgetNotes();
     try {
       const pdfs = await Promise.all(
         sample.bills.map(async (url, i): Promise<Doc> => {
@@ -1039,7 +1049,15 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
           <p role="status" className="text-[13px] text-text-2 empty:absolute">
             {blocker}
           </p>
-          <button type="button" disabled={!ready} onClick={() => dispatch({ type: "start" })} className="h-11 rounded-lg bg-text px-6 text-[15px] font-medium text-white hover:bg-black disabled:bg-fill-2 disabled:text-text-2">
+          <button
+            type="button"
+            disabled={!ready}
+            onClick={() => {
+              forgetNotes();
+              dispatch({ type: "start" });
+            }}
+            className="h-11 rounded-lg bg-text px-6 text-[15px] font-medium text-white hover:bg-black disabled:bg-fill-2 disabled:text-text-2"
+          >
             {bills.length > 1 ? `Check ${bills.length} bills` : "Check bill"}
           </button>
         </div>
