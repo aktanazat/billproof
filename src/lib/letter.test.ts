@@ -174,6 +174,20 @@ describe("a message with no dollar claim", () => {
     expect(buildMessage(risen, new Set(), new Set(["Q1"])).complaint).toContain("Problem: a price increase and fees on my bill I never agreed to.");
     expect(buildMessage(risen, new Set(), new Set()).complaint).toContain("Problem: a price increase on my bill the company hasn't explained.");
   });
+
+  // The rise names what went up. A bigger discount went "from" one amount "to" another too, and so did a charge that is
+  // gone; listed beside the increases, each read as one of them.
+  test("a rise names only the charges that went up", () => {
+    const lines = [
+      { label: "Promotional Discount", beforeCents: -5750, afterCents: -8710 },
+      { label: "Old Equipment Fee", beforeCents: 500, afterCents: null },
+      { label: "Fiber 500 Internet", beforeCents: 5500, afterCents: 7500 },
+    ];
+    const { chat } = buildMessage({ ...result, change: { earlierCents: 7249, currentCents: 9249, lines } }, new Set(), new Set());
+    expect(chat).toContain("Fiber 500 Internet went from $55.00 to $75.00");
+    expect(chat).not.toContain("Promotional Discount");
+    expect(chat).not.toContain("Old Equipment Fee");
+  });
 });
 
 describe("a missing autopay credit on a bill with no company name", () => {
@@ -354,6 +368,14 @@ describe("the complaint a regulator receives", () => {
     expect(chat).toContain("For the $92.49 bill, Fiber 500 Internet");
     expect(buildMessage(due, new Set(["C1"]), new Set()).chat).toContain("I'm writing about account ending 4415, bill due Nov 5, 2026.");
   });
+
+  // A statement's printed date names it exactly; its total ("the $92.49 bill") is the last resort, for one with no date.
+  test("a statement whose only date read is its statement date is named by that date", () => {
+    const base = month(11, [priceClaim]);
+    const dated = { ...base, reading: { ...base.reading, period_start: null, period_end: null, statement_date: "2026-11-12", printed: { ...base.reading.printed, current_charges: { cents: 9249, quote: "Current charges $92.49" } } } };
+    expect(buildMessage(dated, new Set(["C1"]), new Set()).chat).toContain("I'm writing about account ending 4415, statement dated Nov 12, 2026.");
+    expect(buildYearMessage([month(10, [priceClaim]), dated]).chat).toContain("For the statement dated Nov 12, 2026, Fiber 500 Internet");
+  });
 });
 
 // A year's statements usually all carry the same company fees. Its heading counts the statements with fees worth asking
@@ -391,6 +413,14 @@ describe("a year message with fees to ask about", () => {
     // The bill is named once, at the start; "on the bill" again after it read twice over.
     expect(message.chat).toContain("On the bill for Nov 1, 2026 to Nov 30, 2026, Modem Rental appears 2 times ($15.00 and $15.00). Please confirm whether this is a duplicate and credit it if so.");
     expect(message.complaint).toContain("On the bill for Nov 1, 2026 to Nov 30, 2026, Modem Rental appears 2 times ($15.00 and $15.00).");
+  });
+
+  // The year's list of fees to explain holds fees nobody agreed to; a charge printed twice is asked about as a possible
+  // duplicate under its statement, and in the fee list too it read as both.
+  test("a charge printed twice is not also asked about as a fee nobody agreed to", () => {
+    const doubled = statement("2026-11-01", "2026-11-30", [fee("F1", "Modem Rental", 1500), fee("F2", "Modem Rental", 1500)], [{ id: "Q1", kind: "repeated_charge", lineIds: ["F1", "F2"], promiseId: null }]);
+    const { chat } = buildYearMessage([october, doubled]);
+    expect(chat.match(/Modem Rental/g)).toHaveLength(1);
   });
 
   // A statement with no dates, due date or printed total can't be named, so the charge alone is asked about, without
