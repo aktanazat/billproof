@@ -73,7 +73,7 @@ export async function POST(request: Request) {
             const { pages, unavailable } = await postPages(post.images);
             if (pages.length === 0) {
               const message = unavailable > 0 ? "The pictures couldn't be loaded just now." : "The pictures are no longer online.";
-              send({ type: "post", i, event: { type: "error", failure: "bad_input", message, spentMicros: 0, retryable: false } });
+              send({ type: "post", i, event: { type: "error", failure: "bad_input", message, spentMicros: 0, retryable: unavailable > 0 } });
               continue;
             }
             await runCheck(

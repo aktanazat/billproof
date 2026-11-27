@@ -60,22 +60,23 @@ test("a live run that spent nothing leaves the visitor and the site free to run 
 });
 
 // A post's pictures can be deleted from Reddit after the census, or fail to arrive for a moment. Its tile says which,
-// and no check is started for a post with nothing to read.
+// no check is started for a post with nothing to read, and only pictures that didn't arrive are worth another run: the
+// page names that reason when no bill was checked.
 test("a post whose pictures are gone, or don't arrive, says which, and nothing is checked for it", async () => {
   useLedger(1_000_000);
-  const messages = async (unavailable: number, visitor: string) => {
+  const failures = async (unavailable: number, visitor: string) => {
     vi.mocked(postPages).mockImplementation(async () => ({ pages: [], positions: [], unavailable }));
     try {
-      return (await run(visitor)).flatMap((event) => (event.type === "post" && event.event.type === "error" ? [event.event.message] : []));
+      return (await run(visitor)).flatMap((event) => (event.type === "post" && event.event.type === "error" ? [`${event.event.message} retryable=${event.event.retryable}`] : []));
     } finally {
       vi.mocked(postPages).mockImplementation(ready);
     }
   };
   vi.mocked(runCheck).mockClear();
-  const gone = await messages(0, "198.51.100.1");
-  const away = await messages(1, "198.51.100.2");
-  expect(gone).toEqual(Array(24).fill("The pictures are no longer online."));
-  expect(away).toEqual(Array(24).fill("The pictures couldn't be loaded just now."));
+  const gone = await failures(0, "198.51.100.1");
+  const away = await failures(1, "198.51.100.2");
+  expect(gone).toEqual(Array(24).fill("The pictures are no longer online. retryable=false"));
+  expect(away).toEqual(Array(24).fill("The pictures couldn't be loaded just now. retryable=true"));
   expect(runCheck).not.toHaveBeenCalled();
 });
 
