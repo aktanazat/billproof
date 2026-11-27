@@ -151,7 +151,8 @@ export function YearView({ state, result, dispatch }: { state: Done; result: Yea
           <h1 className={firstBad >= 0 ? undefined : "text-[28px] font-semibold leading-[1.2] tracking-[-0.02em]"}>
             {firstBad >= 0 ? (
               <>
-                <span className="block text-[40px] font-semibold leading-none tracking-[-0.02em] tabular-nums">{usd(total)}</span>{" "}
+                {/* 28 px below 320 px wide (a phone zoomed in): a year's total can't wrap, and at 40 "$1,250.00" is wider than the column. */}
+                <span className="block text-[40px] font-semibold leading-none tracking-[-0.02em] tabular-nums max-[320px]:text-[28px]">{usd(total)}</span>{" "}
                 <span className="mt-2 block max-w-[44rem] text-[17px] text-text-2">
                   to ask back{provider ? ` from ${provider}` : ""} across {statements}
                   {waiting ? ", once you confirm the marked lines" : ""}

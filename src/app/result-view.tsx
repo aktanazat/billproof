@@ -467,7 +467,8 @@ export function ResultView({
             <h1 className="text-[28px] font-semibold leading-[1.2] tracking-[-0.02em]">{verdict}</h1>
           ) : (
             <h1>
-              <span className="block text-[40px] font-semibold leading-none tracking-[-0.02em] tabular-nums">{usd(askTotal)}</span>{" "}
+              {/* 28 px below 320 px wide (a phone zoomed in): an amount can't wrap, and at 40 "$1,250.00" is wider than the column. */}
+              <span className="block text-[40px] font-semibold leading-none tracking-[-0.02em] tabular-nums max-[320px]:text-[28px]">{usd(askTotal)}</span>{" "}
               <span className="mt-2 block text-[17px] text-text-2">
                 to ask back{provider ? ` from ${provider}` : ""}
                 {waiting ? (result.transcript ? ", once you confirm what you heard" : `, once you confirm the marked ${markedLines === 1 ? "line" : "lines"}`) : ""}

@@ -214,7 +214,7 @@ export default function RealBills() {
       <SiteHeader current="real" />
       <section className="mx-auto w-full max-w-[1120px] px-6 pb-24">
         <div className="max-w-[46rem] pt-12">
-          <h1 className="text-[40px] font-semibold leading-[1.1] tracking-[-0.025em]">Real bills people posted, checked</h1>
+          <h1 className="text-[40px] font-semibold leading-[1.1] tracking-[-0.025em] max-[320px]:text-[28px]">Real bills people posted, checked</h1>
           <p className="mt-4 text-[17px] leading-[26px] text-text-2 text-pretty">
             {results.length.toLocaleString("en-US")} public Reddit posts about phone, internet and TV bills, from Xfinity, Spectrum, AT&amp;T, Verizon and others. Muse Ember sorted every picture, read each real bill line by line, and checked it against what the poster wrote they were promised. Those checks cost {formatMicros(checksCost)}; with the re-reads as the checks were improved, the census took {minutes} {minutes === 1 ? "minute" : "minutes"} and {formatMicros(realRun.spentMicros)} in all.
           </p>

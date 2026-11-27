@@ -884,7 +884,8 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
       <div className="max-w-[44rem] pt-12">
         {/* Back from a check, the button pressed is gone with its screen, so the heading takes focus; a first visit keeps
             the browser's own starting point. */}
-        <h1 ref={state.attempts > 0 ? focusOnShow : undefined} tabIndex={state.attempts > 0 ? -1 : undefined} className="text-[40px] font-semibold leading-[1.1] tracking-[-0.025em] outline-none">
+        {/* 28 px below 320 px wide (a phone zoomed in): at 40 "promised" is wider than the column. */}
+        <h1 ref={state.attempts > 0 ? focusOnShow : undefined} tabIndex={state.attempts > 0 ? -1 : undefined} className="text-[40px] font-semibold leading-[1.1] tracking-[-0.025em] outline-none max-[320px]:text-[28px]">
           Check a bill against what you were promised
         </h1>
         <p className="mt-4 text-[17px] leading-[26px] text-text-2 text-pretty">
