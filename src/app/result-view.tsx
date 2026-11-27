@@ -362,6 +362,11 @@ export function Trace({ calls, spentMicros, notes }: { calls: CallRecord[]; spen
   );
 }
 
+// A sample's saved check shown in place of a refused live one says so first, so it isn't taken for a check run now.
+export function SavedNote({ note }: { note: string }) {
+  return <p className="mb-4 max-w-[44rem] rounded-lg bg-fill px-3 py-2 text-[13px]">{note}</p>;
+}
+
 export function ResultView({
   result,
   bill,
@@ -372,6 +377,7 @@ export function ResultView({
   dispatch,
   backLabel,
   onBack,
+  saved = null,
 }: {
   result: SingleResult;
   bill: number;
@@ -383,6 +389,8 @@ export function ResultView({
   dispatch: (action: CheckAction) => void;
   backLabel: string;
   onBack: () => void;
+  // Why a sample's saved check is shown instead of a live one, and from when; null for a live check.
+  saved?: string | null;
 }) {
   const [focus, setFocus] = useState<string[] | null>(null);
   const back = (
@@ -390,11 +398,15 @@ export function ResultView({
       {backLabel}
     </button>
   );
+  const savedNote = saved && <SavedNote note={saved} />;
 
   if (result.outcome !== "checked") {
     return (
       <section className="mx-auto flex w-full max-w-[1120px] flex-col items-start gap-3 px-6 pt-10">
-        <h1 ref={focusOnShow} tabIndex={-1} className="text-[28px] font-semibold leading-[1.2] tracking-[-0.02em] outline-none">{result.outcome === "not_a_bill" ? "This isn't a bill" : "Couldn't check this bill"}</h1>
+        <div ref={focusOnShow} tabIndex={-1} className="outline-none">
+          {savedNote}
+          <h1 className="text-[28px] font-semibold leading-[1.2] tracking-[-0.02em]">{result.outcome === "not_a_bill" ? "This isn't a bill" : "Couldn't check this bill"}</h1>
+        </div>
         {result.outcome === "could_not_check" && <p className="text-[17px] text-text-2 wrap-anywhere">{inPlainWords(result.reason)}</p>}
         <p className="max-w-[40rem] text-[15px]">
           {result.outcome === "not_a_bill"
@@ -473,6 +485,7 @@ export function ResultView({
     <section className="mx-auto w-full max-w-[1120px] px-6 pb-24 pt-6">
       <header className="flex flex-wrap items-end justify-between gap-4 pb-6">
         <div ref={focusOnShow} tabIndex={-1} className="outline-none">
+          {savedNote}
           {verdict ? (
             <h1 className="text-[28px] font-semibold leading-[1.2] tracking-[-0.02em]">{verdict}</h1>
           ) : (

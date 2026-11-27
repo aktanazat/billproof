@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { expect, test } from "vitest";
 import type { CheckEvent, CheckResult } from "../src/lib/result";
-import { cases, replayed, scoreCase } from "./eval-cases";
+import { cases, replayed, SAMPLE_CASES, savedSampleResult, scoreCase } from "./eval-cases";
 
 // Two eval runs keep every reading Muse Ember made of the synthetic bills. Deciding them again under today's rules is
 // how a rule change is checked against real model output without spending: each case must still find every planted
@@ -22,3 +22,15 @@ for (const run of ["run-2026-11-26.json", "run-2026-11-25b.json"]) {
     expect(misses).toEqual([]);
   }, 60_000);
 }
+
+// When live checks are refused, a sample shows the check saved with the site. It must be what today's rules decide
+// from its run, or the start screen would show a result the site no longer gives; `pnpm saved-samples` writes them.
+test("every sample's saved check is today's rules on its saved run", async () => {
+  const samples: { id: string }[] = JSON.parse(readFileSync(path.join(import.meta.dirname, "..", "public", "samples", "index.json"), "utf8"));
+  expect(Object.keys(SAMPLE_CASES).sort()).toEqual(samples.map((sample) => sample.id).sort());
+  for (const sample of Object.keys(SAMPLE_CASES)) {
+    const saved: { savedOn: string; result: CheckResult } = JSON.parse(readFileSync(path.join(import.meta.dirname, "..", "public", "samples", "saved", `${sample}.json`), "utf8"));
+    const run = JSON.parse(readFileSync(path.join(import.meta.dirname, "..", "eval", `run-${saved.savedOn}.json`), "utf8"));
+    expect(JSON.parse(JSON.stringify(await savedSampleResult(sample, run))), sample).toEqual(saved.result);
+  }
+}, 60_000);

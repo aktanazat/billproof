@@ -198,6 +198,7 @@ describe("check machine", () => {
       attempts: 1,
       result: notABill,
       selections: [{ claims: { C1: "needs_confirmation" }, questions: {} }],
+      saved: null,
     };
     expect(play([{ type: "toggle_claim", bill: 0, id: "C1" }], done)).toMatchObject({ selections: [{ claims: { C1: "needs_confirmation" } }] });
     expect(play([{ type: "confirm_claim", bill: 0, id: "C1" }], done)).toMatchObject({ selections: [{ claims: { C1: "selected" } }] });
