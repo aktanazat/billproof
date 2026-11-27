@@ -1067,7 +1067,7 @@ export function Checker({ samples, realSamples, startWith }: { samples: Sample[]
                 aria-label="What you were promised"
                 // 16 px on a phone: iPhone Safari zooms the page into a box with smaller text when it's tapped. It grows
                 // with a pasted offer, up to half the screen, so what was pasted can be read and trimmed in place.
-                className="mt-2 block min-h-[88px] max-h-[50vh] w-full flex-1 resize-none rounded-lg bg-white p-3 text-[16px] leading-[22px] field-sizing-content shadow-[inset_0_0_0_1px_var(--line)] placeholder:text-text-2 focus:outline-none focus-visible:shadow-[inset_0_0_0_2px_var(--text)] sm:text-[15px]"
+                className="mt-2 block min-h-[88px] max-h-[50vh] w-full flex-1 resize-none rounded-lg bg-white p-3 text-[16px] leading-[22px] field-sizing-content shadow-[inset_0_0_0_1px_var(--line)] placeholder:text-text-2 sm:text-[15px]"
               />
               {offerNote && (
                 <p role="status" className="mt-2 px-2 text-[13px] text-text-2">
