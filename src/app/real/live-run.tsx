@@ -194,7 +194,7 @@ export function LiveRun({ paused }: { paused: boolean }) {
                   <div className={`h-28 overflow-hidden rounded-[4px] bg-white ${found ? "outline-2 -outline-offset-2 outline-red" : "outline-1 -outline-offset-1 outline-line"} ${tile.stage === "waiting" ? "opacity-40" : ""}`}>
                     <Thumbnail src={tile.picture} />
                   </div>
-                  <p className="truncate text-[12px] text-text-2">{tile.provider ?? "Bill"}</p>
+                  <p className="text-[12px] text-text-2 wrap-break-word">{tile.provider ?? "Bill"}</p>
                   <p className={`text-[13px] leading-[17px] tabular-nums ${found ? "font-semibold text-red" : live ? "text-text" : "text-text-2"}`}>
                     {tile.stage === "waiting" ? "Waiting" : live ? `${STAGE_TEXT[live]}${tile.lines > 0 ? `, ${tile.lines} ${tile.lines === 1 ? "line" : "lines"}` : ""}` : tile.note}
                   </p>
