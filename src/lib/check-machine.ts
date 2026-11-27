@@ -105,6 +105,9 @@ function prepared<T extends { id: string; name: string; status: string }>(item: 
 
 // Characters as the server's limit counts them, and as people see them: an emoji is one, not JavaScript's two units.
 const offerLength = (text: string) => [...text.trim()].length;
+// A link to the plan page is a likely paste, but a check reads only the words given and can't open it. Each link must
+// be set apart by spaces, so the pattern can't backtrack over a long run of joined links.
+const onlyLinks = (text: string) => /^\s*(?:https?:\/\/|www\.)\S*(?:\s+(?:https?:\/\/|www\.)\S*)*\s*$/i.test(text);
 
 // The request body for a check, or null when the inputs cannot start one.
 export function checkInput(inputs: Inputs): CheckInput | null {
@@ -118,7 +121,7 @@ export function checkInput(inputs: Inputs): CheckInput | null {
       return { bills, offer: null };
     case "text": {
       const text = offer.text.trim();
-      if (offerLength(text) > MAX_OFFER_TEXT) return null;
+      if (offerLength(text) > MAX_OFFER_TEXT || onlyLinks(text)) return null;
       return { bills, offer: text ? { kind: "text", text } : null };
     }
     case "file":
@@ -130,12 +133,14 @@ export function checkInput(inputs: Inputs): CheckInput | null {
 
 // Why a check can't start, for beside the disabled button. A file that failed (it didn't open, isn't a kind a check
 // reads, or is a recording past the length limit) holds it back until removed, and its row says only what went wrong
-// with it; so does an offer longer than a check reads. A file still opening says so on its row, and an empty screen is
-// plain.
+// with it; so does an offer longer than a check reads, or one that is only links, which the check can't open. A file
+// still opening says so on its row, and an empty screen is plain.
 export function startBlocker(inputs: Inputs): string | null {
   const offerFailed = (inputs.offer.kind === "file" && inputs.offer.doc.status === "failed") || (inputs.offer.kind === "call" && inputs.offer.call.status === "failed");
   if (offerFailed || inputs.bills.some((doc) => doc.status === "failed")) return "Remove the file that can't be checked to continue.";
-  const written = inputs.offer.kind === "text" ? offerLength(inputs.offer.text) : 0;
+  const text = inputs.offer.kind === "text" ? inputs.offer.text : "";
+  if (onlyLinks(text)) return "Billproof can't open links. Paste the offer's words, or add a screenshot or PDF of the page.";
+  const written = offerLength(text);
   return written > MAX_OFFER_TEXT ? `The offer is ${written.toLocaleString("en-US")} characters; a check reads up to ${MAX_OFFER_TEXT.toLocaleString("en-US")}. Keep the part with the prices and what's included.` : null;
 }
 

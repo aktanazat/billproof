@@ -76,6 +76,18 @@ describe("check machine", () => {
     expect(startBlocker(over.inputs)).toBe("The offer is 20,001 characters; a check reads up to 20,000. Keep the part with the prices and what's included.");
   });
 
+  // A link to the plan page is a likely paste, but the check reads only the words given; sent on, it was paid for and
+  // could only come back without a promise.
+  test("an offer that is only links holds the check back, saying what to add; words with a link start", () => {
+    const linkOnly = play([...readyBill, { type: "offer_text", text: " https://www.xfinity.com/learn/offers/fiber-500 " }, { type: "start" }]);
+    if (linkOnly.s !== "composing") throw new Error("a link-only offer started the check");
+    expect(startBlocker(linkOnly.inputs)).toBe("Billproof can't open links. Paste the offer's words, or add a screenshot or PDF of the page.");
+    const twoLinks = play([...readyBill, { type: "offer_text", text: "www.att.com/internet/fiber\nhttps://www.att.com/offers" }, { type: "start" }]);
+    expect(twoLinks.s).toBe("composing");
+    const withWords = play([...readyBill, { type: "offer_text", text: "Fiber 500 for $55/mo with autopay. https://example.com/offer" }, { type: "start" }]);
+    expect(withWords.s).toBe("running");
+  });
+
   test("a real post whose pictures are gone waits on the start screen with the reason instead of starting", () => {
     const offer = { kind: "text" as const, text: "$55 a month" };
     const gone = play([{ type: "sample_ready", inputs: { bills: [{ id: "p", name: "3 pictures from the post", status: "failed", message: "The pictures from this post are no longer online." }], offer } }]);
