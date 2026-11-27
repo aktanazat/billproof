@@ -138,6 +138,9 @@ function ClaimRow({ claim, index, result, callUrl, mark, onToggle, onConfirm, on
   // A charge's controls are spoken with its title after the words shown, so a list of them tells the charges apart.
   const title = claimTitle(claim, lines);
   const confirmLabel = result.transcript ? "I heard it, use this" : "The marked line matches my bill";
+  // The confirm button gives way to the "In message" box; focus follows it there, or it would drop to the page with the
+  // removed button, and a screen reader would hear nothing to say the charge went into the message.
+  const confirming = useRef(false);
   return (
     <li tabIndex={0} onMouseEnter={() => onFocus(focusIds)} onMouseLeave={() => onFocus(null)} onFocus={() => onFocus(focusIds)} onBlur={() => onFocus(null)} className="flex flex-col gap-3 border-b border-line py-4 outline-none focus-visible:bg-fill">
       <div className="flex items-start gap-3">
@@ -171,12 +174,31 @@ function ClaimRow({ claim, index, result, callUrl, mark, onToggle, onConfirm, on
       <div className="flex flex-col items-start gap-3 sm:ml-[30px] sm:flex-row sm:items-center">
         {claim.lookedFor && <p className="max-w-[34rem] text-[13px] leading-[18px] text-text-2">{"Checked against the company's side before claiming."}</p>}
         {mark === "needs_confirmation" ? (
-          <button type="button" onClick={onConfirm} aria-label={`${confirmLabel}: ${title}`} className="h-8 rounded-lg bg-text px-3 text-[13px] font-medium text-white hover:bg-black sm:ml-auto">
+          <button
+            type="button"
+            onClick={() => {
+              confirming.current = true;
+              onConfirm();
+            }}
+            aria-label={`${confirmLabel}: ${title}`}
+            className="h-8 rounded-lg bg-text px-3 text-[13px] font-medium text-white hover:bg-black sm:ml-auto"
+          >
             {confirmLabel}
           </button>
         ) : (
           <label className="inline-flex min-h-6 cursor-pointer items-center gap-2 text-[13px] text-text-2 select-none sm:ml-auto">
-            <input type="checkbox" checked={mark === "selected"} onChange={onToggle} aria-label={`In message: ${title}`} className="size-4 accent-[var(--text)]" />
+            <input
+              ref={(input) => {
+                if (!input || !confirming.current) return;
+                confirming.current = false;
+                input.focus();
+              }}
+              type="checkbox"
+              checked={mark === "selected"}
+              onChange={onToggle}
+              aria-label={`In message: ${title}`}
+              className="size-4 accent-[var(--text)]"
+            />
             In message
           </label>
         )}
