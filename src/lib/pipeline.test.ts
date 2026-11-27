@@ -25,6 +25,16 @@ test("a failed check tells the person what happened in plain words, never the se
   expect(console.error).toHaveBeenCalledWith("check failed:", expect.objectContaining({ message: "MODEL_API_KEY is not set on the server" }));
 });
 
+// A check Muse Ember never charged for (here it fails before any request leaves) must not use up the visitor's hour,
+// or a year check that failed for the server's reasons would lock them out of trying again.
+test("a check that ended without costing anything gives its bills back to the visitor's hour", async () => {
+  const ledger = openLedger(":memory:", 10_000_000);
+  const pixel = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+  const year = { bills: Array.from({ length: 12 }, () => ({ pages: [{ image: pixel, text: null }] })), offer: { kind: "text" as const, text: "$55 a month" } };
+  for (let i = 0; i < 3; i++) await runCheck(year, { ledger, client: "visitor", signal: new AbortController().signal, emit: () => {} });
+  expect(ledger.admitCheck("visitor", 12)).toEqual(expect.any(String));
+});
+
 // Once the demo's budget can't cover one more check, the page already says checks are paused; a check started anyway
 // is refused for that reason before anything is sent to Muse Ember, so a Muse Ember failure can't take its place.
 test("a check started after the demo's budget is used says so, before Muse Ember is reached", async () => {

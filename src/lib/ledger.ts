@@ -2,11 +2,11 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import { mkdirSync } from "node:fs";
 import path from "node:path";
-import { DatabaseSync } from "node:sqlite";
+import { DatabaseSync, type StatementSync } from "node:sqlite";
 import { formatMicros } from "./cost";
 
 export const CHECK_CAP_MICROS = 30_000;
-export const CHECKS_PER_CLIENT_PER_HOUR = 30;
+export const BILLS_PER_CLIENT_PER_HOUR = 30;
 const HOUR_MS = 3_600_000;
 const BUDGET_SPENT = "This demo has used its budget for live checks. Every saved result is still on the Real bills page.";
 
@@ -24,7 +24,11 @@ export function isLedgerRefusal(error: unknown): error is LedgerRefusal {
 }
 
 export type Ledger = {
-  admitCheck(client: string, now?: number): string;
+  // `bills` is how many statements the check reads: the hourly limit counts each, as each costs about one check.
+  admitCheck(client: string, bills?: number, now?: number): string;
+  // A check that ended without costing anything (a sample answered from recent results, a call Meta turned away before
+  // charging) gives its place in the hour back.
+  release(checkId: string): void;
   reserve(checkId: string, amount: number, capMicros: number): string;
   settle(attemptId: string, actualMicros: number): void;
   lose(attemptId: string): void;
@@ -48,7 +52,7 @@ export function openLedger(file: string, eventCapMicros: number): Ledger {
   db.exec(`
     PRAGMA journal_mode = WAL;
     PRAGMA busy_timeout = 5000;
-    CREATE TABLE IF NOT EXISTS checks (id TEXT PRIMARY KEY, client TEXT NOT NULL, created_at INTEGER NOT NULL);
+    CREATE TABLE IF NOT EXISTS checks (id TEXT PRIMARY KEY, client TEXT NOT NULL, created_at INTEGER NOT NULL, bills INTEGER NOT NULL DEFAULT 1);
     CREATE TABLE IF NOT EXISTS attempts (
       id TEXT PRIMARY KEY,
       check_id TEXT NOT NULL REFERENCES checks(id),
@@ -65,11 +69,26 @@ export function openLedger(file: string, eventCapMicros: number): Ledger {
   const committed = `COALESCE(SUM(CASE state WHEN 'settled' THEN actual ELSE reserved END), 0)`;
   const eventSpent = db.prepare(`SELECT ${committed} AS micros FROM attempts`);
   const checkSpent = db.prepare(`SELECT ${committed} AS micros FROM attempts WHERE check_id = ?`);
-  // A check counts toward its client's hour once it cost something: a charge, a call still open, or one lost in flight.
-  const recentChecks = db.prepare(
-    `SELECT COUNT(*) AS n, MIN(created_at) AS oldest FROM checks WHERE client = ? AND created_at > ? AND EXISTS (SELECT 1 FROM attempts WHERE attempts.check_id = checks.id AND (state != 'settled' OR actual > 0))`,
-  );
-  const insertCheck = db.prepare(`INSERT INTO checks (id, client, created_at) VALUES (?, ?, ?)`);
+  // A check counts toward its client's hour from its admission, so checks sent at the same moment can't all pass; one
+  // that ends having cost nothing is released. A ledger written before checks counted their bills gets the column at its
+  // first admission, each old check counting as one; opening stays read-only, so a server that can't write the file
+  // still shows its pages.
+  let checkStatements: { recent: StatementSync; insert: StatementSync; release: StatementSync } | null = null;
+  const checkQueries = () => {
+    if (checkStatements) return checkStatements;
+    if (!db.prepare(`SELECT 1 FROM pragma_table_info('checks') WHERE name = 'bills'`).get()) {
+      db.exec(`ALTER TABLE checks ADD COLUMN bills INTEGER NOT NULL DEFAULT 1;
+        UPDATE checks SET bills = 0 WHERE NOT EXISTS (SELECT 1 FROM attempts WHERE attempts.check_id = checks.id AND (state != 'settled' OR actual > 0));`);
+    }
+    checkStatements = {
+      recent: db.prepare(`SELECT created_at AS at, bills FROM checks WHERE client = ? AND created_at > ? AND bills > 0 ORDER BY created_at`),
+      insert: db.prepare(`INSERT INTO checks (id, client, created_at, bills) VALUES (?, ?, ?, ?)`),
+      release: db.prepare(
+        `UPDATE checks SET bills = 0 WHERE id = ? AND NOT EXISTS (SELECT 1 FROM attempts WHERE attempts.check_id = checks.id AND (state != 'settled' OR actual > 0))`,
+      ),
+    };
+    return checkStatements;
+  };
   // The address is kept only for the hourly limit (owner approval 2026-11-27: "yes"); older checks keep their spend.
   const forgetClients = db.prepare(`UPDATE checks SET client = '' WHERE created_at <= ? AND client != ''`);
   const insertAttempt = db.prepare(`INSERT INTO attempts (id, check_id, reserved, state, created_at) VALUES (?, ?, ?, 'reserved', ?)`);
@@ -101,21 +120,25 @@ export function openLedger(file: string, eventCapMicros: number): Ledger {
   }
 
   return {
-    admitCheck(client: string, now = Date.now()): string {
-      // Outside the admission, so a refused check (the budget spent) doesn't roll the clearing back.
+    admitCheck(client: string, bills = 1, now = Date.now()): string {
+      // Outside the admission, so a refused check (the budget spent) doesn't roll the clearing back, or the column.
       forgetClients.run(now - HOUR_MS);
+      const queries = checkQueries();
       return writeTransaction(() => {
         // The page says checks are paused at this point, so a check started anyway is refused before anything is sent.
         if (eventCapMicros - micros(eventSpent.get()) < CHECK_CAP_MICROS) throw new LedgerRefusal("budget_spent", BUDGET_SPENT);
-        const recent = recentChecks.get(client, now - HOUR_MS);
-        const n = numberColumn(recent, "n");
-        if (n >= CHECKS_PER_CLIENT_PER_HOUR) {
-          // The next check opens when the oldest one in the hour ages out.
-          const minutes = Math.max(1, Math.ceil((numberColumn(recent, "oldest") + HOUR_MS - now) / 60_000));
-          throw new LedgerRefusal("too_many_checks", `Your network has run ${n} checks in the last hour, the most allowed. Another can start in ${minutes} ${minutes === 1 ? "minute" : "minutes"}.`);
+        const recent = queries.recent.all(client, now - HOUR_MS).map((row) => ({ at: numberColumn(row, "at"), bills: numberColumn(row, "bills") }));
+        const counted = recent.reduce((sum, check) => sum + check.bills, 0);
+        if (counted + bills > BILLS_PER_CLIENT_PER_HOUR) {
+          // The check can start once enough of the hour's bills age out, oldest first.
+          let left = counted;
+          const freed = recent.find((check) => (left -= check.bills) + bills <= BILLS_PER_CLIENT_PER_HOUR) ?? recent[recent.length - 1];
+          const minutes = Math.max(1, Math.ceil((freed.at + HOUR_MS - now) / 60_000));
+          const next = bills === 1 ? "Another check" : `A check of ${bills} bills`;
+          throw new LedgerRefusal("too_many_checks", `Your network has checked ${counted} ${counted === 1 ? "bill" : "bills"} in the last hour, and the limit is ${BILLS_PER_CLIENT_PER_HOUR}. ${next} can start in ${minutes} ${minutes === 1 ? "minute" : "minutes"}.`);
         }
         const id = randomUUID();
-        insertCheck.run(id, client, now);
+        queries.insert.run(id, client, now, bills);
         return id;
       });
     },
@@ -138,6 +161,9 @@ export function openLedger(file: string, eventCapMicros: number): Ledger {
     },
     lose(attemptId: string) {
       loseAttempt.run(attemptId);
+    },
+    release(checkId: string) {
+      checkQueries().release.run(checkId);
     },
     spentForCheck(checkId: string): number {
       return micros(checkSpent.get(checkId));

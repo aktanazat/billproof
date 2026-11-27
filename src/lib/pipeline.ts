@@ -557,12 +557,19 @@ function failureOf(error: unknown): [CheckFailure, string, number | undefined] {
 export async function runCheck(input: CheckInput, deps: CheckDeps): Promise<void> {
   let checkId: string | null = null;
   try {
-    checkId = deps.ledger.admitCheck(deps.client);
+    checkId = deps.ledger.admitCheck(deps.client, input.bills.length);
     const capMicros = CHECK_CAP_MICROS * input.bills.length;
     deps.emit({ type: "result", result: await check(input, checkId, capMicros, deps) });
   } catch (error) {
     const spentMicros = checkId ? deps.ledger.spentForCheck(checkId) : 0;
     const [failure, message, bill] = failureOf(error);
     deps.emit({ type: "error", failure, message, spentMicros, retryable: RETRYABLE[failure], ...(bill === undefined ? {} : { bill }) });
+  } finally {
+    // Every call has settled or been lost by now, so a check that cost nothing gives its place in the hour back.
+    try {
+      if (checkId) deps.ledger.release(checkId);
+    } catch (error) {
+      console.error("ledger: couldn't release a check that cost nothing:", error);
+    }
   }
 }
