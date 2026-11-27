@@ -249,7 +249,7 @@ export function MessageBox({ message }: { message: Message }) {
     ["chat", "Chat"],
     ["email", "Email"],
     ["call", "Call script"],
-    ["complaint", "FCC complaint"],
+    ["complaint", "Complaint"],
   ] as const;
   return (
     <section className="flex flex-col gap-3">
