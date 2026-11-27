@@ -218,18 +218,28 @@ type Step = { key: "sort" | "bill" | "offer" | "compare" | "challenge"; stages: 
 const STAGE_ORDER: Stage[] = ["sorting", "reading_bill", "rereading_bill", "reading_offer", "comparing", "challenging"];
 const KIND_NAMES: Record<PageKind, string> = { bill: "Bill", older_bill: "Earlier bill", promise: "Promise", other: "Not used" };
 
+// A stopped check's current step didn't finish, so it isn't ticked.
 function stepStatus(step: Step, stage: Stage | null, active: boolean): "done" | "now" | "later" {
   if (!stage) return step.key === "bill" && active ? "now" : "later";
   const at = STAGE_ORDER.indexOf(stage);
   const first = Math.min(...step.stages.map((s) => STAGE_ORDER.indexOf(s)));
   const last = Math.max(...step.stages.map((s) => STAGE_ORDER.indexOf(s)));
   if (at > last) return "done";
-  if (at >= first) return active ? "now" : "done";
+  if (at >= first) return active ? "now" : "later";
   return "later";
 }
 
 const secondary = "h-9 rounded-lg bg-fill px-4 text-[15px] hover:bg-fill-2";
 const primary = "h-9 rounded-lg bg-text px-4 text-[15px] font-medium text-white hover:bg-black";
+
+// Why a check stopped. Mounted with the stopped screen, so a failure is announced as it appears.
+function StopReason({ state }: { state: Exclude<CheckState, { s: "composing" } | { s: "done" } | { s: "running" }> }) {
+  return (
+    <p className="text-[15px]" role={state.s === "failed" ? "alert" : undefined}>
+      {state.s === "failed" ? state.message : "Check stopped."}
+    </p>
+  );
+}
 
 function Footer({ state, onCancel, dispatch }: { state: Exclude<CheckState, { s: "composing" } | { s: "done" }>; onCancel: () => void; dispatch: (action: CheckAction) => void }) {
   if (state.s === "running") {
@@ -241,9 +251,6 @@ function Footer({ state, onCancel, dispatch }: { state: Exclude<CheckState, { s:
   }
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-[15px]" role={state.s === "failed" ? "alert" : undefined}>
-        {state.s === "failed" ? state.message : "Check stopped."}
-      </p>
       {state.spentMicros > 0 && <p className="text-[13px] text-text-2 tabular-nums">{state.s === "cancelled" || !state.spentFinal ? `At least ${formatMicros(state.spentMicros)} spent` : `${formatMicros(state.spentMicros)} spent`}</p>}
       <div className="flex gap-2">
         {(state.s === "cancelled" || state.retryable) && (
@@ -316,7 +323,8 @@ function WorkingYear({ state, onCancel, dispatch }: { state: Exclude<CheckState,
           );
         })}
       </ol>
-      <div className="mt-8">
+      <div className="mt-8 flex flex-col gap-3">
+        {state.s !== "running" && <StopReason state={state} />}
         <Footer state={state} onCancel={onCancel} dispatch={dispatch} />
       </div>
     </section>
@@ -366,7 +374,9 @@ function Working({ state, onCancel, dispatch }: { state: Exclude<CheckState, { s
           {/* Once stopped, the footer states the spend, with "At least" when the total isn't final. */}
           {state.s === "running" && state.spentMicros > 0 && <p className="text-[13px] text-text-2 tabular-nums">{formatMicros(state.spentMicros)}</p>}
         </div>
-        <p className="min-h-[44px] text-[15px] leading-[22px] text-text-2">{latestThought ?? (running ? "Muse Ember is starting on the bill." : "")}</p>
+        {/* Stopped, the reason takes the place of the thinking text, under the heading: below the steps it sat past a
+            phone's first screen. */}
+        {state.s === "running" ? <p className="min-h-[44px] text-[15px] leading-[22px] text-text-2">{latestThought ?? "Muse Ember is starting on the bill."}</p> : <StopReason state={state} />}
 
         <ol className="flex flex-col border-t border-line">
           {steps.map((step) => {
