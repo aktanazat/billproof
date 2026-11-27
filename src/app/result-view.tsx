@@ -410,6 +410,10 @@ export function ResultView({
   const linesOf = (ids: string[]) => ids.flatMap((id) => result.reading.line_items.find((line) => line.id === id) ?? []);
   const promises = new Map<string, PromiseTerm>(result.promises.map((promise) => [promise.id, promise]));
   const questions = result.questions.filter((q) => SHOWN_QUESTIONS.has(q.kind));
+  // The heading counts the charges asked about, by name: two questions on one plan (its conditions and its end date)
+  // are one, and so is a fee printed once per line.
+  const chargedNames = new Map(result.reading.line_items.filter((line) => line.amount_cents > 0).map((line) => [line.id, line.label]));
+  const askedCharges = new Set(questions.flatMap((q) => q.lineIds.flatMap((id) => chargedNames.get(id) ?? []))).size || questions.length;
   // A claim waiting for the person to confirm still counts toward what can be asked back.
   const askTotal = result.claims.reduce((total, claim) => total + (selection.claims[claim.id] === "unselected" ? 0 : claim.amountCents), 0);
   const unconfirmed = result.claims.filter((claim) => selection.claims[claim.id] === "needs_confirmation");
@@ -435,7 +439,7 @@ export function ResultView({
       : result.providerMismatch
         ? `The offer is from ${result.offerProvider}, not ${provider ?? "this company"}`
         : questions.length > 0
-          ? `${questions.length} ${questions.length === 1 ? "charge" : "charges"} worth asking about`
+          ? `${askedCharges} ${askedCharges === 1 ? "charge" : "charges"} worth asking about`
           : // A rise since the earlier bill is what the message asks about, so it heads the page rather than "nothing".
             result.change && result.change.currentCents > result.change.earlierCents
             ? `This bill is ${usd(result.change.currentCents - result.change.earlierCents)} higher than the one before`

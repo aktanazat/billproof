@@ -390,6 +390,10 @@ describe("the result page's heading", () => {
     ["no offer was given", { ...checked([plan], []), hadOffer: false }, "Nothing to flag on this bill"],
     ["the offer is another company's", { ...checked([plan], []), providerMismatch: true, offerProvider: "Westline Cable" }, "The offer is from Westline Cable, not AT&T"],
     ["one question is worth asking", checked([plan, line("F1", "Network Fee", 399, "company_fee")], [{ id: "Q1", kind: "unagreed_fee", lineIds: ["F1"], promiseId: null }]), "1 charge worth asking about"],
+    // Two questions about the same plan and its discount (its conditions and its end date) are about one charge.
+    ["two questions are about one charge", { ...checked([plan, line("D1", "Promotional Discount", -1000, "discount")], [{ id: "Q1", kind: "conditions_unproven", lineIds: ["L1", "D1"], promiseId: "P1" }, { id: "Q2", kind: "end_date_unread", lineIds: ["L1", "D1"], promiseId: "P1" }]), promises: [promise] }, "1 charge worth asking about"],
+    // A fee printed once per phone line is one charge asked about, as its one row says ("charged 3 times").
+    ["a fee is printed once per line", checked([plan, line("F1", "Company fees", 300, "company_fee"), line("F2", "Company fees", 300, "company_fee"), line("F3", "Company fees", 300, "company_fee")], [{ id: "Q1", kind: "unagreed_fee", lineIds: ["F1", "F2", "F3"], promiseId: null }]), "1 charge worth asking about"],
     ["no promise matched a line", { ...checked([plan], []), promises: [promise] }, "Couldn't match your offer to this bill"],
     ["every promise was kept", { ...checked([plan], []), promises: [promise], matchedPromiseIds: ["P1"] }, "Nothing is billed above your offer"],
     // A rise since the earlier bill is what the page's message asks about, so the heading can't say there's nothing.
