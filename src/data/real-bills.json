@@ -2515,15 +2515,7 @@
       "dropped": [],
       "questions": [
         {
-          "kind": "conditions_unproven",
-          "lines": [
-            "ENTERTAINMENT (all included)",
-            "$25 off AT&T Unlimited Video Loyalty Ongoing"
-          ],
-          "cents": 9700
-        },
-        {
-          "kind": "partial_period",
+          "kind": "end_date_unread",
           "lines": [
             "all included $37.01 off for 24 months",
             "ENTERTAINMENT (all included)",
@@ -2542,7 +2534,7 @@
       ],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 2,
+      "matchedPromises": 1,
       "spentMicros": 5001
     },
     {
@@ -2797,13 +2789,6 @@
       "dropped": [],
       "questions": [
         {
-          "kind": "conditions_unproven",
-          "lines": [
-            "Fast"
-          ],
-          "cents": 9600
-        },
-        {
           "kind": "unagreed_fee",
           "lines": [
             "Broadcast TV Fee"
@@ -2820,7 +2805,7 @@
       ],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 1,
+      "matchedPromises": 0,
       "spentMicros": 4746
     },
     {
@@ -6660,10 +6645,18 @@
       ],
       "claims": [],
       "dropped": [],
-      "questions": [],
+      "questions": [
+        {
+          "kind": "end_date_unread",
+          "lines": [
+            "Internet"
+          ],
+          "cents": 6000
+        }
+      ],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 0,
+      "matchedPromises": 1,
       "spentMicros": 3291,
       "change": null
     },
@@ -6758,7 +6751,7 @@
       "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 0,
+      "matchedPromises": 1,
       "spentMicros": 3742,
       "change": null
     },
@@ -7261,19 +7254,10 @@
       ],
       "claims": [],
       "dropped": [],
-      "questions": [
-        {
-          "kind": "end_date_unread",
-          "lines": [
-            "Spectrum Internet Advantage",
-            "Promotional Discount"
-          ],
-          "cents": 2420
-        }
-      ],
+      "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 2,
+      "matchedPromises": 0,
       "spentMicros": 5342,
       "change": {
         "earlierCents": 3000,
@@ -7680,10 +7664,20 @@
       ],
       "claims": [],
       "dropped": [],
-      "questions": [],
+      "questions": [
+        {
+          "kind": "end_date_unread",
+          "lines": [
+            "Spectrum TV",
+            "Spectrum Internet",
+            "Spectrum Voice"
+          ],
+          "cents": 16625
+        }
+      ],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 0,
+      "matchedPromises": 1,
       "spentMicros": 5993,
       "change": null
     },
@@ -9066,7 +9060,7 @@
       "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 1,
+      "matchedPromises": 0,
       "spentMicros": 1747,
       "change": null
     },
@@ -9104,13 +9098,6 @@
           "cents": 4000
         },
         {
-          "kind": "end_date_unread",
-          "lines": [
-            "Advanced WiFi"
-          ],
-          "cents": 0
-        },
-        {
           "kind": "unagreed_fee",
           "lines": [
             "CA Cost Recovery Charge"
@@ -9120,7 +9107,7 @@
       ],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 2,
+      "matchedPromises": 1,
       "spentMicros": 2079,
       "change": null
     },
@@ -9208,27 +9195,10 @@
       ],
       "claims": [],
       "dropped": [],
-      "questions": [
-        {
-          "kind": "end_date_unread",
-          "lines": [
-            "Spectrum Internet Premier",
-            "Promotional Discount"
-          ],
-          "cents": 3000
-        },
-        {
-          "kind": "conditions_unproven",
-          "lines": [
-            "Spectrum Internet Premier",
-            "Promotional Discount"
-          ],
-          "cents": 3000
-        }
-      ],
+      "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 3,
+      "matchedPromises": 0,
       "spentMicros": 2855,
       "change": null
     },
@@ -11468,7 +11438,7 @@
       "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 1,
+      "matchedPromises": 0,
       "spentMicros": 4418,
       "change": null
     },
@@ -11759,25 +11729,10 @@
       ],
       "claims": [],
       "dropped": [],
-      "questions": [
-        {
-          "kind": "price_gap",
-          "lines": [
-            "Internet 300 (Fiber 300) Stand-alone"
-          ],
-          "cents": 7500
-        },
-        {
-          "kind": "end_date_unread",
-          "lines": [
-            "Internet 300 (Fiber 300) Stand-alone"
-          ],
-          "cents": 7500
-        }
-      ],
+      "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 3,
+      "matchedPromises": 0,
       "spentMicros": 4827,
       "change": null
     },
@@ -12814,7 +12769,7 @@
       "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 1,
+      "matchedPromises": 0,
       "spentMicros": 4109,
       "change": null
     },
@@ -12903,19 +12858,10 @@
       ],
       "claims": [],
       "dropped": [],
-      "questions": [
-        {
-          "kind": "end_date_unread",
-          "lines": [
-            "Spectrum Internet Gig",
-            "Promotional Discount"
-          ],
-          "cents": 7000
-        }
-      ],
+      "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 1,
+      "matchedPromises": 0,
       "spentMicros": 7562,
       "change": {
         "earlierCents": 4000,
@@ -12965,18 +12911,10 @@
       ],
       "claims": [],
       "dropped": [],
-      "questions": [
-        {
-          "kind": "price_gap",
-          "lines": [
-            "AT&T Internet 5000"
-          ],
-          "cents": 13500
-        }
-      ],
+      "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 1,
+      "matchedPromises": 0,
       "spentMicros": 2912,
       "change": null
     },
@@ -13616,18 +13554,10 @@
       ],
       "claims": [],
       "dropped": [],
-      "questions": [
-        {
-          "kind": "conditions_unproven",
-          "lines": [
-            "Plans"
-          ],
-          "cents": 13396
-        }
-      ],
+      "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 1,
+      "matchedPromises": 0,
       "spentMicros": 3359,
       "change": null
     },
@@ -13757,7 +13687,7 @@
       "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 1,
+      "matchedPromises": 0,
       "spentMicros": 4577,
       "change": null
     },
@@ -15172,7 +15102,7 @@
       "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 1,
+      "matchedPromises": 0,
       "spentMicros": 3657
     },
     {
@@ -15361,7 +15291,7 @@
       ],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 1,
+      "matchedPromises": 0,
       "spentMicros": 4945,
       "change": null
     },
@@ -15620,13 +15550,6 @@
       "dropped": [],
       "questions": [
         {
-          "kind": "partial_period",
-          "lines": [
-            "Home Internet Backup"
-          ],
-          "cents": -1800
-        },
-        {
           "kind": "unagreed_fee",
           "lines": [
             "T-Mobile fees & charges"
@@ -15636,7 +15559,7 @@
       ],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 1,
+      "matchedPromises": 0,
       "spentMicros": 3204,
       "change": null
     },
@@ -17527,17 +17450,6 @@
       "dropped": [],
       "questions": [
         {
-          "kind": "conditions_unproven",
-          "lines": [
-            "Monthly charges",
-            "Monthly charges",
-            "Monthly charges",
-            "Monthly charges",
-            "Monthly charges"
-          ],
-          "cents": 25495
-        },
-        {
           "kind": "unagreed_fee",
           "lines": [
             "Company fees & surcharges",
@@ -17556,7 +17468,7 @@
       ],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 1,
+      "matchedPromises": 0,
       "spentMicros": 4684,
       "change": null
     },
@@ -18857,28 +18769,10 @@
       ],
       "claims": [],
       "dropped": [],
-      "questions": [
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Unlimited Premium PL - 5 Lines (Sep 22 - Oct 01)",
-            "Discount for Signature on AT&T Unlimited 6+ phones (Sep 22 - Oct 01)"
-          ],
-          "cents": -1533
-        },
-        {
-          "kind": "partial_period",
-          "lines": [
-            "Unlimited Premium PL - 6+ Lines (Sep 22 - Oct 01)",
-            "Unlimited Premium PL - 6+ Lines AutoPay & paperless disc ($10 off w/ bank acct)",
-            "Discount for Signature on AT&T Unlimited 6+ phones"
-          ],
-          "cents": 5965
-        }
-      ],
+      "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 4,
+      "matchedPromises": 0,
       "spentMicros": 3927,
       "change": null
     },
@@ -20765,14 +20659,6 @@
       "dropped": [],
       "questions": [
         {
-          "kind": "end_date_unread",
-          "lines": [
-            "Discount for switching to AT&T with own device",
-            "Discount for Military & Veteran Appreciation"
-          ],
-          "cents": -2000
-        },
-        {
           "kind": "unagreed_fee",
           "lines": [
             "Company fees & surcharges",
@@ -20785,7 +20671,7 @@
       ],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 2
+      "matchedPromises": 0
     },
     {
       "id": "1xjjvb5",
@@ -21293,7 +21179,7 @@
       "questions": [],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 1,
+      "matchedPromises": 0,
       "spentMicros": 1292,
       "change": null
     },
@@ -23430,7 +23316,7 @@
       ],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 1,
+      "matchedPromises": 2,
       "spentMicros": 2400,
       "change": null
     },
@@ -23706,7 +23592,7 @@
       ],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 1,
+      "matchedPromises": 2,
       "spentMicros": 3755,
       "change": null
     },
@@ -24932,7 +24818,7 @@
       ],
       "explained": 0,
       "hadOffer": true,
-      "matchedPromises": 0,
+      "matchedPromises": 1,
       "spentMicros": 4861,
       "change": null
     },
@@ -25302,6 +25188,15 @@
       "claims": [],
       "dropped": [],
       "questions": [
+        {
+          "kind": "conditions_unproven",
+          "lines": [
+            "ULTIMATE (all included)",
+            "$5 off for 12 mo w/ABP + eBill",
+            "$63 off for 12 months"
+          ],
+          "cents": 6000
+        },
         {
           "kind": "unagreed_fee",
           "lines": [

@@ -1,16 +1,18 @@
 // Runs Billproof over real bills people posted publicly, each against what the poster says they were promised,
 // and writes what it found. Spend goes through the same ledger as the app.
 // Usage: MODEL_API_KEY=… pnpm census <posts.jsonl> [limit]
+//        pnpm census --redecide   (applies today's deciding rules to the saved readings; no model calls)
 // Each input line: { id, sub, title, text, images: string[], permalink, created }.
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { postPages } from "../src/data/real-pages";
 import { formatMicros } from "../src/lib/cost";
 import { openLedger } from "../src/lib/ledger";
 import { runCheck } from "../src/lib/pipeline";
+import { decide } from "../src/lib/decide";
 import { claimedCents, postNotes, type RealBill, type RealRun } from "../src/lib/real-bills";
 import { MAX_BILL_PAGES } from "../src/lib/limits";
-import type { CheckEvent, CheckInput, CheckResult } from "../src/lib/result";
+import type { CheckEvent, CheckInput, CheckResult, Checked } from "../src/lib/result";
 
 type Post = { id: string; sub: string; title: string; text: string; images: string[]; permalink: string; created: number };
 
@@ -52,7 +54,48 @@ function summary(post: Post, result: CheckResult | null, error: string | null, m
   };
 }
 
+const site = path.join(process.cwd(), "src", "data", "real-bills.json");
+const rawDir = path.join(process.cwd(), "eval", "census");
+
+// The page shows each bill as the deciding rules judged it when the census ran; after the rules change, a live check
+// of the same post answers differently. This judges every bill's saved reading again and replaces only what that
+// judgment writes. A bill whose claims would change needs the company's side checked again, which is a model call, so
+// it is named and nothing is written.
+async function redecide() {
+  const run = JSON.parse(await readFile(site, "utf8")) as RealRun;
+  const saved = new Map<string, Checked[]>();
+  for (const name of (await readdir(rawDir)).filter((f) => f.startsWith("raw-")).sort()) {
+    for (const check of JSON.parse(await readFile(path.join(rawDir, name), "utf8")) as { id: string; events: CheckEvent[] }[]) {
+      const end = check.events.at(-1);
+      if (end?.type === "result" && end.result.outcome === "checked") saved.set(check.id, [...(saved.get(check.id) ?? []), end.result]);
+    }
+  }
+  const claimKeys = (claims: { kind: string; amountCents: number }[]) => JSON.stringify(claims.map((c) => `${c.kind} ${c.amountCents}`).sort());
+  const stale: string[] = [];
+  let changed = 0;
+  const results = run.results.map((bill) => {
+    if (bill.outcome !== "checked") return bill;
+    // A post read more than once keeps the reading the page shows.
+    const result = saved.get(bill.id)?.filter((r) => r.reading.line_items.length === bill.lines && r.reading.provider === bill.provider && r.reading.period_start === bill.period[0] && r.reading.period_end === bill.period[1]).at(-1);
+    if (!result) throw new Error(`${bill.id}: no saved reading matches the published one`);
+    const decision = decide(result.reading, result.promises, { kind: "image" }, { kind: "text", text: postNotes(bill) }, result.offerProvider);
+    if (claimKeys(decision.claims) !== claimKeys([...result.claims, ...result.dropped.map((d) => d.claim)])) stale.push(bill.id);
+    const judged = summary(bill, { ...result, ...decision, claims: result.claims, dropped: result.dropped }, null, bill.ms, []);
+    if (judged.outcome !== "checked") throw new Error(`${bill.id}: a checked bill stopped being one`);
+    const next = { ...bill, questions: judged.questions, explained: judged.explained, matchedPromises: judged.matchedPromises };
+    if (JSON.stringify(next) !== JSON.stringify(bill)) changed++;
+    return next;
+  });
+  if (stale.length > 0) throw new Error(`Claims would change on ${stale.join(", ")}: run the census again for these posts`);
+  await writeFile(site, JSON.stringify({ ...run, results }, null, 2));
+  console.log(`${changed} of ${results.filter((r) => r.outcome === "checked").length} bills changed; saved ${site}`);
+}
+
 const [file, limitArg] = process.argv.slice(2);
+if (file === "--redecide") {
+  await redecide();
+  process.exit(0);
+}
 if (!file) throw new Error("Usage: pnpm census <posts.jsonl> [limit]");
 const posts: Post[] = (await readFile(file, "utf8"))
   .split("\n")
@@ -101,8 +144,6 @@ console.log(`\n${posts.length} posts, ${checked.length} read as bills, ${withCla
 
 // The site's real-bills page reads the summary; every event of every check stays local under eval/census.
 const run: RealRun = { ranAt: new Date().toISOString(), seconds, spentMicros: spent, posts: posts.length, results };
-const site = path.join(process.cwd(), "src", "data", "real-bills.json");
-const rawDir = path.join(process.cwd(), "eval", "census");
 await mkdir(path.dirname(site), { recursive: true });
 await mkdir(rawDir, { recursive: true });
 await writeFile(site, JSON.stringify(run, null, 2));
